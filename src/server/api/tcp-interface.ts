@@ -70,7 +70,6 @@ export class BotTunnel {
         if (this.dataBuffer !== undefined) {
             console.log("Buffer Not Undefined!");
             this.dataBuffer = Buffer.concat([this.dataBuffer, data]);
-
         } else {
             this.dataBuffer = data;
         }
@@ -185,20 +184,18 @@ export class BotTunnel {
     }
 
     makeHello(mac: string): Packet {
-        // Very ordered list of config nodes to send over
-        // t: type, v: value
-        const configEntries: [string, string][] = [];
+        // Unordered list of config nodes to send over
+        // n: name, v: value
+        const configEntries = {};
 
-        // Where a bot has a specific config changed, like moving a pin
+        // Where a bot has a specific config changed, like a different encoder multiplier or pin location
         const overrides =
             (config[config.bots[mac]] ?? { attributes: {} })["attributes"] ??
             {};
 
         for (const i of config.botConfigSchema) {
             if (i.name in overrides) {
-                configEntries.push([i.type, overrides[i.name]]);
-            } else {
-                configEntries.push([i.type, i.default_value.toString()]);
+                configEntries[i.name] = overrides[i.name];
             }
         }
 

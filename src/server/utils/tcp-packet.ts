@@ -5,8 +5,7 @@ import {
     Union,
     Static,
     Literal,
-    Array,
-    Tuple,
+    Dictionary,
 } from "runtypes";
 
 export enum PacketType {
@@ -47,7 +46,7 @@ export const CLIENT_HELLO_SCHEMA = Record({
 export const SERVER_HELLO_SCHEMA = Record({
     type: Literal(PacketType.SERVER_HELLO),
     protocol: Uint32,
-    config: Array(Tuple(String /*type*/, String /*value*/)),
+    config: Dictionary(NumberType, String),
 });
 export const PING_SEND_SCHEMA = Record({ type: Literal(PacketType.PING_SEND) });
 export const PING_RESPONSE_SCHEMA = Record({
