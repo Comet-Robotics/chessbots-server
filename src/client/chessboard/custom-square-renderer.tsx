@@ -10,7 +10,7 @@ import { CustomSquareContext } from "./custom-square-context";
 
 /**
  * A renderer for the square dots and piece highlighting
- * @param props - the square, its style, and any children 
+ * @param props - the square, its style, and any children
  */
 export const customSquareRenderer = forwardRef<
     HTMLDivElement,

@@ -28,7 +28,7 @@ interface NavbarMenuProps {
  * Creates a navbar with a title and the abort, resign, and debug buttons
  *
  * @param props - message handler for abort/resign
- * @returns the navbar element with all the buttons 
+ * @returns the navbar element with all the buttons
  */
 export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
     // Store react router state for game
