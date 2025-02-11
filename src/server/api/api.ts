@@ -250,7 +250,7 @@ apiRouter.get("/get-puzzles", (_, res) => {
  * sends a drive message through the tcp connection
  *
  * @param message - the robot id and left/right motor powers
- * @returns - boolean if successful
+ * @returns boolean if successful
  */
 function doDriveRobot(message: DriveRobotMessage): boolean {
     // check if robot is registered
@@ -288,7 +288,7 @@ function doDriveRobot(message: DriveRobotMessage): boolean {
 /**
  * set a variable on the robot
  * @param message - the robot id and variable information to change
- * @returns - boolean completed successfully
+ * @returns boolean completed successfully
  */
 function doSetRobotVariable(message: SetRobotVariableMessage): boolean {
     if (!tcpServer) {
