@@ -41,6 +41,7 @@ export class SetRobotVariableMessage extends RobotMessage {
 
 /**
  * A message to drive the robot based on left and right motor power
+ * @returns an object with the id, left, right motor power
  */
 export class DriveRobotMessage extends RobotMessage {
     constructor(
