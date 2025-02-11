@@ -23,6 +23,7 @@ export function SetupBase(props: SetupBaseProps): JSX.Element {
                 chess={new ChessEngine()}
                 side={Side.WHITE}
                 onMove={() => {}}
+                rotation={0}
             />
             <Dialog
                 isOpen
