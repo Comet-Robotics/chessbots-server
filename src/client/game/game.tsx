@@ -25,6 +25,9 @@ import { AcceptDrawDialog, OfferDrawDialog } from "./draw-dialog";
 
 /**
  * Creates a MessageHandler function to handle move messages and game interruptions.
+ * @param chess - the current chess object to apply moves to
+ * @param setX - react set state functions to update the UI on change
+ * @returns a message handler that updates the client state based on the message
  */
 function getMessageHandler(
     chess: ChessEngine,

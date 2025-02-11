@@ -72,7 +72,7 @@ interface SetupMainProps {
  * The initial buttons for choosing game types
  *
  * @param props - the hook for changing setup type
- * @returns Setup buttons and debug button
+ * @returns Setup buttons and debug button elements
  */
 function SetupMain(props: SetupMainProps) {
     const navigate = useNavigate();

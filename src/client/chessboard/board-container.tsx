@@ -11,8 +11,8 @@ interface BoardContainerProps extends PropsWithChildren {
 
 /**
  * A container to deal with chessboard resizing
- * @param props - width handler and inner elements
- * @returns
+ * @param props - side, width handler, rotation, and inner elements
+ * @returns a resizable container with a chessboard inside
  */
 export function BoardContainer(props: BoardContainerProps) {
     const [transform, setTransform] = useState<Transform | undefined>();

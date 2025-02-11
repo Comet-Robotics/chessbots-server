@@ -5,7 +5,7 @@ import { Difficulty, GameType } from "../../common/client-types";
 import { Side } from "../../common/game-types";
 import { post } from "../api";
 
-/** User's desired side, b/w/r */
+/** User's desired side, b/w/random */
 enum DesiredSide {
     WHITE = "white",
     BLACK = "black",
@@ -20,7 +20,7 @@ interface SetupGameProps {
  * Creates the dialog for setting up human and computer games
  *
  * @param props - the chosen game type
- * @returns setup dialog
+ * @returns setup dialog as a div
  */
 export function SetupGame(props: SetupGameProps) {
     const navigate = useNavigate();
@@ -125,7 +125,7 @@ interface DifficultySliderProps {
  * Creates a difficulty slider from 0 to 3
  *
  * @param props - difficulty change handler
- * @returns slider
+ * @returns 4 part difficulty slider
  */
 function DifficultySlider(props: DifficultySliderProps) {
     return (
@@ -164,7 +164,7 @@ interface SelectSideProps {
 /**
  * Creates a dialog for the user to choose their side
  * @param props - function for handling user side choice
- * @returns - user side dialog
+ * @returns user side dialog
  */
 function SelectSide(props: SelectSideProps) {
     return (

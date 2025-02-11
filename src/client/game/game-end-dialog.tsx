@@ -24,7 +24,7 @@ interface GameEndDialogProps {
  * creates the game ending dialog with a continue button
  *
  * @param props - the game end reason and side
- * @returns
+ * @returns a dialog box that can only be closed by clicking the button
  */
 export function GameEndDialog(props: GameEndDialogProps) {
     const [isOpen, setIsOpen] = useState(true);

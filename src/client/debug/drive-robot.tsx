@@ -19,6 +19,7 @@ function almostEqual(v1: number, v2: number, epsilon: number = 0.01): boolean {
 
 /**
  * A component which can be used to drive an individual robot around.
+ * @param props - the robotid and the send message function
  */
 export function DriveRobot(props: DriveRobotProps) {
     // state variable for handling the power levels of the robot
