@@ -13,7 +13,7 @@ export type StackFrame = {
 };
 
 /**
- * An update message for the simulator with the robot id and position
+ * An update message for the simulator with the robot id, rotation and position
  */
 export class SimulatorUpdateMessage extends Message {
     protected type = MessageType.SIMULATOR_UPDATE;

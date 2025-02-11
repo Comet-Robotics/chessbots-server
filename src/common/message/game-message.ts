@@ -70,7 +70,6 @@ export class GameInterruptedMessage extends Message {
 
 /**
  * A message that contains why the game has finished
- *
  */
 export class GameFinishedMessage extends Message {
     constructor(public readonly reason: GameFinishedReason) {

@@ -30,6 +30,9 @@ export enum GameInterruptedReason {
     ABORTED = "aborted",
 }
 
+/**
+ * a reason for the game to pause temporarily, but not end the game
+ */
 export enum GameHoldReason {
     DRAW_OFFERED = "draw-offered",
     DRAW_CONFIRMATION = "draw-confirmation",

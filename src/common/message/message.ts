@@ -50,6 +50,11 @@ export enum MessageType {
     SIMULATOR_UPDATE = "simulator-update",
 }
 
+/**
+ * The base class for messages
+ *
+ * all messages have a type and can be converted to json
+ */
 export abstract class Message {
     /**
      * Serializes the message as json.
@@ -69,6 +74,9 @@ export abstract class Message {
     }
 }
 
+/**
+ * A message to register the client with the server
+ */
 export class RegisterWebsocketMessage extends Message {
     protected type = MessageType.REGISTER_WEBSOCKET;
 }

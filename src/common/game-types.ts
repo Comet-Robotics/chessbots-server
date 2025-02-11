@@ -25,6 +25,11 @@ export enum Side {
     SPECTATOR = "s",
 }
 
+/**
+ * gets the opposite enum value of a side
+ * @param side - a side
+ * @returns the opposite of the input side
+ */
 export function oppositeSide(side: Side) {
     return side === Side.WHITE ? Side.BLACK : Side.WHITE;
 }
