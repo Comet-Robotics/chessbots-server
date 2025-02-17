@@ -41,10 +41,12 @@ export let gameManager: GameManager | null = null;
  * The websocket is used to stream moves to and from the client.
  */
 export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
+    // on close, delete the cookie id
     ws.on("close", () => {
         socketManager.handleSocketClosed(req.cookies.id);
     });
 
+    // if there is an actual message, forward it to appropriate handler
     ws.on("message", (data) => {
         const message = parseMessage(data.toString());
         console.log("Received message: " + message.toJson());
@@ -69,11 +71,19 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
 
 export const apiRouter = Router();
 
+/**
+ * client information endpoint
+ *
+ * finds the client type and checks if the game is active
+ * used when a client connects to the server
+ */
+
 apiRouter.get("/client-information", (req, res) => {
     const clientType = clientManager.getClientType(req.cookies.id);
-    //loading saves from file if found
+    // loading saves from file if found
     const oldSave = SaveManager.loadGame(req.cookies.id);
     if (oldSave) {
+        // if the game was an ai game, create a computer game manager with the ai difficulty
         if (oldSave.aiDifficulty !== -1) {
             gameManager = new ComputerGameManager(
                 new ChessEngine(oldSave.game),
@@ -87,6 +97,7 @@ apiRouter.get("/client-information", (req, res) => {
                 oldSave.aiDifficulty,
                 oldSave.host !== req.cookies.id,
             );
+            // create a new human game manger with appropriate clients
         } else {
             gameManager = new HumanGameManager(
                 new ChessEngine(oldSave.game),
@@ -108,6 +119,12 @@ apiRouter.get("/client-information", (req, res) => {
     });
 });
 
+/**
+ * game state endpoint
+ *
+ * gets the game state from the game manager
+ * returns an object with the side, game pgn, and the game end reason
+ */
 apiRouter.get("/game-state", (req, res) => {
     if (gameManager === null) {
         console.warn("Invalid attempt to fetch game state");
@@ -117,9 +134,16 @@ apiRouter.get("/game-state", (req, res) => {
     return res.send(gameManager.getGameState(clientType));
 });
 
+/**
+ * start computer game endpoint
+ *
+ * creates a new computer game manager based on the requests's side and difficulty
+ * returns a success message
+ */
 apiRouter.post("/start-computer-game", (req, res) => {
     const side = req.query.side as Side;
     const difficulty = parseInt(req.query.difficulty as string) as Difficulty;
+    // create a new computer game manager
     gameManager = new ComputerGameManager(
         new ChessEngine(),
         socketManager,
@@ -130,8 +154,16 @@ apiRouter.post("/start-computer-game", (req, res) => {
     return res.send({ message: "success" });
 });
 
+/**
+ * start human game endpoint
+ *
+ * creates a new human game engine based on the request's side
+ *
+ * returns a success message
+ */
 apiRouter.post("/start-human-game", (req, res) => {
     const side = req.query.side as Side;
+    // create a new human game manager
     gameManager = new HumanGameManager(
         new ChessEngine(),
         socketManager,
@@ -142,11 +174,17 @@ apiRouter.post("/start-human-game", (req, res) => {
     return res.send({ message: "success" });
 });
 
+/**
+ * Returns all registered robot ids
+ */
 apiRouter.get("/get-ids", (_, res) => {
     const ids = Array.from(robotManager.idsToRobots.keys());
     return res.send({ ids });
 });
 
+/**
+ * move a random robot forward and turn 45 degrees
+ */
 apiRouter.get("/do-smth", async (_, res) => {
     const robotsEntries = Array.from(virtualRobots.entries());
     const [, robot] =
@@ -157,12 +195,16 @@ apiRouter.get("/do-smth", async (_, res) => {
     res.send({ message: "success" });
 });
 
+/**
+ * get the current state of the virtual robots for the simulator
+ */
 apiRouter.get("/get-simulator-robot-state", (_, res) => {
     if (!USE_VIRTUAL_ROBOTS) {
         return res.status(400).send({ message: "Simulator is not enabled." });
     }
     const robotsEntries = Array.from(virtualRobots.entries());
 
+    // get all of the robots and their positions
     const robotState = Object.fromEntries(
         robotsEntries.map(([id, robot]) => {
             let headingRadians = robot.headingRadians;
@@ -176,6 +218,8 @@ apiRouter.get("/get-simulator-robot-state", (_, res) => {
             return [id, { position, headingRadians: headingRadians }];
         }),
     );
+
+    //send the robots and any tunnel messages
     return res.send({
         robotState,
         messages: Array.from(VirtualBotTunnel.messages),
@@ -202,7 +246,14 @@ apiRouter.get("/get-puzzles", (_, res) => {
     });
 });
 
+/**
+ * sends a drive message through the tcp connection
+ *
+ * @param message - the robot id and left/right motor powers
+ * @returns boolean if successful
+ */
 function doDriveRobot(message: DriveRobotMessage): boolean {
+    // check if robot is registered
     if (!tcpServer) {
         console.warn("Attempted to drive robot without TCP server.");
         return false;
@@ -214,11 +265,15 @@ function doDriveRobot(message: DriveRobotMessage): boolean {
         return false;
     } else {
         const tunnel = tcpServer.getTunnelFromId(message.id);
+
+        // check if robot is connected
         if (!tunnel.connected) {
             console.warn(
                 "attempted manual move for disconnected robot ID " + message.id,
             );
             return false;
+
+            // send the robot message
         } else {
             tunnel.send({
                 type: "DRIVE_TANK",
@@ -230,6 +285,11 @@ function doDriveRobot(message: DriveRobotMessage): boolean {
     return true;
 }
 
+/**
+ * set a variable on the robot
+ * @param message - the robot id and variable information to change
+ * @returns boolean completed successfully
+ */
 function doSetRobotVariable(message: SetRobotVariableMessage): boolean {
     if (!tcpServer) {
         console.warn("Attempted to set robot variable without TCP server.");

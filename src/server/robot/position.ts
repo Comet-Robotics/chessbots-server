@@ -1,5 +1,8 @@
 import { Pair } from "../utils/pair";
 
+/**
+ * x,y positions
+ */
 export class Position extends Pair<Position> {
     constructor(
         public readonly x: number,

@@ -18,6 +18,9 @@ import {
 } from "../../common/game-end-reasons";
 import { SaveManager } from "./save-manager";
 
+/**
+ * The manager for game communication
+ */
 export abstract class GameManager {
     protected gameInterruptedReason: GameInterruptedReason | undefined =
         undefined;
@@ -29,10 +32,11 @@ export abstract class GameManager {
          * The side the host is playing.
          */
         protected hostSide: Side,
-        //true if host and client get reversed
+        // true if host and client get reversed
         protected reverse: boolean,
     ) {}
 
+    /** check if game ended */
     public isGameEnded(): boolean {
         return (
             this.gameInterruptedReason !== undefined ||
@@ -40,6 +44,7 @@ export abstract class GameManager {
         );
     }
 
+    /** get game end reason */
     public getGameEndReason(): GameEndReason | undefined {
         return this.gameInterruptedReason ?? this.chess.getGameFinishedReason();
     }
@@ -70,6 +75,9 @@ export abstract class GameManager {
     ): void;
 }
 
+/**
+ * game manager for handling human communications
+ */
 export class HumanGameManager extends GameManager {
     constructor(
         chess: ChessEngine,
@@ -84,10 +92,18 @@ export class HumanGameManager extends GameManager {
         clientManager.sendToSpectators(new GameStartedMessage());
     }
 
+    /**
+     * handles messages between players
+     * @param message - the message to be sent
+     * @param id - id of the sender
+     */
     public handleMessage(message: Message, id: string): void {
+        // check which type the id is
         const clientType = this.clientManager.getClientType(id);
         let sendToPlayer: SendMessage;
         let sendToOpponent: SendMessage;
+
+        // decide whether the host is the player or the opponent
         if (clientType === ClientType.HOST) {
             sendToPlayer = this.clientManager.sendToHost.bind(
                 this.clientManager,
@@ -103,11 +119,14 @@ export class HumanGameManager extends GameManager {
                 this.clientManager,
             );
         }
+
+        //bind all spectators
         const sendToSpectators = this.clientManager.sendToSpectators.bind(
             this.clientManager,
         );
         const ids = this.clientManager.getIds();
         const currentSave = SaveManager.loadGame(id);
+        // update the internal chess object if it is a move massage
         if (message instanceof MoveMessage) {
             this.chess.makeMove(message.move);
             if (ids) {
@@ -131,12 +150,16 @@ export class HumanGameManager extends GameManager {
             }
             sendToOpponent(message);
             sendToSpectators(message);
+
+            // end the game if it is interrupted
         } else if (message instanceof GameInterruptedMessage) {
             this.gameInterruptedReason = message.reason;
             // propagate back to both sockets
             sendToPlayer(message);
             sendToOpponent(message);
             sendToSpectators(message);
+
+            //end the game in save manager
             if (ids) {
                 if (currentSave?.host === ids[0])
                     SaveManager.endGame(ids[0], ids[1]);
@@ -171,10 +194,15 @@ export class HumanGameManager extends GameManager {
     }
 }
 
+/**
+ * game manager for making and sending ai moves
+ */
 export class ComputerGameManager extends GameManager {
     // The minimum amount of time to wait responding with a move.
     MINIMUM_DELAY = 500;
 
+    // Create the game manager
+    // if the player is black have the computer make the first move
     constructor(
         chess: ChessEngine,
         socketManager: SocketManager,
@@ -190,6 +218,12 @@ export class ComputerGameManager extends GameManager {
         }
     }
 
+    /**
+     * handle messages between the server and the player
+     * @param message - the message to send
+     * @param id - id of the sender
+     * @returns when the game ends
+     */
     public handleMessage(message: Message, id: string): void {
         if (message instanceof MoveMessage) {
             this.chess.makeMove(message.move);

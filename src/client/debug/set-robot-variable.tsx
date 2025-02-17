@@ -8,6 +8,11 @@ interface SetRobotVariableProps {
     sendMessage: SendMessage;
 }
 
+/**
+ * set a variable for a robot
+ * @param props - function for setting the variable
+ * @returns - setup form
+ */
 export function SetRobotVariable(props: SetRobotVariableProps): JSX.Element {
     const [variableName, setVariableName] = useState("");
     const [variableValue, setVariableValue] = useState("");

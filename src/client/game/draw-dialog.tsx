@@ -20,6 +20,11 @@ interface DrawDialogProps {
     sendMessage: SendMessage;
 }
 
+/**
+ * allows the player to offer a draw to the other people
+ * @param props - function for sending messages
+ * @returns - draw dialog
+ */
 export function OfferDrawDialog(props: DrawDialogProps) {
     const [isOpen, setIsOpen] = useState(true);
     const actions = (
@@ -61,6 +66,11 @@ export function OfferDrawDialog(props: DrawDialogProps) {
     );
 }
 
+/**
+ * Allow a player to accept another player's draw request
+ * @param props - function for sending messages
+ * @returns - draw accept dialog
+ */
 export function AcceptDrawDialog(props: DrawDialogProps) {
     const [isOpen, setIsOpen] = useState(true);
     const actions = (

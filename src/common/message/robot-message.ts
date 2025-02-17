@@ -1,5 +1,8 @@
 import { Message, MessageType } from "./message";
 
+/**
+ * send a robot message
+ */
 abstract class RobotMessage extends Message {
     constructor(public readonly id: string) {
         super();
@@ -13,6 +16,9 @@ abstract class RobotMessage extends Message {
     }
 }
 
+/**
+ * A message to set a variable on the robot
+ */
 export class SetRobotVariableMessage extends RobotMessage {
     constructor(
         id: string,
@@ -33,6 +39,10 @@ export class SetRobotVariableMessage extends RobotMessage {
     }
 }
 
+/**
+ * A message to drive the robot based on left and right motor power
+ * @returns an object with the id, left, right motor power
+ */
 export class DriveRobotMessage extends RobotMessage {
     constructor(
         id: string,

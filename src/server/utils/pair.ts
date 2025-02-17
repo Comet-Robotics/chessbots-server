@@ -1,3 +1,6 @@
+/**
+ * pair operations
+ */
 export abstract class Pair<T extends Pair<T>> {
     constructor(
         // Pair is implemented atomically and doesn't support mutation
