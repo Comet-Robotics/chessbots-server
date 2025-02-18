@@ -21,9 +21,9 @@ export abstract class Pair<T extends Pair<T>> {
     add(other: T): T {
         return this.create(this.item1 + other.item1, this.item2 + other.item2);
     }
-    
+
     addTuple(tuple: [number, number]): T {
-        const [item1, item2] = tuple
+        const [item1, item2] = tuple;
         return this.create(this.item1 + item1, this.item2 + item2);
     }
 
@@ -40,6 +40,6 @@ export abstract class Pair<T extends Pair<T>> {
     }
 
     equals(other: T) {
-        return this.item1 === other.item1 && this.item2 === other.item2
+        return this.item1 === other.item1 && this.item2 === other.item2;
     }
 }
