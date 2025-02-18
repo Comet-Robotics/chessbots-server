@@ -1,4 +1,7 @@
+import { Square } from "chess.js";
 import { Pair } from "../utils/pair";
+
+const FILE_LOOKUP = "abcdefgh";
 
 /**
  * Defines a position on the 12x12 grid robots are allowed to be in.
@@ -16,15 +19,26 @@ export class GridIndices extends Pair<GridIndices> {
         public readonly j: number,
     ) {
         if (i < 0 || i > 11) {
-            throw new Error("Index " + i + " is out of bounds.");
+            //throw new Error("Index " + i + " is out of bounds.");
         }
         if (j < 0 || j > 11) {
-            throw new Error("Index " + j + " is out of bounds.");
+            //throw new Error("Index " + j + " is out of bounds.");
         }
         super(i, j);
     }
 
     protected create(i: number, j: number): GridIndices {
+        return new GridIndices(i, j);
+    }
+
+    /**
+     * Converts a square to a grid index in the 0-11 range
+     * @param square - The square to convert
+     * @returns The grid index
+     */
+    public static squareToGrid(square: Square): GridIndices {
+        const i = FILE_LOOKUP.indexOf(square.charAt(0)) + 2;
+        const j = parseInt(square.charAt(1)) - 1 + 2;
         return new GridIndices(i, j);
     }
 
