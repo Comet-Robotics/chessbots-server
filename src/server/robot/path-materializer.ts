@@ -91,9 +91,9 @@ function calcCollisionType(gridMove: GridMove): number {
 }
 
 function addToCollisions(collisions: string[], x: number, y: number) {
-    const square1 = new GridIndices(x, y);
-    if (robotManager.isRobotAtIndices(square1)) {
-        collisions.push(robotManager.getRobotAtIndices(square1).id);
+    const square = new GridIndices(x, y);
+    if (robotManager.isRobotAtIndices(square)) {
+        collisions.push(robotManager.getRobotAtIndices(square).id);
     }
 }
 
