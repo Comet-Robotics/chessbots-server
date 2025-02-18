@@ -9,6 +9,9 @@ import {
 import EventEmitter from "node:events";
 import { v4 as randomUUID } from "uuid";
 
+/**
+ * The tunnel for handling communications to the robots
+ */
 export class BotTunnel {
     connected: boolean = false;
     dataBuffer: Buffer | undefined;
@@ -16,6 +19,12 @@ export class BotTunnel {
     id: string | undefined;
     emitter: EventEmitter;
 
+    /**
+     * take the robot socket and creates an emitter to notify dependencies
+     *
+     * @param socket - socket of the incoming connections
+     * @param onHandshake - handshake handler
+     */
     constructor(
         private socket: net.Socket | null,
         private onHandshake: (packetContent: string) => void,
@@ -27,6 +36,11 @@ export class BotTunnel {
         return this.socket!.readyState === "open";
     }
 
+    /**
+     * get the most relevant identifier possible
+     *
+     * @returns - a robot identifier
+     */
     getIdentifier(): string {
         if (this.id !== undefined) {
             return "ID: " + this.id;
@@ -39,6 +53,10 @@ export class BotTunnel {
         }
     }
 
+    /**
+     * log when data comes in
+     * @param data - the incoming data
+     */
     onData(data: Buffer) {
         console.log(
             "connection data from %s: %j",
@@ -48,6 +66,10 @@ export class BotTunnel {
         this.handleData(data);
     }
 
+    /**
+     * log errors and update connection status
+     * @param err - the error message
+     */
     onError(err: Error) {
         console.error(
             "Connection error from %s: %s",
@@ -57,11 +79,19 @@ export class BotTunnel {
         this.connected = false;
     }
 
+    /**
+     * log when a connection is removed or lost
+     */
     onClose() {
         console.log("Lost connection to %s", this.getIdentifier());
         this.connected = false;
     }
 
+    /**
+     * Sets up the data buffer for it to be handled by the queue
+     *
+     * @param data - data to be handled
+     */
     handleData(data: Buffer) {
         if (this.dataBuffer !== undefined) {
             this.dataBuffer = Buffer.concat([this.dataBuffer, data]);
@@ -72,15 +102,24 @@ export class BotTunnel {
         this.handleQueue();
     }
 
+    /**
+     * handles the incoming data and check if it is valid
+     *
+     * emits result for further handling
+     *
+     * @returns - nothing if nothing happened and nothing if something happened
+     */
     handleQueue() {
         if (this.dataBuffer === undefined || this.dataBuffer.length < 3) {
             this.dataBuffer = undefined;
             return;
         }
 
+        // get the data and find the terminator
         let str = this.dataBuffer.toString();
         const terminator = str.indexOf(";");
 
+        // if there is no terminator, wait for it
         if (terminator === -1) {
             if (str.length > 200) {
                 // Invalid state, reset buf
@@ -93,6 +132,7 @@ export class BotTunnel {
 
         str = str.substring(0, terminator);
 
+        // check if the buffer is the correct length based on where the terminator is
         if (this.dataBuffer.length > terminator) {
             this.dataBuffer = this.dataBuffer.subarray(terminator + 1);
         } else {
@@ -104,20 +144,24 @@ export class BotTunnel {
 
             // Parse packet based on type
             switch (packet.type) {
+                // register new robot
                 case "CLIENT_HELLO": {
                     this.onHandshake(packet.macAddress);
                     this.send(this.makeHello(packet.macAddress));
                     this.connected = true;
                     break;
                 }
+                // respond to pings
                 case "PING_SEND": {
                     this.send({ type: "PING_RESPONSE" });
                     break;
                 }
+                // emit a action complete for further processing
                 case "ACTION_SUCCESS": {
                     this.emitter.emit("actionComplete", { success: true });
                     break;
                 }
+                // emit a action fail for further processing
                 case "ACTION_FAIL": {
                     this.emitter.emit("actionComplete", {
                         success: false,
@@ -139,10 +183,15 @@ export class BotTunnel {
         }
     }
 
+    /**
+     * send packets to robot
+     * @param packet - packet to send
+     */
     send(packet: Packet) {
         const str = packetToJson(packet);
         const msg = str + ";";
 
+        // If the connection isn't active, there is no robot
         if (!this.isActive()) {
             console.error(
                 "Connection to",
@@ -160,6 +209,10 @@ export class BotTunnel {
         this.socket!.write(msg);
     }
 
+    /**
+     * Wait for the socket to respond to the sent action
+     * @returns - if the action was completed or rejected
+     */
     async waitForActionResponse(): Promise<void> {
         return new Promise((res, rej) => {
             this.emitter.once("actionComplete", (args) => {
@@ -199,9 +252,19 @@ export class BotTunnel {
     }
 }
 
+/**
+ * Handles tcp tunnels and maintains a list of connections
+ */
 export class TCPServer {
     private server: net.Server;
 
+    /**
+     * creates a tcp server on port from server config and registers passed in ids with their corresponding bot tunnels
+     *
+     * when a robot connects, bind it to the server
+     *
+     * @param connections - bot connections in a id:BotTunnel array
+     */
     constructor(private connections: { [id: string]: BotTunnel } = {}) {
         this.server = net.createServer();
         this.server.on("connection", this.handleConnection.bind(this));
@@ -213,15 +276,24 @@ export class TCPServer {
         });
     }
 
+    /**
+     * When a robot connects, add the tunnel to the robot connections at its id
+     *
+     * assign a random id to new robots
+     *
+     * @param socket - the incoming connection socket information
+     */
     private handleConnection(socket: net.Socket) {
         const remoteAddress = socket.remoteAddress + ":" + socket.remotePort;
         console.log("New client connection from %s", remoteAddress);
 
         socket.setNoDelay(true);
 
+        // create a new bot tunnel for the connection
         const tunnel = new BotTunnel(
             socket,
             ((mac: string) => {
+                // add the new robot to the array if it isn't in bots config
                 console.log("Adding robot with mac", mac, "to arr");
                 let id: string;
                 if (!(mac in config["bots"])) {
@@ -241,15 +313,25 @@ export class TCPServer {
             }).bind(this),
         );
 
+        // bind the sockets to the corresponding functions
         socket.on("data", tunnel.onData.bind(tunnel));
         socket.once("close", tunnel.onClose.bind(tunnel));
         socket.on("error", tunnel.onError.bind(tunnel));
     }
 
+    /**
+     * get the robot tunnel based on the robot id string
+     * @param id - id string
+     * @returns - tcp tunnel
+     */
     public getTunnelFromId(id: string): BotTunnel {
         return this.connections[id];
     }
 
+    /**
+     * get a list of connected ids
+     * @returns - list of id keys
+     */
     public getConnectedIds(): string[] {
         return Object.keys(this.connections);
     }

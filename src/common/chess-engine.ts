@@ -6,6 +6,11 @@ import { Move, PieceType, Side } from "./game-types";
 import { GridIndices } from "../server/robot/grid-indices";
 import type { RobotManager } from "../server/robot/robot-manager";
 
+/**
+ * Creates the engine to manage chess game
+ *
+ * includes movement, ai moves, castling, en passant, and game finished
+ */
 export class ChessEngine {
     private chess: Chess;
 
@@ -32,22 +37,25 @@ export class ChessEngine {
         return copy;
     }
 
+    /** get the board position */
     get fen(): string {
         return this.chess.fen();
     }
 
+    /** get the board history */
     get pgn(): string {
         return this.chess.pgn();
     }
 
+    /** load a board from history */
     loadPgn(pgn: string) {
         this.chess.loadPgn(pgn);
     }
 
+
     load(fen: string) {
         this.chess.load(fen);
     }
-
     getLastMove() {
         const moves = this.chess.history({ verbose: true });
         return moves.length > 0 ? moves[moves.length - 1] : undefined;
@@ -196,6 +204,11 @@ export class ChessEngine {
         return this.getPieceTypeFromSquare(move.from) as PieceType;
     }
 
+    /**
+     * gets ALL legal moves from the provided square
+     * @param square - from square
+     * @returns - possible to squares
+     */
     getLegalMoves(square?: Square) {
         return this.chess.moves({
             square,
@@ -203,6 +216,11 @@ export class ChessEngine {
         });
     }
 
+    /**
+     * returns a square's legal moves as a map
+     * @param square - from square
+     * @returns - possible to squares
+     */
     getLegalSquares(square?: Square): Square[] {
         return this.getLegalMoves(square).map((move) => move.to);
     }
@@ -232,6 +250,11 @@ export class ChessEngine {
         return from[1] === "2" && to[1] === "1";
     }
 
+    /**
+     * makes an ai move based on the selected difficulty
+     * @param difficulty - a value from 0 to 4 for the ai
+     * @returns - the move made
+     */
     makeAiMove(difficulty: Difficulty): Move {
         // result is an object e.g. { "A1": "A2" }
         const result = aiMove(this.fen, difficulty);
@@ -251,6 +274,10 @@ export class ChessEngine {
         return this.makeMove({ from, to });
     }
 
+    /**
+     * checks if and how the game has ended
+     * @returns - a game finished reason from the enum
+     */
     getGameFinishedReason(): GameFinishedReason | undefined {
         if (this.chess.isCheckmate()) {
             // If it's your turn, you lost
