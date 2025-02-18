@@ -305,20 +305,70 @@ function constructFinalCommand(
     move: GridMove,
     driveCommands: DriveCommand[],
     rotateCommands: ReversibleRobotCommand[],
+    collisionType: number,
 ): MovePiece {
     const from = move.from;
     // console.log(from, robotManager.indicesToIds);
     const mainPiece = robotManager.getRobotAtIndices(from).id;
+    const dte = directionToEdge(from);
 
     if (mainPiece !== undefined) {
         console.log("main piece");
         const to = move.to;
-        const pos = new Position(to.i + 0.5, to.j + 0.5);
-        const mainDrive = constructDriveCommand(mainPiece, pos);
-        const mainTurn = constructRotateCommand(mainPiece, pos);
-        const setupCommands: ReversibleRobotCommand[] = [];
-        setupCommands.push(...rotateCommands, mainTurn, ...driveCommands);
-        return new MovePiece(setupCommands, mainDrive);
+        if (collisionType === 0) {
+            const y = dte[1] * 0.5;
+            const pos1 = new Position(from.i + 0.5, from.j + y + 0.5);
+            const pos2 = new Position(to.i + 0.5, to.j + y + 0.5);
+            const pos3 = new Position(to.i + 0.5, to.j + 0.5);
+            const mainDrive1 = constructDriveCommand(mainPiece, pos1);
+            const mainDrive2 = constructDriveCommand(mainPiece, pos2);
+            const mainDrive3 = constructDriveCommand(mainPiece, pos3);
+            const mainTurn1 = constructRotateCommand(mainPiece, pos1);
+            const mainTurn2 = constructRotateCommand(mainPiece, pos2);
+            const mainTurn3 = constructRotateCommand(mainPiece, pos3);
+            const setupCommands: ReversibleRobotCommand[] = [];
+
+            const mainDrive: SequentialCommandGroup =
+                new SequentialCommandGroup([
+                    mainDrive1,
+                    mainTurn2,
+                    mainDrive2,
+                    mainTurn3,
+                    mainDrive3,
+                ]);
+            setupCommands.push(...rotateCommands, mainTurn1, ...driveCommands);
+            return new MovePiece(setupCommands, mainDrive);
+        } else if (collisionType === 1) {
+            const x = dte[0] * 0.5;
+            const pos1 = new Position(from.i + x + 0.5, from.j + 0.5);
+            const pos2 = new Position(to.i + x + 0.5, to.j + 0.5);
+            const pos3 = new Position(to.i + 0.5, to.j + 0.5);
+            const mainDrive1 = constructDriveCommand(mainPiece, pos1);
+            const mainDrive2 = constructDriveCommand(mainPiece, pos2);
+            const mainDrive3 = constructDriveCommand(mainPiece, pos3);
+            const mainTurn1 = constructRotateCommand(mainPiece, pos1);
+            const mainTurn2 = constructRotateCommand(mainPiece, pos2);
+            const mainTurn3 = constructRotateCommand(mainPiece, pos3);
+            const setupCommands: ReversibleRobotCommand[] = [];
+
+            const mainDrive: SequentialCommandGroup =
+                new SequentialCommandGroup([
+                    mainDrive1,
+                    mainTurn2,
+                    mainDrive2,
+                    mainTurn3,
+                    mainDrive3,
+                ]);
+            setupCommands.push(...rotateCommands, mainTurn1, ...driveCommands);
+            return new MovePiece(setupCommands, mainDrive);
+        } else {
+            const pos = new Position(to.i + 0.5, to.j + 0.5);
+            const mainDrive = constructDriveCommand(mainPiece, pos);
+            const mainTurn = constructRotateCommand(mainPiece, pos);
+            const setupCommands: ReversibleRobotCommand[] = [];
+            setupCommands.push(...rotateCommands, mainTurn, ...driveCommands);
+            return new MovePiece(setupCommands, mainDrive);
+        }
     } else {
         console.log("no main piece");
         return new MovePiece(rotateCommands, new SequentialCommandGroup([]));
@@ -338,7 +388,12 @@ function moveMainPiece(move: GridMove): MovePiece {
         driveCommands.push(constructDriveCommand(pieceId, location));
         rotateCommands.push(constructRotateCommand(pieceId, location));
     }
-    return constructFinalCommand(move, driveCommands, rotateCommands);
+    return constructFinalCommand(
+        move,
+        driveCommands,
+        rotateCommands,
+        collisionType,
+    );
 }
 
 /**
