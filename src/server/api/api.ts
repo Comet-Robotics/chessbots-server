@@ -49,9 +49,7 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
         socketManager.handleSocketClosed(req.cookies.id);
     });
 
-
     ws.on("message", async (data) => {
-
         const message = parseMessage(data.toString());
         console.log("Received message: " + message.toJson());
 
@@ -191,9 +189,8 @@ apiRouter.get("/get-ids", (_, res) => {
  */
 apiRouter.get("/do-smth", async (_, res) => {
     const robotsEntries = Array.from(virtualRobots.entries());
-    const randomRobotIndex = Math.floor(Math.random() * robotsEntries.length)
-    const [, robot] =
-        robotsEntries[randomRobotIndex];
+    const randomRobotIndex = Math.floor(Math.random() * robotsEntries.length);
+    const [, robot] = robotsEntries[randomRobotIndex];
     await robot.sendDrivePacket(1);
     await robot.sendTurnPacket(45 * DEGREE);
 

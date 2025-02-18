@@ -52,7 +52,6 @@ export class ChessEngine {
         this.chess.loadPgn(pgn);
     }
 
-
     load(fen: string) {
         this.chess.load(fen);
     }

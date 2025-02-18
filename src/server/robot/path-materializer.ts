@@ -607,7 +607,7 @@ export function materializePath(move: Move): Command {
         let rookMove3;
         let rookPiece;
         if (moveToGridMove(move).from.j === 2) {
-            rookPiece = robotManager.getRobotAtIndices(new GridIndices(9, 2))
+            rookPiece = robotManager.getRobotAtIndices(new GridIndices(9, 2));
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
                 gridIndicesToPosition(new GridIndices(8, 2)),

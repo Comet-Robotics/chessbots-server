@@ -21,53 +21,52 @@ const srcDir = path.resolve(__dirname, "../");
  * @param justMyCode - no clue
  * @returns - the stack of the error
  */
-function getStack(justMyCode = true) {
-    // inspired by https://stackoverflow.com/a/56651526
-    const err = new Error();
-    Error.captureStackTrace(err, getStack);
+// function getStack(justMyCode = true) {
+//     // inspired by https://stackoverflow.com/a/56651526
+//     const err = new Error();
+//     Error.captureStackTrace(err, getStack);
 
-    const { stack } = err;
-    if (!stack) return;
-    const cleanedStack = parseErrorStack(stack);
+//     const { stack } = err;
+//     if (!stack) return;
+//     const cleanedStack = parseErrorStack(stack);
 
-    if (justMyCode) {
-        const chessBotCodeEndFrame = cleanedStack.findIndex(
-            (frame) => !frame.fileName.startsWith(srcDir),
-        );
-        if (chessBotCodeEndFrame !== -1) {
-            cleanedStack.splice(chessBotCodeEndFrame);
-        }
-    }
+//     if (justMyCode) {
+//         const chessBotCodeEndFrame = cleanedStack.findIndex(
+//             (frame) => !frame.fileName.startsWith(srcDir),
+//         );
+//         if (chessBotCodeEndFrame !== -1) {
+//             cleanedStack.splice(chessBotCodeEndFrame);
+//         }
+//     }
 
-    return cleanedStack;
-}
+//     return cleanedStack;
+// }
 
 /**
  * parse the stack for important information like file, function, and line
  * @param stack - the stack to parse
  * @returns the stack frames as readable objects
  */
-const parseErrorStack = (stack: string): StackFrame[] => {
-    const lines = stack.split("\n");
-    const frames = lines.slice(1).map((line) => {
-        const match = line.match(/^\s+at (?:(.+) \()?(.+):(\d+):(\d+)\)?$/);
-        if (!match) {
-            throw new Error(`Invalid stack frame: ${line}`);
-        }
-        const [, functionName, fileName, lineNumber, columnNumber] = match;
-        if (!fileName || !lineNumber || !columnNumber) {
-            throw new Error(`Invalid stack frame: ${line}`);
-        }
-        return {
-            fileName,
-            functionName,
-            lineNumber: parseInt(lineNumber),
-            columnNumber: parseInt(columnNumber),
-        };
-    });
-    return frames;
-};
-
+// const parseErrorStack = (stack: string): StackFrame[] => {
+//     const lines = stack.split("\n");
+//     const frames = lines.slice(1).map((line) => {
+//         const match = line.match(/^\s+at (?:(.+) \()?(.+):(\d+):(\d+)\)?$/);
+//         if (!match) {
+//             throw new Error(`Invalid stack frame: ${line}`);
+//         }
+//         const [, functionName, fileName, lineNumber, columnNumber] = match;
+//         if (!fileName || !lineNumber || !columnNumber) {
+//             throw new Error(`Invalid stack frame: ${line}`);
+//         }
+//         return {
+//             fileName,
+//             functionName,
+//             lineNumber: parseInt(lineNumber),
+//             columnNumber: parseInt(columnNumber),
+//         };
+//     });
+//     return frames;
+// };
 
 /**
  * A mock of the regular robot tunnel for the simulator robots

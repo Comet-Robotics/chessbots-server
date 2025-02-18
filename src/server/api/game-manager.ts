@@ -21,7 +21,6 @@ import { materializePath } from "../robot/path-materializer";
 import { executor } from "./api";
 import { DO_SAVES } from "../utils/env";
 
-
 /**
  * The manager for game communication
  */
@@ -73,10 +72,7 @@ export abstract class GameManager {
         };
     }
 
-    public abstract handleMessage(
-        message: Message,
-        id: string,
-    ): Promise<void>;
+    public abstract handleMessage(message: Message, id: string): Promise<void>;
 }
 
 /**
@@ -95,7 +91,6 @@ export class HumanGameManager extends GameManager {
         clientManager.sendToClient(new GameStartedMessage());
         clientManager.sendToSpectators(new GameStartedMessage());
     }
-
 
     /**
      * handles messages between players
@@ -136,7 +131,6 @@ export class HumanGameManager extends GameManager {
         if (message instanceof MoveMessage) {
             // Call path materializer and send to bots
             const command = materializePath(message.move);
-            
 
             this.chess.makeMove(message.move);
 
@@ -234,16 +228,13 @@ export class ComputerGameManager extends GameManager {
         }
     }
 
-
-    
-
     /**
      * handle messages between the server and the player
      * @param message - the message to send
      * @param id - id of the sender
      * @returns when the game ends
      */
-  public async handleMessage(message: Message, id: string): Promise<void> {
+    public async handleMessage(message: Message, id: string): Promise<void> {
         if (message instanceof MoveMessage) {
             this.chess.makeMove(message.move);
             if (DO_SAVES) {
