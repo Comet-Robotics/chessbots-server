@@ -15,7 +15,7 @@ const srcDir = path.resolve(__dirname, "../");
 
 /**
  * get the current error stack
- * @param justMyCode - no clue
+ * @param justMyCode - restricts the scope of the stack to just the code in the chessBot project. ex: if there is an error thrown in a file in the node_modules folder, this will not be included in the stack.
  * @returns - the stack of the error
  */
 function getStack(justMyCode = true) {

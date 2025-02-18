@@ -188,7 +188,9 @@ export class BotTunnel {
      * @param packet - packet to send
      */
     send(packet: Packet) {
-        const str = packetToJson(packet);
+        const packetId = randomUUID();
+
+        const str = packetToJson(packet, packetId);
         const msg = str + ";";
 
         // If the connection isn't active, there is no robot
@@ -207,15 +209,20 @@ export class BotTunnel {
 
         console.log({ msg });
         this.socket!.write(msg);
+
+        return packetId
     }
 
     /**
      * Wait for the socket to respond to the sent action
      * @returns - if the action was completed or rejected
      */
-    async waitForActionResponse(): Promise<void> {
+    async waitForActionResponse(packetId: string): Promise<void> {
         return new Promise((res, rej) => {
             this.emitter.once("actionComplete", (args) => {
+                if (args.packetId !== packetId) {
+                    return;
+                }
                 if (args.success) res();
                 else rej(args.reason);
             });

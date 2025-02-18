@@ -163,9 +163,9 @@ export function jsonToPacket(jsonStr: string): Packet {
  * @param packet - packet to be converted
  * @returns - json string
  */
-export function packetToJson(packet: Packet): string {
+export function packetToJson(packet: Packet, packetId: string): string {
     if (!Packet.guard(packet)) {
         throw new Error("Invalid packet: " + JSON.stringify(packet));
     }
-    return JSON.stringify(packet);
+    return JSON.stringify({...packet, packetId});
 }
