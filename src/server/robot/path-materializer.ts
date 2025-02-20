@@ -306,17 +306,18 @@ function constructFinalCommand(
     driveCommands: DriveCommand[],
     rotateCommands: ReversibleRobotCommand[],
     collisionType: number,
+    numCollisions: number,
 ): MovePiece {
     const from = move.from;
     // console.log(from, robotManager.indicesToIds);
     const mainPiece = robotManager.getRobotAtIndices(from).id;
-    const dte = directionToEdge(from);
+    const dirToEdge = directionToEdge(from);
 
     if (mainPiece !== undefined) {
         console.log("main piece");
         const to = move.to;
-        if (collisionType === 0) {
-            const y = dte[1] * 0.5;
+        if (collisionType === 0 && numCollisions > 1) {
+            const y = dirToEdge[1] * 0.5;
             const pos1 = new Position(from.i + 0.5, from.j + y + 0.5);
             const pos2 = new Position(to.i + 0.5, to.j + y + 0.5);
             const pos3 = new Position(to.i + 0.5, to.j + 0.5);
@@ -338,8 +339,8 @@ function constructFinalCommand(
                 ]);
             setupCommands.push(...rotateCommands, mainTurn1, ...driveCommands);
             return new MovePiece(setupCommands, mainDrive);
-        } else if (collisionType === 1) {
-            const x = dte[0] * 0.5;
+        } else if (collisionType === 1 && numCollisions > 1) {
+            const x = dirToEdge[0] * 0.5;
             const pos1 = new Position(from.i + x + 0.5, from.j + 0.5);
             const pos2 = new Position(to.i + x + 0.5, to.j + 0.5);
             const pos3 = new Position(to.i + 0.5, to.j + 0.5);
@@ -393,6 +394,7 @@ function moveMainPiece(move: GridMove): MovePiece {
         driveCommands,
         rotateCommands,
         collisionType,
+        collisions.length,
     );
 }
 
