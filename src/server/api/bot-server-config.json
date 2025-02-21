@@ -2,7 +2,9 @@
     "tcpServerPort": 3001,
     "bots": {
         "80:65:99:4d:f3:f0": "robot-15",
-        "c0:4e:30:4b:68:76": "robot-11"
+        "c0:4e:30:4b:68:76": "robot-11",
+        "80:65:99:4d:f3:9a": "robot-3",
+        "80:65:99:4d:f4:2a": "robot-4"
     },
     "robot-1": {
         "attributes": {},
@@ -383,22 +385,22 @@
         {
             "name": "ENCODER_A_PIN1",
             "type": "gpio",
-            "default_value": 32
+            "default_value": 18
         },
         {
             "name": "ENCODER_A_PIN2",
             "type": "gpio",
-            "default_value": 31
+            "default_value": 21
         },
         {
             "name": "ENCODER_B_PIN1",
             "type": "gpio",
-            "default_value": 18
+            "default_value": 16
         },
         {
             "name": "ENCODER_B_PIN2",
             "type": "gpio",
-            "default_value": 34
+            "default_value": 17
         },
         {
             "name": "RELAY_IR_LED",
