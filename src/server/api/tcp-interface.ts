@@ -7,7 +7,7 @@ import {
     packetToJson,
 } from "../utils/tcp-packet";
 import EventEmitter from "node:events";
-import { randomUUID } from "node:crypto";
+import { v4 as randomUUID } from "uuid";
 
 /**
  * The tunnel for handling communications to the robots

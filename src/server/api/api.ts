@@ -26,12 +26,15 @@ import { ChessEngine } from "../../common/chess-engine";
 import { Side } from "../../common/game-types";
 import { USE_VIRTUAL_ROBOTS } from "../utils/env";
 import { SaveManager } from "./save-manager";
+
+import { CommandExecutor } from "../command/executor";
 import { VirtualBotTunnel, virtualRobots } from "../simulator";
 import { Position } from "../robot/position";
-import { DEGREE } from "../utils/units";
+import { DEGREE } from "../../common/units";
 
 export const tcpServer: TCPServer | null =
     USE_VIRTUAL_ROBOTS ? null : new TCPServer();
+export const executor = new CommandExecutor();
 
 export let gameManager: GameManager | null = null;
 
@@ -46,8 +49,7 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
         socketManager.handleSocketClosed(req.cookies.id);
     });
 
-    // if there is an actual message, forward it to appropriate handler
-    ws.on("message", (data) => {
+    ws.on("message", async (data) => {
         const message = parseMessage(data.toString());
         console.log("Received message: " + message.toJson());
 
@@ -60,7 +62,7 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
             message instanceof GameFinishedMessage
         ) {
             // TODO: Handle game manager not existing
-            gameManager?.handleMessage(message, req.cookies.id);
+            await gameManager?.handleMessage(message, req.cookies.id);
         } else if (message instanceof DriveRobotMessage) {
             doDriveRobot(message);
         } else if (message instanceof SetRobotVariableMessage) {
@@ -187,8 +189,8 @@ apiRouter.get("/get-ids", (_, res) => {
  */
 apiRouter.get("/do-smth", async (_, res) => {
     const robotsEntries = Array.from(virtualRobots.entries());
-    const [, robot] =
-        robotsEntries[Math.floor(Math.random() * robotsEntries.length)];
+    const randomRobotIndex = Math.floor(Math.random() * robotsEntries.length);
+    const [, robot] = robotsEntries[randomRobotIndex];
     await robot.sendDrivePacket(1);
     await robot.sendTurnPacket(45 * DEGREE);
 

@@ -9,6 +9,7 @@ import {
 } from "../../common/message/simulator-message";
 import { Tag, CompoundTag } from "@blueprintjs/core";
 import "./simulator.scss";
+import { clampHeading } from "../../common/units";
 
 const tileSize = 60;
 const robotSize = tileSize / 2;
@@ -187,10 +188,10 @@ export function Simulator() {
                         }}
                         className="log-list"
                     >
-                        {messageLog.map(({ message, ts }, index) => {
+                        {messageLog.map(({ message, ts }) => {
                             return (
                                 <LogEntry
-                                    key={index}
+                                    key={ts.getMilliseconds()}
                                     message={message}
                                     ts={ts}
                                 />
@@ -328,14 +329,14 @@ function Robot(props: {
             className="robot"
             style={{
                 position: "absolute",
-                left: `${props.pos.position.x * tileSize}px`,
-                bottom: `${props.pos.position.y * tileSize}px`,
+                left: `${props.pos.position.x * tileSize - 0.25 * tileSize}px`,
+                bottom: `${props.pos.position.y * tileSize - 0.25 * tileSize}px`,
             }}
         >
             <Tooltip content={`${props.robotId}: ${JSON.stringify(props.pos)}`}>
                 <div
                     style={{
-                        transform: `rotate(-${props.pos.headingRadians}rad)`,
+                        transform: `rotate(-${clampHeading(props.pos.headingRadians)}rad)`,
                         backgroundColor: "white",
                         borderRadius: "50%",
                         border: `4px solid ${props.onTopOfRobots.length > 0 ? "red" : "black"}`,
