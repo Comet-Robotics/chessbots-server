@@ -282,10 +282,11 @@ function findShimmyLocation(
 
 function constructDriveCommand(
     pieceId: string,
-    location: Position,
+    endLocation: Position,
+    startLocation: Position | null,
 ): DriveCommand {
     const robot = robotManager.getRobot(pieceId);
-    const offset = location.sub(robot.position);
+    const offset = endLocation.sub(startLocation ?? robot.position);
     const distance = Math.hypot(offset.x, offset.y);
     return new DriveCommand(pieceId, distance);
 }
@@ -293,9 +294,10 @@ function constructDriveCommand(
 function constructRotateCommand(
     pieceId: string,
     location: Position,
+    startLocation: Position | null,
 ): ReversibleRobotCommand {
     const robot = robotManager.getRobot(pieceId);
-    const offset = location.sub(robot.position);
+    const offset = location.sub(startLocation ?? robot.position);
     const angle = Math.atan2(offset.y, offset.x);
     console.log("rotate cmd construct", robot.position, offset, angle);
     return new ReversibleAbsoluteRotateCommand(pieceId, () => angle);
@@ -309,7 +311,7 @@ function constructFinalCommand(
     numCollisions: number,
 ): MovePiece {
     const from = move.from;
-    // console.log(from, robotManager.indicesToIds);
+    console.log(from, robotManager.indicesToIds);
     const mainPiece = robotManager.getRobotAtIndices(from).id;
     const dirToEdge = directionToEdge(from);
 
@@ -319,14 +321,15 @@ function constructFinalCommand(
         if (collisionType === 0 && numCollisions > 1) {
             const y = dirToEdge[1] * 0.5;
             const pos1 = new Position(from.i + 0.5, from.j + y + 0.5);
-            const pos2 = new Position(to.i + 0.5, to.j + y + 0.5);
+            const pos2 = new Position(to.i + 0.5, from.j + y + 0.5);
             const pos3 = new Position(to.i + 0.5, to.j + 0.5);
-            const mainDrive1 = constructDriveCommand(mainPiece, pos1);
-            const mainDrive2 = constructDriveCommand(mainPiece, pos2);
-            const mainDrive3 = constructDriveCommand(mainPiece, pos3);
-            const mainTurn1 = constructRotateCommand(mainPiece, pos1);
-            const mainTurn2 = constructRotateCommand(mainPiece, pos2);
-            const mainTurn3 = constructRotateCommand(mainPiece, pos3);
+            console.log("from, to ========", from, " ", to);
+            const mainDrive1 = constructDriveCommand(mainPiece, pos1, null);
+            const mainDrive2 = constructDriveCommand(mainPiece, pos2, pos1);
+            const mainDrive3 = constructDriveCommand(mainPiece, pos3, pos2);
+            const mainTurn1 = constructRotateCommand(mainPiece, pos1, null);
+            const mainTurn2 = constructRotateCommand(mainPiece, pos2, pos1);
+            const mainTurn3 = constructRotateCommand(mainPiece, pos3, pos2);
             const setupCommands: ReversibleRobotCommand[] = [];
 
             const mainDrive: SequentialCommandGroup =
@@ -342,14 +345,15 @@ function constructFinalCommand(
         } else if (collisionType === 1 && numCollisions > 1) {
             const x = dirToEdge[0] * 0.5;
             const pos1 = new Position(from.i + x + 0.5, from.j + 0.5);
-            const pos2 = new Position(to.i + x + 0.5, to.j + 0.5);
+            const pos2 = new Position(from.i + x + 0.5, to.j + 0.5);
             const pos3 = new Position(to.i + 0.5, to.j + 0.5);
-            const mainDrive1 = constructDriveCommand(mainPiece, pos1);
-            const mainDrive2 = constructDriveCommand(mainPiece, pos2);
-            const mainDrive3 = constructDriveCommand(mainPiece, pos3);
-            const mainTurn1 = constructRotateCommand(mainPiece, pos1);
-            const mainTurn2 = constructRotateCommand(mainPiece, pos2);
-            const mainTurn3 = constructRotateCommand(mainPiece, pos3);
+            console.log("from, to ========", from, " ", to);
+            const mainDrive1 = constructDriveCommand(mainPiece, pos1, null);
+            const mainDrive2 = constructDriveCommand(mainPiece, pos2, pos1);
+            const mainDrive3 = constructDriveCommand(mainPiece, pos3, pos2);
+            const mainTurn1 = constructRotateCommand(mainPiece, pos1, null);
+            const mainTurn2 = constructRotateCommand(mainPiece, pos2, pos1);
+            const mainTurn3 = constructRotateCommand(mainPiece, pos3, pos2);
             const setupCommands: ReversibleRobotCommand[] = [];
 
             const mainDrive: SequentialCommandGroup =
@@ -364,8 +368,8 @@ function constructFinalCommand(
             return new MovePiece(setupCommands, mainDrive);
         } else {
             const pos = new Position(to.i + 0.5, to.j + 0.5);
-            const mainDrive = constructDriveCommand(mainPiece, pos);
-            const mainTurn = constructRotateCommand(mainPiece, pos);
+            const mainDrive = constructDriveCommand(mainPiece, pos, null);
+            const mainTurn = constructRotateCommand(mainPiece, pos, null);
             const setupCommands: ReversibleRobotCommand[] = [];
             setupCommands.push(...rotateCommands, mainTurn, ...driveCommands);
             return new MovePiece(setupCommands, mainDrive);
@@ -386,8 +390,8 @@ function moveMainPiece(move: GridMove): MovePiece {
     for (let i = 0; i < collisions.length; i++) {
         const pieceId = collisions[i];
         const location = findShimmyLocation(pieceId, move, collisionType);
-        driveCommands.push(constructDriveCommand(pieceId, location));
-        rotateCommands.push(constructRotateCommand(pieceId, location));
+        driveCommands.push(constructDriveCommand(pieceId, location, null));
+        rotateCommands.push(constructRotateCommand(pieceId, location, null));
     }
     return constructFinalCommand(
         move,
