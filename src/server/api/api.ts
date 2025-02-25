@@ -47,7 +47,7 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
     });
 
     // if there is an actual message, forward it to appropriate handler
-    ws.on("message", (data) => {
+    ws.on("message", async (data) => {
         const message = parseMessage(data.toString());
         console.log("Received message: " + message.toJson());
 
@@ -62,9 +62,9 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
             // TODO: Handle game manager not existing
             gameManager?.handleMessage(message, req.cookies.id);
         } else if (message instanceof DriveRobotMessage) {
-            doDriveRobot(message);
+            await doDriveRobot(message);
         } else if (message instanceof SetRobotVariableMessage) {
-            doSetRobotVariable(message);
+            await doSetRobotVariable(message);
         }
     });
 };
@@ -252,7 +252,7 @@ apiRouter.get("/get-puzzles", (_, res) => {
  * @param message - the robot id and left/right motor powers
  * @returns boolean if successful
  */
-function doDriveRobot(message: DriveRobotMessage): boolean {
+async function doDriveRobot(message: DriveRobotMessage): Promise<boolean> {
     // check if robot is registered
     if (!tcpServer) {
         console.warn("Attempted to drive robot without TCP server.");
@@ -275,7 +275,7 @@ function doDriveRobot(message: DriveRobotMessage): boolean {
 
             // send the robot message
         } else {
-            tunnel.send({
+            await tunnel.send({
                 type: "DRIVE_TANK",
                 left: message.leftPower,
                 right: message.rightPower,
@@ -290,7 +290,7 @@ function doDriveRobot(message: DriveRobotMessage): boolean {
  * @param message - the robot id and variable information to change
  * @returns boolean completed successfully
  */
-function doSetRobotVariable(message: SetRobotVariableMessage): boolean {
+async function doSetRobotVariable(message: SetRobotVariableMessage): Promise<boolean> {
     if (!tcpServer) {
         console.warn("Attempted to set robot variable without TCP server.");
         return false;
@@ -309,7 +309,7 @@ function doSetRobotVariable(message: SetRobotVariableMessage): boolean {
             );
             return false;
         } else {
-            tunnel.send({
+            await tunnel.send({
                 type: "SET_VAR",
                 var_id: parseInt(message.variableName),
                 var_type: "float",

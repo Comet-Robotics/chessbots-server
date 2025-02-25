@@ -1,9 +1,10 @@
-import { Socket } from "net";
+import { Socket } from "node:net";
 import { BotTunnel } from "../../api/tcp-interface";
 import { vi, test, expect, afterEach } from "vitest";
-import { Packet, jsonToPacket, packetToJson } from "../tcp-packet";
+import { type Packet, jsonToPacket, packetToJson } from "../tcp-packet";
+import { randomUUID } from "node:crypto";
 
-vi.mock("net");
+vi.mock("node:net");
 
 const mockSocket = vi.mocked(Socket.prototype);
 
@@ -30,18 +31,22 @@ const invalidMessages = [
 ];
 
 test.each(validMessages)("Test packet serialization", async (packet) => {
-    expect(jsonToPacket(packetToJson(packet))).toStrictEqual(packet);
+    const packetId = randomUUID();
+    expect(jsonToPacket(packetToJson(packet, packetId))).toStrictEqual({...packet, packetId});
 });
 
 test.each(invalidMessages)("Test packet serialization", async (packet) => {
-    expect(() => packetToJson(packet as Packet)).toThrowError();
+    expect(() => {
+        const packetId = randomUUID() 
+        packetToJson(packet as Packet, packetId)
+    }).toThrowError();
     expect(() => jsonToPacket(JSON.stringify(packet))).toThrowError();
 });
 
 test.each(validMessages)("Test message sending", async (packet) => {
-    mockBotTunnel.send(packet);
+    const packetId = await mockBotTunnel.send(packet);
     expect(mockWrite).toBeCalledTimes(1);
     expect(mockWrite.mock.calls[0][0]).toStrictEqual(
-        `${packetToJson(packet)};`,
+        `${packetToJson(packet, packetId)};`,
     );
 });

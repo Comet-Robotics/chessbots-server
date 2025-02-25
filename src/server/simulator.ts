@@ -10,6 +10,7 @@ import {
     StackFrame,
 } from "../common/message/simulator-message";
 import { socketManager } from "./api/managers";
+import { randomUUID } from "node:crypto";
 
 const srcDir = path.resolve(__dirname, "../");
 
@@ -95,18 +96,29 @@ export class VirtualBotTunnel extends BotTunnel {
         return "Virtual Bot ID: " + this.robotId;
     }
 
-    private emitActionComplete() {
-        this.emitter.emit("actionComplete", { success: true });
+    private emitActionComplete(packetId: string) {
+        this.emitter.emit("actionComplete", { success: true, packetId });
     }
 
-    send(packet: Packet) {
+    async send(packet: Packet): Promise<string> {
+        const packetId = randomUUID();
         const stack = getStack();
 
-        // NOTE: need to ensure that all the packets which are used in the Robot class (src/server/robot/robot.ts) are also provided with a matching virtual implementation here
+        return new Promise((res, rej) => {
+            const onActionComplete = (args) => {
+                if (args.packetId !== packetId) return;
+                this.emitter.off("actionComplete", onActionComplete);
+                if (args.success) res(args.packetId);
+                else rej(args.reason);
+            }
+
+            this.emitter.on("actionComplete", onActionComplete);
+
+            // NOTE: need to ensure that all the packets which are used in the Robot class (src/server/robot/robot.ts) are also provided with a matching virtual implementation here
         switch (packet.type) {
             case "TURN_BY_ANGLE":
                 this.headingRadians += packet.deltaHeadingRadians;
-                this.emitActionComplete();
+                this.emitActionComplete(packetId);
                 break;
             case "DRIVE_TILES": {
                 const distance = packet.tileDistance;
@@ -121,7 +133,7 @@ export class VirtualBotTunnel extends BotTunnel {
                 );
                 this.position = newPosition;
 
-                this.emitActionComplete();
+                this.emitActionComplete(packetId);
                 break;
             }
             default:
@@ -144,6 +156,7 @@ export class VirtualBotTunnel extends BotTunnel {
         );
         VirtualBotTunnel.messages.push({ ts: new Date(), message });
         socketManager.sendToAll(message);
+        });
     }
 }
 

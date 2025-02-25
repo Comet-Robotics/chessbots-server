@@ -94,12 +94,10 @@ export class Robot {
      */
     public async sendTurnPacket(deltaHeadingRadians: number): Promise<void> {
         const tunnel = this.getTunnel();
-        const id = tunnel.send({
+        await tunnel.send({
             type: "TURN_BY_ANGLE",
             deltaHeadingRadians: deltaHeadingRadians,
         });
-        const promise = tunnel.waitForActionResponse(id);
-        return promise;
     }
 
     /**
@@ -110,8 +108,6 @@ export class Robot {
      */
     public async sendDrivePacket(tileDistance: number): Promise<void> {
         const tunnel = this.getTunnel();
-        const id = tunnel.send({ type: "DRIVE_TILES", tileDistance })
-        const promise = tunnel.waitForActionResponse(id);
-        return promise;
+        await tunnel.send({ type: "DRIVE_TILES", tileDistance })
     }
 }
