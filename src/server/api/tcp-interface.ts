@@ -8,7 +8,7 @@ import {
     packetToJson,
 } from "../utils/tcp-packet";
 import EventEmitter from "node:events";
-import { v4 as randomUUID } from "uuid";
+import { randomUUID } from "node:crypto";
 
 /**
  * The tunnel for handling communications to the robots
@@ -237,7 +237,7 @@ export class BotTunnel {
     }
 
     makeHello(mac: string): Packet {
-        // Unordered list of config nodes to send over
+        // Map of config nodes to send over
         // n: name, v: value
         const configEntries = {};
 

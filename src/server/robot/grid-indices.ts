@@ -19,10 +19,10 @@ export class GridIndices extends Pair<GridIndices> {
         public readonly j: number,
     ) {
         if (i < 0 || i > 11) {
-            //throw new Error("Index " + i + " is out of bounds.");
+            throw new Error("Index " + i + " is out of bounds.");
         }
         if (j < 0 || j > 11) {
-            //throw new Error("Index " + j + " is out of bounds.");
+            throw new Error("Index " + j + " is out of bounds.");
         }
         super(i, j);
     }
