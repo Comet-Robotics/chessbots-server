@@ -328,8 +328,8 @@ function Robot(props: {
             className="robot"
             style={{
                 position: "absolute",
-                left: `${props.pos.position.x * tileSize}px`,
-                bottom: `${props.pos.position.y * tileSize}px`,
+                left: `${props.pos.position.x * tileSize - 0.25 * tileSize}px`,
+                bottom: `${props.pos.position.y * tileSize - 0.25 * tileSize}px`,
             }}
         >
             <Tooltip content={`${props.robotId}: ${JSON.stringify(props.pos)}`}>

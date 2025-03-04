@@ -2,16 +2,20 @@
     "name": "utd-chess-bots",
     "private": true,
     "version": "0.0.0",
-    "workspaces": ["src/client", "src/server"],
+    "workspaces": [
+        "src/client",
+        "src/server"
+    ],
     "scripts": {
         "dev": "nodemon src/server/main.ts",
+        "debug": "nodemon --inspect src/server/main.ts",
         "start": "NODE_ENV=production ts-node ./src/server/main.ts",
         "build": "vite build",
         "docs:build": "typedoc",
         "docs:dev": "nodemon --exec 'yarn run docs:build' --watch ./tsconfig.json,./src/**/*,./docs/**/*",
         "test": "vitest",
-        "format": "prettier --write src/*",
-        "format-check": "prettier --check src/*",
+        "format": "prettier --write src/**",
+        "format-check": "prettier --check src/**",
         "lint": "eslint . --fix --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "lint-check": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
     },
@@ -40,5 +44,6 @@
     },
     "optionalDependencies": {
         "bufferutil": "^4.0.8"
-    }
+    },
+    "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

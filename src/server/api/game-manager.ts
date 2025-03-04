@@ -17,6 +17,8 @@ import {
     GameEndReason as GameInterruptedReason,
 } from "../../common/game-end-reasons";
 import { SaveManager } from "./save-manager";
+import { materializePath } from "../robot/path-materializer";
+import { executor } from "./api";
 
 /**
  * The manager for game communication
@@ -26,7 +28,7 @@ export abstract class GameManager {
         undefined;
 
     constructor(
-        protected chess: ChessEngine,
+        public chess: ChessEngine,
         protected socketManager: SocketManager,
         /**
          * The side the host is playing.
@@ -72,7 +74,7 @@ export abstract class GameManager {
     public abstract handleMessage(
         message: Message,
         clientType: ClientType,
-    ): void;
+    ): Promise<void>;
 }
 
 /**
@@ -97,7 +99,7 @@ export class HumanGameManager extends GameManager {
      * @param message - the message to be sent
      * @param id - id of the sender
      */
-    public handleMessage(message: Message, id: string): void {
+    public async handleMessage(message: Message, id: string): Promise<void> {
         // check which type the id is
         const clientType = this.clientManager.getClientType(id);
         let sendToPlayer: SendMessage;
@@ -128,7 +130,16 @@ export class HumanGameManager extends GameManager {
         const currentSave = SaveManager.loadGame(id);
         // update the internal chess object if it is a move massage
         if (message instanceof MoveMessage) {
+            // Call path materializer and send to bots
+            const command = materializePath(message.move);
+
             this.chess.makeMove(message.move);
+
+            console.log("running executor");
+            console.log(command);
+            await executor.execute(command);
+            console.log("executor done");
+
             if (ids) {
                 if (currentSave?.host === ids[0]) {
                     SaveManager.saveGame(
@@ -224,7 +235,7 @@ export class ComputerGameManager extends GameManager {
      * @param id - id of the sender
      * @returns when the game ends
      */
-    public handleMessage(message: Message, id: string): void {
+    public async handleMessage(message: Message, id: string): Promise<void> {
         if (message instanceof MoveMessage) {
             this.chess.makeMove(message.move);
             SaveManager.saveGame(

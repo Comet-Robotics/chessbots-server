@@ -76,6 +76,10 @@ export abstract class CommandGroup extends CommandBase {
         super();
         this.addRequirements(commands.map((c) => [...c.requirements]).flat());
     }
+    public abstract reverse();
+}
+function isReversable(obj): obj is Reversible<typeof obj> {
+    return typeof obj.reverse() === "function";
 }
 
 /**
@@ -84,6 +88,14 @@ export abstract class CommandGroup extends CommandBase {
 export class ParallelCommandGroup extends CommandGroup {
     public async execute(): Promise<void> {
         const promises = this.commands.map((move) => move.execute());
+        return Promise.all(promises).then(null);
+    }
+    public async reverse(): Promise<void> {
+        const promises = this.commands.map((move) => {
+            if (isReversable(move)) {
+                move.reverse();
+            }
+        });
         return Promise.all(promises).then(null);
     }
 }
@@ -96,6 +108,15 @@ export class SequentialCommandGroup extends CommandGroup {
         let promise = Promise.resolve();
         for (const command of this.commands) {
             promise = promise.then(() => command.execute());
+        }
+        return promise;
+    }
+    public async reverse(): Promise<void> {
+        let promise = Promise.resolve();
+        for (const command of this.commands) {
+            if (isReversable(command)) {
+                promise = promise.then(() => command.reverse());
+            }
         }
         return promise;
     }
