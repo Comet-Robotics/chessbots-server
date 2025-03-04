@@ -32,13 +32,16 @@ const invalidMessages = [
 
 test.each(validMessages)("Test packet serialization", async (packet) => {
     const packetId = randomUUID();
-    expect(jsonToPacket(packetToJson(packet, packetId))).toStrictEqual({...packet, packetId});
+    expect(jsonToPacket(packetToJson(packet, packetId))).toStrictEqual({
+        ...packet,
+        packetId,
+    });
 });
 
 test.each(invalidMessages)("Test packet serialization", async (packet) => {
     expect(() => {
-        const packetId = randomUUID() 
-        packetToJson(packet as Packet, packetId)
+        const packetId = randomUUID();
+        packetToJson(packet as Packet, packetId);
     }).toThrowError();
     expect(() => jsonToPacket(JSON.stringify(packet))).toThrowError();
 });

@@ -169,5 +169,5 @@ export function packetToJson(packet: Packet, packetId: string): string {
     if (!Packet.guard(packet)) {
         throw new Error("Invalid packet: " + JSON.stringify(packet));
     }
-    return JSON.stringify({...packet, packetId});
+    return JSON.stringify({ ...packet, packetId });
 }

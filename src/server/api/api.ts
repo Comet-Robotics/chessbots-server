@@ -290,7 +290,9 @@ async function doDriveRobot(message: DriveRobotMessage): Promise<boolean> {
  * @param message - the robot id and variable information to change
  * @returns boolean completed successfully
  */
-async function doSetRobotVariable(message: SetRobotVariableMessage): Promise<boolean> {
+async function doSetRobotVariable(
+    message: SetRobotVariableMessage,
+): Promise<boolean> {
     if (!tcpServer) {
         console.warn("Attempted to set robot variable without TCP server.");
         return false;

@@ -110,52 +110,52 @@ export class VirtualBotTunnel extends BotTunnel {
                 this.emitter.off("actionComplete", onActionComplete);
                 if (args.success) res(args.packetId);
                 else rej(args.reason);
-            }
+            };
 
             this.emitter.on("actionComplete", onActionComplete);
 
             // NOTE: need to ensure that all the packets which are used in the Robot class (src/server/robot/robot.ts) are also provided with a matching virtual implementation here
-        switch (packet.type) {
-            case "TURN_BY_ANGLE":
-                this.headingRadians += packet.deltaHeadingRadians;
-                this.emitActionComplete(packetId);
-                break;
-            case "DRIVE_TILES": {
-                const distance = packet.tileDistance;
-                const deltaX = distance * Math.cos(this.headingRadians);
-                const deltaY = distance * Math.sin(this.headingRadians);
+            switch (packet.type) {
+                case "TURN_BY_ANGLE":
+                    this.headingRadians += packet.deltaHeadingRadians;
+                    this.emitActionComplete(packetId);
+                    break;
+                case "DRIVE_TILES": {
+                    const distance = packet.tileDistance;
+                    const deltaX = distance * Math.cos(this.headingRadians);
+                    const deltaY = distance * Math.sin(this.headingRadians);
 
-                const newPosition = this.position.add(
-                    new Position(deltaX, deltaY),
-                );
-                console.log(
-                    `Robot ${this.robotId} moved to ${newPosition.x}, ${newPosition.y} from ${this.position.x}, ${this.position.y}`,
-                );
-                this.position = newPosition;
+                    const newPosition = this.position.add(
+                        new Position(deltaX, deltaY),
+                    );
+                    console.log(
+                        `Robot ${this.robotId} moved to ${newPosition.x}, ${newPosition.y} from ${this.position.x}, ${this.position.y}`,
+                    );
+                    this.position = newPosition;
 
-                this.emitActionComplete(packetId);
-                break;
+                    this.emitActionComplete(packetId);
+                    break;
+                }
+                default:
+                    throw new Error(
+                        "Unhandled packet type for virtual bot: " + packet.type,
+                    );
             }
-            default:
-                throw new Error(
-                    "Unhandled packet type for virtual bot: " + packet.type,
-                );
-        }
 
-        const message = new SimulatorUpdateMessage(
-            this.robotId,
-            {
-                position: {
-                    x: this.position.x,
-                    y: this.position.y,
+            const message = new SimulatorUpdateMessage(
+                this.robotId,
+                {
+                    position: {
+                        x: this.position.x,
+                        y: this.position.y,
+                    },
+                    headingRadians: this.headingRadians,
                 },
-                headingRadians: this.headingRadians,
-            },
-            packet,
-            stack,
-        );
-        VirtualBotTunnel.messages.push({ ts: new Date(), message });
-        socketManager.sendToAll(message);
+                { ...packet, packetId },
+                stack,
+            );
+            VirtualBotTunnel.messages.push({ ts: new Date(), message });
+            socketManager.sendToAll(message);
         });
     }
 }

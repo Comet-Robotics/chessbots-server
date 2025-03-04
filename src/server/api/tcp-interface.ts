@@ -141,7 +141,7 @@ export class BotTunnel {
 
         try {
             const packet = jsonToPacket(str);
-            const {packetId} = packet;
+            const { packetId } = packet;
 
             // Parse packet based on type
             switch (packet.type) {
@@ -159,7 +159,10 @@ export class BotTunnel {
                 }
                 // emit a action complete for further processing
                 case "ACTION_SUCCESS": {
-                    this.emitter.emit("actionComplete", { success: true, packetId });
+                    this.emitter.emit("actionComplete", {
+                        success: true,
+                        packetId,
+                    });
                     break;
                 }
                 // emit a action fail for further processing
@@ -167,7 +170,7 @@ export class BotTunnel {
                     this.emitter.emit("actionComplete", {
                         success: false,
                         reason: packet.reason,
-                        packetId
+                        packetId,
                     });
                     break;
                 }
@@ -189,7 +192,7 @@ export class BotTunnel {
      * send packets to robot. promise resolves when the robot acknowledges that the action is complete
      * @param packet - packet to send
      * @returns - the packet id
-     */        
+     */
     async send(packet: Packet): Promise<string> {
         const packetId = randomUUID();
 
@@ -218,7 +221,7 @@ export class BotTunnel {
                 this.emitter.off("actionComplete", onActionComplete);
                 if (args.success) res(args.packetId);
                 else rej(args.reason);
-            }
+            };
 
             this.emitter.on("actionComplete", onActionComplete);
             this.socket!.write(msg);
