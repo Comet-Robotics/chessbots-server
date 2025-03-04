@@ -1,7 +1,7 @@
-import * as net from "net";
+import * as net from "node:net";
 import config from "./bot-server-config.json";
 import {
-    Packet,
+    type Packet,
     SERVER_PROTOCOL_VERSION,
     jsonToPacket,
     packetToJson,
@@ -57,13 +57,13 @@ export class BotTunnel {
      * log when data comes in
      * @param data - the incoming data
      */
-    onData(data: Buffer) {
+    async onData(data: Buffer) {
         console.log(
             "connection data from %s: %j",
             this.getIdentifier(),
             data.toString(),
         );
-        this.handleData(data);
+        await this.handleData(data);
     }
 
     /**
@@ -92,14 +92,14 @@ export class BotTunnel {
      *
      * @param data - data to be handled
      */
-    handleData(data: Buffer) {
+    async handleData(data: Buffer) {
         if (this.dataBuffer !== undefined) {
             this.dataBuffer = Buffer.concat([this.dataBuffer, data]);
         } else {
             this.dataBuffer = data;
         }
 
-        this.handleQueue();
+        await this.handleQueue();
     }
 
     /**
@@ -109,7 +109,7 @@ export class BotTunnel {
      *
      * @returns - nothing if nothing happened and nothing if something happened
      */
-    handleQueue() {
+    async handleQueue() {
         if (this.dataBuffer === undefined || this.dataBuffer.length < 3) {
             this.dataBuffer = undefined;
             return;
@@ -141,24 +141,28 @@ export class BotTunnel {
 
         try {
             const packet = jsonToPacket(str);
+            const { packetId } = packet;
 
             // Parse packet based on type
             switch (packet.type) {
                 // register new robot
                 case "CLIENT_HELLO": {
                     this.onHandshake(packet.macAddress);
-                    this.send(this.makeHello(packet.macAddress));
+                    await this.send(this.makeHello(packet.macAddress));
                     this.connected = true;
                     break;
                 }
                 // respond to pings
                 case "PING_SEND": {
-                    this.send({ type: "PING_RESPONSE" });
+                    await this.send({ type: "PING_RESPONSE" });
                     break;
                 }
                 // emit a action complete for further processing
                 case "ACTION_SUCCESS": {
-                    this.emitter.emit("actionComplete", { success: true });
+                    this.emitter.emit("actionComplete", {
+                        success: true,
+                        packetId,
+                    });
                     break;
                 }
                 // emit a action fail for further processing
@@ -166,6 +170,7 @@ export class BotTunnel {
                     this.emitter.emit("actionComplete", {
                         success: false,
                         reason: packet.reason,
+                        packetId,
                     });
                     break;
                 }
@@ -179,16 +184,19 @@ export class BotTunnel {
             this.dataBuffer !== undefined &&
             this.dataBuffer.indexOf(";") !== -1
         ) {
-            this.handleQueue();
+            await this.handleQueue();
         }
     }
 
     /**
-     * send packets to robot
+     * send packets to robot. promise resolves when the robot acknowledges that the action is complete
      * @param packet - packet to send
+     * @returns - the packet id
      */
-    send(packet: Packet) {
-        const str = packetToJson(packet);
+    async send(packet: Packet): Promise<string> {
+        const packetId = randomUUID();
+
+        const str = packetToJson(packet, packetId);
         const msg = str + ";";
 
         // If the connection isn't active, there is no robot
@@ -206,19 +214,17 @@ export class BotTunnel {
         }
 
         console.log({ msg });
-        this.socket!.write(msg);
-    }
 
-    /**
-     * Wait for the socket to respond to the sent action
-     * @returns - if the action was completed or rejected
-     */
-    async waitForActionResponse(): Promise<void> {
         return new Promise((res, rej) => {
-            this.emitter.once("actionComplete", (args) => {
-                if (args.success) res();
+            const onActionComplete = (args) => {
+                if (args.packetId !== packetId) return;
+                this.emitter.off("actionComplete", onActionComplete);
+                if (args.success) res(args.packetId);
                 else rej(args.reason);
-            });
+            };
+
+            this.emitter.on("actionComplete", onActionComplete);
+            this.socket!.write(msg);
         });
     }
 

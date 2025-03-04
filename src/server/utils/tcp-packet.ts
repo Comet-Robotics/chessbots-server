@@ -145,17 +145,19 @@ export const Packet = Union(
 );
 export type Packet = Static<typeof Packet>;
 
+type PacketWithId = Packet & { packetId: string };
+
 /**
  * convert json to a packet to be sent over tcp
  * @param jsonStr - string to be converted
  * @returns - the object packet
  */
-export function jsonToPacket(jsonStr: string): Packet {
+export function jsonToPacket(jsonStr: string): PacketWithId {
     const obj = JSON.parse(jsonStr);
     if (!Packet.guard(obj)) {
         throw new Error("Invalid packet: " + jsonStr);
     }
-    return obj as Packet;
+    return obj as PacketWithId;
 }
 
 /**
@@ -163,9 +165,9 @@ export function jsonToPacket(jsonStr: string): Packet {
  * @param packet - packet to be converted
  * @returns - json string
  */
-export function packetToJson(packet: Packet): string {
+export function packetToJson(packet: Packet, packetId: string): string {
     if (!Packet.guard(packet)) {
         throw new Error("Invalid packet: " + JSON.stringify(packet));
     }
-    return JSON.stringify(packet);
+    return JSON.stringify({ ...packet, packetId });
 }
