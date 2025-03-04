@@ -5,6 +5,7 @@ import {
     GameInterruptedMessage,
     GameStartedMessage,
     GameHoldMessage,
+    GameFinishedMessage,
 } from "../../common/message/game-message";
 import { SocketManager } from "./socket-manager";
 import { ClientManager } from "./client-manager";
@@ -19,6 +20,9 @@ import { SaveManager } from "./save-manager";
 import { materializePath } from "../robot/path-materializer";
 import { executor } from "./api";
 
+/**
+ * The manager for game communication
+ */
 export abstract class GameManager {
     protected gameInterruptedReason: GameInterruptedReason | undefined =
         undefined;
@@ -30,10 +34,11 @@ export abstract class GameManager {
          * The side the host is playing.
          */
         protected hostSide: Side,
-        //true if host and client get reversed
+        // true if host and client get reversed
         protected reverse: boolean,
     ) {}
 
+    /** check if game ended */
     public isGameEnded(): boolean {
         return (
             this.gameInterruptedReason !== undefined ||
@@ -41,6 +46,7 @@ export abstract class GameManager {
         );
     }
 
+    /** get game end reason */
     public getGameEndReason(): GameEndReason | undefined {
         return this.gameInterruptedReason ?? this.chess.getGameFinishedReason();
     }
@@ -53,8 +59,10 @@ export abstract class GameManager {
         let side: Side;
         if (clientType === ClientType.HOST) {
             side = this.reverse ? oppositeSide(this.hostSide) : this.hostSide;
-        } else {
+        } else if (clientType === ClientType.CLIENT) {
             side = this.reverse ? this.hostSide : oppositeSide(this.hostSide);
+        } else {
+            side = Side.SPECTATOR;
         }
         return {
             side,
@@ -69,6 +77,9 @@ export abstract class GameManager {
     ): Promise<void>;
 }
 
+/**
+ * game manager for handling human communications
+ */
 export class HumanGameManager extends GameManager {
     constructor(
         chess: ChessEngine,
@@ -80,12 +91,21 @@ export class HumanGameManager extends GameManager {
         super(chess, socketManager, hostSide, reverse);
         // Notify other client the game has started
         clientManager.sendToClient(new GameStartedMessage());
+        clientManager.sendToSpectators(new GameStartedMessage());
     }
 
+    /**
+     * handles messages between players
+     * @param message - the message to be sent
+     * @param id - id of the sender
+     */
     public async handleMessage(message: Message, id: string): Promise<void> {
+        // check which type the id is
         const clientType = this.clientManager.getClientType(id);
         let sendToPlayer: SendMessage;
         let sendToOpponent: SendMessage;
+
+        // decide whether the host is the player or the opponent
         if (clientType === ClientType.HOST) {
             sendToPlayer = this.clientManager.sendToHost.bind(
                 this.clientManager,
@@ -101,8 +121,14 @@ export class HumanGameManager extends GameManager {
                 this.clientManager,
             );
         }
+
+        //bind all spectators
+        const sendToSpectators = this.clientManager.sendToSpectators.bind(
+            this.clientManager,
+        );
         const ids = this.clientManager.getIds();
         const currentSave = SaveManager.loadGame(id);
+        // update the internal chess object if it is a move massage
         if (message instanceof MoveMessage) {
             // Call path materializer and send to bots
             const command = materializePath(message.move);
@@ -134,11 +160,31 @@ export class HumanGameManager extends GameManager {
                 }
             }
             sendToOpponent(message);
+            sendToSpectators(message);
+
+            // end the game if it is interrupted
         } else if (message instanceof GameInterruptedMessage) {
             this.gameInterruptedReason = message.reason;
             // propagate back to both sockets
             sendToPlayer(message);
             sendToOpponent(message);
+            sendToSpectators(message);
+
+            //end the game in save manager
+            if (ids) {
+                if (currentSave?.host === ids[0])
+                    SaveManager.endGame(ids[0], ids[1]);
+                else SaveManager.endGame(ids[1], ids[0]);
+            }
+        } else if (message instanceof GameFinishedMessage) {
+            // propagate back to both sockets
+            //sendToPlayer(message);
+            //sendToOpponent(message);
+            if (ids) {
+                if (currentSave?.host === ids[0])
+                    SaveManager.endGame(ids[0], ids[1]);
+                else SaveManager.endGame(ids[1], ids[0]);
+            }
         } else if (message instanceof GameHoldMessage) {
             if (message.reason === GameHoldReason.DRAW_CONFIRMATION)
                 sendToPlayer(message);
@@ -147,22 +193,27 @@ export class HumanGameManager extends GameManager {
             } else {
                 sendToPlayer(message);
                 sendToOpponent(message);
+                sendToSpectators(message);
             }
+        } else if (this.isGameEnded()) {
             if (ids) {
                 if (currentSave?.host === ids[0])
                     SaveManager.endGame(ids[0], ids[1]);
                 else SaveManager.endGame(ids[1], ids[0]);
             }
-        } else if (this.isGameEnded()) {
-            if (ids) SaveManager.endGame(ids[0], ids[1]);
         }
     }
 }
 
+/**
+ * game manager for making and sending ai moves
+ */
 export class ComputerGameManager extends GameManager {
     // The minimum amount of time to wait responding with a move.
     MINIMUM_DELAY = 500;
 
+    // Create the game manager
+    // if the player is black have the computer make the first move
     constructor(
         chess: ChessEngine,
         socketManager: SocketManager,
@@ -178,6 +229,12 @@ export class ComputerGameManager extends GameManager {
         }
     }
 
+    /**
+     * handle messages between the server and the player
+     * @param message - the message to send
+     * @param id - id of the sender
+     * @returns when the game ends
+     */
     public async handleMessage(message: Message, id: string): Promise<void> {
         if (message instanceof MoveMessage) {
             this.chess.makeMove(message.move);

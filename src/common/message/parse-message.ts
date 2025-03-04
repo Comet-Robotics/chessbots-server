@@ -6,6 +6,7 @@ import {
     GameInterruptedMessage,
     GameStartedMessage,
     GameHoldMessage,
+    GameFinishedMessage,
 } from "./game-message";
 import { SimulatorUpdateMessage } from "./simulator-message";
 
@@ -13,7 +14,7 @@ import { SimulatorUpdateMessage } from "./simulator-message";
  * Parses sent messages into Message instances.
  *
  * @param text - A string received from the server or the client.
- * @returns the parsed Message class.
+ * @returns the class related to the parsed message.
  */
 export function parseMessage(text: string): Message {
     const obj = JSON.parse(text);
@@ -25,6 +26,8 @@ export function parseMessage(text: string): Message {
             return new GameStartedMessage();
         case MessageType.GAME_INTERRUPTED:
             return new GameInterruptedMessage(obj.reason);
+        case MessageType.GAME_FINISHED:
+            return new GameFinishedMessage(obj.reason);
         case MessageType.GAME_HELD:
             return new GameHoldMessage(obj.reason);
         case MessageType.POSITION:
@@ -48,7 +51,7 @@ export function parseMessage(text: string): Message {
                 obj.robotId,
                 obj.location,
                 obj.packet,
-                obj.stackFrame,
+                obj.stackTrace,
             );
     }
     throw new Error("Failed to parse message.");

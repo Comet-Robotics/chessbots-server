@@ -17,7 +17,10 @@ export function computeChessboardTransform(
     const width = Math.min(canvasHeight, canvasWidth) * scale;
     const height = width;
 
+    // shifts the x and y
     const xShift = (canvasWidth - width) / 2;
     const yShift = (canvasHeight - height) / 2;
+
+    // return the shift
     return { left: xShift, top: yShift, height, width };
 }

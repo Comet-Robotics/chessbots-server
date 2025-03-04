@@ -80,6 +80,9 @@ export function SquareHighlight(props: PieceSquareProps) {
     );
 }
 
+/**
+ * SVG of the piece clicked
+ */
 export function ClickedPiece(props: PieceSquareProps) {
     return (
         <div

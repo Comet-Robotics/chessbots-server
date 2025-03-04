@@ -16,15 +16,39 @@ import {
 } from "../../common/game-end-reasons";
 import { SendMessage } from "../../common/message/message";
 import { Side } from "../../common/game-types";
+import { Dispatch } from "react";
 
 interface NavbarMenuProps {
     sendMessage: SendMessage;
     side: Side;
+    setRotation: Dispatch<React.SetStateAction<number>>; //set state type
 }
 
+/**
+ * Creates a navbar with a title and the abort, resign, and debug buttons
+ *
+ * @param props - message handler for abort/resign
+ * @returns the navbar element with all the buttons
+ */
 export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
     // Store react router state for game
     const navigate = useNavigate();
+
+    /** create navbar rotate button */
+    const rotateButton =
+        props.side === Side.SPECTATOR ?
+            <Button
+                minimal
+                text="Rotate"
+                intent="primary"
+                onClick={() => {
+                    props.setRotation((oldRotation) => {
+                        return oldRotation + 90;
+                    });
+                }}
+            />
+        :   "";
+
     return (
         <Navbar>
             <NavbarGroup>
@@ -40,7 +64,7 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
                             new GameInterruptedMessage(
                                 props.side === Side.WHITE ?
                                     GameInterruptedReason.WHITE_RESIGNED
-                                :   GameInterruptedReason.BLACK_RESIGNED, // TODO change to either WHITE_RESIGNED or BLACK_RESIGNED
+                                :   GameInterruptedReason.BLACK_RESIGNED,
                             ),
                         );
                     }}
@@ -53,13 +77,15 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
                     onClick={async () => {
                         props.sendMessage(
                             new GameHoldMessage(
-                                GameHoldReason.DRAW_CONFIRMATION, // TODO change to either WHITE_RESIGNED or BLACK_RESIGNED
+                                GameHoldReason.DRAW_CONFIRMATION,
                             ),
                         );
                     }}
                 />
             </NavbarGroup>
             <NavbarGroup align="right">
+                {rotateButton}
+                <h3>{props.side}</h3>
                 <Button icon="cog" minimal onClick={() => navigate("/debug")} />
             </NavbarGroup>
         </Navbar>

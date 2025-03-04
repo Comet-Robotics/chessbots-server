@@ -15,6 +15,11 @@ import { getStartHeading, Side } from "../common/game-types";
 
 const srcDir = path.resolve(__dirname, "../");
 
+/**
+ * get the current error stack
+ * @param justMyCode - no clue
+ * @returns - the stack of the error
+ */
 function getStack(justMyCode = true) {
     // inspired by https://stackoverflow.com/a/56651526
     const err = new Error();
@@ -36,6 +41,11 @@ function getStack(justMyCode = true) {
     return cleanedStack;
 }
 
+/**
+ * parse the stack for important information like file, function, and line
+ * @param stack - the stack to parse
+ * @returns the stack frames as readable objects
+ */
 const parseErrorStack = (stack: string): StackFrame[] => {
     const lines = stack.split("\n");
     const frames = lines.slice(1).map((line) => {
@@ -54,6 +64,9 @@ const parseErrorStack = (stack: string): StackFrame[] => {
     return frames;
 };
 
+/**
+ * A mock of the regular robot tunnel for the simulator robots
+ */
 export class VirtualBotTunnel extends BotTunnel {
     connected = true;
 
@@ -136,6 +149,9 @@ export class VirtualBotTunnel extends BotTunnel {
     }
 }
 
+/**
+ * virtual robots that can be moved around
+ */
 export class VirtualRobot extends Robot {
     public getTunnel(): BotTunnel {
         return virtualBotTunnels.get(this.id)!;
@@ -146,6 +162,9 @@ const virtualBotIds = Array(32)
     .fill(undefined)
     .map((_, i) => `virtual-robot-${(i + 1).toString()}`);
 
+/**
+ * a map of all the created virtual robots with ids, positions, and homes
+ */
 export const virtualRobots = new Map<string, VirtualRobot>(
     virtualBotIds.map((id, idx) => {
         const realRobotConfig = config[id.replace("virtual-", "")];
@@ -171,6 +190,7 @@ export const virtualRobots = new Map<string, VirtualRobot>(
     }),
 );
 
+/** a map of all the current virtual robot tunnels */
 const virtualBotTunnels = new Map<string, BotTunnel>(
     virtualBotIds.map((id) => [id, new VirtualBotTunnel(id)]),
 );

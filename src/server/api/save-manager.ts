@@ -12,7 +12,7 @@
 
 import { Side } from "../../common/game-types";
 
-//Save files contain a date in ms and pgn string
+// Save files contain a date in ms and pgn string
 export interface iSave {
     host: string;
     date: number;
@@ -114,7 +114,7 @@ export class SaveManager {
      * Searches through saves, removing ones older than 3 hours
      */
 
-    //Save game and save file are separate for future-proofing in case we change to a database.
+    // Save game and save file are separate for future-proofing in case we change to a database.
     public static removeOld() {
         const date = new Date().getTime();
 
@@ -122,7 +122,7 @@ export class SaveManager {
         file.forEach((f) => {
             const save = FileManager.loadFile(f);
             if (save.date > date + 10800000) {
-                //3 hours in ms
+                // 3 hours in ms
                 FileManager.deleteFile(f);
             }
         });

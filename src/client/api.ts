@@ -44,6 +44,7 @@ export function useSocket(
     onMessage?: MessageHandler,
     onOpen?: () => void,
 ): SendMessage {
+    // handle sending a message and opening it
     const { sendMessage } = useWebSocket(WEBSOCKET_URL, {
         onOpen: () => {
             console.log("Connection established");
@@ -52,6 +53,7 @@ export function useSocket(
                 onOpen();
             }
         },
+        // handle what to do with the message
         onMessage: (msg: MessageEvent) => {
             const message = parseMessage(msg.data.toString());
             console.log("Handle message: " + message.toJson());
@@ -62,6 +64,7 @@ export function useSocket(
         },
     });
 
+    // handle how a message is sent
     const sendMessageHandler = useMemo(() => {
         return (message: Message) => {
             console.log("Sending message: " + message.toJson());
@@ -83,6 +86,7 @@ export async function post(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> {
     try {
+        // run a post to the provided api path with the provided query
         let normalizedUrl = `/api${apiPath}`;
         if (query) {
             normalizedUrl += `?${new URLSearchParams(query)}`;
