@@ -228,9 +228,6 @@ export class ChessEngine {
      */
     makeMove(move: Move): Move {
         this.chess.move(move);
-        move.from;
-        //const rob = robotManager.getRobotAtIndices(GridIndices.squareToGrid(move.from));
-        //robotManager.updateRobot(rob)
         return move;
     }
 
