@@ -25,14 +25,16 @@ export function SetupBase(props: SetupBaseProps): JSX.Element {
                 onMove={() => {}}
                 rotation={0}
             />
-            <Dialog
-                isOpen
-                canEscapeKeyClose={false}
-                canOutsideClickClose={false}
-            >
-                <DialogBody>{props.children}</DialogBody>
-                <DialogFooter minimal actions={props.actions} />
-            </Dialog>
+            <>
+                <Dialog
+                    isOpen
+                    canEscapeKeyClose={false}
+                    canOutsideClickClose={false}
+                >
+                    <div style = {{backgroundColor: '#1a1616'}}><DialogBody>{props.children}</DialogBody></div>
+                    <div style = {{backgroundColor: '#1a1616'}}><DialogFooter minimal actions={props.actions} /></div>
+                </Dialog>
+            </>
         </>
     );
 }

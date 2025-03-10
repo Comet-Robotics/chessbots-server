@@ -79,7 +79,7 @@ function SetupMain(props: SetupMainProps) {
     const debugButton = (
         <Button
             minimal
-            style={{ float: "right" }}
+            style={{ float: "right", color: "white" }}
             icon="cog"
             onClick={() => navigate("/debug")}
         />
@@ -90,17 +90,20 @@ function SetupMain(props: SetupMainProps) {
         <>
             <Button
                 large
-                text="Play with the computer"
+                text = "Play With The Computer"
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.COMPUTER)}
+                //Used to align the <p> in the center.
+                style={{backgroundColor: "#FF4400", color: "white"}}
             />
             <Button
                 large
-                text="Play against a human"
+                text="Play Against A Human"
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.HUMAN)}
+                style={{backgroundColor: "#FF4400", color: "white"}}
             />
             <Button
                 large
@@ -108,6 +111,7 @@ function SetupMain(props: SetupMainProps) {
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.PUZZLE)}
+                style={{backgroundColor: "#FF4400", color: "white"}}
             />
         </>
     );
@@ -125,7 +129,7 @@ function SetupMain(props: SetupMainProps) {
                     justifyContent: "space-around",
                 }}
             >
-                <H3>Welcome to Chess Bot!</H3>
+                <H3 style={{color: 'white'}}>Welcome to Chess Bot!</H3>
                 {actions}
             </div>
         </>
