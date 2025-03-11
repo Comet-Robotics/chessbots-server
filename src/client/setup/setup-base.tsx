@@ -18,7 +18,7 @@ interface SetupBaseProps extends PropsWithChildren {
 export function SetupBase(props: SetupBaseProps): JSX.Element {
     return (
         <>
-            <Outlet />
+            <Outlet/>
             <ChessboardWrapper
                 chess={new ChessEngine()}
                 side={Side.WHITE}
@@ -26,13 +26,15 @@ export function SetupBase(props: SetupBaseProps): JSX.Element {
                 rotation={0}
             />
             <>
-                <Dialog
+                <Dialog style = {{backgroundColor: 'transparent', boxShadow: 'none'}}
                     isOpen
                     canEscapeKeyClose={false}
                     canOutsideClickClose={false}
                 >
-                    <div style = {{backgroundColor: '#1a1616'}}><DialogBody>{props.children}</DialogBody></div>
-                    <div style = {{backgroundColor: '#1a1616'}}><DialogFooter minimal actions={props.actions} /></div>
+                    <div style = {{backgroundColor: '#1a1616', borderRadius: '1vw', overflow: 'hidden', border: 'none'}}>
+                    <DialogBody>{props.children}</DialogBody>
+                    <DialogFooter minimal actions={props.actions} />
+                    </div>
                 </Dialog>
             </>
         </>
