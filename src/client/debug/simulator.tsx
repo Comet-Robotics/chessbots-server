@@ -14,7 +14,7 @@ const tileSize = 60;
 const robotSize = tileSize / 2;
 const cellCount = 12;
 
-type RobotState = { [robotId: string]: SimulatedRobotLocation };
+export type RobotState = { [robotId: string]: SimulatedRobotLocation };
 
 /**
  * Creates a robot simulator for testing robot commands
@@ -185,7 +185,7 @@ const openInEditor = async (frame: StackFrame) => {
     await fetch(`/__open-in-editor?${params.toString()}`);
 };
 
-function RobotGrid({robotState}: {robotState: RobotState}) {
+export function RobotGrid({robotState}: {robotState: RobotState}) {
     return <div
         style={{
             display: "grid",
