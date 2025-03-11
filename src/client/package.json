@@ -12,7 +12,9 @@
         "react-joystick-component": "^6.2.1",
         "react-router-dom": "^6.21.3",
         "react-use-websocket": "^4.5.0",
-        "scss": "^0.2.4"
+        "scss": "^0.2.4",
+        "@theatre/core": "^0.7.2",
+        "@theatre/studio": "^0.7.2"
     },
     "devDependencies": {
         "@types/react": "^18.2.48",

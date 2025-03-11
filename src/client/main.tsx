@@ -14,6 +14,10 @@ export const queryClient = new QueryClient();
 
 FocusStyleManager.onlyShowFocusOnTabs();
 
+import studio from '@theatre/studio'
+
+studio.initialize()
+
 //creates the root of the page and forwards control to the page router
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <>
