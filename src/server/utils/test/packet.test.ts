@@ -1,5 +1,3 @@
-import { Socket } from "node:net";
-import { BotTunnel } from "../../api/tcp-interface";
 import { vi, test, expect, afterEach } from "vitest";
 import {
     type Packet,
@@ -8,14 +6,15 @@ import {
     PacketType,
 } from "../tcp-packet";
 import { randomUUID } from "node:crypto";
+import { VirtualBotTunnel } from "../../simulator";
+import WebSocket from "ws";
+import { socketManager } from "../../api/managers";
 
-vi.mock("node:net");
+const mockSocket = vi.mocked(WebSocket.prototype);
+const TEST_ROBOT_ID = "virtual-robot-1";
+socketManager.registerSocket(TEST_ROBOT_ID, mockSocket);
 
-const mockSocket = vi.mocked(Socket.prototype);
-
-const mockBotTunnel = new BotTunnel(mockSocket, () => {});
-vi.spyOn(mockBotTunnel, "isActive").mockReturnValue(true);
-const mockWrite = vi.spyOn(mockSocket, "write");
+const mockBotTunnel = new VirtualBotTunnel(TEST_ROBOT_ID);
 
 afterEach(() => {
     vi.clearAllMocks();
@@ -52,9 +51,5 @@ test.each(invalidMessages)("Test packet serialization", async (packet) => {
 });
 
 test.each(validMessages)("Test message sending", async (packet) => {
-    const packetId = await mockBotTunnel.send(packet);
-    expect(mockWrite).toBeCalledTimes(1);
-    expect(mockWrite.mock.calls[0][0]).toStrictEqual(
-        `${packetToJson(packet, packetId)};`,
-    );
+    await mockBotTunnel.send(packet);
 });

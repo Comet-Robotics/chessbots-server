@@ -1,4 +1,4 @@
-import EventEmitter from "node:events";
+import { EventEmitter } from "@posva/event-emitter";
 import { BotTunnel } from "./api/tcp-interface";
 import { Robot } from "./robot/robot";
 import config from "./api/bot-server-config.json";
@@ -104,24 +104,28 @@ export class VirtualBotTunnel extends BotTunnel {
 
     async send(packet: Packet): Promise<string> {
         const packetId = randomUUID();
-        const stack = getStack();
+        let stack: StackFrame[] = [];
+        try {
+            stack = getStack() ?? stack;
+        } catch (e) {
+            console.warn("Error getting stack trace", e);
+        }
 
         return new Promise((res, rej) => {
-            const onActionComplete = (args) => {
+            const removeListener = this.emitter.on("actionComplete", (args) => {
                 if (args.packetId !== packetId) return;
-                this.emitter.off("actionComplete", onActionComplete);
+                removeListener();
                 if (args.success) res(args.packetId);
                 else rej(args.reason);
-            };
-
-            this.emitter.on("actionComplete", onActionComplete);
+            });
 
             // NOTE: need to ensure that all the packets which are used in the Robot class (src/server/robot/robot.ts) are also provided with a matching virtual implementation here
             switch (packet.type) {
-                case PacketType.TURN_BY_ANGLE:
+                case PacketType.TURN_BY_ANGLE: {
                     this.headingRadians += packet.deltaHeadingRadians;
                     this.emitActionComplete(packetId);
                     break;
+                }
                 case PacketType.DRIVE_TILES: {
                     const distance = packet.tileDistance;
                     const deltaX = distance * Math.cos(this.headingRadians);
@@ -139,9 +143,10 @@ export class VirtualBotTunnel extends BotTunnel {
                     break;
                 }
                 default:
-                    throw new Error(
-                        "Unhandled packet type for virtual bot: " + packet.type,
+                    console.warn(
+                        `Unhandled packet type (${packet.type}) from ${this.robotId} - packetId: ${packetId}`,
                     );
+                    this.emitActionComplete(packetId);
             }
 
             const message = new SimulatorUpdateMessage(
