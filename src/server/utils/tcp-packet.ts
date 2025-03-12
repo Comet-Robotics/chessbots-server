@@ -164,7 +164,7 @@ export const Packet = Union(
 );
 export type Packet = Static<typeof Packet>;
 
-type PacketWithId = Packet & { packetId: string };
+export type PacketWithId = Packet & { packetId: string };
 
 /**
  * convert json to a packet to be sent over tcp
