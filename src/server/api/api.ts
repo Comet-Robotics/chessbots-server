@@ -16,7 +16,7 @@ import {
 import { TCPServer } from "./tcp-interface";
 import { Difficulty } from "../../common/client-types";
 import { RegisterWebsocketMessage } from "../../common/message/message";
-import { clientManager, robotManager, socketManager } from "./managers";
+import { clientManager, socketManager } from "./managers";
 import {
     ComputerGameManager,
     GameManager,
@@ -26,12 +26,16 @@ import { ChessEngine } from "../../common/chess-engine";
 import { Side } from "../../common/game-types";
 import { USE_VIRTUAL_ROBOTS } from "../utils/env";
 import { SaveManager } from "./save-manager";
+
+import { CommandExecutor } from "../command/executor";
 import { VirtualBotTunnel, virtualRobots } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../utils/units";
+import { PacketType } from "../utils/tcp-packet";
 
 export const tcpServer: TCPServer | null =
     USE_VIRTUAL_ROBOTS ? null : new TCPServer();
+export const executor = new CommandExecutor();
 
 export let gameManager: GameManager | null = null;
 
@@ -60,7 +64,7 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
             message instanceof GameFinishedMessage
         ) {
             // TODO: Handle game manager not existing
-            gameManager?.handleMessage(message, req.cookies.id);
+            await gameManager?.handleMessage(message, req.cookies.id);
         } else if (message instanceof DriveRobotMessage) {
             await doDriveRobot(message);
         } else if (message instanceof SetRobotVariableMessage) {
@@ -178,7 +182,8 @@ apiRouter.post("/start-human-game", (req, res) => {
  * Returns all registered robot ids
  */
 apiRouter.get("/get-ids", (_, res) => {
-    const ids = Array.from(robotManager.idsToRobots.keys());
+    const ids = tcpServer?.getConnectedIds();
+    //const ids = Array.from(robotManager.idsToRobots.keys());
     return res.send({ ids });
 });
 

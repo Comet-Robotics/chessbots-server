@@ -2,7 +2,7 @@ import EventEmitter from "node:events";
 import { BotTunnel } from "./api/tcp-interface";
 import { Robot } from "./robot/robot";
 import config from "./api/bot-server-config.json";
-import { Packet } from "./utils/tcp-packet";
+import { Packet, PacketType } from "./utils/tcp-packet";
 import { Position, ZERO_POSITION } from "./robot/position";
 import path from "path";
 import {
@@ -11,6 +11,8 @@ import {
 } from "../common/message/simulator-message";
 import { socketManager } from "./api/managers";
 import { randomUUID } from "node:crypto";
+import { GridIndices } from "./robot/grid-indices";
+import { getStartHeading, Side } from "../common/game-types";
 
 const srcDir = path.resolve(__dirname, "../");
 
@@ -177,17 +179,24 @@ const virtualBotIds = Array(32)
  * a map of all the created virtual robots with ids, positions, and homes
  */
 export const virtualRobots = new Map<string, VirtualRobot>(
-    virtualBotIds.map((id) => {
+    virtualBotIds.map((id, idx) => {
         const realRobotConfig = config[id.replace("virtual-", "")];
         return [
             id,
             new VirtualRobot(
                 id,
-                realRobotConfig.homePosition,
-                undefined,
+                new GridIndices(
+                    realRobotConfig.homePosition.x,
+                    realRobotConfig.homePosition.y,
+                ),
+                new GridIndices(
+                    realRobotConfig.defaultPosition.x,
+                    realRobotConfig.defaultPosition.y,
+                ),
+                getStartHeading(idx < 16 ? Side.WHITE : Side.BLACK),
                 new Position(
-                    realRobotConfig.defaultPosition.x + 0.25,
-                    realRobotConfig.defaultPosition.y + 0.25,
+                    realRobotConfig.defaultPosition.x + 0.5,
+                    realRobotConfig.defaultPosition.y + 0.5,
                 ),
             ),
         ] as const;

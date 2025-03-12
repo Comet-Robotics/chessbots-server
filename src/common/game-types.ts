@@ -1,5 +1,5 @@
 import { Square } from "chess.js";
-import { Robot } from "../server/robot/robot";
+import type { Robot } from "../server/robot/robot";
 import { DEGREE } from "../server/utils/units";
 
 /**
@@ -40,7 +40,7 @@ export function oppositeSide(side: Side) {
  * @returns angle in radians
  */
 export function getStartHeading(side: Side) {
-    return side === Side.WHITE ? 90 * DEGREE : 270 * DEGREE;
+    return side === Side.WHITE ? 90 * DEGREE : 90 * DEGREE;
 }
 
 /**

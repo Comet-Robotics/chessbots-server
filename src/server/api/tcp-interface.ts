@@ -93,7 +93,11 @@ export class BotTunnel {
      * @param data - data to be handled
      */
     async handleData(data: Buffer) {
+        console.log("Handling Data");
+        console.log("Current Data: ");
+        console.log(this.dataBuffer);
         if (this.dataBuffer !== undefined) {
+            console.log("Buffer Not Undefined!");
             this.dataBuffer = Buffer.concat([this.dataBuffer, data]);
         } else {
             this.dataBuffer = data;
@@ -111,7 +115,6 @@ export class BotTunnel {
      */
     async handleQueue() {
         if (this.dataBuffer === undefined || this.dataBuffer.length < 3) {
-            this.dataBuffer = undefined;
             return;
         }
 
@@ -139,9 +142,13 @@ export class BotTunnel {
             this.dataBuffer = undefined;
         }
 
+        console.log("Current String: ");
+        console.log(str);
+
         try {
             const packet = jsonToPacket(str);
             const { packetId } = packet;
+            console.log("Received Packet");
 
             // Parse packet based on type
             switch (packet.type) {
@@ -166,7 +173,7 @@ export class BotTunnel {
                     break;
                 }
                 // emit a action fail for further processing
-                case "ACTION_FAIL": {
+                case PacketType.ACTION_FAIL: {
                     this.emitter.emit("actionComplete", {
                         success: false,
                         reason: packet.reason,
@@ -229,25 +236,23 @@ export class BotTunnel {
     }
 
     makeHello(mac: string): Packet {
-        // Very ordered list of config nodes to send over
-        // t: type, v: value
-        const configEntries: [string, string][] = [];
+        // Map of config nodes to send over
+        // n: name, v: value
+        const configEntries = {};
 
-        // Where a bot has a specific config changed, like moving a pin
+        // Where a bot has a specific config changed, like a different encoder multiplier or pin location
         const overrides =
             (config[config.bots[mac]] ?? { attributes: {} })["attributes"] ??
             {};
 
         for (const i of config.botConfigSchema) {
             if (i.name in overrides) {
-                configEntries.push([i.type, overrides[i.name]]);
-            } else {
-                configEntries.push([i.type, i.default_value.toString()]);
+                configEntries[i.name] = overrides[i.name];
             }
         }
 
         const ret: Packet = {
-            type: "SERVER_HELLO",
+            type: PacketType.SERVER_HELLO,
             protocol: SERVER_PROTOCOL_VERSION,
             config: configEntries,
         };

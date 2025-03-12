@@ -144,7 +144,7 @@ export class RelativeMoveCommand
 }
 
 /**
- * Moves a robot to a global location.
+ * Moves a robot to a global location. WARNING: Only moves in a straight line
  */
 export class AbsoluteMoveCommand extends MoveCommand {
     public async execute(): Promise<void> {

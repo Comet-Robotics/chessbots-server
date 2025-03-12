@@ -29,7 +29,9 @@ export function useEffectQuery(
 /**
  * The URL to use for connecting to the websocket backend.
  */
-const WEBSOCKET_URL = `ws://${new URL(window.location.href).host}/ws`;
+const USE_SSL = window.location.protocol === "https:";
+const WS_PROTOCOL = USE_SSL ? "wss" : "ws";
+const WEBSOCKET_URL = `${WS_PROTOCOL}://${new URL(window.location.href).host}/ws`;
 
 /**
  * A custom hook which allows using a websocket to connect to the server.

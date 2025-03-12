@@ -2,7 +2,8 @@ import { FULL_ROTATION, RADIAN, clampHeading } from "../utils/units";
 import { Position, ZERO_POSITION } from "./position";
 import { GridIndices } from "./grid-indices";
 import { tcpServer } from "../api/api";
-import { BotTunnel } from "../api/tcp-interface";
+import type { BotTunnel } from "../api/tcp-interface";
+import { PacketType } from "../utils/tcp-packet";
 
 /**
  * Represents a robot.
@@ -17,6 +18,7 @@ export class Robot {
          * The location the robot lives in when its not in use.
          */
         public readonly homeIndices: GridIndices,
+        public readonly defaultIndices: GridIndices,
         public readonly startHeadingRadians: number = 0,
         private _position: Position = ZERO_POSITION,
     ) {
