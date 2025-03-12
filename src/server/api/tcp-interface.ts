@@ -7,8 +7,16 @@ import {
     packetToJson,
     PacketType,
 } from "../utils/tcp-packet";
-import EventEmitter from "node:events";
+import { EventEmitter } from "@posva/event-emitter";
 import { randomUUID } from "node:crypto";
+
+type RobotEventEmitter = EventEmitter<{
+    actionComplete: {
+        success: boolean;
+        packetId: string;
+        reason?: string;
+    };
+}>;
 
 /**
  * The tunnel for handling communications to the robots
@@ -18,7 +26,7 @@ export class BotTunnel {
     dataBuffer: Buffer | undefined;
     address: string | undefined;
     id: string | undefined;
-    emitter: EventEmitter;
+    emitter: RobotEventEmitter;
 
     /**
      * take the robot socket and creates an emitter to notify dependencies
@@ -224,14 +232,13 @@ export class BotTunnel {
         console.log({ msg });
 
         return new Promise((res, rej) => {
-            const onActionComplete = (args) => {
+            const removeListener = this.emitter.on("actionComplete", (args) => {
                 if (args.packetId !== packetId) return;
-                this.emitter.off("actionComplete", onActionComplete);
+                removeListener();
                 if (args.success) res(args.packetId);
                 else rej(args.reason);
-            };
+            });
 
-            this.emitter.on("actionComplete", onActionComplete);
             this.socket!.write(msg);
         });
     }
