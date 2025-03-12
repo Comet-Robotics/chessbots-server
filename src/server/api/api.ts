@@ -281,7 +281,7 @@ async function doDriveRobot(message: DriveRobotMessage): Promise<boolean> {
             // send the robot message
         } else {
             await tunnel.send({
-                type: "DRIVE_TANK",
+                type: PacketType.DRIVE_TANK,
                 left: message.leftPower,
                 right: message.rightPower,
             });
@@ -317,7 +317,7 @@ async function doSetRobotVariable(
             return false;
         } else {
             await tunnel.send({
-                type: "SET_VAR",
+                type: PacketType.SET_VAR,
                 var_id: parseInt(message.variableName),
                 var_type: "float",
                 var_val: message.variableValue,

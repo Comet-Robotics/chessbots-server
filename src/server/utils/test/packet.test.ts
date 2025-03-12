@@ -1,7 +1,12 @@
 import { Socket } from "node:net";
 import { BotTunnel } from "../../api/tcp-interface";
 import { vi, test, expect, afterEach } from "vitest";
-import { type Packet, jsonToPacket, packetToJson } from "../tcp-packet";
+import {
+    type Packet,
+    jsonToPacket,
+    packetToJson,
+    PacketType,
+} from "../tcp-packet";
 import { randomUUID } from "node:crypto";
 
 vi.mock("node:net");
@@ -17,17 +22,17 @@ afterEach(() => {
 });
 
 const validMessages: Packet[] = [
-    { type: "CLIENT_HELLO", macAddress: "HELLO3" },
-    { type: "DRIVE_TANK", left: 0.3, right: -0.4 },
-    { type: "SET_VAR", var_id: 3, var_type: "uint32", var_val: 10 },
+    { type: PacketType.CLIENT_HELLO, macAddress: "HELLO3" },
+    { type: PacketType.DRIVE_TANK, left: 0.3, right: -0.4 },
+    { type: PacketType.SET_VAR, var_id: 3, var_type: "uint32", var_val: 10 },
 ];
 
 const invalidMessages = [
     {}, // missing type
     { type: "INVALID_TYPE" }, // invalid type
-    { type: "DRIVE_TANK", left: 0.3 }, // missing property
-    { type: "DRIVE_TANK", left: 100, right: -0.9 }, // property outside constraint bounds
-    { type: "SET_VAR", var_id: 0, var_type: "int32", var_val: -3.14 }, // property with invalid type
+    { type: PacketType.DRIVE_TANK, left: 0.3 }, // missing property
+    { type: PacketType.DRIVE_TANK, left: 100, right: -0.9 }, // property outside constraint bounds
+    { type: PacketType.SET_VAR, var_id: 0, var_type: "int32", var_val: -3.14 }, // property with invalid type
 ];
 
 test.each(validMessages)("Test packet serialization", async (packet) => {

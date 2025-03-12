@@ -5,6 +5,7 @@ import {
     SERVER_PROTOCOL_VERSION,
     jsonToPacket,
     packetToJson,
+    PacketType,
 } from "../utils/tcp-packet";
 import EventEmitter from "node:events";
 import { randomUUID } from "node:crypto";
@@ -161,11 +162,11 @@ export class BotTunnel {
                 }
                 // respond to pings
                 case "PING_SEND": {
-                    await this.send({ type: "PING_RESPONSE" });
+                    await this.send({ type: PacketType.PING_RESPONSE });
                     break;
                 }
                 // emit a action complete for further processing
-                case "ACTION_SUCCESS": {
+                case PacketType.ACTION_SUCCESS: {
                     this.emitter.emit("actionComplete", {
                         success: true,
                         packetId,

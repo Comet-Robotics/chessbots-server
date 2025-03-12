@@ -118,11 +118,11 @@ export class VirtualBotTunnel extends BotTunnel {
 
             // NOTE: need to ensure that all the packets which are used in the Robot class (src/server/robot/robot.ts) are also provided with a matching virtual implementation here
             switch (packet.type) {
-                case "TURN_BY_ANGLE":
+                case PacketType.TURN_BY_ANGLE:
                     this.headingRadians += packet.deltaHeadingRadians;
                     this.emitActionComplete(packetId);
                     break;
-                case "DRIVE_TILES": {
+                case PacketType.DRIVE_TILES: {
                     const distance = packet.tileDistance;
                     const deltaX = distance * Math.cos(this.headingRadians);
                     const deltaY = distance * Math.sin(this.headingRadians);
