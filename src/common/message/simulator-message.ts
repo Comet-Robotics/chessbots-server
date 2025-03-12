@@ -1,5 +1,5 @@
 import { Message, MessageType } from "./message";
-import type {PacketWithId}  from "../../server/utils/tcp-packet";
+import type { PacketWithId } from "../../server/utils/tcp-packet";
 export type SimulatedRobotLocation = {
     position: { x: number; y: number };
     headingRadians: number;
