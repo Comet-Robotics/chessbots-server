@@ -239,17 +239,19 @@ export class BotTunnel {
                 this.socket!.write(msg);
                 res(packetId);
             } else {
-                const removeListener = this.emitter.on("actionComplete", (args) => {
-                    if (args.packetId !== packetId) return;
-                    removeListener();
-                    console.log("action complete", args);
-                    if (args.success) res(args.packetId);
-                    else rej(args.reason);
-                });
+                const removeListener = this.emitter.on(
+                    "actionComplete",
+                    (args) => {
+                        if (args.packetId !== packetId) return;
+                        removeListener();
+                        console.log("action complete", args);
+                        if (args.success) res(args.packetId);
+                        else rej(args.reason);
+                    },
+                );
 
                 this.socket!.write(msg);
             }
-
         });
     }
 
