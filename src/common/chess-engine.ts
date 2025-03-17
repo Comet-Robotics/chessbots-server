@@ -47,7 +47,12 @@ export class ChessEngine {
         return this.chess.pgn();
     }
 
-    /** load a board from history */
+    /** load a board from history (FEN) */
+    loadFen(fen: string) {
+        this.chess.load(fen);
+    }
+
+    /** load a board from history (PGN) */
     loadPgn(pgn: string) {
         this.chess.loadPgn(pgn);
     }
