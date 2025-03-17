@@ -38,6 +38,7 @@ export function Debug2(): JSX.Element {
     const [chess, setChess] = useState(new ChessEngine());
     const [gameInterruptedReason, setGameInterruptedReason] =
         useState<GameInterruptedReason>();
+    const [rotation, setRotation] = useState<number>(0);
 
     const sendMessage = useSocket(
         getMessageHandler(chess, setChess, setGameInterruptedReason),
@@ -45,7 +46,7 @@ export function Debug2(): JSX.Element {
 
     useEffect(() => {
         const holder = new ChessEngine();
-        holder.load("7k/8/8/3Q4/8/8/8/K7 w - - 0 1");
+        holder.loadFen("7k/8/8/3Q4/8/8/8/K7 w - - 0 1");
         setChess(holder);
     }, []);
 
@@ -75,12 +76,17 @@ export function Debug2(): JSX.Element {
 
     return (
         <>
-            <NavbarMenu sendMessage={sendMessage} side={side} />
+            <NavbarMenu
+                sendMessage={sendMessage}
+                side={side}
+                setRotation={setRotation}
+            />
             <div id="body-container">
                 <ChessboardWrapper
                     side={side}
                     chess={chess}
                     onMove={handleMove}
+                    rotation={rotation ? rotation : 0}
                 />
                 {gameEndDialog}
                 <Outlet />
