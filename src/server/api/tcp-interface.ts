@@ -231,15 +231,25 @@ export class BotTunnel {
 
         console.log({ msg });
 
-        return new Promise((res, rej) => {
-            const removeListener = this.emitter.on("actionComplete", (args) => {
-                if (args.packetId !== packetId) return;
-                removeListener();
-                if (args.success) res(args.packetId);
-                else rej(args.reason);
-            });
+        // Packets that don't need to be waited on for completion
+        const EXCLUDED_PACKET_TYPES = [PacketType.SERVER_HELLO];
 
-            this.socket!.write(msg);
+        return new Promise((res, rej) => {
+            if (EXCLUDED_PACKET_TYPES.includes(packet.type)) {
+                this.socket!.write(msg);
+                res(packetId);
+            } else {
+                const removeListener = this.emitter.on("actionComplete", (args) => {
+                    if (args.packetId !== packetId) return;
+                    removeListener();
+                    console.log("action complete", args);
+                    if (args.success) res(args.packetId);
+                    else rej(args.reason);
+                });
+
+                this.socket!.write(msg);
+            }
+
         });
     }
 
