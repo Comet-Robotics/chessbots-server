@@ -5,3 +5,21 @@
 .buttonDark {
     background-color: #FF4400 !important;
 }
+
+.textDark {
+    color: white;
+}
+
+.textLight {
+    color: black;
+}
+
+.backgroundDark {
+    background-color: #1a1616;
+    border-radius: 1vw;
+}
+
+.backgroundLight {
+    background-color: #efefef;
+    border-radius: 1vw;
+}

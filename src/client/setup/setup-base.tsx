@@ -4,6 +4,8 @@ import { ChessboardWrapper } from "../chessboard/chessboard-wrapper";
 import { PropsWithChildren, ReactNode } from "react";
 import { ChessEngine } from "../../common/chess-engine";
 import { Side } from "../../common/game-types";
+import { inDarkMode } from "../checkDarkMode";
+import "../colors.css"
 
 interface SetupBaseProps extends PropsWithChildren {
     actions?: ReactNode;
@@ -31,7 +33,7 @@ export function SetupBase(props: SetupBaseProps): JSX.Element {
                     canEscapeKeyClose={false}
                     canOutsideClickClose={false}
                 >
-                    <div style = {{backgroundColor: '#1a1616', borderRadius: '1vw', overflow: 'hidden', border: 'none'}}>
+                    <div className={inDarkMode() ? "backgroundDark" : "backgroundLight"}>
                     <DialogBody>{props.children}</DialogBody>
                     <DialogFooter minimal actions={props.actions} />
                     </div>

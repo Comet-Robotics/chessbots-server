@@ -132,7 +132,7 @@ function SetupMain(props: SetupMainProps) {
                     justifyContent: "space-around",
                 }}
             >
-                <H3 style={{color: 'white'}}>Welcome to Chess Bot!</H3>
+                <H3 className={inDarkMode() ? "textDark": "textLight"}>Welcome to Chess Bot!</H3>
                 {actions}
             </div>
         </>
