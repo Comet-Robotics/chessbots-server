@@ -5,6 +5,8 @@ import { SetupGame } from "./setup-game";
 import { Navigate, useNavigate } from "react-router-dom";
 import { ClientType, GameType } from "../../common/client-types";
 import { get, useEffectQuery } from "../api";
+import { inDarkMode } from "../checkDarkMode";
+import "../colors.css"
 
 enum SetupType {
     MAIN = "main",
@@ -84,34 +86,35 @@ function SetupMain(props: SetupMainProps) {
             onClick={() => navigate("/debug")}
         />
     );
-
+    console.log("dark mode status: " + inDarkMode())
     /** computer, human, and puzzle buttons */
     const actions = (
         <>
-            <Button
-                large
-                text = "Play With The Computer"
-                rightIcon="arrow-right"
-                intent="primary"
-                onClick={() => props.onPageChange(SetupType.COMPUTER)}
-                //Used to align the <p> in the center.
-                style={{backgroundColor: "#FF4400", color: "white"}}
-            />
+                <Button
+                    large
+                    text = "Play With The Computer"
+                    rightIcon="arrow-right"
+                    intent="primary"
+                    onClick={() => props.onPageChange(SetupType.COMPUTER)}
+                    className={inDarkMode() ? "buttonDark" : "buttonLight"}
+                    //Used to align the <p> in the center.
+                    
+                />
             <Button
                 large
                 text="Play Against A Human"
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.HUMAN)}
-                style={{backgroundColor: "#FF4400", color: "white"}}
-            />
+                className={inDarkMode() ? "buttonDark" : "buttonLight"}
+                />
             <Button
                 large
                 text="Puzzle"
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.PUZZLE)}
-                style={{backgroundColor: "#FF4400", color: "white"}}
+                className={inDarkMode() ? "buttonDark" : "buttonLight"}
             />
         </>
     );
