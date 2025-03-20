@@ -46,3 +46,13 @@
 .sliderLight .bp5-slider-track :last-child {
     background-color: #4b4b4b !important;
   }     
+
+/*This is for the left half of the bar*/
+.driveSliderDark .bp5-slider-track :nth-child(2) {
+    background-color: #FF4400 !important;
+}
+
+/*This is for the left half of the bar*/
+.driveSliderLight .bp5-slider-track :nth-child(2) {
+    background-color: #1976D2 !important;
+}

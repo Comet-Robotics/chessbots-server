@@ -8,6 +8,7 @@ import { SetRobotVariable } from "./set-robot-variable";
 import "./debug.scss";
 import { bgColor, textColor } from "../checkDarkMode";
 import "../colors.css"
+import { text } from "node:stream/consumers";
 
 /**
  * A debug menu which can be used to manually control individual robots.
@@ -47,7 +48,7 @@ export function Debug() {
                 {selectedRobotId === undefined ? null : (
                     <>
                         <div className="debug-section">
-                            <H2>
+                            <H2 className={textColor()}>
                                 Motor Control for <Code>{selectedRobotId}</Code>
                             </H2>
                             <DriveRobot
@@ -56,7 +57,7 @@ export function Debug() {
                             />
                         </div>
                         <div className="debug-section">
-                            <H2>
+                            <H2 className={textColor()}>
                                 Configuration for <Code>{selectedRobotId}</Code>
                             </H2>
                             <SetRobotVariable

@@ -52,12 +52,12 @@ export function SelectRobot(props: SelectRobotProps) {
             filterable={false}
             popoverProps={{ minimal: true }}
         >
-            <Button className={buttonColor() + " " + textColor()}
+            <Button
                 text={
-                    hasSelection ?
-                        "Robot " + props.selectedRobotId
-                    :   "Select a robot..."
-                }
+                        hasSelection ?
+                            "Robot " + props.selectedRobotId
+                        :   "Select a robot..."
+                    }
                 rightIcon="double-caret-vertical"
             />
         </Select>

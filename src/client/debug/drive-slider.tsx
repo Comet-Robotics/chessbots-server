@@ -1,4 +1,5 @@
 import { Slider } from "@blueprintjs/core";
+import { driveSliderColor } from "../checkDarkMode";
 
 interface DriveSliderProps {
     power: number;
@@ -12,7 +13,7 @@ interface DriveSliderProps {
  */
 export function DriveSlider(props: DriveSliderProps) {
     return (
-        <Slider
+        <Slider className={driveSliderColor()}
             disabled
             min={-1}
             max={1}

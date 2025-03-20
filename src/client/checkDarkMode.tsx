@@ -19,5 +19,16 @@ function sliderColor(): "sliderDark" | "sliderLight" {
   return(inDarkMode() ? "sliderDark" : "sliderLight")
 }
 
+function joystickOutColor(): "#ff8d70" | "#000033" {
+  return(inDarkMode() ? "#ff8d70": "#000033")
+}
 
-export {textColor, bgColor, buttonColor, sliderColor}
+function joystickInColor(): "#e34017" | "#3d59ab" {
+  return(inDarkMode() ? "#e34017": "#3d59ab")
+}
+
+function driveSliderColor(): "driveSliderDark" | "driveSliderLight" {
+  return(inDarkMode() ? "driveSliderDark" : "driveSliderLight")
+}
+
+export {textColor, bgColor, buttonColor, sliderColor, joystickOutColor, joystickInColor, driveSliderColor}
