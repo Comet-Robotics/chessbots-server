@@ -9,6 +9,7 @@ import {
 } from "../../common/message/simulator-message";
 import { Tag, CompoundTag } from "@blueprintjs/core";
 import "./simulator.scss";
+import { bgColor, textColor } from "../checkDarkMode";
 
 const tileSize = 60;
 const robotSize = tileSize / 2;
@@ -103,7 +104,7 @@ export function Simulator() {
      * add all the robots on top of the board
      */
     return (
-        <Card>
+        <Card className={bgColor()}>
             <Button
                 minimal
                 style={{ float: "right" }}
@@ -113,7 +114,7 @@ export function Simulator() {
             <Button
                 minimal
                 style={{ float: "right" }}
-                icon="cog"
+                icon="cog"  
                 onClick={() => navigate("/debug")}
             />
             <div
@@ -124,7 +125,7 @@ export function Simulator() {
                     alignItems: "center",
                 }}
             >
-                <H1>Robot Simulator</H1>
+                <H1 className={textColor()}>Robot Simulator</H1>
                 <Button icon="refresh" onClick={fetchRobotState}>
                     Refresh
                 </Button>
