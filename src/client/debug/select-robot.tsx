@@ -1,7 +1,5 @@
 import { Button, MenuItem } from "@blueprintjs/core";
 import { ItemRenderer, Select } from "@blueprintjs/select";
-import { bgColor, buttonColor, textBoxColor, textColor } from "../checkDarkMode";
-import { text } from "node:stream/consumers";
 
 /**
  * Creates a robot menu item
