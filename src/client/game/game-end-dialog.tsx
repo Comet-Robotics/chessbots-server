@@ -15,6 +15,8 @@ import {
 } from "../../common/game-end-reasons";
 import { useState } from "react";
 import { Side } from "../../common/game-types";
+import { bgColor, buttonColor, textColor } from "../checkDarkMode";
+import "../colors.css"
 
 interface GameEndDialogProps {
     reason: GameEndReason;
@@ -35,6 +37,7 @@ export function GameEndDialog(props: GameEndDialogProps) {
         <Button
             text="Continue"
             rightIcon="arrow-right"
+            className={buttonColor()}
             intent="primary"
             onClick={() => {
                 navigate("/home");
@@ -44,7 +47,7 @@ export function GameEndDialog(props: GameEndDialogProps) {
 
     // return the dialog with the button and game over reason
     return (
-        <Dialog
+        <Dialog className={bgColor()}
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
             canOutsideClickClose={false}
@@ -52,10 +55,17 @@ export function GameEndDialog(props: GameEndDialogProps) {
         >
             <DialogBody>
                 <NonIdealState
-                    title={gameOverMessage(props.reason)}
                     icon={gameOverIcon(props.reason, props.side)}
+                    title= 
+                        {
+                            <h4 className={textColor()}>
+                                {gameOverMessage(props.reason)}
+                            </h4>
+                        } 
                     iconMuted={false}
-                />
+                >
+                </NonIdealState>
+                
             </DialogBody>
             <DialogFooter minimal actions={actions} />
         </Dialog>

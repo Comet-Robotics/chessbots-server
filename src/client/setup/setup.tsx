@@ -5,7 +5,8 @@ import { SetupGame } from "./setup-game";
 import { Navigate, useNavigate } from "react-router-dom";
 import { ClientType, GameType } from "../../common/client-types";
 import { get, useEffectQuery } from "../api";
-import { inDarkMode } from "../checkDarkMode";
+import { buttonColor, bgColor, textColor } from "../checkDarkMode";
+import { text } from "stream/consumers";
 import "../colors.css"
 
 enum SetupType {
@@ -86,7 +87,6 @@ function SetupMain(props: SetupMainProps) {
             onClick={() => navigate("/debug")}
         />
     );
-    console.log("dark mode status: " + inDarkMode())
     /** computer, human, and puzzle buttons */
     const actions = (
         <>
@@ -96,7 +96,7 @@ function SetupMain(props: SetupMainProps) {
                     rightIcon="arrow-right"
                     intent="primary"
                     onClick={() => props.onPageChange(SetupType.COMPUTER)}
-                    className={inDarkMode() ? "buttonDark" : "buttonLight"}
+                    className={buttonColor()}
                     //Used to align the <p> in the center.
                     
                 />
@@ -106,7 +106,7 @@ function SetupMain(props: SetupMainProps) {
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.HUMAN)}
-                className={inDarkMode() ? "buttonDark" : "buttonLight"}
+                className={buttonColor()}
                 />
             <Button
                 large
@@ -114,7 +114,7 @@ function SetupMain(props: SetupMainProps) {
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.PUZZLE)}
-                className={inDarkMode() ? "buttonDark" : "buttonLight"}
+                className={buttonColor()}
             />
         </>
     );
@@ -132,7 +132,7 @@ function SetupMain(props: SetupMainProps) {
                     justifyContent: "space-around",
                 }}
             >
-                <H3 className={inDarkMode() ? "textDark": "textLight"}>Welcome to Chess Bot!</H3>
+                <H3 className={textColor()}>Welcome to Chess Bot!</H3>
                 {actions}
             </div>
         </>

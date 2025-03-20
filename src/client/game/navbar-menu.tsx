@@ -17,6 +17,9 @@ import {
 import { SendMessage } from "../../common/message/message";
 import { Side } from "../../common/game-types";
 import { Dispatch } from "react";
+import { bgColor, textColor } from "../checkDarkMode";
+import "../colors.css"
+import { text } from "stream/consumers";
 
 interface NavbarMenuProps {
     sendMessage: SendMessage;
@@ -50,9 +53,9 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
         :   "";
 
     return (
-        <Navbar>
+        <Navbar className={bgColor()}>
             <NavbarGroup>
-                <NavbarHeading>ChessBot</NavbarHeading>
+                <NavbarHeading className={textColor()}>ChessBot</NavbarHeading>
                 <NavbarDivider />
                 <Button
                     icon="flag"
@@ -85,7 +88,7 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
             </NavbarGroup>
             <NavbarGroup align="right">
                 {rotateButton}
-                <h3>{props.side}</h3>
+                <h3 className={textColor()}>{props.side}</h3>
                 <Button icon="cog" minimal onClick={() => navigate("/debug")} />
             </NavbarGroup>
         </Navbar>

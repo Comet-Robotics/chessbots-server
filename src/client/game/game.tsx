@@ -22,6 +22,8 @@ import { ChessEngine } from "../../common/chess-engine";
 import { Move } from "../../common/game-types";
 import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { AcceptDrawDialog, OfferDrawDialog } from "./draw-dialog";
+import { bgColor } from "../checkDarkMode";
+import "../colors.css";
 
 /**
  * Creates a MessageHandler function to handle move messages and game interruptions.
@@ -142,7 +144,7 @@ export function Game(): JSX.Element {
                 side={side}
                 setRotation={setRotation}
             />
-            <div id="body-container">
+            <div id="body-container" className={bgColor()}>
                 <ChessboardWrapper
                     side={side}
                     chess={chess}
