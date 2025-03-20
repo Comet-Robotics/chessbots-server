@@ -56,3 +56,11 @@
 .driveSliderLight .bp5-slider-track :nth-child(2) {
     background-color: #1976D2 !important;
 }
+
+.textBoxLight {
+    background-color: #c7c7c7 !important;
+}
+
+.textBoxDark {
+    background-color: #4b4b4b !important;
+}

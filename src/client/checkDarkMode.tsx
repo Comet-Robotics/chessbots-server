@@ -31,4 +31,8 @@ function driveSliderColor(): "driveSliderDark" | "driveSliderLight" {
   return(inDarkMode() ? "driveSliderDark" : "driveSliderLight")
 }
 
-export {textColor, bgColor, buttonColor, sliderColor, joystickOutColor, joystickInColor, driveSliderColor}
+function textBoxColor(): "textBoxDark" | "textBoxLight" {
+  return (inDarkMode() ? "textBoxDark" : "textBoxLight")
+}
+
+export {textColor, bgColor, buttonColor, sliderColor, joystickOutColor, joystickInColor, driveSliderColor, textBoxColor}

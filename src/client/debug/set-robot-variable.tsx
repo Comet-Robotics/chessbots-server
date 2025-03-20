@@ -2,7 +2,9 @@ import { useState } from "react";
 import { SendMessage } from "../../common/message/message";
 import { Button, FormGroup, InputGroup, NumericInput } from "@blueprintjs/core";
 import { SetRobotVariableMessage } from "../../common/message/robot-message";
-import { buttonColor, textColor } from "../checkDarkMode";
+import { buttonColor, textBoxColor, textColor } from "../checkDarkMode";
+import "../colors.css"
+import { Blank } from "@blueprintjs/icons";
 
 interface SetRobotVariableProps {
     robotId: string;
@@ -20,7 +22,7 @@ export function SetRobotVariable(props: SetRobotVariableProps): JSX.Element {
     return (
         <>
             <FormGroup label={<p className={textColor()}>Variable Name</p>} labelFor="variable-name">
-                <InputGroup
+                <InputGroup 
                     id="variable-name"
                     value={variableName}
                     onValueChange={(value: string) => {

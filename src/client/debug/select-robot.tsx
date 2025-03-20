@@ -1,6 +1,7 @@
 import { Button, MenuItem } from "@blueprintjs/core";
 import { ItemRenderer, Select } from "@blueprintjs/select";
-import { bgColor, buttonColor, textColor } from "../checkDarkMode";
+import { bgColor, buttonColor, textBoxColor, textColor } from "../checkDarkMode";
+import { text } from "node:stream/consumers";
 
 /**
  * Creates a robot menu item
@@ -50,14 +51,13 @@ export function SelectRobot(props: SelectRobotProps) {
             itemRenderer={renderRobotIds}
             onItemSelect={props.onRobotIdSelected}
             filterable={false}
-            popoverProps={{ minimal: true }}
+            popoverProps={{ minimal: true}}
+            
         >
             <Button
-                text={
-                        hasSelection ?
+                text={hasSelection ?
                             "Robot " + props.selectedRobotId
-                        :   "Select a robot..."
-                    }
+                        :   "Select a robot..."}
                 rightIcon="double-caret-vertical"
             />
         </Select>
