@@ -4,9 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { Difficulty, GameType } from "../../common/client-types";
 import { Side } from "../../common/game-types";
 import { post } from "../api";
-import { buttonColor, bgColor, textColor, sliderColor, textBoxColor} from "../checkDarkMode";
-import { text } from "stream/consumers";
-import "../colors.css"
+import {
+    buttonColor,
+    textColor,
+    sliderColor,
+    textBoxColor,
+} from "../checkDarkMode";
+import "../colors.css";
 /** User's desired side, b/w/random */
 enum DesiredSide {
     WHITE = "white",
@@ -135,7 +139,8 @@ function DifficultySlider(props: DifficultySliderProps) {
         <>
             <H6 className={textColor()}>Difficulty</H6>
             <div style={{ width: "75%" }}>
-                <Slider className={textColor() + " " + sliderColor()}
+                <Slider
+                    className={textColor() + " " + sliderColor()}
                     intent="primary"
                     value={props.difficulty}
                     onChange={props.onDifficultyChange}
@@ -173,7 +178,8 @@ function SelectSide(props: SelectSideProps) {
     return (
         <>
             <H6 className={textColor()}>Desired Side</H6>
-            <select className={textBoxColor() + " " + textColor()}
+            <select
+                className={textBoxColor() + " " + textColor()}
                 value={props.desiredSide}
                 onChange={(e) =>
                     props.onDesiredSideChange(e.target.value as DesiredSide)

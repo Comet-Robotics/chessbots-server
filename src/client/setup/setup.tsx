@@ -5,9 +5,8 @@ import { SetupGame } from "./setup-game";
 import { Navigate, useNavigate } from "react-router-dom";
 import { ClientType, GameType } from "../../common/client-types";
 import { get, useEffectQuery } from "../api";
-import { buttonColor, bgColor, textColor } from "../checkDarkMode";
-import { text } from "stream/consumers";
-import "../colors.css"
+import { buttonColor, textColor } from "../checkDarkMode";
+import "../colors.css";
 
 enum SetupType {
     MAIN = "main",
@@ -90,16 +89,15 @@ function SetupMain(props: SetupMainProps) {
     /** computer, human, and puzzle buttons */
     const actions = (
         <>
-                <Button
-                    large
-                    text = "Play With The Computer"
-                    rightIcon="arrow-right"
-                    intent="primary"
-                    onClick={() => props.onPageChange(SetupType.COMPUTER)}
-                    className={buttonColor()}
-                    //Used to align the <p> in the center.
-                    
-                />
+            <Button
+                large
+                text="Play With The Computer"
+                rightIcon="arrow-right"
+                intent="primary"
+                onClick={() => props.onPageChange(SetupType.COMPUTER)}
+                className={buttonColor()}
+                //Used to align the <p> in the center.
+            />
             <Button
                 large
                 text="Play Against A Human"
@@ -107,7 +105,7 @@ function SetupMain(props: SetupMainProps) {
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.HUMAN)}
                 className={buttonColor()}
-                />
+            />
             <Button
                 large
                 text="Puzzle"

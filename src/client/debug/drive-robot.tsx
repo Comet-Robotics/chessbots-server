@@ -268,7 +268,9 @@ export function DriveRobot(props: DriveRobotProps) {
                             justifyContent: "center",
                         }}
                     >
-                        <Joystick baseColor={joystickOutColor()} stickColor={joystickInColor()}
+                        <Joystick
+                            baseColor={joystickOutColor()}
+                            stickColor={joystickInColor()}
                             throttle={ROBOT_MSG_THROTTLE_MS}
                             size={150}
                             pos={convertMotorPowersToJoystickXY(

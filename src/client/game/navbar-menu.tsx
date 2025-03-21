@@ -18,8 +18,7 @@ import { SendMessage } from "../../common/message/message";
 import { Side } from "../../common/game-types";
 import { Dispatch } from "react";
 import { bgColor, textColor } from "../checkDarkMode";
-import "../colors.css"
-import { text } from "stream/consumers";
+import "../colors.css";
 
 interface NavbarMenuProps {
     sendMessage: SendMessage;

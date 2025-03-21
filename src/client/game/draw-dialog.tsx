@@ -16,7 +16,7 @@ import {
     GameInterruptedReason,
 } from "../../common/game-end-reasons";
 import { bgColor, buttonColor, textColor } from "../checkDarkMode";
-import "../colors.css"
+import "../colors.css";
 
 interface DrawDialogProps {
     sendMessage: SendMessage;
@@ -56,7 +56,8 @@ export function OfferDrawDialog(props: DrawDialogProps) {
         </>
     );
     return (
-        <Dialog className={bgColor()}
+        <Dialog
+            className={bgColor()}
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
             canOutsideClickClose={false}
@@ -64,9 +65,7 @@ export function OfferDrawDialog(props: DrawDialogProps) {
         >
             <DialogBody>
                 <NonIdealState>
-                    {
-                        <h4 className={textColor()}>Offer draw?</h4>
-                    }
+                    {<h4 className={textColor()}>Offer draw?</h4>}
                 </NonIdealState>
             </DialogBody>
             <DialogFooter minimal actions={actions} />

@@ -114,7 +114,7 @@ export function Simulator() {
             <Button
                 minimal
                 style={{ float: "right" }}
-                icon="cog"  
+                icon="cog"
                 onClick={() => navigate("/debug")}
             />
             <div

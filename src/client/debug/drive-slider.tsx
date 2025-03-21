@@ -13,7 +13,8 @@ interface DriveSliderProps {
  */
 export function DriveSlider(props: DriveSliderProps) {
     return (
-        <Slider className={driveSliderColor()}
+        <Slider
+            className={driveSliderColor()}
             disabled
             min={-1}
             max={1}

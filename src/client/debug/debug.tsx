@@ -7,8 +7,7 @@ import { DriveRobot } from "./drive-robot";
 import { SetRobotVariable } from "./set-robot-variable";
 import "./debug.scss";
 import { bgColor, textColor } from "../checkDarkMode";
-import "../colors.css"
-import { text } from "node:stream/consumers";
+import "../colors.css";
 
 /**
  * A debug menu which can be used to manually control individual robots.

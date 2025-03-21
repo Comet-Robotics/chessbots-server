@@ -49,13 +49,14 @@ export function SelectRobot(props: SelectRobotProps) {
             itemRenderer={renderRobotIds}
             onItemSelect={props.onRobotIdSelected}
             filterable={false}
-            popoverProps={{ minimal: true}}
-            
+            popoverProps={{ minimal: true }}
         >
             <Button
-                text={hasSelection ?
-                            "Robot " + props.selectedRobotId
-                        :   "Select a robot..."}
+                text={
+                    hasSelection ?
+                        "Robot " + props.selectedRobotId
+                    :   "Select a robot..."
+                }
                 rightIcon="double-caret-vertical"
             />
         </Select>

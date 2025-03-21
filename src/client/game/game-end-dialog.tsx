@@ -16,7 +16,7 @@ import {
 import { useState } from "react";
 import { Side } from "../../common/game-types";
 import { bgColor, buttonColor, textColor } from "../checkDarkMode";
-import "../colors.css"
+import "../colors.css";
 
 interface GameEndDialogProps {
     reason: GameEndReason;
@@ -47,7 +47,8 @@ export function GameEndDialog(props: GameEndDialogProps) {
 
     // return the dialog with the button and game over reason
     return (
-        <Dialog className={bgColor()}
+        <Dialog
+            className={bgColor()}
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
             canOutsideClickClose={false}
@@ -56,16 +57,13 @@ export function GameEndDialog(props: GameEndDialogProps) {
             <DialogBody>
                 <NonIdealState
                     icon={gameOverIcon(props.reason, props.side)}
-                    title= 
-                        {
-                            <h4 className={textColor()}>
-                                {gameOverMessage(props.reason)}
-                            </h4>
-                        } 
+                    title={
+                        <h4 className={textColor()}>
+                            {gameOverMessage(props.reason)}
+                        </h4>
+                    }
                     iconMuted={false}
-                >
-                </NonIdealState>
-                
+                ></NonIdealState>
             </DialogBody>
             <DialogFooter minimal actions={actions} />
         </Dialog>

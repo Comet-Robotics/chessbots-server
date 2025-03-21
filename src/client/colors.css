@@ -1,9 +1,9 @@
 .buttonLight {
-    background-color: #1976D2 !important;
+    background-color: #1976d2 !important;
 }
 
 .buttonDark {
-    background-color: #FF4400 !important;
+    background-color: #ff4400 !important;
 }
 
 .textDark {
@@ -20,7 +20,6 @@
 
 .bgLight {
     background-color: #efefef;
-    
 }
 
 .roundedBorder {
@@ -29,32 +28,32 @@
 
 /*This is for the left half of the bar*/
 .sliderDark .bp5-slider-track :nth-child(2) {
-    background-color: #FF4400 !important;
+    background-color: #ff4400 !important;
 }
 
 /*This is for the left half of the bar*/
 .sliderLight .bp5-slider-track :nth-child(2) {
-    background-color: #1976D2 !important;
+    background-color: #1976d2 !important;
 }
 
 /*This is for the right half of the bar*/
 .sliderDark .bp5-slider-track :last-child {
     background-color: #c7c7c7 !important;
-  }     
-  
+}
+
 /*This is for the right half of the bar*/
 .sliderLight .bp5-slider-track :last-child {
     background-color: #4b4b4b !important;
-  }     
+}
 
 /*This is for the left half of the bar*/
 .driveSliderDark .bp5-slider-track :nth-child(2) {
-    background-color: #FF4400 !important;
+    background-color: #ff4400 !important;
 }
 
 /*This is for the left half of the bar*/
 .driveSliderLight .bp5-slider-track :nth-child(2) {
-    background-color: #1976D2 !important;
+    background-color: #1976d2 !important;
 }
 
 .textBoxLight {
