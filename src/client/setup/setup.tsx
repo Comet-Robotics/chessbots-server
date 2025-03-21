@@ -5,6 +5,8 @@ import { SetupGame } from "./setup-game";
 import { Navigate, useNavigate } from "react-router-dom";
 import { ClientType, GameType } from "../../common/client-types";
 import { get, useEffectQuery } from "../api";
+import { buttonColor, textColor } from "../checkDarkMode";
+import "../colors.css";
 
 enum SetupType {
     MAIN = "main",
@@ -79,28 +81,30 @@ function SetupMain(props: SetupMainProps) {
     const debugButton = (
         <Button
             minimal
-            style={{ float: "right" }}
+            style={{ float: "right", color: "white" }}
             icon="cog"
             onClick={() => navigate("/debug")}
         />
     );
-
     /** computer, human, and puzzle buttons */
     const actions = (
         <>
             <Button
                 large
-                text="Play with the computer"
+                text="Play With The Computer"
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.COMPUTER)}
+                className={buttonColor()}
+                //Used to align the <p> in the center.
             />
             <Button
                 large
-                text="Play against a human"
+                text="Play Against A Human"
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.HUMAN)}
+                className={buttonColor()}
             />
             <Button
                 large
@@ -108,6 +112,7 @@ function SetupMain(props: SetupMainProps) {
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.PUZZLE)}
+                className={buttonColor()}
             />
         </>
     );
@@ -125,7 +130,7 @@ function SetupMain(props: SetupMainProps) {
                     justifyContent: "space-around",
                 }}
             >
-                <H3>Welcome to Chess Bot!</H3>
+                <H3 className={textColor()}>Welcome to Chess Bot!</H3>
                 {actions}
             </div>
         </>

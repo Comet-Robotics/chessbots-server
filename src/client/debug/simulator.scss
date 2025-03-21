@@ -2,6 +2,10 @@
     background-color: rgb(240, 240, 240);
 }
 
+.log-list > *:nth-child(even) {
+    background-color: rgb(201, 115, 115);
+}
+
 .log-list > *:hover {
     background-color: rgb(168, 166, 166);
 }

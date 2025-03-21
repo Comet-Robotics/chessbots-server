@@ -2,6 +2,7 @@ import { ResizeEntry, ResizeSensor } from "@blueprintjs/core";
 import { PropsWithChildren, useState } from "react";
 import { Transform, computeChessboardTransform } from "./board-transform";
 import { Side } from "../../common/game-types";
+import { bgColor } from "../checkDarkMode";
 
 interface BoardContainerProps extends PropsWithChildren {
     side: Side;
@@ -28,7 +29,7 @@ export function BoardContainer(props: BoardContainerProps) {
     // returns the resizable container
     return (
         <ResizeSensor onResize={handleResize}>
-            <div id="chess-container">
+            <div id="chess-container" className={bgColor()}>
                 <div
                     id="chessboard"
                     style={{

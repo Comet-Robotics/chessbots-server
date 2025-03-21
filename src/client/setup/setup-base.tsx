@@ -4,6 +4,8 @@ import { ChessboardWrapper } from "../chessboard/chessboard-wrapper";
 import { PropsWithChildren, ReactNode } from "react";
 import { ChessEngine } from "../../common/chess-engine";
 import { Side } from "../../common/game-types";
+import { bgColor } from "../checkDarkMode";
+import "../colors.css";
 
 interface SetupBaseProps extends PropsWithChildren {
     actions?: ReactNode;
@@ -25,14 +27,22 @@ export function SetupBase(props: SetupBaseProps): JSX.Element {
                 onMove={() => {}}
                 rotation={0}
             />
-            <Dialog
-                isOpen
-                canEscapeKeyClose={false}
-                canOutsideClickClose={false}
-            >
-                <DialogBody>{props.children}</DialogBody>
-                <DialogFooter minimal actions={props.actions} />
-            </Dialog>
+            <>
+                <Dialog
+                    style={{
+                        backgroundColor: "transparent",
+                        boxShadow: "none",
+                    }}
+                    isOpen
+                    canEscapeKeyClose={false}
+                    canOutsideClickClose={false}
+                >
+                    <div className={bgColor() + " " + "roundedBorder"}>
+                        <DialogBody>{props.children}</DialogBody>
+                        <DialogFooter minimal actions={props.actions} />
+                    </div>
+                </Dialog>
+            </>
         </>
     );
 }
