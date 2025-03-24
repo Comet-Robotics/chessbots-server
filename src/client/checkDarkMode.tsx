@@ -1,37 +1,31 @@
 //Checks if the user prefers light or dark mode from their window.
 
-const allSettings : string[] = ["System", "Light", "Dark"]
-
+const allSettings: string[] = ["System", "Light", "Dark"];
 
 function browserInDarkMode(): boolean {
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
-localStorage.setItem('userSetting', '0');
+localStorage.setItem("userSetting", "0");
 
-function changeUserSetting(newSetting : number)
-{
-    if(localStorage.getItem('refreshing') !== 'true')
-    {
-        localStorage.setItem('userSetting', (newSetting - 1) + "")
-        localStorage.setItem('refreshing', 'true')    
+function changeUserSetting(newSetting: number) {
+    if (localStorage.getItem("refreshing") !== "true") {
+        localStorage.setItem("userSetting", newSetting - 1 + "");
+        localStorage.setItem("refreshing", "true");
     }
 }
 
-function chooseDark() : boolean
-{
-    const numericIndex : number = parseInt(localStorage.getItem('userSetting') || '0')
-    if(allSettings[numericIndex] == "System")
-    {
+function chooseDark(): boolean {
+    const numericIndex: number = parseInt(
+        localStorage.getItem("userSetting") || "0",
+    );
+    if (allSettings[numericIndex] === "System") {
         return browserInDarkMode();
-    }
-    else if(allSettings[numericIndex] == "Light")
-    {
+    } else if (allSettings[numericIndex] === "Light") {
         return false;
     }
     return true;
 }
-
 
 function textColor(): "textDark" | "textLight" {
     return chooseDark() ? "textDark" : "textLight";
@@ -78,13 +72,13 @@ function innerRobotColor(): "innerBotDark" | "innerBotLight" {
     return chooseDark() ? "innerBotDark" : "innerBotLight";
 }
 
-function getUserSetting() : number
-{
-    console.log("storage item: " + localStorage.getItem('userSetting'))
-    const numericIndex : number = parseInt(localStorage.getItem('userSetting') || '0')
-    if(localStorage.getItem("refreshing") == "true")
-    {
-        localStorage.setItem("refreshing", "false")
+function getUserSetting(): number {
+    console.log("storage item: " + localStorage.getItem("userSetting"));
+    const numericIndex: number = parseInt(
+        localStorage.getItem("userSetting") || "0",
+    );
+    if (localStorage.getItem("refreshing") === "true") {
+        localStorage.setItem("refreshing", "false");
     }
     return numericIndex + 1;
 }
@@ -101,5 +95,5 @@ export {
     robotColor,
     innerRobotColor,
     changeUserSetting,
-    getUserSetting
+    getUserSetting,
 };
