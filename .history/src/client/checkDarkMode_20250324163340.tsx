@@ -35,12 +35,16 @@ function textBoxColor(): "textBoxDark" | "textBoxLight" {
     return inDarkMode() ? "textBoxDark" : "textBoxLight";
 }
 
-function robotColor(onTopOfRobots: number): "robotDark" | "robotLight" | "robotCollideDark" | "robotCollideLight" {
+function robotColor(onTopOfRobots: number): "robotDark" | "robotLight" {
     if(onTopOfRobots > 0)
     {
-        return inDarkMode() ? "robotCollideDark" : "robotCollideLight";
+
     }
-    return inDarkMode() ? "robotDark" : "robotLight";    
+    else
+    {
+        return inDarkMode() ? "robotDark" : "robotLight";
+    }
+    
 }
 
 function innerRobotColor(): "innerBotDark" | "innerBotLight" {

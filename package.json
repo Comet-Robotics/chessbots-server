@@ -20,6 +20,7 @@
         "lint-check": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
     },
     "dependencies": {
+        "@posva/event-emitter": "^1.0.2",
         "chess.js": "^1.0.0-beta.6",
         "eslint-plugin-tsdoc": "^0.2.17",
         "typescript": "^4.9.3",

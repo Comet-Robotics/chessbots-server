@@ -9,7 +9,7 @@ import {
 } from "../../common/message/simulator-message";
 import { Tag, CompoundTag } from "@blueprintjs/core";
 import "./simulator.scss";
-import { bgColor, innerRobotColor, robotColor, textColor } from "../checkDarkMode";
+import { bgColor, textColor } from "../checkDarkMode";
 
 const tileSize = 60;
 const robotSize = tileSize / 2;
@@ -337,7 +337,7 @@ function Robot(props: {
                 <div className={robotColor(props.onTopOfRobots.length)}
                     style={{
                         transform: `rotate(-${props.pos.headingRadians}rad)`,
-                        // backgroundColor: "white",
+                        backgroundColor: "white",
                         borderRadius: "50%",
                         // border: `4px solid ${props.onTopOfRobots.length > 0 ? "red" : "black"}`,
                         display: "flex",
@@ -350,11 +350,10 @@ function Robot(props: {
                     }}
                 >
                     <div
-                        className={innerRobotColor()}
                         style={{
                             width: robotSize / 4,
                             height: robotSize / 4,
-                            // backgroundColor: "black",
+                            backgroundColor: "black",
                             borderRadius: "50%",
                         }}
                     />

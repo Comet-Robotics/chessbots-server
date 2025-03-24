@@ -35,17 +35,7 @@ function textBoxColor(): "textBoxDark" | "textBoxLight" {
     return inDarkMode() ? "textBoxDark" : "textBoxLight";
 }
 
-function robotColor(onTopOfRobots: number): "robotDark" | "robotLight" | "robotCollideDark" | "robotCollideLight" {
-    if(onTopOfRobots > 0)
-    {
-        return inDarkMode() ? "robotCollideDark" : "robotCollideLight";
-    }
-    return inDarkMode() ? "robotDark" : "robotLight";    
-}
-
-function innerRobotColor(): "innerBotDark" | "innerBotLight" {
-    return inDarkMode() ? "innerBotDark" : "innerBotLight";
-}
+function robotColor(number): 
 
 export {
     textColor,
@@ -57,5 +47,4 @@ export {
     driveSliderColor,
     textBoxColor,
     robotColor,
-    innerRobotColor
 };

@@ -74,20 +74,9 @@
 
 .robotLight {
     background-color: white;
-    border: 4px solid black;
+    border-color: ;
 }
 
 .robotDark {
     background-color: black;
-    border: 4px solid white;
-}
-
-.robotCollideLight {
-    background-color: red;
-    border: 4px solid black;
-}
-
-.robotCollideDark {
-    background-color: purple;
-    border: 4px solid white
 }
