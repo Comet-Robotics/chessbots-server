@@ -18,7 +18,7 @@ import {
 import { TCPServer } from "./tcp-interface";
 import { Difficulty } from "../../common/client-types";
 import { RegisterWebsocketMessage } from "../../common/message/message";
-import { clientManager, socketManager } from "./managers";
+import { clientManager, robotManager, socketManager } from "./managers";
 import {
     ComputerGameManager,
     GameManager,
@@ -202,8 +202,14 @@ apiRouter.post("/start-puzzle-game", (req, res) => {
 });
 
 apiRouter.get("/get-ids", (_, res) => {
-    const ids = tcpServer?.getConnectedIds();
-    //const ids = Array.from(robotManager.idsToRobots.keys());
+    let ids: string[];
+    if (!tcpServer) {
+        // Virtual robots
+        ids = Array.from(robotManager.idsToRobots.keys());
+    } else {
+        // Real server
+        ids = tcpServer.getConnectedIds();
+    }
     return res.send({ ids });
 });
 
