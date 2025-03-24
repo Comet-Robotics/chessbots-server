@@ -1,4 +1,4 @@
-import { Button, H3, NonIdealState, Spinner } from "@blueprintjs/core";
+import { Button, H3, NonIdealState, Slider, Spinner } from "@blueprintjs/core";
 import { SetupBase } from "./setup-base";
 import { Dispatch, useState } from "react";
 import { SetupGame } from "./setup-game";
@@ -114,6 +114,15 @@ function SetupMain(props: SetupMainProps) {
                 onClick={() => props.onPageChange(SetupType.PUZZLE)}
                 className={buttonColor()}
             />
+            <Slider
+                max={3}
+                min={1}
+                value={1}
+                showTrackFill
+                labelValues={1, 2, 3}
+            >
+
+            </Slider>
         </>
     );
 

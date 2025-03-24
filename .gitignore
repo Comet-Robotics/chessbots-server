@@ -30,3 +30,6 @@ site/
 !site/CNAME
 
 */.env
+
+# ignore history directory
+/.history
