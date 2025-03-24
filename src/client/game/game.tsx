@@ -49,7 +49,7 @@ function getMessageHandler(
             const fen = message.chess;
             if (fen) {
                 setTimeout(() => {
-                    chess.load(fen);
+                    chess.loadFen(fen);
                     setChess(chess.copy());
                 }, 500);
             }

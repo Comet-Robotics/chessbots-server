@@ -306,7 +306,7 @@ export class PuzzleGameManager extends GameManager {
             fen.split(" ")[1] === "w" ? Side.WHITE : Side.BLACK,
             false,
         );
-        chess.load(fen);
+        chess.loadFen(fen);
     }
 
     public getDifficulty(): number {

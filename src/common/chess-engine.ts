@@ -52,7 +52,7 @@ export class ChessEngine {
         return { from: undo?.from, to: undo?.to } as Move;
     }
 
-    load(fen: string) {
+    loadFen(fen: string) {
         this.chess.load(fen);
     }
 
