@@ -10,6 +10,15 @@
         "rating": 514
     },
     "Puzzle 3": {
+        "fen": "8/8/8/8/2Prk1p1/2K5/8/5R2 w - - 0 1",
+        "moves": [
+            { "from": "f1", "to": "e1" },
+            { "from": "e4", "to": "f3" },
+            { "from": "c3", "to": "d4" }
+        ],
+        "rating": 1000
+    },
+    "Puzzle 4": {
         "fen": "1r3k2/R4p2/5Kp1/1p1Pp3/2p1PbP1/2P2P2/4B3/8 b - - 0 1",
         "moves": [
             { "from": "b8", "to": "b6" },
@@ -18,7 +27,7 @@
         ],
         "rating": 1000
     },
-    "Puzzle 4": {
+    "Puzzle 5": {
         "fen": "r1b3k1/1pq1b1r1/p2p3Q/3Pp3/3p1P2/P2B3P/1PP3P1/1R3RK1 w - - 0 1",
         "moves": [
             { "from": "f4", "to": "e5" },
