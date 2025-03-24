@@ -26,7 +26,10 @@ import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { AcceptDrawDialog, OfferDrawDialog } from "./draw-dialog";
 
 /**
- * Creates a MessageHandler function.
+ * Creates a MessageHandler function to handle move messages and game interruptions.
+ * @param chess - the current chess object to apply moves to
+ * @param setX - react set state functions to update the UI on change
+ * @returns a message handler that updates the client state based on the message
  */
 function getMessageHandler(
     chess: ChessEngine,
@@ -59,7 +62,11 @@ function getMessageHandler(
         }
     };
 }
-
+/**
+ * Creates required message, game, and move handling functions before inserting them into a chessboard wrapper
+ *
+ * @returns chessboard wrapper with current side and message handler
+ */
 export function Game(): JSX.Element {
     const [chess, setChess] = useState(new ChessEngine());
     const [gameInterruptedReason, setGameInterruptedReason] =
@@ -68,6 +75,7 @@ export function Game(): JSX.Element {
     const [gameHoldReason, setGameHoldReason] = useState<GameHoldReason>();
     const [rotation, setRotation] = useState<number>(0);
 
+    /** send any messages using our defined message handler inside a message socket for handling */
     const sendMessage = useSocket(
         getMessageHandler(
             chess,
@@ -78,6 +86,7 @@ export function Game(): JSX.Element {
         ),
     );
 
+    // checks if a game is currently active
     const { isPending, data, isError } = useEffectQuery(
         "game-state",
         async () => {
@@ -92,6 +101,7 @@ export function Game(): JSX.Element {
         false,
     );
 
+    // if a game is pending, show a loading screen while waiting
     if (isPending) {
         return (
             <NonIdealState
@@ -99,12 +109,14 @@ export function Game(): JSX.Element {
                 title="Loading..."
             />
         );
+        // go to /home if error
     } else if (isError) {
         return <Navigate to="/home" />;
     }
 
     const side = data.side;
 
+    // check if the game has ended or been interrupted
     let gameEndReason: GameEndReason | undefined = undefined;
     const gameFinishedReason = chess.getGameFinishedReason();
     if (gameEndedReason !== undefined) {
@@ -116,6 +128,7 @@ export function Game(): JSX.Element {
         gameEndReason = gameInterruptedReason;
     }
 
+    /** create a game end dialog with the game end reason, if defined */
     const gameEndDialog =
         gameEndReason !== undefined ?
             <GameEndDialog reason={gameEndReason} side={side} />
@@ -134,11 +147,13 @@ export function Game(): JSX.Element {
             :   null
         :   null;
 
+    /** make moves by making a copy of the chessboard and sending the move message */
     const handleMove = (move: Move): void => {
         setChess(chess.copy(move));
         sendMessage(new MoveMessage(move));
     };
 
+    // return the chessboard wrapper, navbar, and potential end dialog
     return (
         <>
             <NavbarMenu

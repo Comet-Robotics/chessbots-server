@@ -1,5 +1,5 @@
 import { Square } from "chess.js";
-import { Robot } from "../server/robot/robot";
+import type { Robot } from "../server/robot/robot";
 import { DEGREE } from "../server/utils/units";
 
 /**
@@ -25,13 +25,27 @@ export enum Side {
     SPECTATOR = "s",
 }
 
+/**
+ * gets the opposite enum value of a side
+ * @param side - a side
+ * @returns the opposite of the input side
+ */
 export function oppositeSide(side: Side) {
     return side === Side.WHITE ? Side.BLACK : Side.WHITE;
 }
 
+/**
+ * get the robot's start heading based on the side it is on
+ * @param side - the current side
+ * @returns angle in radians
+ */
 export function getStartHeading(side: Side) {
-    return side === Side.WHITE ? 90 * DEGREE : 270 * DEGREE;
+    return side === Side.WHITE ? 90 * DEGREE : 90 * DEGREE;
 }
+
+/**
+ * holds the piece side, type, robot, and square
+ */
 export class Piece {
     constructor(
         public readonly side: Side,
@@ -41,6 +55,9 @@ export class Piece {
     ) {}
 }
 
+/**
+ * the movement shown as FROM one square TO another, and if it is a promotion
+ */
 export interface Move {
     from: Square;
     to: Square;

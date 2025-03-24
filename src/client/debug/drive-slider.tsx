@@ -5,6 +5,11 @@ interface DriveSliderProps {
     onChange: (value: number) => void;
 }
 
+/**
+ * creates a slider to show power values in debug driving
+ * @param props - the value of the slider
+ * @returns the slider element
+ */
 export function DriveSlider(props: DriveSliderProps) {
     return (
         <Slider

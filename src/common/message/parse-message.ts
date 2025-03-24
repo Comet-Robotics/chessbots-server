@@ -16,7 +16,7 @@ import { SimulatorUpdateMessage } from "./simulator-message";
  * Parses sent messages into Message instances.
  *
  * @param text - A string received from the server or the client.
- * @returns the parsed Message class.
+ * @returns the class related to the parsed message.
  */
 export function parseMessage(text: string): Message {
     const obj = JSON.parse(text);

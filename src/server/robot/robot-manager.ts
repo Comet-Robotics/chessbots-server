@@ -13,7 +13,7 @@ export class RobotManager {
     /**
      * Maps robot locations to their ids.
      */
-    indicesToIds: Map<GridIndices, string> = new Map();
+    indicesToIds: Map<string, string> = new Map();
 
     constructor(robots: Robot[]) {
         robots.forEach((robot) => this.addRobot(robot));
@@ -21,7 +21,7 @@ export class RobotManager {
 
     addRobot(robot: Robot) {
         this.idsToRobots.set(robot.id, robot);
-        this.indicesToIds.set(robot.homeIndices, robot.id);
+        this.indicesToIds.set(JSON.stringify(robot.defaultIndices), robot.id);
     }
 
     /**
@@ -40,7 +40,7 @@ export class RobotManager {
      * Returns `true` if a Robot is at the specified position, and `false` otherwise.
      */
     isRobotAtIndices(indices: GridIndices): boolean {
-        return this.indicesToIds.has(indices);
+        return this.indicesToIds.has(JSON.stringify(indices));
     }
 
     /**
@@ -48,10 +48,21 @@ export class RobotManager {
      * Throws if no robot is found.
      */
     getRobotAtIndices(indices: GridIndices): Robot {
-        const robotId = this.indicesToIds.get(indices);
+        const robotId = this.indicesToIds.get(JSON.stringify(indices));
         if (robotId === undefined) {
             throw new Error("Failed to find robot at position " + indices);
         }
         return this.getRobot(robotId);
+    }
+
+    updateRobot(robotId: string, indices: GridIndices) {
+        // if (this.indicesToIds.has(JSON.stringify(indices))) {
+        //     this.indicesToIds.delete(JSON.stringify(indices));
+        // }
+        for (const [i, r] of this.indicesToIds.entries()) {
+            if (robotId === r) this.indicesToIds.delete(i);
+        }
+        this.indicesToIds.set(JSON.stringify(indices), robotId);
+        console.log("new indices are: ", indices);
     }
 }

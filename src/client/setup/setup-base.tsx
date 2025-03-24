@@ -9,6 +9,12 @@ interface SetupBaseProps extends PropsWithChildren {
     actions?: ReactNode;
 }
 
+/**
+ * Create the background chessboard and applies a dialog on top
+ *
+ * @param props - any dialogs that need to be shown on screen
+ * @returns the background element with a dialog
+ */
 export function SetupBase(props: SetupBaseProps): JSX.Element {
     return (
         <>

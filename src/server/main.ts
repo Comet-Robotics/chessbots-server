@@ -1,11 +1,11 @@
 import express, { RequestHandler, Express } from "express";
 import ViteExpress from "vite-express";
 import cookieParser from "cookie-parser";
-import { v4 as uuid } from "uuid";
 import { apiRouter, websocketHandler } from "./api/api";
 import expressWebSocket from "express-ws";
 import { clientManager } from "./api/managers";
 import launchEditorMiddleware from "launch-editor-middleware";
+import { randomUUID } from "node:crypto";
 
 const app = expressWebSocket(express()).app;
 
@@ -18,7 +18,7 @@ app.use(cookieParser());
  */
 const checkAuthentication: RequestHandler = (req, res, next) => {
     if (!req.cookies.id) {
-        res.cookie("id", uuid(), {
+        res.cookie("id", randomUUID(), {
             // Expires after 1 day
             maxAge: 86400000,
             // Cookie isn't available to client

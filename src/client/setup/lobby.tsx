@@ -6,18 +6,25 @@ import { useSocket, useEffectQuery, get } from "../api";
 import { ClientType } from "../../common/client-types";
 import { Navigate } from "react-router-dom";
 
+/**
+ * check for an active game and waits for one or forwards to setup
+ *
+ * @returns a setup base with the loading screen or a redirect to /game
+ */
 export function Lobby() {
     const { isPending, data } = useEffectQuery("client-information", () =>
         get("/client-information"),
     );
     const navigate = useNavigate();
 
+    // use a socket to wait for game started
     useSocket((message) => {
         if (message instanceof GameStartedMessage) {
             navigate("/game");
         }
     });
 
+    // show a loading screen if the message is pending
     if (isPending) {
         return (
             <SetupBase>
@@ -29,6 +36,7 @@ export function Lobby() {
         );
     }
 
+    // navigate to setup if the client is a host, or show a loading screen if waiting
     if (data.clientType === ClientType.HOST) {
         return <Navigate to="/setup" />;
     } else {
