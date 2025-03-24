@@ -89,10 +89,9 @@ function SetupMain(props: SetupMainProps) {
 
     // This effect will run after every render
     useEffect(() => {
-      console.log("Render finished!");
-      localStorage.setItem("refreshing", "false")
+        console.log("Render finished!");
+        localStorage.setItem("refreshing", "false");
     }, [rendering]); // You can add specific dependencies here (like count) to only trigger on those changes
-  
 
     console.log(sliderValue);
     const debugButton = (
@@ -139,7 +138,7 @@ function SetupMain(props: SetupMainProps) {
                 stepSize={1}
                 onChange={(newVal) => {
                     changeUserSetting(newVal);
-                    localStorage.setItem("refreshing", "true")
+                    localStorage.setItem("refreshing", "true");
                     window.location.reload();
                 }}
                 labelRenderer={(value) => {

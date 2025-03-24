@@ -7,14 +7,11 @@ function browserInDarkMode(): boolean {
 }
 
 function changeUserSetting(newSetting: number) {
-    if (localStorage.getItem("refreshing") !== "true") 
-    {
+    if (localStorage.getItem("refreshing") !== "true") {
         localStorage.setItem("userSetting", newSetting - 1 + "");
         localStorage.setItem("refreshing", "true");
-    }
-    else
-    {
-        console.log("wait for refresh!")
+    } else {
+        console.log("wait for refresh!");
     }
 }
 
@@ -83,6 +80,14 @@ function getUserSetting(): number {
     return numericIndex + 1;
 }
 
+function simBorderColor(): "#c3c3c3" | "#1a1616" {
+    return chooseDark() ? "#c3c3c3" : "#1a1616";
+}
+
+function simRingCellColor(): "#332e2e" | "#d3d3d3" {
+    return chooseDark() ? "#332e2e" : "#d3d3d3";
+}
+
 export {
     textColor,
     bgColor,
@@ -96,4 +101,6 @@ export {
     innerRobotColor,
     changeUserSetting,
     getUserSetting,
+    simBorderColor,
+    simRingCellColor,
 };

@@ -13,6 +13,8 @@ import {
     bgColor,
     innerRobotColor,
     robotColor,
+    simBorderColor,
+    simRingCellColor,
     textColor,
 } from "../checkDarkMode";
 
@@ -158,11 +160,12 @@ export function Simulator() {
                                 <div
                                     key={i}
                                     style={{
-                                        border: "1px solid black",
+                                        borderWidth: "1px",
+                                        borderStyle: "solid",
+                                        borderColor: simBorderColor(),
                                         backgroundColor:
-                                            !isCenterCell ? "lightgray" : (
-                                                "transparent"
-                                            ),
+                                            !isCenterCell ? simRingCellColor()
+                                            :   "transparent",
                                     }}
                                 />
                             );
