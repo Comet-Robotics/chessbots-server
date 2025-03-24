@@ -5,7 +5,7 @@ import { SetupGame } from "./setup-game";
 import { Navigate, useNavigate } from "react-router-dom";
 import { ClientType, GameType } from "../../common/client-types";
 import { get, useEffectQuery } from "../api";
-import { buttonColor, textColor } from "../checkDarkMode";
+import { buttonColor, changeUserSetting, getUserSetting, textColor } from "../checkDarkMode";
 import "../colors.css";
 
 enum SetupType {
@@ -78,6 +78,8 @@ interface SetupMainProps {
  */
 function SetupMain(props: SetupMainProps) {
     const navigate = useNavigate();
+    const [sliderValue, setSliderValue] = useState(getUserSetting());
+    console.log(sliderValue)
     const debugButton = (
         <Button
             minimal
@@ -117,9 +119,27 @@ function SetupMain(props: SetupMainProps) {
             <Slider
                 max={3}
                 min={1}
-                value={1}
+                value={sliderValue}
                 showTrackFill
-                labelValues={1, 2, 3}
+                stepSize={1}
+                onChange={(newVal) => {
+                    setSliderValue(newVal);
+                    changeUserSetting(newVal);
+                    window.location.reload();
+                    
+                }}
+                labelRenderer={(value) => 
+                {
+                    console.log()
+                    if (value === 1) {
+                        return "System";
+                    } else if (value === 2) {
+                        return "Light";
+                    } else if (value === 3) {
+                        return "Dark";
+                    }
+                    return ""
+                }}
             >
 
             </Slider>

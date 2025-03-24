@@ -1,50 +1,91 @@
 //Checks if the user prefers light or dark mode from their window.
-function inDarkMode(): boolean {
+
+const allSettings : string[] = ["System", "Light", "Dark"]
+
+
+function browserInDarkMode(): boolean {
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
+localStorage.setItem('userSetting', '0');
+
+function changeUserSetting(newSetting : number)
+{
+    if(localStorage.getItem('refreshing') !== 'true')
+    {
+        localStorage.setItem('userSetting', (newSetting - 1) + "")
+        localStorage.setItem('refreshing', 'true')    
+    }
+}
+
+function chooseDark() : boolean
+{
+    const numericIndex : number = parseInt(localStorage.getItem('userSetting') || '0')
+    if(allSettings[numericIndex] == "System")
+    {
+        return browserInDarkMode();
+    }
+    else if(allSettings[numericIndex] == "Light")
+    {
+        return false;
+    }
+    return true;
+}
+
+
 function textColor(): "textDark" | "textLight" {
-    return inDarkMode() ? "textDark" : "textLight";
+    return chooseDark() ? "textDark" : "textLight";
 }
 
 function bgColor(): "bgDark" | "bgLight" {
-    return inDarkMode() ? "bgDark" : "bgLight";
+    return chooseDark() ? "bgDark" : "bgLight";
 }
 
 function buttonColor(): "buttonDark" | "buttonLight" {
-    return inDarkMode() ? "buttonDark" : "buttonLight";
+    return chooseDark() ? "buttonDark" : "buttonLight";
 }
 
 function sliderColor(): "sliderDark" | "sliderLight" {
-    return inDarkMode() ? "sliderDark" : "sliderLight";
+    return chooseDark() ? "sliderDark" : "sliderLight";
 }
 
 function joystickOutColor(): "#ff8d70" | "#000033" {
-    return inDarkMode() ? "#ff8d70" : "#000033";
+    return chooseDark() ? "#ff8d70" : "#000033";
 }
 
 function joystickInColor(): "#e34017" | "#3d59ab" {
-    return inDarkMode() ? "#e34017" : "#3d59ab";
+    return chooseDark() ? "#e34017" : "#3d59ab";
 }
 
 function driveSliderColor(): "driveSliderDark" | "driveSliderLight" {
-    return inDarkMode() ? "driveSliderDark" : "driveSliderLight";
+    return chooseDark() ? "driveSliderDark" : "driveSliderLight";
 }
 
 function textBoxColor(): "textBoxDark" | "textBoxLight" {
-    return inDarkMode() ? "textBoxDark" : "textBoxLight";
+    return chooseDark() ? "textBoxDark" : "textBoxLight";
 }
 
 function robotColor(onTopOfRobots: number): "robotDark" | "robotLight" | "robotCollideDark" | "robotCollideLight" {
     if(onTopOfRobots > 0)
     {
-        return inDarkMode() ? "robotCollideDark" : "robotCollideLight";
+        return chooseDark() ? "robotCollideDark" : "robotCollideLight";
     }
-    return inDarkMode() ? "robotDark" : "robotLight";    
+    return chooseDark() ? "robotDark" : "robotLight";    
 }
 
 function innerRobotColor(): "innerBotDark" | "innerBotLight" {
-    return inDarkMode() ? "innerBotDark" : "innerBotLight";
+    return chooseDark() ? "innerBotDark" : "innerBotLight";
+}
+
+function getUserSetting() : number
+{
+    console.log("storage item: " + localStorage.getItem('userSetting'))
+    const numericIndex : number = parseInt(localStorage.getItem('userSetting') || '0')
+    if(localStorage.getItem("refreshing") == "true")
+    {
+        localStorage.setItem("refreshing", "false")
+    }
+    return numericIndex + 1;
 }
 
 export {
@@ -57,5 +98,7 @@ export {
     driveSliderColor,
     textBoxColor,
     robotColor,
-    innerRobotColor
+    innerRobotColor,
+    changeUserSetting,
+    getUserSetting
 };
