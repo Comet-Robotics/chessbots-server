@@ -35,12 +35,13 @@ function textBoxColor(): "textBoxDark" | "textBoxLight" {
     return inDarkMode() ? "textBoxDark" : "textBoxLight";
 }
 
-function robotColor(onTopOfRobots: number): "robotDark" | "robotLight" | "robotCollideDark" | "robotCollideLight" {
-    if(onTopOfRobots > 0)
-    {
+function robotColor(
+    onTopOfRobots: number,
+): "robotDark" | "robotLight" | "robotCollideDark" | "robotCollideLight" {
+    if (onTopOfRobots > 0) {
         return inDarkMode() ? "robotCollideDark" : "robotCollideLight";
     }
-    return inDarkMode() ? "robotDark" : "robotLight";    
+    return inDarkMode() ? "robotDark" : "robotLight";
 }
 
 function innerRobotColor(): "innerBotDark" | "innerBotLight" {
@@ -57,5 +58,5 @@ export {
     driveSliderColor,
     textBoxColor,
     robotColor,
-    innerRobotColor
+    innerRobotColor,
 };

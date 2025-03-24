@@ -119,10 +119,8 @@ function SetupMain(props: SetupMainProps) {
                 min={1}
                 value={1}
                 showTrackFill
-                labelValues={1, 2, 3}
-            >
-
-            </Slider>
+                labelValues={[1, 2, 3]}
+            />
         </>
     );
 
