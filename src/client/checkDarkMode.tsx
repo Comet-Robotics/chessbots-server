@@ -65,12 +65,13 @@ function textBoxColor(): "textBoxDark" | "textBoxLight" {
     return chooseDark() ? "textBoxDark" : "textBoxLight";
 }
 
-function robotColor(onTopOfRobots: number): "robotDark" | "robotLight" | "robotCollideDark" | "robotCollideLight" {
-    if(onTopOfRobots > 0)
-    {
+function robotColor(
+    onTopOfRobots: number,
+): "robotDark" | "robotLight" | "robotCollideDark" | "robotCollideLight" {
+    if (onTopOfRobots > 0) {
         return chooseDark() ? "robotCollideDark" : "robotCollideLight";
     }
-    return chooseDark() ? "robotDark" : "robotLight";    
+    return chooseDark() ? "robotDark" : "robotLight";
 }
 
 function innerRobotColor(): "innerBotDark" | "innerBotLight" {
