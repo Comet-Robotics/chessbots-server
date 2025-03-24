@@ -1,4 +1,4 @@
-import EventEmitter from "node:events";
+import { EventEmitter } from "@posva/event-emitter";
 import { BotTunnel } from "./api/tcp-interface";
 import { Robot } from "./robot/robot";
 import config from "./api/bot-server-config.json";
@@ -10,6 +10,7 @@ import {
     StackFrame,
 } from "../common/message/simulator-message";
 import { socketManager } from "./api/managers";
+import { randomUUID } from "node:crypto";
 import { GridIndices } from "./robot/grid-indices";
 import { getStartHeading, Side } from "../common/game-types";
 
@@ -17,7 +18,7 @@ const srcDir = path.resolve(__dirname, "../");
 
 /**
  * get the current error stack
- * @param justMyCode - no clue
+ * @param justMyCode - restricts the scope of the stack to just the code in the chessBot project. ex: if there is an error thrown in a file in the node_modules folder, this will not be included in the stack.
  * @returns - the stack of the error
  */
 function getStack(justMyCode = true) {
@@ -97,55 +98,72 @@ export class VirtualBotTunnel extends BotTunnel {
         return "Virtual Bot ID: " + this.robotId;
     }
 
-    private emitActionComplete() {
-        this.emitter.emit("actionComplete", { success: true });
+    private emitActionComplete(packetId: string) {
+        this.emitter.emit("actionComplete", { success: true, packetId });
     }
 
-    send(packet: Packet) {
-        const stack = getStack();
-
-        // NOTE: need to ensure that all the packets which are used in the Robot class (src/server/robot/robot.ts) are also provided with a matching virtual implementation here
-        switch (packet.type) {
-            case PacketType.TURN_BY_ANGLE:
-                this.headingRadians += packet.deltaHeadingRadians;
-                this.emitActionComplete();
-                break;
-            case PacketType.DRIVE_TILES: {
-                const distance = packet.tileDistance;
-                const deltaX = distance * Math.cos(this.headingRadians);
-                const deltaY = distance * Math.sin(this.headingRadians);
-
-                const newPosition = this.position.add(
-                    new Position(deltaX, deltaY),
-                );
-                console.log(
-                    `Robot ${this.robotId} moved to ${newPosition.x}, ${newPosition.y} from ${this.position.x}, ${this.position.y}`,
-                );
-                this.position = newPosition;
-
-                this.emitActionComplete();
-                break;
-            }
-            default:
-                throw new Error(
-                    "Unhandled packet type for virtual bot: " + packet.type,
-                );
+    async send(packet: Packet): Promise<string> {
+        const packetId = randomUUID();
+        let stack: StackFrame[] = [];
+        try {
+            stack = getStack() ?? stack;
+        } catch (e) {
+            console.warn("Error getting stack trace", e);
         }
 
-        const message = new SimulatorUpdateMessage(
-            this.robotId,
-            {
-                position: {
-                    x: this.position.x,
-                    y: this.position.y,
+        return new Promise((res, rej) => {
+            const removeListener = this.emitter.on("actionComplete", (args) => {
+                if (args.packetId !== packetId) return;
+                removeListener();
+                if (args.success) res(args.packetId);
+                else rej(args.reason);
+            });
+
+            // NOTE: need to ensure that all the packets which are used in the Robot class (src/server/robot/robot.ts) are also provided with a matching virtual implementation here
+            switch (packet.type) {
+                case PacketType.TURN_BY_ANGLE: {
+                    this.headingRadians += packet.deltaHeadingRadians;
+                    this.emitActionComplete(packetId);
+                    break;
+                }
+                case PacketType.DRIVE_TILES: {
+                    const distance = packet.tileDistance;
+                    const deltaX = distance * Math.cos(this.headingRadians);
+                    const deltaY = distance * Math.sin(this.headingRadians);
+
+                    const newPosition = this.position.add(
+                        new Position(deltaX, deltaY),
+                    );
+                    console.log(
+                        `Robot ${this.robotId} moved to ${newPosition.x}, ${newPosition.y} from ${this.position.x}, ${this.position.y}`,
+                    );
+                    this.position = newPosition;
+
+                    this.emitActionComplete(packetId);
+                    break;
+                }
+                default:
+                    console.warn(
+                        `Unhandled packet type (${packet.type}) from ${this.robotId} - packetId: ${packetId}`,
+                    );
+                    this.emitActionComplete(packetId);
+            }
+
+            const message = new SimulatorUpdateMessage(
+                this.robotId,
+                {
+                    position: {
+                        x: this.position.x,
+                        y: this.position.y,
+                    },
+                    headingRadians: this.headingRadians,
                 },
-                headingRadians: this.headingRadians,
-            },
-            packet,
-            stack,
-        );
-        VirtualBotTunnel.messages.push({ ts: new Date(), message });
-        socketManager.sendToAll(message);
+                { ...packet, packetId },
+                stack,
+            );
+            VirtualBotTunnel.messages.push({ ts: new Date(), message });
+            socketManager.sendToAll(message);
+        });
     }
 }
 

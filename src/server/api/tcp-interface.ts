@@ -1,14 +1,22 @@
-import * as net from "net";
+import * as net from "node:net";
 import config from "./bot-server-config.json";
 import {
-    PacketType,
-    Packet,
+    type Packet,
     SERVER_PROTOCOL_VERSION,
     jsonToPacket,
     packetToJson,
+    PacketType,
 } from "../utils/tcp-packet";
-import EventEmitter from "node:events";
+import { EventEmitter } from "@posva/event-emitter";
 import { randomUUID } from "node:crypto";
+
+type RobotEventEmitter = EventEmitter<{
+    actionComplete: {
+        success: boolean;
+        packetId: string;
+        reason?: string;
+    };
+}>;
 
 /**
  * The tunnel for handling communications to the robots
@@ -18,7 +26,7 @@ export class BotTunnel {
     dataBuffer: Buffer | undefined;
     address: string | undefined;
     id: string | undefined;
-    emitter: EventEmitter;
+    emitter: RobotEventEmitter;
 
     /**
      * take the robot socket and creates an emitter to notify dependencies
@@ -58,13 +66,13 @@ export class BotTunnel {
      * log when data comes in
      * @param data - the incoming data
      */
-    onData(data: Buffer) {
+    async onData(data: Buffer) {
         console.log(
             "connection data from %s: %j",
             this.getIdentifier(),
             data.toString(),
         );
-        this.handleData(data);
+        await this.handleData(data);
     }
 
     /**
@@ -93,7 +101,7 @@ export class BotTunnel {
      *
      * @param data - data to be handled
      */
-    handleData(data: Buffer) {
+    async handleData(data: Buffer) {
         console.log("Handling Data");
         console.log("Current Data: ");
         console.log(this.dataBuffer);
@@ -104,10 +112,7 @@ export class BotTunnel {
             this.dataBuffer = data;
         }
 
-        console.log("New Buffer: ");
-        console.log(this.dataBuffer);
-
-        this.handleQueue();
+        await this.handleQueue();
     }
 
     /**
@@ -117,8 +122,7 @@ export class BotTunnel {
      *
      * @returns - nothing if nothing happened and nothing if something happened
      */
-    handleQueue() {
-        console.log("Handling Queue");
+    async handleQueue() {
         if (this.dataBuffer === undefined || this.dataBuffer.length < 3) {
             return;
         }
@@ -152,27 +156,29 @@ export class BotTunnel {
 
         try {
             const packet = jsonToPacket(str);
+            const { packetId } = packet;
             console.log("Received Packet");
 
             // Parse packet based on type
             switch (packet.type) {
                 // register new robot
-                case PacketType.CLIENT_HELLO: {
-                    console.log("Received Client Hello");
-                    const stringMac: string = String(packet.macAddress);
-                    this.onHandshake(stringMac);
-                    this.send(this.makeHello(stringMac));
+                case "CLIENT_HELLO": {
+                    this.onHandshake(packet.macAddress);
+                    await this.send(this.makeHello(packet.macAddress));
                     this.connected = true;
                     break;
                 }
                 // respond to pings
-                case PacketType.PING_SEND: {
-                    this.send({ type: PacketType.PING_RESPONSE });
+                case "PING_SEND": {
+                    await this.send({ type: PacketType.PING_RESPONSE });
                     break;
                 }
                 // emit a action complete for further processing
                 case PacketType.ACTION_SUCCESS: {
-                    this.emitter.emit("actionComplete", { success: true });
+                    this.emitter.emit("actionComplete", {
+                        success: true,
+                        packetId,
+                    });
                     break;
                 }
                 // emit a action fail for further processing
@@ -180,6 +186,7 @@ export class BotTunnel {
                     this.emitter.emit("actionComplete", {
                         success: false,
                         reason: packet.reason,
+                        packetId,
                     });
                     break;
                 }
@@ -193,16 +200,19 @@ export class BotTunnel {
             this.dataBuffer !== undefined &&
             this.dataBuffer.indexOf(";") !== -1
         ) {
-            this.handleQueue();
+            await this.handleQueue();
         }
     }
 
     /**
-     * send packets to robot
+     * send packets to robot. promise resolves when the robot acknowledges that the action is complete
      * @param packet - packet to send
+     * @returns - the packet id
      */
-    send(packet: Packet) {
-        const str = packetToJson(packet);
+    async send(packet: Packet): Promise<string> {
+        const packetId = randomUUID();
+
+        const str = packetToJson(packet, packetId);
         const msg = str + ";";
 
         // If the connection isn't active, there is no robot
@@ -220,19 +230,28 @@ export class BotTunnel {
         }
 
         console.log({ msg });
-        this.socket!.write(msg);
-    }
 
-    /**
-     * Wait for the socket to respond to the sent action
-     * @returns - if the action was completed or rejected
-     */
-    async waitForActionResponse(): Promise<void> {
+        // Packets that don't need to be waited on for completion
+        const EXCLUDED_PACKET_TYPES = [PacketType.SERVER_HELLO];
+
         return new Promise((res, rej) => {
-            this.emitter.once("actionComplete", (args) => {
-                if (args.success) res();
-                else rej(args.reason);
-            });
+            if (EXCLUDED_PACKET_TYPES.includes(packet.type)) {
+                this.socket!.write(msg);
+                res(packetId);
+            } else {
+                const removeListener = this.emitter.on(
+                    "actionComplete",
+                    (args) => {
+                        if (args.packetId !== packetId) return;
+                        removeListener();
+                        console.log("action complete", args);
+                        if (args.success) res(args.packetId);
+                        else rej(args.reason);
+                    },
+                );
+
+                this.socket!.write(msg);
+            }
         });
     }
 
