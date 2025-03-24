@@ -6,12 +6,15 @@ function browserInDarkMode(): boolean {
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
-localStorage.setItem("userSetting", "0");
-
 function changeUserSetting(newSetting: number) {
-    if (localStorage.getItem("refreshing") !== "true") {
+    if (localStorage.getItem("refreshing") !== "true") 
+    {
         localStorage.setItem("userSetting", newSetting - 1 + "");
         localStorage.setItem("refreshing", "true");
+    }
+    else
+    {
+        console.log("wait for refresh!")
     }
 }
 
@@ -77,9 +80,6 @@ function getUserSetting(): number {
     const numericIndex: number = parseInt(
         localStorage.getItem("userSetting") || "0",
     );
-    if (localStorage.getItem("refreshing") === "true") {
-        localStorage.setItem("refreshing", "false");
-    }
     return numericIndex + 1;
 }
 

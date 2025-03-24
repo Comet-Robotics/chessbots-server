@@ -1,6 +1,6 @@
 import { Button, H3, NonIdealState, Slider, Spinner } from "@blueprintjs/core";
 import { SetupBase } from "./setup-base";
-import { Dispatch, useState } from "react";
+import { Dispatch, useEffect, useState } from "react";
 import { SetupGame } from "./setup-game";
 import { Navigate, useNavigate } from "react-router-dom";
 import { ClientType, GameType } from "../../common/client-types";
@@ -84,6 +84,16 @@ interface SetupMainProps {
 function SetupMain(props: SetupMainProps) {
     const navigate = useNavigate();
     const [sliderValue, setSliderValue] = useState(getUserSetting());
+
+    const [rendering, hasRendered] = useState("true");
+
+    // This effect will run after every render
+    useEffect(() => {
+      console.log("Render finished!");
+      localStorage.setItem("refreshing", "false")
+    }, [rendering]); // You can add specific dependencies here (like count) to only trigger on those changes
+  
+
     console.log(sliderValue);
     const debugButton = (
         <Button
@@ -128,8 +138,8 @@ function SetupMain(props: SetupMainProps) {
                 showTrackFill
                 stepSize={1}
                 onChange={(newVal) => {
-                    setSliderValue(newVal);
                     changeUserSetting(newVal);
+                    localStorage.setItem("refreshing", "true")
                     window.location.reload();
                 }}
                 labelRenderer={(value) => {
