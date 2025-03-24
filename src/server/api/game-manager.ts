@@ -313,7 +313,8 @@ export class PuzzleGameManager extends GameManager {
         return this.difficulty;
     }
 
-    public handleMessage(message: Message): void {
+    public async handleMessage(message: Message, id: string): Promise<void> {
+        id;
         if (message instanceof MoveMessage) {
             //if the move is correct
             if (
