@@ -9,6 +9,17 @@ import {
 } from "../../common/message/simulator-message";
 import { Tag, CompoundTag } from "@blueprintjs/core";
 import "./simulator.scss";
+import { clampHeading } from "../../common/units";
+import {
+    bgColor,
+    darkModeIcon,
+    innerRobotColor,
+    robotColor,
+    simBorderColor,
+    simRingCellColor,
+    textColor,
+    toggleUserSetting,
+} from "../check-dark-mode";
 
 const tileSize = 60;
 const robotSize = tileSize / 2;
@@ -103,18 +114,24 @@ export function Simulator() {
      * add all the robots on top of the board
      */
     return (
-        <Card>
+        <Card className={bgColor()}>
             <Button
-                minimal
+                variant="minimal"
                 style={{ float: "right" }}
                 icon="home"
                 onClick={() => navigate("/home")}
             />
             <Button
-                minimal
+                variant="minimal"
                 style={{ float: "right" }}
                 icon="cog"
                 onClick={() => navigate("/debug")}
+            />
+            <Button
+                variant="minimal"
+                style={{ float: "right" }}
+                icon={darkModeIcon()}
+                onClick={toggleUserSetting}
             />
             <div
                 style={{
@@ -124,7 +141,7 @@ export function Simulator() {
                     alignItems: "center",
                 }}
             >
-                <H1>Robot Simulator</H1>
+                <H1 className={textColor()}>Robot Simulator</H1>
                 <Button icon="refresh" onClick={fetchRobotState}>
                     Refresh
                 </Button>
@@ -152,11 +169,12 @@ export function Simulator() {
                                 <div
                                     key={i}
                                     style={{
-                                        border: "1px solid black",
+                                        borderWidth: "1px",
+                                        borderStyle: "solid",
+                                        borderColor: simBorderColor(),
                                         backgroundColor:
-                                            !isCenterCell ? "lightgray" : (
-                                                "transparent"
-                                            ),
+                                            !isCenterCell ? simRingCellColor()
+                                            :   "transparent",
                                     }}
                                 />
                             );
@@ -328,17 +346,16 @@ function Robot(props: {
             className="robot"
             style={{
                 position: "absolute",
-                left: `${props.pos.position.x * tileSize}px`,
-                bottom: `${props.pos.position.y * tileSize}px`,
+                left: `${props.pos.position.x * tileSize - 0.25 * tileSize}px`,
+                bottom: `${props.pos.position.y * tileSize - 0.25 * tileSize}px`,
             }}
         >
             <Tooltip content={`${props.robotId}: ${JSON.stringify(props.pos)}`}>
                 <div
+                    className={robotColor(props.onTopOfRobots.length)}
                     style={{
-                        transform: `rotate(-${props.pos.headingRadians}rad)`,
-                        backgroundColor: "white",
+                        transform: `rotate(-${clampHeading(props.pos.headingRadians)}rad)`,
                         borderRadius: "50%",
-                        border: `4px solid ${props.onTopOfRobots.length > 0 ? "red" : "black"}`,
                         display: "flex",
                         justifyContent: "flex-end",
                         alignItems: "center",
@@ -349,10 +366,10 @@ function Robot(props: {
                     }}
                 >
                     <div
+                        className={innerRobotColor()}
                         style={{
                             width: robotSize / 4,
                             height: robotSize / 4,
-                            backgroundColor: "black",
                             borderRadius: "50%",
                         }}
                     />

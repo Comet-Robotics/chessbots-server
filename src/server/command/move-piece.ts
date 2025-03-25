@@ -1,13 +1,13 @@
 import {
     Command,
     RobotCommand,
-    ParallelCommandGroup,
     SequentialCommandGroup,
     Reversible,
+    ParallelCommandGroup,
 } from "./command";
-import { RotateToStartCommand } from "./move-command";
 
-type ReversibleRobotCommand = RobotCommand & Reversible<ReversibleRobotCommand>;
+export type ReversibleRobotCommand = RobotCommand &
+    Reversible<ReversibleRobotCommand>;
 
 /**
  * Executes a set of setupMoves in parallel, followed by a mainMove.
@@ -22,11 +22,12 @@ export class MovePiece extends SequentialCommandGroup {
             new ParallelCommandGroup(setupMoves),
             mainMove,
             new ParallelCommandGroup(
-                setupMoves.map((command) =>
-                    command
-                        .reverse()
-                        .then(new RotateToStartCommand(command.robotId)),
-                ),
+                setupMoves
+                    .map(
+                        (command) => command.reverse(),
+                        // .then(new RotateToStartCommand(command.robotId)), // TODO have rotatetostart at end of pathmat
+                    )
+                    .reverse(),
             ),
         ]);
     }
