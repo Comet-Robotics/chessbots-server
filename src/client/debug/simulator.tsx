@@ -33,12 +33,6 @@ const cellCount = 12;
 export function Simulator() {
     const navigate = useNavigate();
 
-    // Used for dark mode. See navbar-menu.tsx for more
-    const [rendering] = useState("true");
-    useEffect(() => {
-        localStorage.setItem("refreshing", "false");
-    }, [rendering]);
-
     type RobotState = { [robotId: string]: SimulatedRobotLocation };
 
     type Action =

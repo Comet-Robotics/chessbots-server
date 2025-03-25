@@ -63,7 +63,7 @@ export function GameEndDialog(props: GameEndDialogProps) {
                         </h4>
                     }
                     iconMuted={false}
-                ></NonIdealState>
+                />
             </DialogBody>
             <DialogFooter minimal actions={actions} />
         </Dialog>

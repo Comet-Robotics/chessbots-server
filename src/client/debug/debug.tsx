@@ -18,12 +18,6 @@ import "../colors.css";
  * A debug menu which can be used to manually control individual robots.
  */
 export function Debug() {
-    // Used for dark mode. See navbar-menu.tsx for more
-    const [rendering] = useState("true");
-    useEffect(() => {
-        localStorage.setItem("refreshing", "false");
-    }, [rendering]);
-
     const [robotIds, setRobotIds] = useState<string[] | undefined>();
     const [selectedRobotId, setSelectedRobotId] = useState<
         string | undefined

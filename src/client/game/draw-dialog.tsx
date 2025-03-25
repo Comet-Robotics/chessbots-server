@@ -65,7 +65,7 @@ export function OfferDrawDialog(props: DrawDialogProps) {
         >
             <DialogBody>
                 <NonIdealState>
-                    {<h4 className={textColor()}>Offer draw?</h4>}
+                    <h4 className={textColor()}>Offer draw?</h4>
                 </NonIdealState>
             </DialogBody>
             <DialogFooter minimal actions={actions} />

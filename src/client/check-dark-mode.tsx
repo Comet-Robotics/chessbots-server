@@ -18,7 +18,7 @@ function setUserSetting(newSetting: number) {
     //is race condition tomfoolery
     if (localStorage.getItem("refreshing") !== "true") {
         //otherwise, set the item.
-        localStorage.setItem("userSetting", newSetting + "");
+        localStorage.setItem("userSetting", JSON.stringify(newSetting));
 
         //now after setting it we plan to refresh, set it to true now to prevent race conditions where we may overwrite "userSetting" value
         localStorage.setItem("refreshing", "true");
@@ -40,42 +40,40 @@ function chooseDark(): boolean {
     return true;
 }
 
-function textColor(): "textDark" | "textLight" {
+function textColor(): string {
     return chooseDark() ? "textDark" : "textLight";
 }
 
-function bgColor(): "bgDark" | "bgLight" {
+function bgColor(): string {
     return chooseDark() ? "bgDark" : "bgLight";
 }
 
-function buttonColor(): "buttonDark" | "buttonLight" {
+function buttonColor(): string {
     return chooseDark() ? "buttonDark" : "buttonLight";
 }
 
-function sliderColor(): "sliderDark" | "sliderLight" {
+function sliderColor(): string {
     return chooseDark() ? "sliderDark" : "sliderLight";
 }
 
-function joystickOutColor(): "#ff8d70" | "#000033" {
+function joystickOutColor(): string {
     return chooseDark() ? "#ff8d70" : "#000033";
 }
 
-function joystickInColor(): "#e34017" | "#3d59ab" {
+function joystickInColor(): string {
     return chooseDark() ? "#e34017" : "#3d59ab";
 }
 
-function driveSliderColor(): "driveSliderDark" | "driveSliderLight" {
+function driveSliderColor(): string {
     return chooseDark() ? "driveSliderDark" : "driveSliderLight";
 }
 
-function textBoxColor(): "textBoxDark" | "textBoxLight" {
+function textBoxColor(): string {
     return chooseDark() ? "textBoxDark" : "textBoxLight";
 }
 
 //first, we have separate colors for when a robot collides with another robot.
-function robotColor(
-    onTopOfRobots: number,
-): "robotDark" | "robotLight" | "robotCollideDark" | "robotCollideLight" {
+function robotColor(onTopOfRobots: number): string {
     //if robot has collided, set itaccordingly
     if (onTopOfRobots > 0) {
         return chooseDark() ? "robotCollideDark" : "robotCollideLight";
@@ -84,7 +82,7 @@ function robotColor(
     return chooseDark() ? "robotDark" : "robotLight";
 }
 
-function innerRobotColor(): "innerBotDark" | "innerBotLight" {
+function innerRobotColor(): string {
     return chooseDark() ? "innerBotDark" : "innerBotLight";
 }
 
@@ -96,11 +94,11 @@ function getUserSetting(): number {
     return numericIndex;
 }
 
-function simBorderColor(): "#c3c3c3" | "#1a1616" {
+function simBorderColor(): string {
     return chooseDark() ? "#c3c3c3" : "#1a1616";
 }
 
-function simRingCellColor(): "#332e2e" | "#d3d3d3" {
+function simRingCellColor(): string {
     return chooseDark() ? "#332e2e" : "#d3d3d3";
 }
 

@@ -6,7 +6,7 @@ import {
     Spinner,
 } from "@blueprintjs/core";
 import { SetupBase } from "./setup-base";
-import { Dispatch, useEffect, useState } from "react";
+import { Dispatch, useState } from "react";
 import { SetupGame } from "./setup-game";
 import { Navigate, useNavigate } from "react-router-dom";
 import { ClientType, GameType } from "../../common/client-types";
@@ -91,16 +91,6 @@ interface SetupMainProps {
 function SetupMain(props: SetupMainProps) {
     const navigate = useNavigate();
 
-    //we have this because until its declared false, we know our program is still rendering.
-    //So, we wait for the useEFfect to then know what we're done refreshing
-    const [rendering] = useState("true");
-
-    // This effect will run after every render
-    useEffect(() => {
-        //now that we're done refreshing, we set the status of refreshing to false
-        localStorage.setItem("refreshing", "false");
-    }, [rendering]);
-
     const debugButton = (
         <Button
             variant="minimal"
@@ -115,7 +105,7 @@ function SetupMain(props: SetupMainProps) {
         <>
             <Button
                 large
-                text="Play With The Computer"
+                text="Play with the computer"
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.COMPUTER)}

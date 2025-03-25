@@ -16,7 +16,7 @@ import {
 } from "../../common/game-end-reasons";
 import { SendMessage } from "../../common/message/message";
 import { Side } from "../../common/game-types";
-import { Dispatch, useEffect, useState } from "react";
+import { Dispatch } from "react";
 import {
     bgColor,
     textColor,
@@ -40,16 +40,6 @@ interface NavbarMenuProps {
 export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
     // Store react router state for game
     const navigate = useNavigate();
-
-    // We have this because until its declared false, we know our program is still rendering.
-    // So, we wait for the useEffect to then know what we're done refreshing
-    const [rendering] = useState("true");
-
-    // This effect will run after every render
-    useEffect(() => {
-        //now that we're done refreshing, we set the status of refreshing to false
-        localStorage.setItem("refreshing", "false");
-    }, [rendering]);
 
     /** create navbar rotate button */
     const rotateButton =
