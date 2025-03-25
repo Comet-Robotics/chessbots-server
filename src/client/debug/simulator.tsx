@@ -36,7 +36,6 @@ export type RobotState = { [robotId: string]: SimulatedRobotLocation };
 export function Simulator() {
     const navigate = useNavigate();
 
-
     type Action =
         | { type: "SET_ALL_ROBOTS"; payload: RobotState }
         | {
@@ -202,8 +201,9 @@ const openInEditor = async (frame: StackFrame) => {
     await fetch(`/__open-in-editor?${params.toString()}`);
 };
 
-export function RobotGrid({robotState}: {robotState: RobotState}) {
-    return <div
+export function RobotGrid({ robotState }: { robotState: RobotState }) {
+    return (
+        <div
             style={{
                 display: "grid",
                 gridTemplateColumns: `repeat(${cellCount}, ${tileSize}px)`,
@@ -211,12 +211,11 @@ export function RobotGrid({robotState}: {robotState: RobotState}) {
                 position: "relative",
             }}
         >
-        {new Array(cellCount * cellCount)
-            .fill(undefined)
-            .map((_, i) => {
+            {new Array(cellCount * cellCount).fill(undefined).map((_, i) => {
                 const row = Math.floor(i / cellCount);
                 const col = i % cellCount;
-                const isCenterCell = row >= 2 && row < 10 && col >= 2 && col < 10;
+                const isCenterCell =
+                    row >= 2 && row < 10 && col >= 2 && col < 10;
                 return (
                     <div
                         key={i}
@@ -225,8 +224,9 @@ export function RobotGrid({robotState}: {robotState: RobotState}) {
                             borderStyle: "solid",
                             borderColor: simBorderColor(),
                             backgroundColor:
-                                !isCenterCell ? simRingCellColor()
-                                :   "transparent",
+                                !isCenterCell ? simRingCellColor() : (
+                                    "transparent"
+                                ),
                         }}
                     />
                 );
@@ -237,9 +237,11 @@ export function RobotGrid({robotState}: {robotState: RobotState}) {
                     pos={pos}
                     robotId={robotId}
                     key={robotId}
-                onTopOfRobots={[]} />
+                    onTopOfRobots={[]}
+                />
             ))}
-    </div>;
+        </div>
+    );
 }
 
 /**

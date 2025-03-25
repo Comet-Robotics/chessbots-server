@@ -1,27 +1,18 @@
-import {
-    RefObject,
-    useEffect,
-    useMemo,
-    useReducer,
-    useRef,
-} from "react";
+import { RefObject, useEffect, useMemo, useReducer, useRef } from "react";
 import { ContextMenu, Menu, MenuItem, MenuDivider } from "@blueprintjs/core";
 import {
     Coords,
-Point,
+    Point,
     Spline,
     SplinePointType,
     splineToSvgDrawAttribute,
 } from "../../common/spline";
 import { RobotGrid, robotSize } from "../debug/simulator";
 export function Editor() {
-    
     return (
         <div>
-
-
-        <RobotGrid robotState={{}} />
-        <SplineEditor
+            <RobotGrid robotState={{}} />
+            <SplineEditor
                 initialSpline={{
                     start: {
                         type: SplinePointType.StartPoint,
@@ -46,8 +37,7 @@ export function Editor() {
                     ],
                 }}
             />
-        
-    </div>
+        </div>
     );
 }
 
@@ -154,7 +144,9 @@ function SplinePoint({
     // TODO: implement remaining context menu methods
 
     const ref = useRef<HTMLElement>(null);
-    useDraggable(ref, (screenX, screenY)=>moveFn(screenX + robotSize / 4, screenY + robotSize / 4));
+    useDraggable(ref, (screenX, screenY) =>
+        moveFn(screenX + robotSize / 4, screenY + robotSize / 4),
+    );
 
     const mainPointColor =
         point.type === SplinePointType.StartPoint ? "blue" : "black";
@@ -201,8 +193,6 @@ function SplinePoint({
     );
 }
 
-
-
 function useDraggable(
     elRef: RefObject<HTMLElement>,
     updatePosition: (screenX: number, screenY: number) => void,
@@ -224,7 +214,7 @@ function useDraggable(
             document.onmouseup = closeDragElement;
             // call a fn whenever the cursor moves:
             document.onmousemove = elementDrag;
-        }
+        };
 
         const elementDrag = (e) => {
             e.preventDefault();
@@ -232,18 +222,17 @@ function useDraggable(
             pos2 = pos4 - e.clientY;
             pos3 = e.clientX;
             pos4 = e.clientY;
-            const x = el.offsetLeft - pos1
-            const y = el.offsetTop - pos2
-            updatePosition(x,y)
-        }
+            const x = el.offsetLeft - pos1;
+            const y = el.offsetTop - pos2;
+            updatePosition(x, y);
+        };
 
         const closeDragElement = () => {
             document.onmouseup = null;
             document.onmousemove = null;
-        }
+        };
 
-
-        el.addEventListener("mousedown", onMouseDown)
+        el.addEventListener("mousedown", onMouseDown);
 
         return () => {
             el.removeEventListener("mousedown", onMouseDown);

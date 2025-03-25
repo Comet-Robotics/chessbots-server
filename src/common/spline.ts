@@ -17,7 +17,7 @@ export const CoordsSchema = Record({
     x: NumberType,
     y: NumberType,
 });
-export type Coords = Static<typeof CoordsSchema>
+export type Coords = Static<typeof CoordsSchema>;
 
 export const StartPointSchema = Record({
     type: Literal(SplinePointType.StartPoint),

@@ -14,7 +14,6 @@ export const queryClient = new QueryClient();
 
 FocusStyleManager.onlyShowFocusOnTabs();
 
-
 //creates the root of the page and forwards control to the page router
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <>
