@@ -7,7 +7,7 @@ import { ClientType, GameType } from "../../common/client-types";
 import { get, useEffectQuery } from "../api";
 import {
     buttonColor,
-    changeUserSetting,
+    setUserSetting,
     getUserSetting,
     sliderColor,
     textColor,
@@ -98,7 +98,7 @@ function SetupMain(props: SetupMainProps) {
     useEffect(() => {
         //now that we're done refreshing, we set the status of refreshing to false
         localStorage.setItem("refreshing", "false");
-    }, [rendering]); // You can add specific dependencies here (like count) to only trigger on those changes
+    }, [rendering]);
 
     const debugButton = (
         <Button
@@ -148,11 +148,7 @@ function SetupMain(props: SetupMainProps) {
                 stepSize={1}
                 onChange={(newVal) => {
                     //change the local storage variable storing the current setting
-                    changeUserSetting(newVal);
-                    //now we are going to refresh, so we shouldn't overwrite the user setting while refreshing.
-                    localStorage.setItem("refreshing", "true");
-                    //actually do the refresh
-                    window.location.reload();
+                    setUserSetting(newVal);
                 }}
                 //maps our numeric labels to text
                 labelRenderer={(value) => {

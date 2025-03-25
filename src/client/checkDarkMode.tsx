@@ -7,12 +7,17 @@ function browserInDarkMode(): boolean {
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
-function changeUserSetting(newSetting: number) {
+function setUserSetting(newSetting: number) {
     //don't want to modify the value while refreshing. Reason for this
     //is race condition tomfoolery
     if (localStorage.getItem("refreshing") !== "true") {
         //otherwise, set the item.
         localStorage.setItem("userSetting", newSetting + "");
+        
+        //now after setting it we plan to refresh, set it to true now to prevent race conditions where we may overwrite "userSetting" value
+        localStorage.setItem("refreshing", "true");
+        //refresh the page
+        window.location.reload();    
     }
 }
 
@@ -104,8 +109,9 @@ export {
     textBoxColor,
     robotColor,
     innerRobotColor,
-    changeUserSetting,
+    setUserSetting,
     getUserSetting,
     simBorderColor,
     simRingCellColor,
+    chooseDark
 };
