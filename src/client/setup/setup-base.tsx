@@ -4,7 +4,7 @@ import { ChessboardWrapper } from "../chessboard/chessboard-wrapper";
 import { PropsWithChildren, ReactNode } from "react";
 import { ChessEngine } from "../../common/chess-engine";
 import { Side } from "../../common/game-types";
-import { bgColor } from "../checkDarkMode";
+import { bgColor } from "../check-dark-mode";
 import "../colors.css";
 
 interface SetupBaseProps extends PropsWithChildren {

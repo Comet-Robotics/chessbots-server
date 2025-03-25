@@ -18,7 +18,7 @@ import {
     simRingCellColor,
     textColor,
     toggleUserSetting,
-} from "../checkDarkMode";
+} from "../check-dark-mode";
 
 const tileSize = 60;
 const robotSize = tileSize / 2;
@@ -121,19 +121,19 @@ export function Simulator() {
     return (
         <Card className={bgColor()}>
             <Button
-                minimal
+                variant="minimal"
                 style={{ float: "right" }}
                 icon="home"
                 onClick={() => navigate("/home")}
             />
             <Button
-                minimal
+                variant="minimal"
                 style={{ float: "right" }}
                 icon="cog"
                 onClick={() => navigate("/debug")}
             />
             <Button
-                minimal
+                variant="minimal"
                 style={{ float: "right" }}
                 icon={darkModeIcon()}
                 onClick={toggleUserSetting}

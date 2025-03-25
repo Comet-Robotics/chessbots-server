@@ -1,5 +1,5 @@
 import { Slider } from "@blueprintjs/core";
-import { driveSliderColor } from "../checkDarkMode";
+import { driveSliderColor } from "../check-dark-mode";
 
 interface DriveSliderProps {
     power: number;

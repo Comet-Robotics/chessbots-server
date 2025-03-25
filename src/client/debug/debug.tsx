@@ -11,7 +11,7 @@ import {
     darkModeIcon,
     textColor,
     toggleUserSetting,
-} from "../checkDarkMode";
+} from "../check-dark-mode";
 import "../colors.css";
 
 /**
@@ -85,19 +85,19 @@ export function Debug() {
     return (
         <Card className={bgColor()}>
             <Button
-                minimal
+                variant="minimal"
                 style={{ float: "right" }}
                 icon="home"
                 onClick={() => navigate("/home")}
             />
             <Button
-                minimal
+                variant="minimal"
                 style={{ float: "right" }}
                 icon="airplane"
                 onClick={() => navigate("/debug/simulator")}
             />
             <Button
-                minimal
+                variant="minimal"
                 style={{ float: "right" }}
                 icon={darkModeIcon()}
                 onClick={toggleUserSetting}

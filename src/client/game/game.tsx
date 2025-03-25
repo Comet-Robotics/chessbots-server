@@ -22,7 +22,7 @@ import { ChessEngine } from "../../common/chess-engine";
 import { Move } from "../../common/game-types";
 import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { AcceptDrawDialog, OfferDrawDialog } from "./draw-dialog";
-import { bgColor } from "../checkDarkMode";
+import { bgColor } from "../check-dark-mode";
 import "../colors.css";
 
 /**

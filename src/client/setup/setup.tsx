@@ -1,4 +1,10 @@
-import { Button, H3, NonIdealState, Slider, Spinner } from "@blueprintjs/core";
+import {
+    Button,
+    ButtonGroup,
+    H3,
+    NonIdealState,
+    Spinner,
+} from "@blueprintjs/core";
 import { SetupBase } from "./setup-base";
 import { Dispatch, useEffect, useState } from "react";
 import { SetupGame } from "./setup-game";
@@ -6,12 +12,12 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { ClientType, GameType } from "../../common/client-types";
 import { get, useEffectQuery } from "../api";
 import {
+    allSettings,
     buttonColor,
     setUserSetting,
     getUserSetting,
-    sliderColor,
     textColor,
-} from "../checkDarkMode";
+} from "../check-dark-mode";
 import "../colors.css";
 
 enum SetupType {
@@ -85,11 +91,6 @@ interface SetupMainProps {
 function SetupMain(props: SetupMainProps) {
     const navigate = useNavigate();
 
-    //we have this slider value because it's the only way to automatically
-    //update the slider. Set it to currenet user setting initially.
-    //instead of changing the value, we just refresh the page.
-    const [sliderValue] = useState(getUserSetting());
-
     //we have this because until its declared false, we know our program is still rendering.
     //So, we wait for the useEFfect to then know what we're done refreshing
     const [rendering] = useState("true");
@@ -102,12 +103,13 @@ function SetupMain(props: SetupMainProps) {
 
     const debugButton = (
         <Button
-            minimal
+            variant="minimal"
             style={{ float: "right", color: "white" }}
             icon="cog"
             onClick={() => navigate("/debug")}
         />
     );
+
     /** computer, human, and puzzle buttons */
     const actions = (
         <>
@@ -136,30 +138,17 @@ function SetupMain(props: SetupMainProps) {
                 className={buttonColor()}
             />
             <h3 className={textColor()}>Display Settings:</h3>
-            <Slider
-                //colorSliderPos just shortens the slider; otherwise, the text goes off the screen.
-                className={
-                    sliderColor() + " " + textColor() + " colorSliderPos"
-                }
-                max={2}
-                min={0}
-                value={sliderValue}
-                showTrackFill
-                stepSize={1}
-                onChange={(newVal) => {
-                    //change the local storage variable storing the current setting
-                    setUserSetting(newVal);
-                }}
-                //maps our numeric labels to text
-                labelRenderer={(value) => {
-                    if (value === 0) {
-                        return "System";
-                    } else if (value === 1) {
-                        return "Light";
-                    }
-                    return "Dark";
-                }}
-            ></Slider>
+            <ButtonGroup variant="outlined">
+                {allSettings.map((item, idx) => (
+                    <Button
+                        textClassName={textColor()}
+                        icon={item[1]}
+                        text={item[0]}
+                        active={getUserSetting() === idx}
+                        onClick={() => setUserSetting(idx)}
+                    />
+                ))}
+            </ButtonGroup>
         </>
     );
 

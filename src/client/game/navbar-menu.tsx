@@ -22,7 +22,7 @@ import {
     textColor,
     darkModeIcon,
     toggleUserSetting,
-} from "../checkDarkMode";
+} from "../check-dark-mode";
 import "../colors.css";
 
 interface NavbarMenuProps {
@@ -55,7 +55,7 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
     const rotateButton =
         props.side === Side.SPECTATOR ?
             <Button
-                minimal
+                variant="minimal"
                 text="Rotate"
                 intent="primary"
                 onClick={() => {
@@ -73,7 +73,7 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
                 <NavbarDivider />
                 <Button
                     icon="flag"
-                    minimal
+                    variant="minimal"
                     text="Resign"
                     intent="danger"
                     onClick={async () => {
@@ -88,7 +88,7 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
                 />
                 <Button
                     icon="pause"
-                    minimal
+                    variant="minimal"
                     text="Draw"
                     intent="danger"
                     onClick={async () => {
@@ -104,7 +104,7 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
                 {rotateButton}
                 <Button
                     icon={darkModeIcon()}
-                    minimal
+                    variant="minimal"
                     onClick={toggleUserSetting}
                 />
                 <Button icon="cog" minimal onClick={() => navigate("/debug")} />
