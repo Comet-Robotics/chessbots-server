@@ -143,7 +143,6 @@ function SetupMain(props: SetupMainProps) {
                     <Button
                         textClassName={textColor()}
                         //changed for better visibility
-                        className={buttonColor()}
                         icon={item[1]}
                         text={item[0]}
                         active={getUserSetting() === idx}
