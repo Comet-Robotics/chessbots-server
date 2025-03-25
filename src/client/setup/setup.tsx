@@ -17,6 +17,7 @@ import {
     setUserSetting,
     getUserSetting,
     textColor,
+    bgColor,
 } from "../check-dark-mode";
 import "../colors.css";
 
@@ -142,6 +143,8 @@ function SetupMain(props: SetupMainProps) {
                 {allSettings.map((item, idx) => (
                     <Button
                         textClassName={textColor()}
+                        //changed for better visibility
+                        className={buttonColor()}
                         icon={item[1]}
                         text={item[0]}
                         active={getUserSetting() === idx}
