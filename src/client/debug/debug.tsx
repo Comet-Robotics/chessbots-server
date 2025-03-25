@@ -6,6 +6,13 @@ import { SelectRobot } from "./select-robot";
 import { DriveRobot } from "./drive-robot";
 import { SetRobotVariable } from "./set-robot-variable";
 import "./debug.scss";
+import {
+    bgColor,
+    darkModeIcon,
+    textColor,
+    toggleUserSetting,
+} from "../check-dark-mode";
+import "../colors.css";
 
 /**
  * A debug menu which can be used to manually control individual robots.
@@ -35,8 +42,8 @@ export function Debug() {
         body = <Spinner intent="primary" />;
     } else {
         body = (
-            <div className="debug-section">
-                <H2>Select Robot</H2>
+            <div className="debug-section ">
+                <H2 className={textColor()}>Select Robot</H2>
                 <SelectRobot
                     robotIds={robotIds}
                     selectedRobotId={selectedRobotId}
@@ -45,7 +52,7 @@ export function Debug() {
                 {selectedRobotId === undefined ? null : (
                     <>
                         <div className="debug-section">
-                            <H2>
+                            <H2 className={textColor()}>
                                 Motor Control for <Code>{selectedRobotId}</Code>
                             </H2>
                             <DriveRobot
@@ -54,7 +61,7 @@ export function Debug() {
                             />
                         </div>
                         <div className="debug-section">
-                            <H2>
+                            <H2 className={textColor()}>
                                 Configuration for <Code>{selectedRobotId}</Code>
                             </H2>
                             <SetRobotVariable
@@ -70,20 +77,26 @@ export function Debug() {
 
     // return the dialog with buttons for home and simulator
     return (
-        <Card>
+        <Card className={bgColor()}>
             <Button
-                minimal
+                variant="minimal"
                 style={{ float: "right" }}
                 icon="home"
                 onClick={() => navigate("/home")}
             />
             <Button
-                minimal
+                variant="minimal"
                 style={{ float: "right" }}
                 icon="airplane"
                 onClick={() => navigate("/debug/simulator")}
             />
-            <H1>Debug</H1>
+            <Button
+                variant="minimal"
+                style={{ float: "right" }}
+                icon={darkModeIcon()}
+                onClick={toggleUserSetting}
+            />
+            <H1 className={textColor()}>Debug</H1>
             {body}
         </Card>
     );

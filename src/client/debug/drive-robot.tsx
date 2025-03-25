@@ -5,6 +5,11 @@ import { SendMessage } from "../../common/message/message";
 import { Joystick } from "react-joystick-component";
 import type { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
 import { DriveSlider } from "./drive-slider";
+import {
+    joystickInColor,
+    joystickOutColor,
+    textColor,
+} from "../check-dark-mode";
 
 interface DriveRobotProps {
     robotId: string;
@@ -241,7 +246,7 @@ export function DriveRobot(props: DriveRobotProps) {
     return (
         <div tabIndex={0} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
             <br />
-            <p>
+            <p className={textColor()}>
                 Control this robot using the buttons below, arrow keys, WASD, or
                 a connected gamepad. If arrow keys are not working, make sure
                 controls are in focus.
@@ -268,6 +273,8 @@ export function DriveRobot(props: DriveRobotProps) {
                         }}
                     >
                         <Joystick
+                            baseColor={joystickOutColor()}
+                            stickColor={joystickInColor()}
                             throttle={ROBOT_MSG_THROTTLE_MS}
                             size={150}
                             pos={convertMotorPowersToJoystickXY(

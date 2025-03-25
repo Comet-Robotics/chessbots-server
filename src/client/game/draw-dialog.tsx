@@ -15,6 +15,8 @@ import {
     GameHoldReason,
     GameInterruptedReason,
 } from "../../common/game-end-reasons";
+import { bgColor, buttonColor, textColor } from "../check-dark-mode";
+import "../colors.css";
 
 interface DrawDialogProps {
     sendMessage: SendMessage;
@@ -33,6 +35,7 @@ export function OfferDrawDialog(props: DrawDialogProps) {
                 text="Yes"
                 rightIcon="arrow-up"
                 intent="primary"
+                className={buttonColor()}
                 onClick={() => {
                     props.sendMessage(
                         new GameHoldMessage(GameHoldReason.DRAW_OFFERED),
@@ -43,6 +46,7 @@ export function OfferDrawDialog(props: DrawDialogProps) {
                 text="No"
                 rightIcon="arrow-down"
                 intent="primary"
+                className={buttonColor()}
                 onClick={() => {
                     props.sendMessage(
                         new GameHoldMessage(GameHoldReason.DRAW_DENIED),
@@ -53,13 +57,16 @@ export function OfferDrawDialog(props: DrawDialogProps) {
     );
     return (
         <Dialog
+            className={bgColor()}
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
             canOutsideClickClose={false}
             canEscapeKeyClose={false}
         >
             <DialogBody>
-                <NonIdealState title={"Offer draw?"} />
+                <NonIdealState>
+                    <h4 className={textColor()}>Offer draw?</h4>
+                </NonIdealState>
             </DialogBody>
             <DialogFooter minimal actions={actions} />
         </Dialog>
@@ -79,6 +86,7 @@ export function AcceptDrawDialog(props: DrawDialogProps) {
                 text="Yes"
                 rightIcon="arrow-up"
                 intent="primary"
+                className={buttonColor()}
                 onClick={() => {
                     props.sendMessage(
                         new GameInterruptedMessage(
@@ -91,6 +99,7 @@ export function AcceptDrawDialog(props: DrawDialogProps) {
                 text="No"
                 rightIcon="arrow-down"
                 intent="primary"
+                className={buttonColor()}
                 onClick={() => {
                     props.sendMessage(
                         new GameHoldMessage(GameHoldReason.DRAW_DENIED),
