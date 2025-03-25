@@ -493,9 +493,15 @@ function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
     ];
 
     for (const direction of checkDirections) {
-        if (arrayOfDeadzone.find((dz) => dz.equals(home.addTuple(direction)))) {
-            finalDestination = home.addTuple(direction);
-            break;
+        try {
+            const adjacentToHome = home.addTuple(direction);
+            if (arrayOfDeadzone.find((dz) => dz.equals(adjacentToHome))) {
+                finalDestination = adjacentToHome;
+                break;
+            }
+        } catch (e) {
+            // adjacentToHome is out of bounds, skip check
+            continue;
         }
     }
     if (!finalDestination) {
