@@ -11,7 +11,7 @@ function changeUserSetting(newSetting: number) {
     //don't want to modify the value while refreshing. Reason for this
     //is race condition tomfoolery
     if (localStorage.getItem("refreshing") !== "true") {
-        //otherwise, set the item. 
+        //otherwise, set the item.
         localStorage.setItem("userSetting", newSetting + "");
     }
 }

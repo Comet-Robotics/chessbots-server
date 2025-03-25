@@ -88,11 +88,11 @@ function SetupMain(props: SetupMainProps) {
     //we have this slider value because it's the only way to automatically
     //update the slider. Set it to currenet user setting initially.
     //instead of changing the value, we just refresh the page.
-    const [sliderValue, setSliderValue] = useState(getUserSetting());
+    const [sliderValue] = useState(getUserSetting());
 
     //we have this because until its declared false, we know our program is still rendering.
     //So, we wait for the useEFfect to then know what we're done refreshing
-    const [rendering, hasRendered] = useState("true");
+    const [rendering] = useState("true");
 
     // This effect will run after every render
     useEffect(() => {
@@ -135,12 +135,12 @@ function SetupMain(props: SetupMainProps) {
                 onClick={() => props.onPageChange(SetupType.PUZZLE)}
                 className={buttonColor()}
             />
-            <h3 className={textColor()}>
-                Display Settings:
-            </h3>
+            <h3 className={textColor()}>Display Settings:</h3>
             <Slider
                 //colorSliderPos just shortens the slider; otherwise, the text goes off the screen.
-                className={sliderColor() + " " + textColor() + " colorSliderPos"}
+                className={
+                    sliderColor() + " " + textColor() + " colorSliderPos"
+                }
                 max={2}
                 min={0}
                 value={sliderValue}
