@@ -103,7 +103,11 @@ export class VirtualBotTunnel extends BotTunnel {
 
     private emitActionComplete(packetId: string) {
         setTimeout(
-            () => this.emitter.emit("actionComplete", { success: true, packetId }),
+            () =>
+                this.emitter.emit("actionComplete", {
+                    success: true,
+                    packetId,
+                }),
             750,
         ); // needs to match simulator.scss animation timeout
     }
