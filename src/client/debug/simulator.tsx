@@ -355,7 +355,6 @@ function Robot(props: {
                     className={robotColor(props.onTopOfRobots.length)}
                     style={{
                         transform: `rotate(-${clampHeading(props.pos.headingRadians)}rad)`,
-                        backgroundColor: "white",
                         borderRadius: "50%",
                         display: "flex",
                         justifyContent: "flex-end",
