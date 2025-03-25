@@ -33,3 +33,4 @@ site/
 
 # ignore history directory
 /.history
+.env
