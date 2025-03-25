@@ -11,5 +11,5 @@
 }
 
 .robot {
-    transition: all 0.75s ease;
+    transition: all 0.75s ease; // needs to match simulator.ts timeout
 }
