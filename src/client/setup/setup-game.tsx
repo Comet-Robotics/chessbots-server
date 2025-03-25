@@ -9,7 +9,7 @@ import {
     textColor,
     sliderColor,
     textBoxColor,
-} from "../checkDarkMode";
+} from "../check-dark-mode";
 import "../colors.css";
 /** User's desired side, b/w/random */
 enum DesiredSide {

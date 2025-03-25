@@ -15,7 +15,7 @@ import {
     GameHoldReason,
     GameInterruptedReason,
 } from "../../common/game-end-reasons";
-import { bgColor, buttonColor, textColor } from "../checkDarkMode";
+import { bgColor, buttonColor, textColor } from "../check-dark-mode";
 import "../colors.css";
 
 interface DrawDialogProps {

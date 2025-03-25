@@ -15,7 +15,7 @@ import {
 } from "../../common/game-end-reasons";
 import { useState } from "react";
 import { Side } from "../../common/game-types";
-import { bgColor, buttonColor, textColor } from "../checkDarkMode";
+import { bgColor, buttonColor, textColor } from "../check-dark-mode";
 import "../colors.css";
 
 interface GameEndDialogProps {

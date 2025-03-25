@@ -2,7 +2,7 @@ import { ResizeEntry, ResizeSensor } from "@blueprintjs/core";
 import { PropsWithChildren, useState } from "react";
 import { Transform, computeChessboardTransform } from "./board-transform";
 import { Side } from "../../common/game-types";
-import { bgColor } from "../checkDarkMode";
+import { bgColor } from "../check-dark-mode";
 
 interface BoardContainerProps extends PropsWithChildren {
     side: Side;

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { SendMessage } from "../../common/message/message";
 import { Button, FormGroup, InputGroup, NumericInput } from "@blueprintjs/core";
 import { SetRobotVariableMessage } from "../../common/message/robot-message";
-import { buttonColor, textColor } from "../checkDarkMode";
+import { buttonColor, textColor } from "../check-dark-mode";
 import "../colors.css";
 
 interface SetRobotVariableProps {

@@ -1,7 +1,13 @@
 //Checks if the user prefers light or dark mode from their window.
 
-//corresponds to each index to make the code clearer
-const allSettings: string[] = ["System", "Light", "Dark"];
+import { BlueprintIcons_16Id } from "@blueprintjs/icons/lib/esm/generated/16px/blueprint-icons-16";
+
+// Dark mode settings. Format for each entry is [mode-name, icon-name]
+const allSettings: [string, BlueprintIcons_16Id][] = [
+    ["System", "contrast"],
+    ["Light", "flash"],
+    ["Dark", "moon"],
+];
 
 function browserInDarkMode(): boolean {
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -26,9 +32,9 @@ function chooseDark(): boolean {
         localStorage.getItem("userSetting") || "0",
     );
     //if index == 0 and thus we want the "System", we call browserInDarkMode() for that to determine if its in dark mode.
-    if (allSettings[numericIndex] === "System") {
+    if (allSettings[numericIndex][0] === "System") {
         return browserInDarkMode();
-    } else if (allSettings[numericIndex] === "Light") {
+    } else if (allSettings[numericIndex][0] === "Light") {
         return false;
     }
     return true;
@@ -98,7 +104,16 @@ function simRingCellColor(): "#332e2e" | "#d3d3d3" {
     return chooseDark() ? "#332e2e" : "#d3d3d3";
 }
 
+function darkModeIcon(): BlueprintIcons_16Id {
+    return allSettings[getUserSetting()][1];
+}
+
+function toggleUserSetting(): void {
+    setUserSetting((getUserSetting() + 1) % allSettings.length);
+}
+
 export {
+    allSettings,
     textColor,
     bgColor,
     buttonColor,
@@ -114,4 +129,6 @@ export {
     simBorderColor,
     simRingCellColor,
     chooseDark,
+    darkModeIcon,
+    toggleUserSetting,
 };

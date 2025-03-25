@@ -6,13 +6,24 @@ import { SelectRobot } from "./select-robot";
 import { DriveRobot } from "./drive-robot";
 import { SetRobotVariable } from "./set-robot-variable";
 import "./debug.scss";
-import { bgColor, textColor } from "../checkDarkMode";
+import {
+    bgColor,
+    darkModeIcon,
+    textColor,
+    toggleUserSetting,
+} from "../check-dark-mode";
 import "../colors.css";
 
 /**
  * A debug menu which can be used to manually control individual robots.
  */
 export function Debug() {
+    // Used for dark mode. See navbar-menu.tsx for more
+    const [rendering] = useState("true");
+    useEffect(() => {
+        localStorage.setItem("refreshing", "false");
+    }, [rendering]);
+
     const [robotIds, setRobotIds] = useState<string[] | undefined>();
     const [selectedRobotId, setSelectedRobotId] = useState<
         string | undefined
@@ -74,16 +85,22 @@ export function Debug() {
     return (
         <Card className={bgColor()}>
             <Button
-                minimal
+                variant="minimal"
                 style={{ float: "right" }}
                 icon="home"
                 onClick={() => navigate("/home")}
             />
             <Button
-                minimal
+                variant="minimal"
                 style={{ float: "right" }}
                 icon="airplane"
                 onClick={() => navigate("/debug/simulator")}
+            />
+            <Button
+                variant="minimal"
+                style={{ float: "right" }}
+                icon={darkModeIcon()}
+                onClick={toggleUserSetting}
             />
             <H1 className={textColor()}>Debug</H1>
             {body}

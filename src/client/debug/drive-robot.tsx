@@ -5,7 +5,11 @@ import { SendMessage } from "../../common/message/message";
 import { Joystick } from "react-joystick-component";
 import type { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
 import { DriveSlider } from "./drive-slider";
-import { joystickInColor, joystickOutColor, textColor } from "../checkDarkMode";
+import {
+    joystickInColor,
+    joystickOutColor,
+    textColor,
+} from "../check-dark-mode";
 
 interface DriveRobotProps {
     robotId: string;
