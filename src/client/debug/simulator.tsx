@@ -9,6 +9,7 @@ import {
 } from "../../common/message/simulator-message";
 import { Tag, CompoundTag } from "@blueprintjs/core";
 import "./simulator.scss";
+import { clampHeading } from "../../common/units";
 import {
     bgColor,
     darkModeIcon,
@@ -353,7 +354,8 @@ function Robot(props: {
                 <div
                     className={robotColor(props.onTopOfRobots.length)}
                     style={{
-                        transform: `rotate(-${props.pos.headingRadians}rad)`,
+                        transform: `rotate(-${clampHeading(props.pos.headingRadians)}rad)`,
+                        backgroundColor: "white",
                         borderRadius: "50%",
                         display: "flex",
                         justifyContent: "flex-end",
