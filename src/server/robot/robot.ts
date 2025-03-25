@@ -1,4 +1,4 @@
-import { FULL_ROTATION, RADIAN, clampHeading } from "../utils/units";
+import { FULL_ROTATION, RADIAN, clampHeading } from "../../common/units";
 import { Position, ZERO_POSITION } from "./position";
 import { GridIndices } from "./grid-indices";
 import { tcpServer } from "../api/api";
@@ -29,7 +29,7 @@ export class Robot {
         return this._position;
     }
 
-    private set position(coords: Position) {
+    public set position(coords: Position) {
         this._position = coords;
     }
 
@@ -37,7 +37,7 @@ export class Robot {
         return this._headingRadians;
     }
 
-    private set headingRadians(headingRadians: number) {
+    public set headingRadians(headingRadians: number) {
         this._headingRadians = headingRadians;
     }
 
@@ -74,13 +74,15 @@ export class Robot {
      */
     public async relativeMove(deltaPosition: Position): Promise<void> {
         // NOTE: the implementation of this is wrong. it doesn't work properly but it is not needed for now so just ignoring. if someone wants to use this in the future, we can fix it but we probably won't need it in the future anyway (or at least that is what Dylan says)
-        const offset = deltaPosition.sub(this.position);
-        const distance = Math.hypot(offset.x, offset.y);
-        const angle = clampHeading(Math.atan2(-offset.x, offset.y) * RADIAN);
+        const distance = Math.hypot(deltaPosition.x, deltaPosition.y);
+        const angle = clampHeading(
+            Math.atan2(deltaPosition.y, deltaPosition.x) * RADIAN,
+        );
         const promise = this.absoluteRotate(angle).then(() => {
             return this.sendDrivePacket(distance);
         });
         this.position = this.position.add(deltaPosition);
+        console.log(this.position);
         return promise;
     }
 
