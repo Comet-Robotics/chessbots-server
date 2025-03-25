@@ -19,6 +19,7 @@ import {
 import { SaveManager } from "./save-manager";
 import { materializePath } from "../robot/path-materializer";
 import { executor } from "./api";
+import { DO_SAVES } from "../utils/env";
 
 /**
  * The manager for game communication
@@ -71,10 +72,7 @@ export abstract class GameManager {
         };
     }
 
-    public abstract handleMessage(
-        message: Message,
-        clientType: ClientType,
-    ): Promise<void>;
+    public abstract handleMessage(message: Message, id: string): Promise<void>;
 }
 
 /**
@@ -136,11 +134,11 @@ export class HumanGameManager extends GameManager {
             this.chess.makeMove(message.move);
 
             console.log("running executor");
-            console.log(command);
+            console.dir(command, { depth: null });
             await executor.execute(command);
             console.log("executor done");
 
-            if (ids) {
+            if (ids && DO_SAVES) {
                 if (currentSave?.host === ids[0]) {
                     SaveManager.saveGame(
                         ids[0],
@@ -238,13 +236,15 @@ export class ComputerGameManager extends GameManager {
     public async handleMessage(message: Message, id: string): Promise<void> {
         if (message instanceof MoveMessage) {
             this.chess.makeMove(message.move);
-            SaveManager.saveGame(
-                id,
-                "ai",
-                this.hostSide,
-                this.difficulty,
-                this.chess.pgn,
-            );
+            if (DO_SAVES) {
+                SaveManager.saveGame(
+                    id,
+                    "ai",
+                    this.hostSide,
+                    this.difficulty,
+                    this.chess.pgn,
+                );
+            }
 
             if (this.chess.isGameFinished()) {
                 // Game is naturally finished; we're done

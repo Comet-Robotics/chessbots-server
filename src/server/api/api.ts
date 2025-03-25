@@ -30,7 +30,7 @@ import { SaveManager } from "./save-manager";
 import { CommandExecutor } from "../command/executor";
 import { VirtualBotTunnel, virtualRobots } from "../simulator";
 import { Position } from "../robot/position";
-import { DEGREE } from "../utils/units";
+import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
 
 export const tcpServer: TCPServer | null =
@@ -198,8 +198,8 @@ apiRouter.get("/get-ids", (_, res) => {
  */
 apiRouter.get("/do-smth", async (_, res) => {
     const robotsEntries = Array.from(virtualRobots.entries());
-    const [, robot] =
-        robotsEntries[Math.floor(Math.random() * robotsEntries.length)];
+    const randomRobotIndex = Math.floor(Math.random() * robotsEntries.length);
+    const [, robot] = robotsEntries[randomRobotIndex];
     await robot.sendDrivePacket(1);
     await robot.sendTurnPacket(45 * DEGREE);
 
