@@ -1,7 +1,7 @@
 import { FULL_ROTATION, RADIAN, clampHeading } from "../../common/units";
 import { Position, ZERO_POSITION } from "./position";
 import { GridIndices } from "./grid-indices";
-import { tcpServer } from "../api/api";
+import { tcpServer } from "../api/managers";
 import type { BotTunnel } from "../api/tcp-interface";
 import { PacketType } from "../utils/tcp-packet";
 
@@ -112,6 +112,7 @@ export class Robot {
      */
     public async sendDrivePacket(tileDistance: number): Promise<void> {
         const tunnel = this.getTunnel();
-        await tunnel.send({ type: PacketType.DRIVE_TILES, tileDistance });
+        console.log(tileDistance);
+        await tunnel.send({ type: PacketType.DRIVE_TANK, left: 1, right: 1 });
     }
 }

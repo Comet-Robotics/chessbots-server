@@ -13,7 +13,7 @@ import {
     SetRobotVariableMessage,
 } from "../../common/message/robot-message";
 
-import { TCPServer } from "./tcp-interface";
+import { tcpServer } from "./managers";
 import { Difficulty } from "../../common/client-types";
 import { RegisterWebsocketMessage } from "../../common/message/message";
 import { clientManager, robotManager, socketManager } from "./managers";
@@ -33,8 +33,7 @@ import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
 
-export const tcpServer: TCPServer | null =
-    USE_VIRTUAL_ROBOTS ? null : new TCPServer();
+
 export const executor = new CommandExecutor();
 
 export let gameManager: GameManager | null = null;
@@ -202,6 +201,18 @@ apiRouter.get("/do-smth", async (_, res) => {
     const [, robot] = robotsEntries[randomRobotIndex];
     await robot.sendDrivePacket(1);
     await robot.sendTurnPacket(45 * DEGREE);
+
+    res.send({ message: "success" });
+});
+
+apiRouter.get("/do-parallel", async (_, res) => {
+    console.log("Starting parallel command group");
+    const robotsEntries = Array.from(robotManager.idsToRobots.entries());
+    console.log(robotsEntries);
+    for (const [, robot] of robotsEntries) {
+        console.log("Moving robot " + robot.id);
+        await robot.sendDrivePacket(1);
+    }
 
     res.send({ message: "success" });
 });

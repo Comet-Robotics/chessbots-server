@@ -9,6 +9,7 @@ import {
 } from "../utils/tcp-packet";
 import { EventEmitter } from "@posva/event-emitter";
 import { randomUUID } from "node:crypto";
+import { RobotManager } from "../robot/robot-manager";
 
 type RobotEventEmitter = EventEmitter<{
     actionComplete: {
@@ -288,6 +289,7 @@ export class BotTunnel {
  */
 export class TCPServer {
     private server: net.Server;
+    priv;
 
     /**
      * creates a tcp server on port from server config and registers passed in ids with their corresponding bot tunnels
@@ -296,7 +298,10 @@ export class TCPServer {
      *
      * @param connections - bot connections in a id:BotTunnel array
      */
-    constructor(private connections: { [id: string]: BotTunnel } = {}) {
+    constructor(
+        private connections: { [id: string]: BotTunnel } = {},
+        private robotManager: RobotManager,
+    ) {
         this.server = net.createServer();
         this.server.on("connection", this.handleConnection.bind(this));
         this.server.listen(config["tcpServerPort"], () => {
@@ -317,7 +322,6 @@ export class TCPServer {
     private handleConnection(socket: net.Socket) {
         const remoteAddress = socket.remoteAddress + ":" + socket.remotePort;
         console.log("New client connection from %s", remoteAddress);
-
         socket.setNoDelay(true);
 
         // create a new bot tunnel for the connection
@@ -336,6 +340,7 @@ export class TCPServer {
                     config["bots"][mac] = id;
                 } else {
                     id = config["bots"][mac];
+                    this.robotManager.addRobot(this.robotManager.getRobot(id));
                     console.log("Found address ID: " + id);
                 }
                 tunnel.id = id;
