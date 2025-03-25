@@ -47,12 +47,15 @@ export class ChessEngine {
         return this.chess.pgn();
     }
 
-    /** load a board from history (FEN) */
+    undo(): Move {
+        const undo = this.chess.undo();
+        return { from: undo?.from, to: undo?.to } as Move;
+    }
+
     loadFen(fen: string) {
         this.chess.load(fen);
     }
 
-    /** load a board from history (PGN) */
     loadPgn(pgn: string) {
         this.chess.loadPgn(pgn);
     }
@@ -232,6 +235,17 @@ export class ChessEngine {
      * @returns the move that was made.
      */
     makeMove(move: Move): Move {
+        //const yay = this.chess.history[this.chess.history.length-1];
+        //if(yay!==undefined && !(move.from === yay.from || move.to === yay.to))
+        this.chess.move(move);
+        return move;
+    }
+
+    /**
+     * Makes a move on the chessboard.
+     * @returns the move that was made.
+     */
+    move(move: string): string {
         this.chess.move(move);
         return move;
     }

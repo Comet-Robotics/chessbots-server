@@ -1,9 +1,11 @@
 import { Dispatch, useState } from "react";
 
 import {
+    GameEndMessage,
     GameFinishedMessage,
     GameHoldMessage,
     GameInterruptedMessage,
+    SetChessMessage,
 } from "../../common/message/game-message";
 import { MoveMessage } from "../../common/message/game-message";
 import {
@@ -33,14 +35,28 @@ function getMessageHandler(
     chess: ChessEngine,
     setChess: Dispatch<ChessEngine>,
     setGameInterruptedReason: Dispatch<GameInterruptedReason>,
+    setGameEndedReason: Dispatch<GameEndReason>,
     setGameHoldReason: Dispatch<GameHoldReason>,
 ): MessageHandler {
     return (message) => {
         if (message instanceof MoveMessage) {
             // Must be a new instance of ChessEngine to trigger UI redraw
-            setChess(chess.copy(message.move));
+            // short wait so the pieces don't teleport into place
+            setTimeout(() => {
+                setChess(chess.copy(message.move));
+            }, 500);
+        } else if (message instanceof SetChessMessage) {
+            const fen = message.chess;
+            if (fen) {
+                setTimeout(() => {
+                    chess.loadFen(fen);
+                    setChess(chess.copy());
+                }, 500);
+            }
         } else if (message instanceof GameInterruptedMessage) {
             setGameInterruptedReason(message.reason);
+        } else if (message instanceof GameEndMessage) {
+            setGameEndedReason(message.reason);
         } else if (message instanceof GameHoldMessage) {
             setGameHoldReason(message.reason);
         }
@@ -55,6 +71,7 @@ export function Game(): JSX.Element {
     const [chess, setChess] = useState(new ChessEngine());
     const [gameInterruptedReason, setGameInterruptedReason] =
         useState<GameInterruptedReason>();
+    const [gameEndedReason, setGameEndedReason] = useState<GameEndReason>();
     const [gameHoldReason, setGameHoldReason] = useState<GameHoldReason>();
     const [rotation, setRotation] = useState<number>(0);
 
@@ -64,6 +81,7 @@ export function Game(): JSX.Element {
             chess,
             setChess,
             setGameInterruptedReason,
+            setGameEndedReason,
             setGameHoldReason,
         ),
     );
@@ -101,7 +119,9 @@ export function Game(): JSX.Element {
     // check if the game has ended or been interrupted
     let gameEndReason: GameEndReason | undefined = undefined;
     const gameFinishedReason = chess.getGameFinishedReason();
-    if (gameFinishedReason !== undefined) {
+    if (gameEndedReason !== undefined) {
+        gameEndReason = gameEndedReason;
+    } else if (gameFinishedReason !== undefined) {
         sendMessage(new GameFinishedMessage(gameFinishedReason));
         gameEndReason = gameFinishedReason;
     } else if (gameInterruptedReason !== undefined) {
@@ -113,7 +133,6 @@ export function Game(): JSX.Element {
         gameEndReason !== undefined ?
             <GameEndDialog reason={gameEndReason} side={side} />
         :   null;
-
     const gameOfferDialog =
         gameHoldReason !== undefined ?
             gameHoldReason === GameHoldReason.DRAW_CONFIRMATION ?
@@ -140,6 +159,8 @@ export function Game(): JSX.Element {
             <NavbarMenu
                 sendMessage={sendMessage}
                 side={side}
+                difficulty={data.difficulty}
+                AiDifficulty={data.AiDifficulty}
                 setRotation={setRotation}
             />
             <div id="body-container">

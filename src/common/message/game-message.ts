@@ -4,6 +4,7 @@ import {
     GameInterruptedReason,
     GameHoldReason,
     GameFinishedReason,
+    GameEndReason,
 } from "../game-end-reasons";
 
 /**
@@ -35,6 +36,20 @@ export class MoveMessage extends Message {
         return {
             ...super.toObj(),
             move: this.move,
+        };
+    }
+}
+export class SetChessMessage extends Message {
+    constructor(public readonly chess: string) {
+        super();
+    }
+
+    protected type = MessageType.SET_CHESS;
+
+    protected toObj(): object {
+        return {
+            ...super.toObj(),
+            chess: this.chess,
         };
     }
 }
@@ -95,6 +110,21 @@ export class GameHoldMessage extends Message {
     }
 
     protected type = MessageType.GAME_HELD;
+
+    protected toObj(): object {
+        return {
+            ...super.toObj(),
+            reason: this.reason,
+        };
+    }
+}
+
+export class GameEndMessage extends Message {
+    constructor(public readonly reason: GameEndReason) {
+        super();
+    }
+
+    protected type = MessageType.GAME_ENDED;
 
     protected toObj(): object {
         return {
