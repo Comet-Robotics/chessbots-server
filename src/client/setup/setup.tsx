@@ -9,6 +9,7 @@ import {
     buttonColor,
     changeUserSetting,
     getUserSetting,
+    sliderColor,
     textColor,
 } from "../checkDarkMode";
 import "../colors.css";
@@ -113,7 +114,6 @@ function SetupMain(props: SetupMainProps) {
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.COMPUTER)}
                 className={buttonColor()}
-                //Used to align the <p> in the center.
             />
             <Button
                 large
@@ -131,7 +131,11 @@ function SetupMain(props: SetupMainProps) {
                 onClick={() => props.onPageChange(SetupType.PUZZLE)}
                 className={buttonColor()}
             />
+            <h3 className={textColor()}>
+                Display Settings:
+            </h3>
             <Slider
+                className={sliderColor() + " " + textColor() + " colorSliderPos"}
                 max={3}
                 min={1}
                 value={sliderValue}
@@ -143,7 +147,6 @@ function SetupMain(props: SetupMainProps) {
                     window.location.reload();
                 }}
                 labelRenderer={(value) => {
-                    console.log();
                     if (value === 1) {
                         return "System";
                     } else if (value === 2) {

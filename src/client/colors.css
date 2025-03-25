@@ -91,3 +91,7 @@
     background-color: purple;
     border: 4px solid white;
 }
+
+.colorSliderPos {
+    width: 75%;
+}
