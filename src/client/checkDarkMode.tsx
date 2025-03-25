@@ -1,5 +1,6 @@
 //Checks if the user prefers light or dark mode from their window.
 
+//corresponds to each index to make the code clearer
 const allSettings: string[] = ["System", "Light", "Dark"];
 
 function browserInDarkMode(): boolean {
@@ -7,11 +8,11 @@ function browserInDarkMode(): boolean {
 }
 
 function changeUserSetting(newSetting: number) {
+    //don't want to modify the value while refreshing. Reason for this
+    //is race condition tomfoolery
     if (localStorage.getItem("refreshing") !== "true") {
-        localStorage.setItem("userSetting", newSetting - 1 + "");
-        localStorage.setItem("refreshing", "true");
-    } else {
-        console.log("wait for refresh!");
+        //otherwise, set the item. 
+        localStorage.setItem("userSetting", newSetting + "");
     }
 }
 
@@ -19,6 +20,7 @@ function chooseDark(): boolean {
     const numericIndex: number = parseInt(
         localStorage.getItem("userSetting") || "0",
     );
+    //if index == 0 and thus we want the "System", we call browserInDarkMode() for that to determine if its in dark mode.
     if (allSettings[numericIndex] === "System") {
         return browserInDarkMode();
     } else if (allSettings[numericIndex] === "Light") {
@@ -59,12 +61,15 @@ function textBoxColor(): "textBoxDark" | "textBoxLight" {
     return chooseDark() ? "textBoxDark" : "textBoxLight";
 }
 
+//first, we have separate colors for when a robot collides with another robot.
 function robotColor(
     onTopOfRobots: number,
 ): "robotDark" | "robotLight" | "robotCollideDark" | "robotCollideLight" {
+    //if robot has collided, set itaccordingly
     if (onTopOfRobots > 0) {
         return chooseDark() ? "robotCollideDark" : "robotCollideLight";
     }
+    //otherwise, set light/dark as normal
     return chooseDark() ? "robotDark" : "robotLight";
 }
 
@@ -72,12 +77,12 @@ function innerRobotColor(): "innerBotDark" | "innerBotLight" {
     return chooseDark() ? "innerBotDark" : "innerBotLight";
 }
 
+//gets the current user setting value
 function getUserSetting(): number {
-    console.log("storage item: " + localStorage.getItem("userSetting"));
     const numericIndex: number = parseInt(
         localStorage.getItem("userSetting") || "0",
     );
-    return numericIndex + 1;
+    return numericIndex;
 }
 
 function simBorderColor(): "#c3c3c3" | "#1a1616" {

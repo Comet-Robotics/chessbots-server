@@ -84,17 +84,22 @@ interface SetupMainProps {
  */
 function SetupMain(props: SetupMainProps) {
     const navigate = useNavigate();
+
+    //we have this slider value because it's the only way to automatically
+    //update the slider. Set it to currenet user setting initially.
+    //instead of changing the value, we just refresh the page.
     const [sliderValue, setSliderValue] = useState(getUserSetting());
 
+    //we have this because until its declared false, we know our program is still rendering.
+    //So, we wait for the useEFfect to then know what we're done refreshing
     const [rendering, hasRendered] = useState("true");
 
     // This effect will run after every render
     useEffect(() => {
-        console.log("Render finished!");
+        //now that we're done refreshing, we set the status of refreshing to false
         localStorage.setItem("refreshing", "false");
     }, [rendering]); // You can add specific dependencies here (like count) to only trigger on those changes
 
-    console.log(sliderValue);
     const debugButton = (
         <Button
             minimal
@@ -134,26 +139,29 @@ function SetupMain(props: SetupMainProps) {
                 Display Settings:
             </h3>
             <Slider
+                //colorSliderPos just shortens the slider; otherwise, the text goes off the screen.
                 className={sliderColor() + " " + textColor() + " colorSliderPos"}
-                max={3}
-                min={1}
+                max={2}
+                min={0}
                 value={sliderValue}
                 showTrackFill
                 stepSize={1}
                 onChange={(newVal) => {
+                    //change the local storage variable storing the current setting
                     changeUserSetting(newVal);
+                    //now we are going to refresh, so we shouldn't overwrite the user setting while refreshing.
                     localStorage.setItem("refreshing", "true");
+                    //actually do the refresh
                     window.location.reload();
                 }}
+                //maps our numeric labels to text
                 labelRenderer={(value) => {
-                    if (value === 1) {
+                    if (value === 0) {
                         return "System";
-                    } else if (value === 2) {
+                    } else if (value === 1) {
                         return "Light";
-                    } else if (value === 3) {
-                        return "Dark";
                     }
-                    return "";
+                    return "Dark";
                 }}
             ></Slider>
         </>
