@@ -11,7 +11,7 @@ import { Tag, CompoundTag } from "@blueprintjs/core";
 import "./simulator.scss";
 
 const tileSize = 60;
-const robotSize = tileSize / 2;
+export const robotSize = tileSize / 2;
 const cellCount = 12;
 
 export type RobotState = { [robotId: string]: SimulatedRobotLocation };
@@ -21,7 +21,7 @@ export type RobotState = { [robotId: string]: SimulatedRobotLocation };
  *
  * does not require physical robots to be connected
  * @returns the simulator screen as a card
-*/
+ */
 export function Simulator() {
     const navigate = useNavigate();
 
@@ -187,13 +187,13 @@ const openInEditor = async (frame: StackFrame) => {
 
 export function RobotGrid({robotState}: {robotState: RobotState}) {
     return <div
-        style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${cellCount}, ${tileSize}px)`,
-            gridTemplateRows: `repeat(${cellCount}, ${tileSize}px)`,
-            position: "relative",
-        }}
-    >
+            style={{
+                display: "grid",
+                gridTemplateColumns: `repeat(${cellCount}, ${tileSize}px)`,
+                gridTemplateRows: `repeat(${cellCount}, ${tileSize}px)`,
+                position: "relative",
+            }}
+        >
         {new Array(cellCount * cellCount)
             .fill(undefined)
             .map((_, i) => {
@@ -211,14 +211,14 @@ export function RobotGrid({robotState}: {robotState: RobotState}) {
                         }} />
                 );
             })}
-        {/* TODO: implement onTopOfRobots */}
-        {Object.entries(robotState).map(([robotId, pos]) => (
-            <Robot
-                pos={pos}
-                robotId={robotId}
-                key={robotId}
+            {/* TODO: implement onTopOfRobots */}
+            {Object.entries(robotState).map(([robotId, pos]) => (
+                <Robot
+                    pos={pos}
+                    robotId={robotId}
+                    key={robotId}
                 onTopOfRobots={[]} />
-        ))}
+            ))}
     </div>;
 }
 
