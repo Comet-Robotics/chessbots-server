@@ -17,7 +17,6 @@ import {
     setUserSetting,
     getUserSetting,
     textColor,
-    bgColor,
 } from "../check-dark-mode";
 import "../colors.css";
 
