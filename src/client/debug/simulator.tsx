@@ -11,11 +11,13 @@ import { Tag, CompoundTag } from "@blueprintjs/core";
 import "./simulator.scss";
 import {
     bgColor,
+    darkModeIcon,
     innerRobotColor,
     robotColor,
     simBorderColor,
     simRingCellColor,
     textColor,
+    toggleUserSetting,
 } from "../checkDarkMode";
 
 const tileSize = 60;
@@ -30,6 +32,12 @@ const cellCount = 12;
  */
 export function Simulator() {
     const navigate = useNavigate();
+
+    // Used for dark mode. See navbar-menu.tsx for more
+    const [rendering] = useState("true");
+    useEffect(() => {
+        localStorage.setItem("refreshing", "false");
+    }, [rendering]);
 
     type RobotState = { [robotId: string]: SimulatedRobotLocation };
 
@@ -123,6 +131,12 @@ export function Simulator() {
                 style={{ float: "right" }}
                 icon="cog"
                 onClick={() => navigate("/debug")}
+            />
+            <Button
+                minimal
+                style={{ float: "right" }}
+                icon={darkModeIcon()}
+                onClick={toggleUserSetting}
             />
             <div
                 style={{

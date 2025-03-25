@@ -1,5 +1,7 @@
 //Checks if the user prefers light or dark mode from their window.
 
+import { BlueprintIcons_16Id } from "@blueprintjs/icons/lib/esm/generated/16px/blueprint-icons-16";
+
 //corresponds to each index to make the code clearer
 const allSettings: string[] = ["System", "Light", "Dark"];
 
@@ -98,6 +100,23 @@ function simRingCellColor(): "#332e2e" | "#d3d3d3" {
     return chooseDark() ? "#332e2e" : "#d3d3d3";
 }
 
+function darkModeIcon(): BlueprintIcons_16Id {
+    switch (getUserSetting()) {
+        case 0:
+            return "contrast";
+        case 1:
+            return "flash";
+        case 2:
+            return "moon";
+        default:
+            return "contrast";
+    }
+}
+
+function toggleUserSetting(): void {
+    setUserSetting((getUserSetting() + 1) % allSettings.length);
+}
+
 export {
     textColor,
     bgColor,
@@ -114,4 +133,6 @@ export {
     simBorderColor,
     simRingCellColor,
     chooseDark,
+    darkModeIcon,
+    toggleUserSetting,
 };

@@ -19,9 +19,9 @@ import { Side } from "../../common/game-types";
 import { Dispatch, useEffect, useState } from "react";
 import {
     bgColor,
-    setUserSetting,
-    chooseDark,
     textColor,
+    darkModeIcon,
+    toggleUserSetting,
 } from "../checkDarkMode";
 import "../colors.css";
 
@@ -41,8 +41,8 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
     // Store react router state for game
     const navigate = useNavigate();
 
-    //we have this because until its declared false, we know our program is still rendering.
-    //So, we wait for the useEFfect to then know what we're done refreshing
+    // We have this because until its declared false, we know our program is still rendering.
+    // So, we wait for the useEffect to then know what we're done refreshing
     const [rendering] = useState("true");
 
     // This effect will run after every render
@@ -102,29 +102,12 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
             </NavbarGroup>
             <NavbarGroup align="right">
                 {rotateButton}
-                <h3 className={textColor()}>{props.side}</h3>
-                <Button icon="cog" minimal onClick={() => navigate("/debug")} />
                 <Button
+                    icon={darkModeIcon()}
                     minimal
-                    onClick={() => {
-                        //if chooseDark is true, now we want to set it to light, so pass 1.
-                        //if chooseDark is false, that means its light currently, so want to
-                        //set it to dark, so pass index 2.
-                        chooseDark() ? setUserSetting(1) : setUserSetting(2);
-                        //begin the refresh
-                    }}
-                >
-                    <img
-                        //if it's dark, display a moon. Otherwise, display a sun.
-                        src={
-                            chooseDark() ? "/public/moon.png" : (
-                                "/public/sun.png"
-                            )
-                        }
-                        alt="light"
-                        style={{ width: "30px", height: "30px" }}
-                    />
-                </Button>
+                    onClick={toggleUserSetting}
+                />
+                <Button icon="cog" minimal onClick={() => navigate("/debug")} />
             </NavbarGroup>
         </Navbar>
     );
