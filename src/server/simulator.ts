@@ -49,22 +49,25 @@ function getStack(justMyCode = true) {
  */
 const parseErrorStack = (stack: string): StackFrame[] => {
     const lines = stack.split("\n");
-    const frames = lines.slice(1).map((line) => {
+    const frames = lines.slice(1).reduce<StackFrame[]>((result, line) => {
         const match = line.match(/^\s+at (?:(.+) \()?(.+):(\d+):(\d+)\)?$/);
         if (!match) {
-            throw new Error(`Invalid stack frame: ${line}`);
+            console.warn(`Invalid stack frame: ${line}`);
+            return result;
         }
         const [, functionName, fileName, lineNumber, columnNumber] = match;
         if (!fileName || !lineNumber || !columnNumber) {
-            throw new Error(`Invalid stack frame: ${line}`);
+            console.warn(`Invalid stack frame: ${line}`);
+            return result;
         }
-        return {
+        result.push({
             fileName,
             functionName,
             lineNumber: parseInt(lineNumber),
             columnNumber: parseInt(columnNumber),
-        };
-    });
+        });
+        return result;
+    }, []);
     return frames;
 };
 
