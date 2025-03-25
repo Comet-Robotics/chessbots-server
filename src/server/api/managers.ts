@@ -15,4 +15,4 @@ export const robotManager = new RobotManager(
     USE_VIRTUAL_ROBOTS ? Array.from(virtualRobots.values()) : [],
 );
 export const tcpServer: TCPServer | null =
-    USE_VIRTUAL_ROBOTS ? null : new TCPServer({},robotManager);
+    USE_VIRTUAL_ROBOTS ? null : new TCPServer({}, robotManager);

@@ -33,7 +33,6 @@ import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
 
-
 export const executor = new CommandExecutor();
 
 export let gameManager: GameManager | null = null;
