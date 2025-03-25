@@ -13,11 +13,11 @@ function setUserSetting(newSetting: number) {
     if (localStorage.getItem("refreshing") !== "true") {
         //otherwise, set the item.
         localStorage.setItem("userSetting", newSetting + "");
-        
+
         //now after setting it we plan to refresh, set it to true now to prevent race conditions where we may overwrite "userSetting" value
         localStorage.setItem("refreshing", "true");
         //refresh the page
-        window.location.reload();    
+        window.location.reload();
     }
 }
 
@@ -113,5 +113,5 @@ export {
     getUserSetting,
     simBorderColor,
     simRingCellColor,
-    chooseDark
+    chooseDark,
 };

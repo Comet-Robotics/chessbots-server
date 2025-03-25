@@ -17,7 +17,12 @@ import {
 import { SendMessage } from "../../common/message/message";
 import { Side } from "../../common/game-types";
 import { Dispatch, useEffect, useState } from "react";
-import { bgColor, setUserSetting, chooseDark, textColor} from "../checkDarkMode";
+import {
+    bgColor,
+    setUserSetting,
+    chooseDark,
+    textColor,
+} from "../checkDarkMode";
 import "../colors.css";
 
 interface NavbarMenuProps {
@@ -37,14 +42,14 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
     const navigate = useNavigate();
 
     //we have this because until its declared false, we know our program is still rendering.
-        //So, we wait for the useEFfect to then know what we're done refreshing
-        const [rendering] = useState("true");
-    
-        // This effect will run after every render
-        useEffect(() => {
-            //now that we're done refreshing, we set the status of refreshing to false
-            localStorage.setItem("refreshing", "false");
-        }, [rendering]);
+    //So, we wait for the useEFfect to then know what we're done refreshing
+    const [rendering] = useState("true");
+
+    // This effect will run after every render
+    useEffect(() => {
+        //now that we're done refreshing, we set the status of refreshing to false
+        localStorage.setItem("refreshing", "false");
+    }, [rendering]);
 
     /** create navbar rotate button */
     const rotateButton =
@@ -99,7 +104,7 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
                 {rotateButton}
                 <h3 className={textColor()}>{props.side}</h3>
                 <Button icon="cog" minimal onClick={() => navigate("/debug")} />
-                <Button 
+                <Button
                     minimal
                     onClick={() => {
                         //if chooseDark is true, now we want to set it to light, so pass 1.
@@ -107,12 +112,18 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
                         //set it to dark, so pass index 2.
                         chooseDark() ? setUserSetting(1) : setUserSetting(2);
                         //begin the refresh
-                    }}>
-                    <img 
+                    }}
+                >
+                    <img
                         //if it's dark, display a moon. Otherwise, display a sun.
-                        src= {chooseDark() ? "/public/moon.png" : "/public/sun.png"}
-                        alt="light" 
-                        style={{ width: '30px', height: '30px' }}/>
+                        src={
+                            chooseDark() ? "/public/moon.png" : (
+                                "/public/sun.png"
+                            )
+                        }
+                        alt="light"
+                        style={{ width: "30px", height: "30px" }}
+                    />
                 </Button>
             </NavbarGroup>
         </Navbar>
