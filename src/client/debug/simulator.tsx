@@ -22,8 +22,10 @@ import {
 } from "../check-dark-mode";
 
 const tileSize = 60;
-const robotSize = tileSize / 2;
+export const robotSize = tileSize / 2;
 const cellCount = 12;
+
+export type RobotState = { [robotId: string]: SimulatedRobotLocation };
 
 /**
  * Creates a robot simulator for testing robot commands
@@ -33,8 +35,6 @@ const cellCount = 12;
  */
 export function Simulator() {
     const navigate = useNavigate();
-
-    type RobotState = { [robotId: string]: SimulatedRobotLocation };
 
     type Action =
         | { type: "SET_ALL_ROBOTS"; payload: RobotState }
@@ -150,45 +150,7 @@ export function Simulator() {
                 </Button>
             </div>
             <div style={{ display: "flex", gap: "1rem", width: "95vw" }}>
-                <div
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns: `repeat(${cellCount}, ${tileSize}px)`,
-                        gridTemplateRows: `repeat(${cellCount}, ${tileSize}px)`,
-                        position: "relative",
-                    }}
-                >
-                    {new Array(cellCount * cellCount)
-                        .fill(undefined)
-                        .map((_, i) => {
-                            const row = Math.floor(i / cellCount);
-                            const col = i % cellCount;
-                            const isCenterCell =
-                                row >= 2 && row < 10 && col >= 2 && col < 10;
-                            return (
-                                <div
-                                    key={i}
-                                    style={{
-                                        borderWidth: "1px",
-                                        borderStyle: "solid",
-                                        borderColor: simBorderColor(),
-                                        backgroundColor:
-                                            !isCenterCell ? simRingCellColor()
-                                            :   "transparent",
-                                    }}
-                                />
-                            );
-                        })}
-                    {/* TODO: implement onTopOfRobots */}
-                    {Object.entries(robotState).map(([robotId, pos]) => (
-                        <Robot
-                            pos={pos}
-                            robotId={robotId}
-                            key={robotId}
-                            onTopOfRobots={[]}
-                        />
-                    ))}
-                </div>
+                <RobotGrid robotState={robotState} />
                 <div
                     style={{
                         width: "100%",
@@ -238,6 +200,49 @@ const openInEditor = async (frame: StackFrame) => {
     });
     await fetch(`/__open-in-editor?${params.toString()}`);
 };
+
+export function RobotGrid({ robotState }: { robotState: RobotState }) {
+    return (
+        <div
+            style={{
+                display: "grid",
+                gridTemplateColumns: `repeat(${cellCount}, ${tileSize}px)`,
+                gridTemplateRows: `repeat(${cellCount}, ${tileSize}px)`,
+                position: "relative",
+            }}
+        >
+            {new Array(cellCount * cellCount).fill(undefined).map((_, i) => {
+                const row = Math.floor(i / cellCount);
+                const col = i % cellCount;
+                const isCenterCell =
+                    row >= 2 && row < 10 && col >= 2 && col < 10;
+                return (
+                    <div
+                        key={i}
+                        style={{
+                            borderWidth: "1px",
+                            borderStyle: "solid",
+                            borderColor: simBorderColor(),
+                            backgroundColor:
+                                !isCenterCell ? simRingCellColor() : (
+                                    "transparent"
+                                ),
+                        }}
+                    />
+                );
+            })}
+            {/* TODO: implement onTopOfRobots */}
+            {Object.entries(robotState).map(([robotId, pos]) => (
+                <Robot
+                    pos={pos}
+                    robotId={robotId}
+                    key={robotId}
+                    onTopOfRobots={[]}
+                />
+            ))}
+        </div>
+    );
+}
 
 /**
  * the message log, used to show the commands sent to the robot
