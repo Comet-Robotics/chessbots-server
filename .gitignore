@@ -29,4 +29,7 @@ dist-ssr
 site/
 !site/CNAME
 
-*/.env
+.env
+
+# ignore history directory
+/.history

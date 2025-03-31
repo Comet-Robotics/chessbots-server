@@ -2,6 +2,7 @@ import { ResizeEntry, ResizeSensor } from "@blueprintjs/core";
 import { PropsWithChildren, useState } from "react";
 import { Transform, computeChessboardTransform } from "./board-transform";
 import { Side } from "../../common/game-types";
+import { bgColor } from "../check-dark-mode";
 
 interface BoardContainerProps extends PropsWithChildren {
     side: Side;
@@ -9,6 +10,11 @@ interface BoardContainerProps extends PropsWithChildren {
     rotation: number;
 }
 
+/**
+ * A container to deal with chessboard resizing
+ * @param props - side, width handler, rotation, and inner elements
+ * @returns a resizable container with a chessboard inside
+ */
 export function BoardContainer(props: BoardContainerProps) {
     const [transform, setTransform] = useState<Transform | undefined>();
 
@@ -20,9 +26,10 @@ export function BoardContainer(props: BoardContainerProps) {
         setTransform(transform);
     };
 
+    // returns the resizable container
     return (
         <ResizeSensor onResize={handleResize}>
-            <div id="chess-container">
+            <div id="chess-container" className={bgColor()}>
                 <div
                     id="chessboard"
                     style={{

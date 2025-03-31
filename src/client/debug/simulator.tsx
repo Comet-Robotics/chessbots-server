@@ -9,11 +9,28 @@ import {
 } from "../../common/message/simulator-message";
 import { Tag, CompoundTag } from "@blueprintjs/core";
 import "./simulator.scss";
+import { clampHeading } from "../../common/units";
+import {
+    bgColor,
+    darkModeIcon,
+    innerRobotColor,
+    robotColor,
+    simBorderColor,
+    simRingCellColor,
+    textColor,
+    toggleUserSetting,
+} from "../check-dark-mode";
 
 const tileSize = 60;
 const robotSize = tileSize / 2;
-
 const cellCount = 12;
+
+/**
+ * Creates a robot simulator for testing robot commands
+ *
+ * does not require physical robots to be connected
+ * @returns the simulator screen as a card
+ */
 export function Simulator() {
     const navigate = useNavigate();
 
@@ -26,6 +43,7 @@ export function Simulator() {
               payload: { robotId: string; state: SimulatedRobotLocation };
           };
 
+    /** compress robot states for performance */
     const robotStateReducer = (
         state: RobotState,
         action: Action,
@@ -48,6 +66,7 @@ export function Simulator() {
         { message: SimulatorUpdateMessage; ts: Date }[]
     >([]);
 
+    // update the simulator when a message comes in
     useSocket((message) => {
         if (message instanceof SimulatorUpdateMessage) {
             dispatch({
@@ -58,6 +77,7 @@ export function Simulator() {
         }
     });
 
+    // fetch the current state of the robots and update all the sim robots
     const fetchRobotState = async () => {
         const { robotState, messages } = await get(
             "/get-simulator-robot-state",
@@ -72,6 +92,7 @@ export function Simulator() {
         fetchRobotState();
     }, []);
 
+    // get /do-smth to move the robot randomly
     const moveRandomBot = async () => {
         const response = await get("/do-smth");
         if (!response.ok) {
@@ -86,19 +107,31 @@ export function Simulator() {
         }
     }, [messageLog]);
 
+    /**
+     * make the simulator screen
+     *
+     * made by creating an array for the entire chessboard
+     * add all the robots on top of the board
+     */
     return (
-        <Card>
+        <Card className={bgColor()}>
             <Button
-                minimal
+                variant="minimal"
                 style={{ float: "right" }}
                 icon="home"
                 onClick={() => navigate("/home")}
             />
             <Button
-                minimal
+                variant="minimal"
                 style={{ float: "right" }}
                 icon="cog"
                 onClick={() => navigate("/debug")}
+            />
+            <Button
+                variant="minimal"
+                style={{ float: "right" }}
+                icon={darkModeIcon()}
+                onClick={toggleUserSetting}
             />
             <div
                 style={{
@@ -108,7 +141,7 @@ export function Simulator() {
                     alignItems: "center",
                 }}
             >
-                <H1>Robot Simulator</H1>
+                <H1 className={textColor()}>Robot Simulator</H1>
                 <Button icon="refresh" onClick={fetchRobotState}>
                     Refresh
                 </Button>
@@ -136,11 +169,12 @@ export function Simulator() {
                                 <div
                                     key={i}
                                     style={{
-                                        border: "1px solid black",
+                                        borderWidth: "1px",
+                                        borderStyle: "solid",
+                                        borderColor: simBorderColor(),
                                         backgroundColor:
-                                            !isCenterCell ? "lightgray" : (
-                                                "transparent"
-                                            ),
+                                            !isCenterCell ? simRingCellColor()
+                                            :   "transparent",
                                     }}
                                 />
                             );
@@ -187,6 +221,11 @@ export function Simulator() {
     );
 }
 
+/**
+ * open a simulator frame in a editor
+ * @param frame - the frame to view
+ * @returns nothing
+ */
 const openInEditor = async (frame: StackFrame) => {
     if (!frame) {
         console.warn("No stack frame provided for opening in editor");
@@ -200,6 +239,11 @@ const openInEditor = async (frame: StackFrame) => {
     await fetch(`/__open-in-editor?${params.toString()}`);
 };
 
+/**
+ * the message log, used to show the commands sent to the robot
+ * @param props - the message and time
+ * @returns the clickable message box
+ */
 function LogEntry(props: { message: SimulatorUpdateMessage; ts: Date }) {
     const { message, ts } = props;
 
@@ -287,6 +331,11 @@ function LogEntry(props: { message: SimulatorUpdateMessage; ts: Date }) {
     );
 }
 
+/**
+ * Creates a robot icon to show in the simulator
+ * @param props - the robot position and id
+ * @returns the robot icon scaled to the board
+ */
 function Robot(props: {
     pos: SimulatedRobotLocation;
     robotId: string;
@@ -297,17 +346,16 @@ function Robot(props: {
             className="robot"
             style={{
                 position: "absolute",
-                left: `${props.pos.position.x * tileSize}px`,
-                bottom: `${props.pos.position.y * tileSize}px`,
+                left: `${props.pos.position.x * tileSize - 0.25 * tileSize}px`,
+                bottom: `${props.pos.position.y * tileSize - 0.25 * tileSize}px`,
             }}
         >
             <Tooltip content={`${props.robotId}: ${JSON.stringify(props.pos)}`}>
                 <div
+                    className={robotColor(props.onTopOfRobots.length)}
                     style={{
-                        transform: `rotate(-${props.pos.headingRadians}rad)`,
-                        backgroundColor: "white",
+                        transform: `rotate(-${clampHeading(props.pos.headingRadians)}rad)`,
                         borderRadius: "50%",
-                        border: `4px solid ${props.onTopOfRobots.length > 0 ? "red" : "black"}`,
                         display: "flex",
                         justifyContent: "flex-end",
                         alignItems: "center",
@@ -318,10 +366,10 @@ function Robot(props: {
                     }}
                 >
                     <div
+                        className={innerRobotColor()}
                         style={{
                             width: robotSize / 4,
                             height: robotSize / 4,
-                            backgroundColor: "black",
                             borderRadius: "50%",
                         }}
                     />

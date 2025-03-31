@@ -15,11 +15,18 @@ import {
     GameHoldReason,
     GameInterruptedReason,
 } from "../../common/game-end-reasons";
+import { bgColor, buttonColor, textColor } from "../check-dark-mode";
+import "../colors.css";
 
 interface DrawDialogProps {
     sendMessage: SendMessage;
 }
 
+/**
+ * allows the player to offer a draw to the other people
+ * @param props - function for sending messages
+ * @returns - draw dialog
+ */
 export function OfferDrawDialog(props: DrawDialogProps) {
     const [isOpen, setIsOpen] = useState(true);
     const actions = (
@@ -28,6 +35,7 @@ export function OfferDrawDialog(props: DrawDialogProps) {
                 text="Yes"
                 rightIcon="arrow-up"
                 intent="primary"
+                className={buttonColor()}
                 onClick={() => {
                     props.sendMessage(
                         new GameHoldMessage(GameHoldReason.DRAW_OFFERED),
@@ -38,6 +46,7 @@ export function OfferDrawDialog(props: DrawDialogProps) {
                 text="No"
                 rightIcon="arrow-down"
                 intent="primary"
+                className={buttonColor()}
                 onClick={() => {
                     props.sendMessage(
                         new GameHoldMessage(GameHoldReason.DRAW_DENIED),
@@ -48,19 +57,27 @@ export function OfferDrawDialog(props: DrawDialogProps) {
     );
     return (
         <Dialog
+            className={bgColor()}
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
             canOutsideClickClose={false}
             canEscapeKeyClose={false}
         >
             <DialogBody>
-                <NonIdealState title={"Offer draw?"} />
+                <NonIdealState>
+                    <h4 className={textColor()}>Offer draw?</h4>
+                </NonIdealState>
             </DialogBody>
             <DialogFooter minimal actions={actions} />
         </Dialog>
     );
 }
 
+/**
+ * Allow a player to accept another player's draw request
+ * @param props - function for sending messages
+ * @returns - draw accept dialog
+ */
 export function AcceptDrawDialog(props: DrawDialogProps) {
     const [isOpen, setIsOpen] = useState(true);
     const actions = (
@@ -69,6 +86,7 @@ export function AcceptDrawDialog(props: DrawDialogProps) {
                 text="Yes"
                 rightIcon="arrow-up"
                 intent="primary"
+                className={buttonColor()}
                 onClick={() => {
                     props.sendMessage(
                         new GameInterruptedMessage(
@@ -81,6 +99,7 @@ export function AcceptDrawDialog(props: DrawDialogProps) {
                 text="No"
                 rightIcon="arrow-down"
                 intent="primary"
+                className={buttonColor()}
                 onClick={() => {
                     props.sendMessage(
                         new GameHoldMessage(GameHoldReason.DRAW_DENIED),

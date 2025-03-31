@@ -4,10 +4,6 @@
  * To add a new message, first add a member to MessageType, then create a corresponding class which extends `Message` and implements the `type` method and the `toObj` method.
  * Finally, add a corresponding case to `parseMessage` in `./parse-message`.
  */
-
-/**
- * A collection of WebSocket message types.
- */
 export enum MessageType {
     /**
      * A client-server message used to register a websocket with the server.
@@ -62,6 +58,11 @@ export enum MessageType {
     UPDATE_QUEUE = "update-queue",
 }
 
+/**
+ * The base class for messages
+ *
+ * all messages have a type and can be converted to json
+ */
 export abstract class Message {
     /**
      * Serializes the message as json.
@@ -81,6 +82,9 @@ export abstract class Message {
     }
 }
 
+/**
+ * A message to register the client with the server
+ */
 export class RegisterWebsocketMessage extends Message {
     protected type = MessageType.REGISTER_WEBSOCKET;
 }

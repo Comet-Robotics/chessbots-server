@@ -1,21 +1,39 @@
-import * as net from "net";
+import * as net from "node:net";
 import config from "./bot-server-config.json";
 import {
-    Packet,
+    type Packet,
     SERVER_PROTOCOL_VERSION,
     jsonToPacket,
     packetToJson,
+    PacketType,
 } from "../utils/tcp-packet";
-import EventEmitter from "node:events";
+import { EventEmitter } from "@posva/event-emitter";
 import { randomUUID } from "node:crypto";
 
+type RobotEventEmitter = EventEmitter<{
+    actionComplete: {
+        success: boolean;
+        packetId: string;
+        reason?: string;
+    };
+}>;
+
+/**
+ * The tunnel for handling communications to the robots
+ */
 export class BotTunnel {
     connected: boolean = false;
     dataBuffer: Buffer | undefined;
     address: string | undefined;
     id: string | undefined;
-    emitter: EventEmitter;
+    emitter: RobotEventEmitter;
 
+    /**
+     * take the robot socket and creates an emitter to notify dependencies
+     *
+     * @param socket - socket of the incoming connections
+     * @param onHandshake - handshake handler
+     */
     constructor(
         private socket: net.Socket | null,
         private onHandshake: (packetContent: string) => void,
@@ -27,6 +45,11 @@ export class BotTunnel {
         return this.socket!.readyState === "open";
     }
 
+    /**
+     * get the most relevant identifier possible
+     *
+     * @returns - a robot identifier
+     */
     getIdentifier(): string {
         if (this.id !== undefined) {
             return "ID: " + this.id;
@@ -39,15 +62,23 @@ export class BotTunnel {
         }
     }
 
-    onData(data: Buffer) {
+    /**
+     * log when data comes in
+     * @param data - the incoming data
+     */
+    async onData(data: Buffer) {
         console.log(
             "connection data from %s: %j",
             this.getIdentifier(),
             data.toString(),
         );
-        this.handleData(data);
+        await this.handleData(data);
     }
 
+    /**
+     * log errors and update connection status
+     * @param err - the error message
+     */
     onError(err: Error) {
         console.error(
             "Connection error from %s: %s",
@@ -57,30 +88,50 @@ export class BotTunnel {
         this.connected = false;
     }
 
+    /**
+     * log when a connection is removed or lost
+     */
     onClose() {
         console.log("Lost connection to %s", this.getIdentifier());
         this.connected = false;
     }
 
-    handleData(data: Buffer) {
+    /**
+     * Sets up the data buffer for it to be handled by the queue
+     *
+     * @param data - data to be handled
+     */
+    async handleData(data: Buffer) {
+        console.log("Handling Data");
+        console.log("Current Data: ");
+        console.log(this.dataBuffer);
         if (this.dataBuffer !== undefined) {
+            console.log("Buffer Not Undefined!");
             this.dataBuffer = Buffer.concat([this.dataBuffer, data]);
         } else {
             this.dataBuffer = data;
         }
 
-        this.handleQueue();
+        await this.handleQueue();
     }
 
-    handleQueue() {
+    /**
+     * handles the incoming data and check if it is valid
+     *
+     * emits result for further handling
+     *
+     * @returns - nothing if nothing happened and nothing if something happened
+     */
+    async handleQueue() {
         if (this.dataBuffer === undefined || this.dataBuffer.length < 3) {
-            this.dataBuffer = undefined;
             return;
         }
 
+        // get the data and find the terminator
         let str = this.dataBuffer.toString();
         const terminator = str.indexOf(";");
 
+        // if there is no terminator, wait for it
         if (terminator === -1) {
             if (str.length > 200) {
                 // Invalid state, reset buf
@@ -93,35 +144,49 @@ export class BotTunnel {
 
         str = str.substring(0, terminator);
 
+        // check if the buffer is the correct length based on where the terminator is
         if (this.dataBuffer.length > terminator) {
             this.dataBuffer = this.dataBuffer.subarray(terminator + 1);
         } else {
             this.dataBuffer = undefined;
         }
 
+        console.log("Current String: ");
+        console.log(str);
+
         try {
             const packet = jsonToPacket(str);
+            const { packetId } = packet;
+            console.log("Received Packet");
 
             // Parse packet based on type
             switch (packet.type) {
+                // register new robot
                 case "CLIENT_HELLO": {
                     this.onHandshake(packet.macAddress);
-                    this.send(this.makeHello(packet.macAddress));
+                    await this.send(this.makeHello(packet.macAddress));
                     this.connected = true;
                     break;
                 }
+                // respond to pings
                 case "PING_SEND": {
-                    this.send({ type: "PING_RESPONSE" });
+                    await this.send({ type: PacketType.PING_RESPONSE });
                     break;
                 }
-                case "ACTION_SUCCESS": {
-                    this.emitter.emit("actionComplete", { success: true });
+                // emit a action complete for further processing
+                case PacketType.ACTION_SUCCESS: {
+                    this.emitter.emit("actionComplete", {
+                        success: true,
+                        packetId,
+                    });
                     break;
                 }
-                case "ACTION_FAIL": {
+                // emit a action fail for further processing
+                case PacketType.ACTION_FAIL: {
                     this.emitter.emit("actionComplete", {
                         success: false,
                         reason: packet.reason,
+                        packetId,
                     });
                     break;
                 }
@@ -135,14 +200,22 @@ export class BotTunnel {
             this.dataBuffer !== undefined &&
             this.dataBuffer.indexOf(";") !== -1
         ) {
-            this.handleQueue();
+            await this.handleQueue();
         }
     }
 
-    send(packet: Packet) {
-        const str = packetToJson(packet);
+    /**
+     * send packets to robot. promise resolves when the robot acknowledges that the action is complete
+     * @param packet - packet to send
+     * @returns - the packet id
+     */
+    async send(packet: Packet): Promise<string> {
+        const packetId = randomUUID();
+
+        const str = packetToJson(packet, packetId);
         const msg = str + ";";
 
+        // If the connection isn't active, there is no robot
         if (!this.isActive()) {
             console.error(
                 "Connection to",
@@ -157,38 +230,49 @@ export class BotTunnel {
         }
 
         console.log({ msg });
-        this.socket!.write(msg);
-    }
 
-    async waitForActionResponse(): Promise<void> {
+        // Packets that don't need to be waited on for completion
+        const EXCLUDED_PACKET_TYPES = [PacketType.SERVER_HELLO];
+
         return new Promise((res, rej) => {
-            this.emitter.once("actionComplete", (args) => {
-                if (args.success) res();
-                else rej(args.reason);
-            });
+            if (EXCLUDED_PACKET_TYPES.includes(packet.type)) {
+                this.socket!.write(msg);
+                res(packetId);
+            } else {
+                const removeListener = this.emitter.on(
+                    "actionComplete",
+                    (args) => {
+                        if (args.packetId !== packetId) return;
+                        removeListener();
+                        console.log("action complete", args);
+                        if (args.success) res(args.packetId);
+                        else rej(args.reason);
+                    },
+                );
+
+                this.socket!.write(msg);
+            }
         });
     }
 
     makeHello(mac: string): Packet {
-        // Very ordered list of config nodes to send over
-        // t: type, v: value
-        const configEntries: [string, string][] = [];
+        // Map of config nodes to send over
+        // n: name, v: value
+        const configEntries = {};
 
-        // Where a bot has a specific config changed, like moving a pin
+        // Where a bot has a specific config changed, like a different encoder multiplier or pin location
         const overrides =
             (config[config.bots[mac]] ?? { attributes: {} })["attributes"] ??
             {};
 
         for (const i of config.botConfigSchema) {
             if (i.name in overrides) {
-                configEntries.push([i.type, overrides[i.name]]);
-            } else {
-                configEntries.push([i.type, i.default_value.toString()]);
+                configEntries[i.name] = overrides[i.name];
             }
         }
 
         const ret: Packet = {
-            type: "SERVER_HELLO",
+            type: PacketType.SERVER_HELLO,
             protocol: SERVER_PROTOCOL_VERSION,
             config: configEntries,
         };
@@ -199,9 +283,19 @@ export class BotTunnel {
     }
 }
 
+/**
+ * Handles tcp tunnels and maintains a list of connections
+ */
 export class TCPServer {
     private server: net.Server;
 
+    /**
+     * creates a tcp server on port from server config and registers passed in ids with their corresponding bot tunnels
+     *
+     * when a robot connects, bind it to the server
+     *
+     * @param connections - bot connections in a id:BotTunnel array
+     */
     constructor(private connections: { [id: string]: BotTunnel } = {}) {
         this.server = net.createServer();
         this.server.on("connection", this.handleConnection.bind(this));
@@ -213,15 +307,24 @@ export class TCPServer {
         });
     }
 
+    /**
+     * When a robot connects, add the tunnel to the robot connections at its id
+     *
+     * assign a random id to new robots
+     *
+     * @param socket - the incoming connection socket information
+     */
     private handleConnection(socket: net.Socket) {
         const remoteAddress = socket.remoteAddress + ":" + socket.remotePort;
         console.log("New client connection from %s", remoteAddress);
 
         socket.setNoDelay(true);
 
+        // create a new bot tunnel for the connection
         const tunnel = new BotTunnel(
             socket,
             ((mac: string) => {
+                // add the new robot to the array if it isn't in bots config
                 console.log("Adding robot with mac", mac, "to arr");
                 let id: string;
                 if (!(mac in config["bots"])) {
@@ -241,15 +344,25 @@ export class TCPServer {
             }).bind(this),
         );
 
+        // bind the sockets to the corresponding functions
         socket.on("data", tunnel.onData.bind(tunnel));
         socket.once("close", tunnel.onClose.bind(tunnel));
         socket.on("error", tunnel.onError.bind(tunnel));
     }
 
+    /**
+     * get the robot tunnel based on the robot id string
+     * @param id - id string
+     * @returns - tcp tunnel
+     */
     public getTunnelFromId(id: string): BotTunnel {
         return this.connections[id];
     }
 
+    /**
+     * get a list of connected ids
+     * @returns - list of id keys
+     */
     public getConnectedIds(): string[] {
         return Object.keys(this.connections);
     }

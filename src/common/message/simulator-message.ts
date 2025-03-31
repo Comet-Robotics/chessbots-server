@@ -1,5 +1,5 @@
 import { Message, MessageType } from "./message";
-import type { Packet } from "../../server/utils/tcp-packet";
+import type { PacketWithId } from "../../server/utils/tcp-packet";
 export type SimulatedRobotLocation = {
     position: { x: number; y: number };
     headingRadians: number;
@@ -12,13 +12,16 @@ export type StackFrame = {
     columnNumber: number;
 };
 
+/**
+ * An update message for the simulator with the robot id, rotation and position
+ */
 export class SimulatorUpdateMessage extends Message {
     protected type = MessageType.SIMULATOR_UPDATE;
 
     constructor(
         public readonly robotId: string,
         public readonly location: SimulatedRobotLocation,
-        public readonly packet: Packet,
+        public readonly packet: PacketWithId,
         public readonly stackTrace?: StackFrame[],
     ) {
         super();

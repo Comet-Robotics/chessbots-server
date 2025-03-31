@@ -8,6 +8,10 @@ import {
 } from "./svg-components";
 import { CustomSquareContext } from "./custom-square-context";
 
+/**
+ * A renderer for the square dots and piece highlighting
+ * @param props - the square, its style, and any children
+ */
 export const customSquareRenderer = forwardRef<
     HTMLDivElement,
     CustomSquareProps
@@ -19,6 +23,7 @@ export const customSquareRenderer = forwardRef<
     let lastMoveHighlight: ReactElement | null = null;
     let clickedPieceHighlight: ReactElement | null = null;
 
+    // highlight the last move made
     const lastMove = chess.getLastMove();
     if (
         lastMove !== undefined &&
@@ -32,6 +37,7 @@ export const customSquareRenderer = forwardRef<
         );
     }
 
+    // highlight clicked pieces
     if (
         lastClickedSquare !== undefined &&
         lastClickedSquare === props.square &&
@@ -46,6 +52,7 @@ export const customSquareRenderer = forwardRef<
         );
     }
 
+    // highlight legal squares and capture opportunities
     if (legalSquares.includes(props.square)) {
         // Square should be highlighted
         if (chess.hasPiece(props.square)) {
@@ -57,11 +64,12 @@ export const customSquareRenderer = forwardRef<
                 />
             );
         } else {
-            //Square is empty
+            // Square is empty
             selectElement = <CenterDot />;
         }
     }
 
+    // return all the highlights inside a div
     return (
         <div style={props.style} ref={ref}>
             {clickedPieceHighlight}

@@ -5,6 +5,11 @@ import { SendMessage } from "../../common/message/message";
 import { Joystick } from "react-joystick-component";
 import type { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
 import { DriveSlider } from "./drive-slider";
+import {
+    joystickInColor,
+    joystickOutColor,
+    textColor,
+} from "../check-dark-mode";
 
 interface DriveRobotProps {
     robotId: string;
@@ -19,14 +24,15 @@ function almostEqual(v1: number, v2: number, epsilon: number = 0.01): boolean {
 
 /**
  * A component which can be used to drive an individual robot around.
+ * @param props - the robotid and the send message function
  */
 export function DriveRobot(props: DriveRobotProps) {
-    //state variable for handling the power levels of the robot
+    // state variable for handling the power levels of the robot
     const [power, setPower] = useState({ left: 0, right: 0 });
     const [prevPad, setPrevPad] = useState({ left: 0, right: 0 });
     const [prev, setPrev] = useState({ left: 0, right: 0 });
 
-    //useEffect hook to send the power levels to the robot if there is a change in the power levels
+    // useEffect hook to send the power levels to the robot if there is a change in the power levels
     useEffect(() => {
         if (
             almostEqual(prev.left, power.left) &&
@@ -40,6 +46,7 @@ export function DriveRobot(props: DriveRobotProps) {
         setPrev({ left: power.left, right: power.right });
     }, [props, power.left, power.right, prev]);
 
+    // allow use of a gamepad
     useEffect(() => {
         if (!navigator.getGamepads) {
             console.log("Gamepad API not supported");
@@ -67,6 +74,7 @@ export function DriveRobot(props: DriveRobotProps) {
                     ) {
                         continue;
                     }
+                    // set power based on pad values
                     setPower({ left: padLeftPower, right: padRightPower });
                     setPrevPad({ left: padLeftPower, right: padRightPower });
                 }
@@ -83,6 +91,7 @@ export function DriveRobot(props: DriveRobotProps) {
         };
     }, [props, prevPad]);
 
+    // the move types and corresponding motor powers
     const handleStopMove = useCallback(() => {
         setPower({ left: 0, right: 0 });
     }, []);
@@ -100,6 +109,7 @@ export function DriveRobot(props: DriveRobotProps) {
         setPower({ left: -0.5, right: 0.5 });
     }, []);
 
+    // handle when the left and right powers change
     const handleLeftPowerChange = useCallback(
         (value: number) => {
             setPower({ left: value, right: power.right });
@@ -113,6 +123,7 @@ export function DriveRobot(props: DriveRobotProps) {
         [power.left],
     );
 
+    /** use wasd and arrows to control robots */
     const hotkeys = useMemo(
         () => [
             {
@@ -189,6 +200,7 @@ export function DriveRobot(props: DriveRobotProps) {
         ],
     );
 
+    // show instructions and on screen buttons
     const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys);
 
     const convertJoystickXYToMotorPowers = useCallback(
@@ -234,7 +246,7 @@ export function DriveRobot(props: DriveRobotProps) {
     return (
         <div tabIndex={0} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
             <br />
-            <p>
+            <p className={textColor()}>
                 Control this robot using the buttons below, arrow keys, WASD, or
                 a connected gamepad. If arrow keys are not working, make sure
                 controls are in focus.
@@ -261,6 +273,8 @@ export function DriveRobot(props: DriveRobotProps) {
                         }}
                     >
                         <Joystick
+                            baseColor={joystickOutColor()}
+                            stickColor={joystickInColor()}
                             throttle={ROBOT_MSG_THROTTLE_MS}
                             size={150}
                             pos={convertMotorPowersToJoystickXY(

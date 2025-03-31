@@ -15,27 +15,40 @@ import {
 } from "../../common/game-end-reasons";
 import { useState } from "react";
 import { Side } from "../../common/game-types";
+import { bgColor, buttonColor, textColor } from "../check-dark-mode";
+import "../colors.css";
 
 interface GameEndDialogProps {
     reason: GameEndReason;
     side: Side;
 }
-
+/**
+ * creates the game ending dialog with a continue button
+ *
+ * @param props - the game end reason and side
+ * @returns a dialog box that can only be closed by clicking the button
+ */
 export function GameEndDialog(props: GameEndDialogProps) {
     const [isOpen, setIsOpen] = useState(true);
     const navigate = useNavigate();
+
+    /** continue button */
     const actions = (
         <Button
             text="Continue"
             rightIcon="arrow-right"
+            className={buttonColor()}
             intent="primary"
             onClick={() => {
                 navigate("/home");
             }}
         />
     );
+
+    // return the dialog with the button and game over reason
     return (
         <Dialog
+            className={bgColor()}
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
             canOutsideClickClose={false}
@@ -43,8 +56,12 @@ export function GameEndDialog(props: GameEndDialogProps) {
         >
             <DialogBody>
                 <NonIdealState
-                    title={gameOverMessage(props.reason)}
                     icon={gameOverIcon(props.reason, props.side)}
+                    title={
+                        <h4 className={textColor()}>
+                            {gameOverMessage(props.reason)}
+                        </h4>
+                    }
                     iconMuted={false}
                 />
             </DialogBody>
@@ -53,7 +70,15 @@ export function GameEndDialog(props: GameEndDialogProps) {
     );
 }
 
+/**
+ * returns the appropriate game over icon based on the reason and side
+ *
+ * @param reason - the reason the game ended
+ * @param side - the current side
+ * @returns game over icon
+ */
 function gameOverIcon(reason: GameEndReason, side: Side) {
+    // check which side won
     const whiteWon =
         reason === GameFinishedReason.BLACK_CHECKMATED ||
         reason === GameInterruptedReason.BLACK_RESIGNED;
@@ -61,9 +86,12 @@ function gameOverIcon(reason: GameEndReason, side: Side) {
         reason === GameFinishedReason.WHITE_CHECKMATED ||
         reason === GameInterruptedReason.WHITE_RESIGNED;
 
+    // checks which side is asking and assigns win/lost accordingly
     const won = side === Side.WHITE ? whiteWon : blackWon;
     const lost = side === Side.WHITE ? blackWon : whiteWon;
     // const draw = !blackWon && !whiteWon;
+
+    // return the correct icon and intent
     if (won) {
         return (
             <Icon
@@ -91,6 +119,12 @@ function gameOverIcon(reason: GameEndReason, side: Side) {
     );
 }
 
+/**
+ * returns the game over reason message string
+ *
+ * @param reason - the game end reason
+ * @returns the game end message string
+ */
 function gameOverMessage(reason: GameEndReason) {
     switch (reason) {
         case GameFinishedReason.WHITE_CHECKMATED:
