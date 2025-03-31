@@ -46,6 +46,7 @@
     position: fixed;
     width: 80%;
     height: 100%;
+    padding-top: 50px;
 }
 
 .flex-container {
@@ -63,7 +64,7 @@
     margin-top: auto;
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 500px) {
     .flex-container {
         flex-direction: row;
     }
@@ -86,5 +87,6 @@
     .main-dialog {
         width: 100%;
         margin-left: auto;
+        padding-top: 0px;
     }
 }
