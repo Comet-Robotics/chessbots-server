@@ -91,7 +91,7 @@ export class ClientManager {
     }
 
     public getIds(): undefined | string[] {
-        if (this.hostId && this.clientId) {
+        if (this.hostId !== undefined && this.clientId !== undefined) {
             return [this.hostId, this.clientId];
         } else {
             return;

@@ -55,12 +55,7 @@ export function Sidebar(props: sidebarProps): JSX.Element {
     //ts wanted me to do something with my data
     data;
     if (isPending || names.isPending) {
-        return (
-            <NonIdealState
-                icon={<Spinner intent="primary" />}
-                title="Loading..."
-            />
-        );
+        return <NonIdealState />;
     } else if (isError) {
         console.log(isError);
     }

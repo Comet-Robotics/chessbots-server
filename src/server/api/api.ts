@@ -57,23 +57,49 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
 
         //if you reload and the game is over
         if (gameManager?.isGameEnded() && onlyOnce) {
+            //make the reassignment occur once per game instead of once per reload
             onlyOnce = false;
-            for (const x in [1, 2]) {
-                console.log(x);
-                if (!queue.isEmpty()) {
-                    const newHost = clientManager.getIds();
-                    clientManager.removeHost();
-                    clientManager.removeClient();
-                    newHost ?
-                        clientManager.assignPlayer(newHost[1])
-                    :   undefined;
+
+            //remove the old players and store them for future reference
+            const oldPlayers = clientManager.getIds();
+            clientManager.removeHost();
+            clientManager.removeClient();
+
+            if (oldPlayers !== undefined) {
+                //in most cases, the second player becomes the host
+                clientManager.assignPlayer(oldPlayers[1]);
+
+                //if no one else wants to play, the host just swaps
+                if (queue.size() === 0) {
+                    clientManager.assignPlayer(oldPlayers[0]);
+                }
+
+                //if there is one person who wants to play, host moves to the second player
+                if (queue.size() === 1) {
                     const newPlayer = queue.pop();
                     if (newPlayer) {
-                        //transfer them from spectator to the newly-opened spot and remove them from queue
                         clientManager.removeSpectator(newPlayer);
                         clientManager.assignPlayer(newPlayer);
                         names.delete(newPlayer);
-                        socketManager.sendToAll(new GameStartedMessage());
+                    }
+                }
+
+                //are enough people to start a game, forget the old people
+                if (queue.size() >= 2) {
+                    const newPlayer = queue.pop();
+                    const newSecondPlayer = queue.pop();
+                    if (newPlayer && newSecondPlayer) {
+                        //reset the clients
+                        clientManager.removeHost();
+                        clientManager.removeClient();
+
+                        //assign new players
+                        clientManager.removeSpectator(newPlayer);
+                        clientManager.assignPlayer(newPlayer);
+                        names.delete(newPlayer);
+                        clientManager.removeSpectator(newSecondPlayer);
+                        clientManager.assignPlayer(newSecondPlayer);
+                        names.delete(newSecondPlayer);
                     }
                 }
             }
