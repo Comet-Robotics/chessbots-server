@@ -1,4 +1,4 @@
-import { Button, NonIdealState, Spinner } from "@blueprintjs/core";
+import { Button, NonIdealState } from "@blueprintjs/core";
 import { Dispatch, useState } from "react";
 import { MessageHandler } from "../../common/message/message";
 import { JoinQueue, UpdateQueue } from "../../common/message/game-message";
