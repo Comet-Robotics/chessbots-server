@@ -30,11 +30,13 @@ export const CubicBezierSchema = Record({
     controlPoint: CoordsSchema,
     endPoint: CoordsSchema,
 });
+export type CubicBezier = Static<typeof CubicBezierSchema>;
 
 export const QuadraticBezierSchema = Record({
     type: Literal(SplinePointType.QuadraticBezier),
     endPoint: CoordsSchema,
 });
+export type QuadraticBezier = Static<typeof QuadraticBezierSchema>;
 
 const Midpoint = Union(CubicBezierSchema, QuadraticBezierSchema);
 export type Midpoint = Static<typeof Midpoint>;

@@ -2,7 +2,9 @@ import { RefObject, useEffect, useMemo, useReducer, useRef } from "react";
 import { ContextMenu, Menu, MenuItem, MenuDivider } from "@blueprintjs/core";
 import {
     Coords,
+    CubicBezier,
     Point,
+    QuadraticBezier,
     Spline,
     SplinePointType,
     splineToSvgDrawAttribute,
@@ -27,8 +29,11 @@ export function Editor() {
                             endPoint: { x: 100, y: 100 },
                         },
                         {
-                            type: SplinePointType.QuadraticBezier,
+                            type: SplinePointType.CubicBezier,
                             endPoint: { x: 315, y: 50 },
+                            controlPoint: {
+                                x: 300, y: 40
+                            }
                         },
                         {
                             type: SplinePointType.QuadraticBezier,
@@ -46,7 +51,10 @@ function SplineEditor({ initialSpline }: { initialSpline: Spline }) {
         | { type: "DELETE_POINT"; index: number }
         | { type: "DELETE_START_POINT" }
         | { type: "MOVE_POINT_ENDPOINT"; coords: Coords; index: number }
-        | { type: "MOVE_START_POINT"; coords: Coords };
+        | { type: "MOVE_START_POINT"; coords: Coords }
+        | {type: "MOVE_CONTROL_POINT", coords: Coords, index: number}
+        | {type: "SWITCH_TO_QUADRATIC", index: number}
+        | {type: "SWITCH_TO_CUBIC", index: number}
 
     const [spline, dispatch] = useReducer(
         (state: Spline, action: SplineEditorAction): Spline => {
@@ -82,6 +90,48 @@ function SplineEditor({ initialSpline }: { initialSpline: Spline }) {
                         },
                     };
                 }
+                case "MOVE_CONTROL_POINT": {
+                    const point = state.points[action.index]
+                    if (point.type !== SplinePointType.CubicBezier) {
+                        return state;
+                    }
+                    
+                    point.controlPoint = action.coords
+                    
+                    const newPoints = [...state.points];
+                    newPoints[action.index] = point;
+
+                    return { ...state, points: newPoints };
+                }
+                case "SWITCH_TO_QUADRATIC": {
+                    const point = state.points[action.index]
+                    if (point.type !== SplinePointType.CubicBezier) {
+                        return state;
+                    }
+                    
+                    const newPoint: QuadraticBezier = { type: SplinePointType.QuadraticBezier, endPoint: point.endPoint }
+                    
+                    const newPoints = [...state.points];
+                    newPoints[action.index] = newPoint;
+
+                    return { ...state, points: newPoints };
+                }
+                case "SWITCH_TO_CUBIC": {
+                    const point = state.points[action.index]
+                    if (point.type !== SplinePointType.QuadraticBezier) {
+                        return state;
+                    }
+                    
+                    const newPoint: CubicBezier = { type: SplinePointType.CubicBezier, controlPoint: {
+                        x: (point.endPoint.x) / 2,
+                        y: (point.endPoint.y) / 2
+                    }, endPoint: point.endPoint }
+                    
+                    const newPoints = [...state.points];
+                    newPoints[action.index] = newPoint;
+
+                    return { ...state, points: newPoints };
+                }
             }
 
             return state;
@@ -101,7 +151,7 @@ function SplineEditor({ initialSpline }: { initialSpline: Spline }) {
                     pointerEvents: "none",
                 }}
             >
-                <path d={path} stroke={"purple"} strokeWidth={5} fill="none" />
+                <path d={path} stroke="purple" strokeWidth={3} fill="none" />
             </svg>
             <SplinePoint
                 point={spline.start}
@@ -115,6 +165,7 @@ function SplineEditor({ initialSpline }: { initialSpline: Spline }) {
                 }
             />
             {spline.points.map((point, index) => (
+                <>
                 <SplinePoint
                     point={point}
                     deleteFn={() => dispatch({ type: "DELETE_POINT", index })}
@@ -125,7 +176,12 @@ function SplineEditor({ initialSpline }: { initialSpline: Spline }) {
                             index,
                         })
                     }
+                    switchToQuadraticFn={() => dispatch({ type: "SWITCH_TO_QUADRATIC", index })}
+                    switchToCubicFn={() => dispatch({ type: "SWITCH_TO_CUBIC", index })}
                 />
+                {/* TODO: add line between control point and end point */}
+                {point.type === SplinePointType.CubicBezier && <SplineControlPoint point={point.controlPoint} moveControlFn={(x, y) => dispatch({ type: "MOVE_CONTROL_POINT", coords: { x, y }, index })} />}
+                </>
             ))}
         </>
     );
@@ -134,17 +190,20 @@ function SplineEditor({ initialSpline }: { initialSpline: Spline }) {
 function SplinePoint({
     point,
     moveFn,
+    switchToQuadraticFn = undefined,
+    switchToCubicFn = undefined,
     deleteFn = undefined,
 }: {
     point: Point;
     moveFn: (x: number, y: number) => void;
     deleteFn?: () => void;
+    switchToQuadraticFn?: () => void,
+    switchToCubicFn?: () => void,
 }) {
     // TODO: fix context menu positioning
-    // TODO: implement remaining context menu methods
 
-    const ref = useRef<HTMLElement>(null);
-    useDraggable(ref, (screenX, screenY) =>
+    const mainPointRef = useRef<HTMLElement>(null);
+    useDraggable(mainPointRef, (screenX, screenY) =>
         moveFn(screenX + robotSize / 4, screenY + robotSize / 4),
     );
 
@@ -160,15 +219,15 @@ function SplinePoint({
             content={
                 <Menu>
                     {point.type === SplinePointType.CubicBezier && (
-                        <MenuItem text="Switch to Quadratic" />
+                        <MenuItem text="Switch to Quadratic" onClick={switchToQuadraticFn} />
                     )}
                     {point.type === SplinePointType.QuadraticBezier && (
-                        <MenuItem text="Switch to Cubic" />
+                        <MenuItem text="Switch to Cubic" onClick={switchToCubicFn} />
                     )}
                     <MenuItem
                         text="Delete..."
                         intent="danger"
-                        onClick={deleteFn ?? undefined}
+                        onClick={deleteFn}
                         disabled={!deleteFn}
                     />
                     <MenuDivider />
@@ -177,7 +236,7 @@ function SplinePoint({
             }
         >
             <span
-                ref={ref}
+                ref={mainPointRef}
                 style={{
                     width: robotSize / 2,
                     height: robotSize / 2,
@@ -190,6 +249,27 @@ function SplinePoint({
                 }}
             />
         </ContextMenu>
+    );
+}
+
+function SplineControlPoint({ point, moveControlFn }: { point: Coords, moveControlFn: (x: number, y: number) => void }) {
+    const controlPointRef = useRef<HTMLElement>(null);
+    useDraggable(controlPointRef, (screenX, screenY) => moveControlFn(screenX + robotSize / 4, screenY + robotSize / 4))
+
+    return (
+        <span
+            ref={controlPointRef}
+            style={{
+                width: robotSize / 2,
+                height: robotSize / 2,
+                backgroundColor: 'red',
+                borderRadius: "50%",
+                position: "absolute",
+                left: point.x - robotSize / 4,
+                top: point.y - robotSize / 4,
+                cursor: "grab",
+            }}
+        />
     );
 }
 
