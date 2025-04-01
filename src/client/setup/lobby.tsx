@@ -5,7 +5,7 @@ import { GameStartedMessage } from "../../common/message/game-message";
 import { useSocket, useEffectQuery, get } from "../api";
 import { ClientType } from "../../common/client-types";
 import { Navigate } from "react-router-dom";
-import { themeButtons } from "./setup";
+import { ThemeButtons } from "./setup";
 
 /**
  * check for an active game and waits for one or forwards to setup
@@ -61,7 +61,7 @@ export function Lobby() {
                             justifyContent: "space-around",
                         }}
                     >
-                        {themeButtons}
+                        <ThemeButtons />
                     </div>
                 </>
             </SetupBase>
