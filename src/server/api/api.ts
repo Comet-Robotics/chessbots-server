@@ -32,6 +32,8 @@ import { VirtualBotTunnel, virtualRobots } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
+import { AbsoluteMoveCommand } from "../command/move-command";
+import { ParallelCommandGroup } from "../command/command";
 
 export const executor = new CommandExecutor();
 
@@ -208,10 +210,13 @@ apiRouter.get("/do-parallel", async (_, res) => {
     console.log("Starting parallel command group");
     const robotsEntries = Array.from(robotManager.idsToRobots.entries());
     console.log(robotsEntries);
+    const commands: any[] = [];
     for (const [, robot] of robotsEntries) {
         console.log("Moving robot " + robot.id);
-        await robot.sendDrivePacket(1);
+        // await robot.sendDrivePacket(1);
+        commands.push(new AbsoluteMoveCommand(robot.id, new Position(5, 5 )));
     }
+    new ParallelCommandGroup(commands).execute();
 
     res.send({ message: "success" });
 });

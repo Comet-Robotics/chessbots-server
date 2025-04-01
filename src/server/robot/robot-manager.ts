@@ -1,5 +1,6 @@
 import { GridIndices } from "./grid-indices";
 import { Robot } from "./robot";
+import config from "../api/bot-server-config.json";
 
 /**
  * Stores robots. Provides utilities for finding them by position.
@@ -24,6 +25,14 @@ export class RobotManager {
         this.indicesToIds.set(JSON.stringify(robot.defaultIndices), robot.id);
     }
 
+    createRobotFromId(robotId: string) {
+        const robot = new Robot(
+            robotId,
+            config[robotId].homePosition,
+            config[robotId].defaultPosition,
+        );
+        this.addRobot(robot);
+    }
     /**
      * Retrieves a robot by id.
      * Throws if no robot is found.

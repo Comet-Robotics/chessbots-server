@@ -340,7 +340,9 @@ export class TCPServer {
                     config["bots"][mac] = id;
                 } else {
                     id = config["bots"][mac];
-                    this.robotManager.addRobot(this.robotManager.getRobot(id));
+                    if (!(id in this.robotManager.idsToRobots)) {
+                        this.robotManager.createRobotFromId(id);
+                    }
                     console.log("Found address ID: " + id);
                 }
                 tunnel.id = id;
