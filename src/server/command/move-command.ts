@@ -182,6 +182,27 @@ export class AbsoluteMoveCommand extends MoveCommand {
     }
 }
 
+export class DriveTicksCommand
+    extends RobotCommand
+    implements Reversible<DriveTicksCommand>
+{
+    constructor(
+        robotId: string,
+        public ticksDistance: number,
+    ) {
+        super(robotId);
+    }
+
+    public async execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+        return robot.sendDriveTicksPacket(this.ticksDistance);
+    }
+
+    public reverse(): DriveTicksCommand {
+        return new DriveTicksCommand(this.robotId, -this.ticksDistance);
+    }
+}
+
 /**
  * Moves a robot to a global location. Implements Reversible through a
  * position supplier to return to the previous position.

@@ -32,7 +32,7 @@ import { VirtualBotTunnel, virtualRobots } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
-import { AbsoluteMoveCommand } from "../command/move-command";
+import { DriveTicksCommand } from "../command/move-command";
 import { ParallelCommandGroup } from "../command/command";
 
 export const executor = new CommandExecutor();
@@ -214,9 +214,9 @@ apiRouter.get("/do-parallel", async (_, res) => {
     for (const [, robot] of robotsEntries) {
         console.log("Moving robot " + robot.id);
         // await robot.sendDrivePacket(1);
-        commands.push(new AbsoluteMoveCommand(robot.id, new Position(5, 5 )));
+        commands.push(new DriveTicksCommand(robot.id, 200000));
     }
-    new ParallelCommandGroup(commands).execute();
+    await new ParallelCommandGroup(commands).execute();
 
     res.send({ message: "success" });
 });

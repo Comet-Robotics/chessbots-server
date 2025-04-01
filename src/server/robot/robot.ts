@@ -115,4 +115,15 @@ export class Robot {
         console.log(tileDistance);
         await tunnel.send({ type: PacketType.DRIVE_TANK, left: 1, right: 1 });
     }
+
+    /**
+     * Send a packet to the robot indicating distance to drive, in ticks. Returns a promise that finishes when the
+     * robot finishes the action.
+     *
+     * @param distanceTicks - The distance to drive forward or backwards by, in ticks.
+     */
+    public async sendDriveTicksPacket(distanceTicks: number): Promise<void> {
+        const tunnel = this.getTunnel();
+        await tunnel.send({ type: PacketType.DRIVE_TICKS, tickDistance: distanceTicks });
+    }
 }

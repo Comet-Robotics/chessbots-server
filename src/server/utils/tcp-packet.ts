@@ -18,6 +18,7 @@ export enum PacketType {
     SET_VAR = "SET_VAR",
     TURN_BY_ANGLE = "TURN_BY_ANGLE",
     DRIVE_TILES = "DRIVE_TILES",
+    DRIVE_TICKS = "DRIVE_TICKS",
     ACTION_SUCCESS = "ACTION_SUCCESS",
     ACTION_FAIL = "ACTION_FAIL",
     DRIVE_TANK = "DRIVE_TANK",
@@ -126,6 +127,12 @@ export const DRIVE_TILES_SCHEMA = Record({
     type: Literal(PacketType.DRIVE_TILES),
     tileDistance: Float,
 });
+
+export const DRIVE_TICKS_SCHEMA = Record({
+    type: Literal(PacketType.DRIVE_TICKS),
+    tickDistance: Int32,
+});
+
 /** success message */
 export const ACTION_SUCCESS_SCHEMA = Record({
     type: Literal(PacketType.ACTION_SUCCESS),
@@ -157,6 +164,7 @@ export const Packet = Union(
     SET_VAR_SCHEMA,
     TURN_BY_ANGLE_SCHEMA,
     DRIVE_TILES_SCHEMA,
+    DRIVE_TICKS_SCHEMA,
     ACTION_SUCCESS_SCHEMA,
     ACTION_FAIL_SCHEMA,
     DRIVE_TANK_SCHEMA,
