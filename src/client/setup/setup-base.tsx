@@ -31,20 +31,20 @@ export function SetupBase(props: SetupBaseProps): JSX.Element {
                 />
                 <Dialog
                     style={{
-                    backgroundColor: "transparent",
-                    boxShadow: "none",
-                }}
-                isOpen
+                        backgroundColor: "transparent",
+                        boxShadow: "none",
+                    }}
+                    isOpen
                     canEscapeKeyClose={false}
                     canOutsideClickClose={false}
                     usePortal={false}
                     enforceFocus={false}
                 >
                     <div className={bgColor() + " " + "roundedBorder"}>
-                    <DialogBody>{props.children}</DialogBody>
+                        <DialogBody>{props.children}</DialogBody>
                         <DialogFooter minimal actions={props.actions} />
                     </div>
-            </Dialog>
+                </Dialog>
             </div>
             <Sidebar />
         </>

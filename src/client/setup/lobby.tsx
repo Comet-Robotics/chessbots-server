@@ -5,6 +5,7 @@ import { GameStartedMessage } from "../../common/message/game-message";
 import { useSocket, useEffectQuery, get } from "../api";
 import { ClientType } from "../../common/client-types";
 import { Navigate } from "react-router-dom";
+import { themeButtons } from "./setup";
 
 /**
  * check for an active game and waits for one or forwards to setup
@@ -42,14 +43,27 @@ export function Lobby() {
     } else {
         return (
             <SetupBase>
-                <NonIdealState
-                    title={
-                        data.clientType === ClientType.CLIENT ?
-                            "Waiting For Host to Start"
-                        :   "Waiting in line"
-                    }
-                    icon={<Spinner intent="primary" />}
-                />
+                <>
+                    <NonIdealState
+                        title={
+                            data.clientType === ClientType.CLIENT ?
+                                "Waiting For Host to Start"
+                            :   "Waiting in line"
+                        }
+                        icon={<Spinner intent="primary" />}
+                    />
+                    <div
+                        style={{
+                            alignItems: "center",
+                            display: "flex",
+                            flex: "1 0 auto",
+                            flexDirection: "column",
+                            justifyContent: "space-around",
+                        }}
+                    >
+                        {themeButtons}
+                    </div>
+                </>
             </SetupBase>
         );
     }
