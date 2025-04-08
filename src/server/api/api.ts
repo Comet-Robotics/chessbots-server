@@ -257,6 +257,12 @@ apiRouter.get("/get-puzzles", (_, res) => {
     });
 });
 
+apiRouter.get("/get-show", (_, res) => {
+    return res.send({
+        show: SaveManager.loadShow("test.json"),
+    });
+});
+
 /**
  * sends a drive message through the tcp connection
  *

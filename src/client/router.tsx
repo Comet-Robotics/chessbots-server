@@ -8,6 +8,7 @@ import { Home } from "./home";
 import { Debug2 } from "./debug/debug2";
 import { Simulator } from "./debug/simulator";
 import { Editor } from "./editor/editor";
+import { Playback } from "./editor/playback";
 
 export const router = createBrowserRouter([
     {
@@ -45,5 +46,9 @@ export const router = createBrowserRouter([
     {
         path: "/editor",
         element: <Editor />,
+    },
+    {
+        path: "/playback",
+        element: <Playback />,
     },
 ]);

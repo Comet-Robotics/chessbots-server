@@ -10,6 +10,7 @@
  * Modified: 9/20/24
  */
 
+import { ShowFile } from "../../client/editor/saveShow";
 import { Side } from "../../common/game-types";
 
 // Save files contain a date in ms and pgn string
@@ -90,6 +91,22 @@ export class SaveManager {
         }
         if (entryFound) {
             const save = FileManager.loadFile(entryFound);
+            return save;
+        }
+        return;
+    }
+
+    public static loadShow(id: string): undefined | ShowFile {
+        const entryNames = FileManager.getFileNames();
+        let entryFound;
+        for (const e of entryNames) {
+            if (e.indexOf(id) !== -1) {
+                entryFound = e;
+                break;
+            }
+        }
+        if (entryFound) {
+            const save = FileManager.loadShow(entryFound);
             return save;
         }
         return;
@@ -180,6 +197,13 @@ export class FileManager {
         const a = this.fs.readFileSync(this.FilePath + "/" + fileName);
         if (a) return JSON.parse(a);
         return {} as iSave;
+    }
+
+    public static loadShow(fileName: string): ShowFile {
+        if (!this.fs.existsSync(this.FilePath)) return {} as ShowFile;
+        const a = this.fs.readFileSync(this.FilePath + "/" + fileName);
+        if (a) return JSON.parse(a);
+        return {} as ShowFile;
     }
 
     /*
