@@ -201,6 +201,9 @@ apiRouter.post("/start-puzzle-game", (req, res) => {
     return res.send({ message: "success" });
 });
 
+/**
+ * Returns all registered robot ids
+ */
 apiRouter.get("/get-ids", (_, res) => {
     let ids: string[];
     if (!tcpServer) {

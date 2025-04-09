@@ -47,15 +47,18 @@ export class ChessEngine {
         return this.chess.pgn();
     }
 
+    /** undo a move */
     undo(): Move {
         const undo = this.chess.undo();
         return { from: undo?.from, to: undo?.to } as Move;
     }
 
+    /** load a board from history (FEN) */
     loadFen(fen: string) {
         this.chess.load(fen);
     }
 
+    /** load a board from history (PGN) */
     loadPgn(pgn: string) {
         this.chess.loadPgn(pgn);
     }
