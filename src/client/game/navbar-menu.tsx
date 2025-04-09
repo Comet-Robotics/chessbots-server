@@ -17,6 +17,13 @@ import {
 import { SendMessage } from "../../common/message/message";
 import { Side } from "../../common/game-types";
 import { Dispatch } from "react";
+import {
+    bgColor,
+    textColor,
+    darkModeIcon,
+    toggleUserSetting,
+} from "../check-dark-mode";
+import "../colors.css";
 
 interface NavbarMenuProps {
     sendMessage: SendMessage;
@@ -54,7 +61,7 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
     const rotateButton =
         props.side === Side.SPECTATOR ?
             <Button
-                minimal
+                variant="minimal"
                 text="Rotate"
                 intent="primary"
                 onClick={() => {
@@ -70,7 +77,7 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
             undefined
         :   <Button
                 icon="flag"
-                minimal
+                variant="minimal"
                 text="Resign"
                 intent="danger"
                 onClick={async () => {
@@ -89,7 +96,7 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
             undefined
         :   <Button
                 icon="pause"
-                minimal
+                variant="minimal"
                 text="Draw"
                 intent="danger"
                 onClick={async () => {
@@ -100,9 +107,9 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
             />;
 
     return (
-        <Navbar>
+        <Navbar className={bgColor()}>
             <NavbarGroup>
-                <NavbarHeading>ChessBot</NavbarHeading>
+                <NavbarHeading className={textColor()}>ChessBot</NavbarHeading>
                 <NavbarDivider />
                 {resignButton}
                 {drawButton}
@@ -111,7 +118,11 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
                 {difficultyButton}
                 {AiDifficultyButton}
                 {rotateButton}
-                <h3>{props.side}</h3>
+                <Button
+                    icon={darkModeIcon()}
+                    variant="minimal"
+                    onClick={toggleUserSetting}
+                />
                 <Button icon="cog" minimal onClick={() => navigate("/debug")} />
             </NavbarGroup>
         </Navbar>

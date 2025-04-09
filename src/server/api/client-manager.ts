@@ -111,7 +111,7 @@ export class ClientManager {
      * gets the ids of all currently connected clients
      * @returns - list of ids, if available
      */
-    public getIds(): undefined | string[] {
+    public getIds(): undefined | [string, string] {
         if (this.hostId && this.clientId) {
             return [this.hostId, this.clientId];
         } else {

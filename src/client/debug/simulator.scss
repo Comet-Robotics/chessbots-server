@@ -2,10 +2,14 @@
     background-color: rgb(240, 240, 240);
 }
 
+.log-list > *:nth-child(even) {
+    background-color: rgb(201, 115, 115);
+}
+
 .log-list > *:hover {
     background-color: rgb(168, 166, 166);
 }
 
 .robot {
-    transition: all 0.75s ease;
+    transition: all 0.75s ease; // needs to match simulator.ts timeout
 }
