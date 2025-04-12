@@ -81,6 +81,7 @@ export function timelineLayerToSpline(layer: TimelineLayer): Spline {
     };
 }
 
+// TODO: empty showfile
 export function createNewShowfile(): Showfile {
     return {
         $chessbots_show_schema_version: 1,
@@ -106,6 +107,10 @@ export function createNewShowfile(): Showfile {
                         },
                     },
                     {
+                       type: TimelineEventTypes.WaitEvent,
+                       durationMs: 5000,
+                    },
+                    {
                         type: TimelineEventTypes.GoToPointEvent,
                         durationMs: 1000,
                         target: {
@@ -128,6 +133,6 @@ export function createNewShowfile(): Showfile {
                 ],
             ],
         ],
-        name: "new show",
+        name: `Show ${new Date().toDateString()} ${new Date().toLocaleTimeString()}`,
     };
 }
