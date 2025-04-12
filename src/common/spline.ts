@@ -38,14 +38,14 @@ export const QuadraticBezierSchema = Record({
 });
 export type QuadraticBezier = Static<typeof QuadraticBezierSchema>;
 
-const Midpoint = Union(CubicBezierSchema, QuadraticBezierSchema);
-export type Midpoint = Static<typeof Midpoint>;
+export const MidpointSchema = Union(CubicBezierSchema, QuadraticBezierSchema);
+export type Midpoint = Static<typeof MidpointSchema>;
 
-export const Spline = Record({
+export const SplineSchema = Record({
     start: StartPointSchema,
-    points: Array(Midpoint),
+    points: Array(MidpointSchema),
 });
-export type Spline = Static<typeof Spline>;
+export type Spline = Static<typeof SplineSchema>;
 
 export const PointSchema = Union(
     StartPointSchema,
