@@ -44,20 +44,32 @@ import {
     ShowfileSchema,
     timelineLayerToSpline,
 } from "../../common/show";
+import { diff } from 'deep-object-diff';
 
 export function Editor() {
     const [initialShow, setInitialShow] = useState(createNewShowfile());
     const {
         value: show,
+        setValue: setShow,
         canUndo,
         canRedo,
         undo,
         redo,
     } = useStateWithTrackedHistory(initialShow);
-
+    
     // TODO: fix viewport height / timeline height
     const [unsavedChanges, setUnsavedChanges] =
-        usePreventExitWithUnsavedChanges();
+    usePreventExitWithUnsavedChanges();
+    
+    useEffect(() => {
+        const result = diff(initialShow, show);
+        if (Object.keys(result).length === 0) {
+            setUnsavedChanges(false);
+        } else {
+            setUnsavedChanges(true);
+        }
+    }, [initialShow, show, setUnsavedChanges]);
+
     const [fsHandle, setFsHandle] = useState<FileSystemFileHandle | null>(null);
 
     const openShowfile = useCallback(async () => {
@@ -84,19 +96,15 @@ export function Editor() {
         }
 
         setInitialShow(show);
+        setShow(show);
         if (blob.handle) setFsHandle(blob.handle);
 
-        setUnsavedChanges(false);
+        console.log(show);
     }, []);
-
-    function saveShowfileAs() {
-        // TODO: implement
-        setUnsavedChanges(false);
-    }
 
     async function saveShowfile() {
 
-        const blob = new Blob([cborEncode(initialShow)], {
+        const blob = new Blob([cborEncode(show)], {
             type: "application/chessbots-showfile",
         });
         await fileSave(
@@ -109,7 +117,7 @@ export function Editor() {
             fsHandle,
         );
 
-        setUnsavedChanges(false);
+        setInitialShow(show);
     }
 
     const hotkeys = useMemo<HotkeyConfig[]>(
@@ -139,16 +147,6 @@ export function Editor() {
                 onKeyDown: redo,
             },
             {
-                combo: "mod+shift+s",
-                group: "Debug",
-                global: true,
-                label: "Save As...",
-                onKeyDown: (e) => {
-                    e.preventDefault();
-                    saveShowfileAs();
-                },
-            },
-            {
                 combo: "mod+o",
                 group: "Debug",
                 global: true,
@@ -159,7 +157,7 @@ export function Editor() {
                 },
             },
         ],
-        [redo, undo, saveShowfile, saveShowfileAs, openShowfile],
+        [redo, undo, saveShowfile, openShowfile],
     );
 
     const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys);
@@ -181,7 +179,8 @@ export function Editor() {
                     <H2>
                         <EditableText
                             placeholder="Click to edit..."
-                            value="New Show"
+                            value={show.name}
+                            onChange={(value) => setShow({ ...show, name: value })}
                         />
                     </H2>
                     {unsavedChanges && <Tag intent="warning" minimal style={{ gridColumn: "1/1" }}>
@@ -199,11 +198,6 @@ export function Editor() {
                         className="bp5-minimal"
                         text="Open..."
                         onClick={openShowfile}
-                    />
-                    <Button
-                        className="bp5-minimal"
-                        text="Save As..."
-                        onClick={saveShowfileAs}
                     />
                     <Button
                         className="bp5-minimal"
@@ -227,6 +221,7 @@ export function Editor() {
                         <SplineEditor initialSpline={spline} />
                     ))}
             </RobotGrid>
+            {/* TODO: implement add button  */}
             <Section
                 title="Timeline"
                 compact
@@ -242,7 +237,7 @@ export function Editor() {
                         gap: "0rem 0.5rem",
                     }}
                 >
-                    {/* TODO: figure out timeline UI */}
+                    {/* TODO: figure out timeline UI. support deleting robots */}
                     <TimelineRow title="Audio"> Stuff here</TimelineRow>
                     {show.timeline.map((_, i) => (
                         <TimelineRow title={`Robot ${i + 1}`}>
@@ -592,7 +587,7 @@ function useDraggable(
 }
 
 function usePreventExitWithUnsavedChanges() {
-    const [unsavedChanges, setUnsavedChanges] = useState(true);
+    const [unsavedChanges, setUnsavedChanges] = useState(false);
 
     useEffect(() => {
         const onBeforeUnload = (e: BeforeUnloadEvent) => {
