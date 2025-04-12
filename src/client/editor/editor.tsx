@@ -44,7 +44,7 @@ import {
     ShowfileSchema,
     timelineLayerToSpline,
 } from "../../common/show";
-import { diff } from 'deep-object-diff';
+import { diff } from "deep-object-diff";
 
 export function Editor() {
     const [initialShow, setInitialShow] = useState(createNewShowfile());
@@ -56,11 +56,11 @@ export function Editor() {
         undo,
         redo,
     } = useStateWithTrackedHistory(initialShow);
-    
+
     // TODO: fix viewport height / timeline height
     const [unsavedChanges, setUnsavedChanges] =
-    usePreventExitWithUnsavedChanges();
-    
+        usePreventExitWithUnsavedChanges();
+
     useEffect(() => {
         const result = diff(initialShow, show);
         if (Object.keys(result).length === 0) {
@@ -103,7 +103,6 @@ export function Editor() {
     }, []);
 
     async function saveShowfile() {
-
         const blob = new Blob([cborEncode(show)], {
             type: "application/chessbots-showfile",
         });
@@ -180,12 +179,20 @@ export function Editor() {
                         <EditableText
                             placeholder="Click to edit..."
                             value={show.name}
-                            onChange={(value) => setShow({ ...show, name: value })}
+                            onChange={(value) =>
+                                setShow({ ...show, name: value })
+                            }
                         />
                     </H2>
-                    {unsavedChanges && <Tag intent="warning" minimal style={{ gridColumn: "1/1" }}>
-                        Unsaved changes
-                    </Tag>}
+                    {unsavedChanges && (
+                        <Tag
+                            intent="warning"
+                            minimal
+                            style={{ gridColumn: "1/1" }}
+                        >
+                            Unsaved changes
+                        </Tag>
+                    )}
                 </div>
 
                 <ButtonGroup size="medium">
