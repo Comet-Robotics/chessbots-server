@@ -14,6 +14,8 @@ import {
     CoordsSchema,
     MidpointSchema,
     PointSchema,
+    Spline,
+    SplinePointType,
     StartPointSchema,
 } from "./spline";
 
@@ -57,7 +59,7 @@ const TimelineLayerSchema = Tuple(
     Array(TimelineEventSchema),
 );
 
-const ShowfileSchema = Record({
+export const ShowfileSchema = Record({
     $chessbots_show_schema_version: Literal(1),
     timeline: Array(TimelineLayerSchema),
     audio: Optional(AudioSchema),
@@ -68,3 +70,64 @@ export type Audio = Static<typeof AudioSchema>;
 export type MovementEvent = Static<typeof GoToPointEventSchema>;
 export type TimelineLayer = Static<typeof TimelineLayerSchema>;
 export type Showfile = Static<typeof ShowfileSchema>;
+
+export function timelineLayerToSpline(layer: TimelineLayer): Spline {
+    const [startPoint, events] = layer;
+    return {
+        start: startPoint.target,
+        points: events
+            .filter((event) => event.type === "goto_point")
+            .map((event) => event.target),
+    };
+}
+
+export function createNewShowfile(): Showfile {
+    return {
+        $chessbots_show_schema_version: 1,
+        timeline: [
+            [
+                {
+                    type: TimelineEventTypes.StartPointEvent,
+                    target: {
+                        type: SplinePointType.StartPoint,
+                        point: {
+                            x: 0,
+                            y: 70,
+                        },
+                    },
+                },
+                [
+                    {
+                        type: TimelineEventTypes.GoToPointEvent,
+                        durationMs: 1000,
+                        target: {
+                            type: SplinePointType.QuadraticBezier,
+                            endPoint: { x: 100, y: 100 },
+                        },
+                    },
+                    {
+                        type: TimelineEventTypes.GoToPointEvent,
+                        durationMs: 1000,
+                        target: {
+                            type: SplinePointType.CubicBezier,
+                            endPoint: { x: 315, y: 50 },
+                            controlPoint: {
+                                x: 300,
+                                y: 40,
+                            },
+                        },
+                    },
+                    {
+                        type: TimelineEventTypes.GoToPointEvent,
+                        durationMs: 1000,
+                        target: {
+                            type: SplinePointType.QuadraticBezier,
+                            endPoint: { x: 70, y: 70 },
+                        },
+                    },
+                ],
+            ],
+        ],
+        name: "new show",
+    };
+}
