@@ -1,5 +1,5 @@
 import { Card, Button, H1, Tooltip, Collapse } from "@blueprintjs/core";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { type PropsWithChildren, useEffect, useReducer, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { get, useSocket } from "../api";
 import {
@@ -201,7 +201,7 @@ const openInEditor = async (frame: StackFrame) => {
     await fetch(`/__open-in-editor?${params.toString()}`);
 };
 
-export function RobotGrid({ robotState }: { robotState: RobotState }) {
+export function RobotGrid({ robotState, children }: PropsWithChildren<{ robotState: RobotState }>) {
     return (
         <div
             style={{
@@ -240,6 +240,7 @@ export function RobotGrid({ robotState }: { robotState: RobotState }) {
                     onTopOfRobots={[]}
                 />
             ))}
+            {children}
         </div>
     );
 }
