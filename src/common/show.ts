@@ -11,9 +11,7 @@ import {
     Tuple,
 } from "runtypes";
 import {
-    CoordsSchema,
     MidpointSchema,
-    PointSchema,
     Spline,
     SplinePointType,
     StartPointSchema,
@@ -107,8 +105,8 @@ export function createNewShowfile(): Showfile {
                         },
                     },
                     {
-                       type: TimelineEventTypes.WaitEvent,
-                       durationMs: 5000,
+                        type: TimelineEventTypes.WaitEvent,
+                        durationMs: 5000,
                     },
                     {
                         type: TimelineEventTypes.GoToPointEvent,
