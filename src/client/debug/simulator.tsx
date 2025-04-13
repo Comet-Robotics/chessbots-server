@@ -207,6 +207,7 @@ const openInEditor = async (frame: StackFrame) => {
     await fetch(`/__open-in-editor?${params.toString()}`);
 };
 
+// TODO: refactor out of debug since we use it in more than just simulator?
 export function RobotGrid({
     robotState,
     children,

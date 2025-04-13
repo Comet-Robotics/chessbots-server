@@ -19,14 +19,17 @@ import {
     Tag,
     useHotkeys,
     type HotkeyConfig,
+    Elevation,
 } from "@blueprintjs/core";
 import { RobotGrid } from "../debug/simulator";
 
 import { fileOpen, fileSave } from "browser-fs-access";
 import {
+    type TimelineEvents,
     createNewShowfile,
     ShowfileSchema,
     timelineLayerToSpline,
+    EVENT_TYPE_TO_COLOR,
 } from "../../common/show";
 import { diff } from "deep-object-diff";
 import {
@@ -34,6 +37,22 @@ import {
     useStateWithTrackedHistory,
 } from "./hooks";
 import { SplineEditor } from "./spline-editor";
+import {
+    motion,
+    useMotionValue,
+    useMotionValueEvent,
+    useTime,
+    useTransform,
+} from "motion/react";
+
+const RULER_TICK_INTERVAL_MS = 250;
+const RULER_EXTRA_TICK_COUNT = 10;
+// TODO: make ruler tick size configurable so we can zoom. relatively low priority. would be nice if gestures could be supported too
+const RULER_TICK_GAP = "1rem";
+
+function millisToXPosition(millis: number): string {
+    return `calc(${millis} / ${RULER_TICK_INTERVAL_MS} * ${RULER_TICK_GAP})`;
+}
 
 export function Editor() {
     const [initialShow, setInitialShow] = useState(createNewShowfile());
@@ -107,6 +126,15 @@ export function Editor() {
         setInitialShow(show);
     }, [fsHandle, show]);
 
+    // TODO: figure out how to get this from the showfile
+    const SEQUENCE_LENGTH_MS = 5 * 1000;
+
+    const { currentTimestamp, playing, togglePlaying } =
+        usePlayHead(SEQUENCE_LENGTH_MS);
+    const seekBarWidth = useTransform(() =>
+        millisToXPosition(currentTimestamp.get()),
+    );
+
     const hotkeys = useMemo<HotkeyConfig[]>(
         () => [
             {
@@ -143,8 +171,18 @@ export function Editor() {
                 label: "Redo",
                 onKeyDown: redo,
             },
+            {
+                combo: "space",
+                group: "Play/Pause",
+                global: true,
+                label: "Play/Pause",
+                onKeyDown: (e) => {
+                    e.preventDefault();
+                    togglePlaying();
+                },
+            },
         ],
-        [redo, undo, saveShowfile, openShowfile],
+        [redo, undo, saveShowfile, openShowfile, togglePlaying],
     );
 
     const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys);
@@ -208,6 +246,7 @@ export function Editor() {
                     />
                 </ButtonGroup>
             </Card>
+            {/* TODO: render robots */}
             <RobotGrid robotState={{}}>
                 {/* TODO: think more about how state changes will make it up from the editor to this component */}
                 {show.timeline
@@ -223,29 +262,83 @@ export function Editor() {
                 style={{ height: "100%" }}
                 rightElement={<Button icon="add" text="Add Robot" />}
             >
+                <ButtonGroup>
+                    <Button
+                        icon={playing ? "pause" : "play"}
+                        text={playing ? "Pause" : "Play"}
+                        onClick={togglePlaying}
+                        variant="outlined"
+                    />
+                </ButtonGroup>
                 <div
                     style={{
                         overflowY: "scroll",
                         maxHeight: "100%",
                         display: "grid",
                         gridTemplateColumns: "max-content 1fr",
-                        gap: "0rem 0.5rem",
+                        gap: `0rem ${RULER_TICK_GAP}`,
                     }}
                 >
-                    {/* TODO: figure out timeline UI. support deleting robots */}
-                    <TimelineRow title="Audio"> Stuff here</TimelineRow>
-                    {show.timeline.map((_, i) => (
-                        <TimelineRow title={`Robot ${i + 1}`}>
-                            Stuff here
-                        </TimelineRow>
-                    ))}
+                    <Ruler sequenceLengthMs={SEQUENCE_LENGTH_MS} />
+                    <TimelineLayer title="Seek">
+                        <motion.div
+                            style={{
+                                display: "flex",
+                                backgroundColor: "red",
+                                height: "1rem",
+                                width: seekBarWidth,
+                            }}
+                        />
+                    </TimelineLayer>
+                    {/* TODO: support deleting robots */}
+                    <TimelineLayer title="Audio"> Stuff here</TimelineLayer>
+                    {show.timeline.map(([startPoint, remainingEvents], i) => {
+                        return (
+                            <TimelineLayer title={`Robot ${i + 1}`}>
+                                <div style={{ display: "flex" }}>
+                                    <TimelineEvent event={startPoint} />
+                                    {remainingEvents.map((event) => {
+                                        return <TimelineEvent event={event} />;
+                                    })}
+                                </div>
+                                {/* TODO: add ability to add events */}
+                            </TimelineLayer>
+                        );
+                    })}
                 </div>
             </Section>
         </div>
     );
 }
 
-const TimelineRow = forwardRef<
+const TimelineEvent = forwardRef<HTMLDivElement, { event: TimelineEvents }>(
+    function TimelineEvent(props, ref) {
+        const { event } = props;
+        // TODO: add context menu for deleting events and adding a new event before and after this one
+
+        // TODO: add handles to the edges of the event to edit durations. add a switch for ripple vs rolling edits
+
+        // ripple edits mean that editing the duration of an event has a ripple effect on ALL the other events in the same layer, shifting all the subsequent event start times by the same amount (so only one event's duration is actually changing)
+        // rolling edits mean that editing the duration of an event also affects the duration of the event that immediately follows it in the same layer, such that adjusting the duration of this event doesn't shift the start timestamp of the subsequent events in the same layer
+
+        return (
+            <Card
+                ref={ref}
+                style={{
+                    width: millisToXPosition(event.durationMs),
+                    backgroundColor: EVENT_TYPE_TO_COLOR[event.type],
+                    color: "white",
+                }}
+                compact
+                elevation={Elevation.TWO}
+            >
+                {event.type}
+            </Card>
+        );
+    },
+);
+
+const TimelineLayer = forwardRef<
     HTMLDivElement,
     PropsWithChildren<{ title: string }>
 >(function TimelineCard(props, ref) {
@@ -267,3 +360,85 @@ const TimelineRow = forwardRef<
         </SectionCard>
     );
 });
+
+function Ruler({ sequenceLengthMs }: { sequenceLengthMs: number }) {
+    return (
+        <TimelineLayer title="Ruler">
+            <div
+                style={{
+                    display: "flex",
+                    width: "max-content",
+                    overflowX: "scroll",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: RULER_TICK_GAP,
+                }}
+            >
+                {new Array(
+                    Math.round(sequenceLengthMs / RULER_TICK_INTERVAL_MS) +
+                        RULER_EXTRA_TICK_COUNT,
+                )
+                    .fill(1)
+                    .map((_, i) => {
+                        // Check if this tick marks a 1000ms interval (every 4 ticks if RULER_INTERVAL_MS is 250)
+                        const isMajorTick =
+                            i % (1000 / RULER_TICK_INTERVAL_MS) === 0;
+                        return (
+                            <div
+                                key={`tick-${i}`}
+                                style={{
+                                    borderRight: "1px solid gray",
+                                    height: isMajorTick ? "1rem" : "0.5rem",
+                                }}
+                            />
+                        );
+                    })}
+            </div>
+        </TimelineLayer>
+    );
+}
+
+function usePlayHead(endDurationMs: number, startMs = 0) {
+    const [playing, setPlaying] = useState(false);
+    const currentTimestamp = useMotionValue(startMs);
+    const time = useTime();
+    const lastAccessedTime = useMotionValue(0);
+
+    const setTimestamp = (timestamp: number) => {
+        currentTimestamp.set(timestamp);
+    };
+
+    const togglePlaying = () => {
+        setPlaying((p) => {
+            if (!p) {
+                // When starting playback, initialize the lastAccessedTime
+                lastAccessedTime.set(time.get());
+            }
+            return !p;
+        });
+    };
+
+    useMotionValueEvent(time, "change", (currentTime) => {
+        if (!playing) {
+            return;
+        }
+
+        const prevTime = lastAccessedTime.get();
+        const elapsedMs = currentTime - prevTime;
+
+        // Update timestamp based on elapsed time
+        const newTimestamp = currentTimestamp.get() + elapsedMs;
+
+        if (newTimestamp >= endDurationMs) {
+            // Loop back to start when reaching the end
+            currentTimestamp.set(0);
+        } else {
+            currentTimestamp.set(newTimestamp);
+        }
+
+        // Update last accessed time for next calculation
+        lastAccessedTime.set(currentTime);
+    });
+
+    return { currentTimestamp, playing, togglePlaying, setTimestamp };
+}

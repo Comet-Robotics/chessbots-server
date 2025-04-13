@@ -1,7 +1,7 @@
 import {
     Number,
     String,
-    Record,
+    Record as RuntypesRecord,
     Array,
     Literal,
     Union,
@@ -12,14 +12,14 @@ import {
 } from "runtypes";
 import {
     MidpointSchema,
-    Spline,
+    type Spline,
     SplinePointType,
     StartPointSchema,
 } from "./spline";
 
 // JSON file would use the Showfile type.
 
-const AudioSchema = Record({
+const AudioSchema = RuntypesRecord({
     startMs: Number,
     // maybe we use something like capnproto, msgpack, or protobuf so we could
     // include an audio file in the showfile. if we really wanted to use JSON we'd
@@ -29,26 +29,27 @@ const AudioSchema = Record({
     tempoBpm: Union(Number, Null),
 });
 
-enum TimelineEventTypes {
-    GoToPointEvent = "goto_point",
-    WaitEvent = "wait",
-    StartPointEvent = "start_point",
-}
+const TimelineEventTypes = {
+    GoToPointEvent: "goto_point",
+    WaitEvent: "wait",
+    StartPointEvent: "start_point",
+} as const;
 
-const GoToPointEventSchema = Record({
+const GoToPointEventSchema = RuntypesRecord({
     durationMs: Number,
     target: MidpointSchema,
     type: Literal(TimelineEventTypes.GoToPointEvent),
 });
 
-const WaitEventSchema = Record({
+const WaitEventSchema = RuntypesRecord({
     durationMs: Number,
     type: Literal(TimelineEventTypes.WaitEvent),
 });
 
-const StartPointEventSchema = Record({
+const StartPointEventSchema = RuntypesRecord({
     type: Literal(TimelineEventTypes.StartPointEvent),
     target: StartPointSchema,
+    durationMs: Number,
 });
 
 const TimelineEventSchema = Union(GoToPointEventSchema, WaitEventSchema);
@@ -57,7 +58,11 @@ const TimelineLayerSchema = Tuple(
     Array(TimelineEventSchema),
 );
 
-export const ShowfileSchema = Record({
+export type TimelineEvents =
+    | Static<typeof TimelineEventSchema>
+    | Static<typeof StartPointEventSchema>;
+
+export const ShowfileSchema = RuntypesRecord({
     $chessbots_show_schema_version: Literal(1),
     timeline: Array(TimelineLayerSchema),
     audio: Optional(AudioSchema),
@@ -65,7 +70,6 @@ export const ShowfileSchema = Record({
 });
 
 export type Audio = Static<typeof AudioSchema>;
-export type MovementEvent = Static<typeof GoToPointEventSchema>;
 export type TimelineLayer = Static<typeof TimelineLayerSchema>;
 export type Showfile = Static<typeof ShowfileSchema>;
 
@@ -94,6 +98,7 @@ export function createNewShowfile(): Showfile {
                             y: 70,
                         },
                     },
+                    durationMs: 7500,
                 },
                 [
                     {
@@ -134,3 +139,14 @@ export function createNewShowfile(): Showfile {
         name: `Show ${new Date().toDateString()} ${new Date().toLocaleTimeString()}`,
     };
 }
+
+import { Colors } from "@blueprintjs/core";
+
+export const EVENT_TYPE_TO_COLOR: Record<
+    (typeof TimelineEventTypes)[keyof typeof TimelineEventTypes],
+    (typeof Colors)[keyof typeof Colors]
+> = {
+    [TimelineEventTypes.GoToPointEvent]: Colors.BLUE2,
+    [TimelineEventTypes.WaitEvent]: Colors.GRAY2,
+    [TimelineEventTypes.StartPointEvent]: Colors.GREEN2,
+};
