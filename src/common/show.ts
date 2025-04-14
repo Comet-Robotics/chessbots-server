@@ -20,7 +20,7 @@ import {
 // JSON file would use the Showfile type.
 
 const AudioSchema = RuntypesRecord({
-    data: InstanceOf<Uint8Array<ArrayBufferLike>>(Uint8Array),
+    data: InstanceOf<Uint8Array>(Uint8Array),
     mimeType: String,
 });
 

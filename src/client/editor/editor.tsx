@@ -143,9 +143,7 @@ export function Editor() {
         setShow({
             ...show,
             audio: {
-                startMs: 0,
                 data: audio,
-                tempoBpm: null,
                 mimeType: blob.type,
             },
         });
