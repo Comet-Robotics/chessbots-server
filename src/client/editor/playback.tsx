@@ -1,6 +1,7 @@
 import { RobotGrid, RobotState } from "../debug/simulator";
 import { SimulatedRobotLocation } from "../../common/message/simulator-message";
 import { get, useEffectQuery } from "../api";
+import { MovementEvent } from "./saveShow";
 
 export function Playback() {
     let showFile;
@@ -20,6 +21,7 @@ export function Playback() {
 
     //console.log(showFile);
     let robotsStart: RobotState = {};
+    const robotCommands: MovementEvent[] = [];
 
     if (showFile) {
         for (let x = 0; x < showFile.pos.length; x++) {
@@ -34,8 +36,8 @@ export function Playback() {
                     location as SimulatedRobotLocation,
             };
 
-            for (const packets in showFile.timeline[x]) {
-                packets;
+            for (const movements in showFile.timeline[x]) {
+                robotCommands.push(JSON.parse(movements));
             }
         }
     }
@@ -43,6 +45,7 @@ export function Playback() {
     return (
         <div>
             <RobotGrid robotState={robotsStart} />
+            
         </div>
     );
 }

@@ -47,7 +47,7 @@ export function Editor() {
     );
 }
 
-function SplineEditor({ initialSpline }: { initialSpline: Spline }) {
+export function SplineEditor({ initialSpline }: { initialSpline: Spline }) {
     type SplineEditorAction =
         | { type: "DELETE_POINT"; index: number }
         | { type: "DELETE_START_POINT" }

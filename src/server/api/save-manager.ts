@@ -202,7 +202,7 @@ export class FileManager {
     public static loadShow(fileName: string): ShowFile {
         if (!this.fs.existsSync(this.FilePath)) return {} as ShowFile;
         const a = this.fs.readFileSync(this.FilePath + "/" + fileName);
-        if (a) return JSON.parse(a);
+        if (a) return JSON.parse(a) as ShowFile;
         return {} as ShowFile;
     }
 
