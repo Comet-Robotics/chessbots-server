@@ -1,3 +1,4 @@
+// @ts-expect-error: chessbots client is a CommonJS module, but this library is a ES Module, so we need to tell TypeScript that it's okay
 import { decode as cborDecode, encode as cborEncode } from "cbor-x";
 import {
     forwardRef,
@@ -24,15 +25,17 @@ import {
 } from "@blueprintjs/core";
 import { RobotGrid } from "../debug/simulator";
 
+// @ts-expect-error: chessbots client is a CommonJS module, but this library is a ES Module, so we need to tell TypeScript that it's okay
 import { fileOpen, fileSave } from "browser-fs-access";
 import {
     type TimelineEvents,
     createNewShowfile,
     ShowfileSchema,
-    timelineLayerToSpline,
     EVENT_TYPE_TO_COLOR,
     type TimelineLayer,
     TimelineEventTypes,
+    type GoToPointEvent,
+    StartPointEvent,
 } from "../../common/show";
 import { diff } from "deep-object-diff";
 import {
@@ -47,12 +50,17 @@ import {
     useTime,
     useTransform,
 } from "motion/react";
-import { SplinePointType } from "../../common/spline";
+import {
+    SplinePointType,
+    type Coords,
+    type CubicBezier,
+    type QuadraticBezier,
+} from "../../common/spline";
 
-const RULER_TICK_INTERVAL_MS = 250;
-const RULER_EXTRA_TICK_COUNT = 10;
+const RULER_TICK_INTERVAL_MS = 100;
+const RULER_EXTRA_TICK_COUNT = 20;
 // TODO: make ruler tick size configurable so we can zoom. relatively low priority. would be nice if gestures could be supported too
-const RULER_TICK_GAP = "1rem";
+const RULER_TICK_GAP = "0.5rem";
 
 function millisToXPosition(millis: number): string {
     return `calc(${millis} / ${RULER_TICK_INTERVAL_MS} * ${RULER_TICK_GAP})`;
@@ -97,7 +105,7 @@ export function Editor() {
 
         let data: unknown | null = null;
         try {
-            data = cborDecode(await blob.bytes());
+            data = cborDecode(new Uint8Array(await blob.arrayBuffer()));
         } catch (e) {
             // TODO: toast or alert
             console.warn("Failed to decode showfile as CBOR", e);
@@ -139,7 +147,7 @@ export function Editor() {
             mimeTypes: ["audio/mpeg", "audio/wav"],
             extensions: [".mp3", ".wav"],
         });
-        const audio = await blob.bytes();
+        const audio = new Uint8Array(await blob.arrayBuffer());
         setShow({
             ...show,
             audio: {
@@ -150,12 +158,199 @@ export function Editor() {
     }, [setShow, show]);
 
     // TODO: figure out how to get this from the showfile
-    const SEQUENCE_LENGTH_MS = 5 * 1000;
+    const SEQUENCE_LENGTH_MS = 10 * 1000;
 
     const { currentTimestamp, playing, togglePlaying } =
         usePlayHead(SEQUENCE_LENGTH_MS);
     const seekBarWidth = useTransform(() =>
         millisToXPosition(currentTimestamp.get()),
+    );
+
+    const handleStartPointMove = useCallback(
+        (layerIndex: number, newCoords: Coords) => {
+            const newTimeline = [...show.timeline];
+            const layer = newTimeline[layerIndex];
+            if (layer) {
+                const [startPoint, remainingEvents] = layer;
+                const newStartPointEvent: StartPointEvent = {
+                    ...startPoint,
+                    target: { ...startPoint.target, point: newCoords },
+                };
+                newTimeline[layerIndex] = [newStartPointEvent, remainingEvents];
+                setShow({ ...show, timeline: newTimeline });
+            }
+        },
+        [show, setShow],
+    );
+
+    const handlePointMove = useCallback(
+        (layerIndex: number, pointIndex: number, newCoords: Coords) => {
+            const newTimeline = [...show.timeline];
+            const layer = newTimeline[layerIndex];
+            if (!layer) return;
+            const [startPoint, remainingEvents] = layer;
+            const events = [...remainingEvents];
+            const eventToUpdate = events[pointIndex];
+
+            if (
+                eventToUpdate &&
+                eventToUpdate.type === TimelineEventTypes.GoToPointEvent
+            ) {
+                events[pointIndex] = {
+                    ...eventToUpdate,
+                    target: {
+                        ...eventToUpdate.target,
+                        endPoint: newCoords,
+                    },
+                };
+                newTimeline[layerIndex] = [startPoint, events];
+                setShow({ ...show, timeline: newTimeline });
+            }
+        },
+        [show, setShow],
+    );
+
+    const handleControlPointMove = useCallback(
+        (layerIndex: number, pointIndex: number, newCoords: Coords) => {
+            const newTimeline = [...show.timeline];
+            const layer = newTimeline[layerIndex];
+            if (!layer) return;
+            const [startPoint, remainingEvents] = layer;
+            const events = [...remainingEvents];
+            const eventToUpdate = events[pointIndex];
+
+            if (
+                eventToUpdate?.type === TimelineEventTypes.GoToPointEvent &&
+                eventToUpdate.target.type === SplinePointType.CubicBezier
+            ) {
+                events[pointIndex] = {
+                    ...eventToUpdate,
+                    target: {
+                        ...eventToUpdate.target,
+                        controlPoint: newCoords,
+                    },
+                };
+                newTimeline[layerIndex] = [startPoint, events];
+                setShow({ ...show, timeline: newTimeline });
+            }
+        },
+        [show, setShow],
+    );
+
+    const handleDeleteStartPoint = useCallback(
+        (layerIndex: number) => {
+            const newTimeline = [...show.timeline];
+            const layer = newTimeline[layerIndex];
+            if (!layer) return;
+
+            const [, remainingEvents] = layer;
+
+            // Promote the first GoToPoint event (if any) to be the new start point
+            const firstGoToPointIndex = remainingEvents.findIndex(
+                (e) => e.type === TimelineEventTypes.GoToPointEvent,
+            );
+
+            if (firstGoToPointIndex !== -1) {
+                const firstGoToPointEvent = remainingEvents[
+                    firstGoToPointIndex
+                ] as GoToPointEvent;
+                const newStartPointEvent: StartPointEvent = {
+                    type: TimelineEventTypes.StartPointEvent,
+                    durationMs: firstGoToPointEvent.durationMs, // Or use firstGoToPointEvent.durationMs?
+                    target: {
+                        type: SplinePointType.StartPoint, // Convert midpoint to start point
+                        point: firstGoToPointEvent.target.endPoint, // Use the endpoint as the new start
+                    },
+                };
+                const newRemainingEvents = remainingEvents.toSpliced(
+                    firstGoToPointIndex,
+                    1,
+                );
+                newTimeline[layerIndex] = [
+                    newStartPointEvent,
+                    newRemainingEvents,
+                ];
+                setShow({ ...show, timeline: newTimeline });
+            } else {
+                console.warn(
+                    "Tried to delete a start point with no subsequent GoTo points. Consider deleting layer instead.",
+                );
+            }
+        },
+        [show, setShow],
+    );
+
+    const handleDeletePoint = useCallback(
+        (layerIndex: number, pointIndex: number) => {
+            const newTimeline = [...show.timeline];
+            const layer = newTimeline[layerIndex];
+            if (!layer) {
+                return;
+            }
+            const [startPoint, remainingEvents] = layer;
+            const events = remainingEvents.toSpliced(pointIndex, 1); // Remove the event
+            newTimeline[layerIndex] = [startPoint, events];
+            setShow({ ...show, timeline: newTimeline });
+        },
+        [show, setShow],
+    );
+
+    const handleSwitchPointType = useCallback(
+        (
+            layerIndex: number,
+            pointIndex: number,
+            newType:
+                | SplinePointType.QuadraticBezier
+                | SplinePointType.CubicBezier,
+        ) => {
+            const newTimeline = [...show.timeline];
+            const layer = newTimeline[layerIndex];
+            if (!layer) return;
+
+            const [startPoint, remainingEvents] = layer;
+            const events = [...remainingEvents];
+
+            const eventToUpdate = events[pointIndex];
+
+            if (eventToUpdate?.type !== TimelineEventTypes.GoToPointEvent) {
+                console.warn("Tried to switch point type on non-GoToPointEvent")
+                return
+            }
+            let newTarget: CubicBezier | QuadraticBezier;
+            if (
+                newType === SplinePointType.CubicBezier &&
+                eventToUpdate.target.type ===
+                    SplinePointType.QuadraticBezier
+            ) {
+                newTarget = {
+                    type: SplinePointType.CubicBezier,
+                    controlPoint: {
+                        x: eventToUpdate.target.endPoint.x - 20,
+                        y: eventToUpdate.target.endPoint.y - 20,
+                    },
+                    endPoint: eventToUpdate.target.endPoint,
+                };
+            } else if (
+                newType === SplinePointType.QuadraticBezier &&
+                eventToUpdate.target.type === SplinePointType.CubicBezier
+            ) {
+                newTarget = {
+                    type: SplinePointType.QuadraticBezier,
+                    endPoint: eventToUpdate.target.endPoint,
+                };
+            } else {
+                console.warn("Tried to switch point type with invalid type")
+                return;
+            }
+
+            events[pointIndex] = {
+                ...eventToUpdate,
+                target: newTarget,
+            };
+            newTimeline[layerIndex] = [startPoint, events];
+            setShow({ ...show, timeline: newTimeline });
+        },
+        [show, setShow],
     );
 
     const hotkeys = useMemo<HotkeyConfig[]>(
@@ -246,6 +441,11 @@ export function Editor() {
 
     useEffect(() => {
         if (!audioRef.current) return;
+
+
+        if (audioRef.current.readyState !== 4) {
+            return;
+        }
 
         if (playing && audioRef.current.paused) {
             audioRef.current.currentTime = Math.min(
@@ -341,11 +541,28 @@ export function Editor() {
             {/* TODO: render robots */}
             <RobotGrid robotState={{}}>
                 {/* TODO: think more about how state changes will make it up from the editor to this component */}
-                {show.timeline
-                    .map((layer) => timelineLayerToSpline(layer))
-                    .map((spline) => (
-                        <SplineEditor initialSpline={spline} />
-                    ))}
+                {show.timeline.map((layer, index) => (
+                    <SplineEditor
+                        key={`spline-editor-${index}`}
+                        layer={layer}
+                        onStartPointMove={(coords) =>
+                            handleStartPointMove(index, coords)
+                        }
+                        onPointMove={(pointIdx, coords) =>
+                            handlePointMove(index, pointIdx, coords)
+                        }
+                        onControlPointMove={(pointIdx, coords) =>
+                            handleControlPointMove(index, pointIdx, coords)
+                        }
+                        onDeleteStartPoint={() => handleDeleteStartPoint(index)}
+                        onDeletePoint={(pointIdx) =>
+                            handleDeletePoint(index, pointIdx)
+                        }
+                        onSwitchPointType={(pointIdx, newType) =>
+                            handleSwitchPointType(index, pointIdx, newType)
+                        }
+                    />
+                ))}
             </RobotGrid>
             <Section
                 title="Timeline"
@@ -387,6 +604,7 @@ export function Editor() {
                     {show.timeline.map(([startPoint, remainingEvents], i) => {
                         return (
                             <TimelineLayer
+                                key={`timeline-layer-${i}`}
                                 title={`Robot ${i + 1}`}
                                 onDelete={() =>
                                     setShow({
@@ -428,6 +646,7 @@ const TimelineEvent = forwardRef<HTMLDivElement, { event: TimelineEvents }>(
                     width: millisToXPosition(event.durationMs),
                     backgroundColor: EVENT_TYPE_TO_COLOR[event.type],
                     color: "white",
+                    visibility: event.type === TimelineEventTypes.WaitEvent ? "hidden" : "inherit",
                 }}
                 compact
                 elevation={Elevation.TWO}
@@ -479,7 +698,7 @@ function Ruler({ sequenceLengthMs }: { sequenceLengthMs: number }) {
                     width: "max-content",
                     overflowX: "scroll",
                     justifyContent: "space-between",
-                    alignItems: "center",
+                    alignItems: "start",
                     gap: RULER_TICK_GAP,
                 }}
             >
@@ -489,15 +708,18 @@ function Ruler({ sequenceLengthMs }: { sequenceLengthMs: number }) {
                 )
                     .fill(1)
                     .map((_, i) => {
-                        // Check if this tick marks a 1000ms interval (every 4 ticks if RULER_INTERVAL_MS is 250)
+                        // Check if this tick marks a 1000ms interval (every 4 ticks if RULER_TICK_INTERVAL_MS is 250)
                         const isMajorTick =
                             i % (1000 / RULER_TICK_INTERVAL_MS) === 0;
+
+                        const isSecondaryTick =
+                            i % (1000 / RULER_TICK_INTERVAL_MS) === 5;
                         return (
                             <div
                                 key={`tick-${i}`}
                                 style={{
                                     borderRight: "1px solid gray",
-                                    height: isMajorTick ? "1rem" : "0.5rem",
+                                    height: isMajorTick ? "1rem" : isSecondaryTick ? "0.8rem" : "0.5rem",
                                 }}
                             />
                         );

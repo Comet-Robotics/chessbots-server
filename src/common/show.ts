@@ -16,13 +16,13 @@ import {
     SplinePointType,
     StartPointSchema,
 } from "./spline";
-
-// JSON file would use the Showfile type.
+import { Colors } from "@blueprintjs/core";
 
 const AudioSchema = RuntypesRecord({
     data: InstanceOf<Uint8Array>(Uint8Array),
     mimeType: String,
 });
+export type Audio = Static<typeof AudioSchema>;
 
 export const TimelineEventTypes = {
     GoToPointEvent: "goto_point",
@@ -30,32 +30,36 @@ export const TimelineEventTypes = {
     StartPointEvent: "start_point",
 } as const;
 
-const GoToPointEventSchema = RuntypesRecord({
+export const GoToPointEventSchema = RuntypesRecord({
     durationMs: Number,
     target: MidpointSchema,
     type: Literal(TimelineEventTypes.GoToPointEvent),
 });
+export type GoToPointEvent = Static<typeof GoToPointEventSchema>;
 
 const WaitEventSchema = RuntypesRecord({
     durationMs: Number,
     type: Literal(TimelineEventTypes.WaitEvent),
 });
+export type WaitEvent = Static<typeof WaitEventSchema>;
 
 const StartPointEventSchema = RuntypesRecord({
     type: Literal(TimelineEventTypes.StartPointEvent),
     target: StartPointSchema,
     durationMs: Number,
 });
+export type StartPointEvent = Static<typeof StartPointEventSchema>;
 
 const TimelineEventSchema = Union(GoToPointEventSchema, WaitEventSchema);
 const TimelineLayerSchema = Tuple(
     StartPointEventSchema,
     Array(TimelineEventSchema),
 );
+export type TimelineLayer = Static<typeof TimelineLayerSchema>;
 
 export type TimelineEvents =
     | Static<typeof TimelineEventSchema>
-    | Static<typeof StartPointEventSchema>;
+    | StartPointEvent;
 
 export const ShowfileSchema = RuntypesRecord({
     $chessbots_show_schema_version: Literal(1),
@@ -63,9 +67,6 @@ export const ShowfileSchema = RuntypesRecord({
     audio: Optional(AudioSchema),
     name: String,
 });
-
-export type Audio = Static<typeof AudioSchema>;
-export type TimelineLayer = Static<typeof TimelineLayerSchema>;
 export type Showfile = Static<typeof ShowfileSchema>;
 
 export function timelineLayerToSpline(layer: TimelineLayer): Spline {
@@ -137,8 +138,6 @@ export function createNewShowfile(): Showfile {
         name: `Show ${new Date().toDateString()} ${new Date().toLocaleTimeString()}`,
     };
 }
-
-import { Colors } from "@blueprintjs/core";
 
 export const EVENT_TYPE_TO_COLOR: Record<
     (typeof TimelineEventTypes)[keyof typeof TimelineEventTypes],
