@@ -21,6 +21,7 @@ import {
     type Coords,
 } from "../../common/spline";
 import {
+    usePlayHead,
     usePreventExitWithUnsavedChanges,
     useStateWithTrackedHistory,
 } from "./hooks";
