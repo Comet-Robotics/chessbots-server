@@ -142,7 +142,12 @@ export function Editor() {
         const audio = await blob.bytes();
         setShow({
             ...show,
-            audio: { startMs: 0, data: audio, tempoBpm: null, mimeType: blob.type },
+            audio: {
+                startMs: 0,
+                data: audio,
+                tempoBpm: null,
+                mimeType: blob.type,
+            },
         });
     }, [setShow, show]);
 
@@ -233,9 +238,11 @@ export function Editor() {
     useEffect(() => {
         if (!audio) return;
 
-        audioRef.current.src = URL.createObjectURL(new Blob([audio.data], {
-            type: audio.mimeType,
-        }));
+        audioRef.current.src = URL.createObjectURL(
+            new Blob([audio.data], {
+                type: audio.mimeType,
+            }),
+        );
         audioRef.current.load();
     }, [audio]);
 
