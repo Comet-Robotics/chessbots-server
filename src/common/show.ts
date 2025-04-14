@@ -6,9 +6,9 @@ import {
     Literal,
     Union,
     type Static,
-    Null,
     Optional,
     Tuple,
+    InstanceOf,
 } from "runtypes";
 import {
     MidpointSchema,
@@ -20,16 +20,11 @@ import {
 // JSON file would use the Showfile type.
 
 const AudioSchema = RuntypesRecord({
-    startMs: Number,
-    // maybe we use something like capnproto, msgpack, or protobuf so we could
-    // include an audio file in the showfile. if we really wanted to use JSON we'd
-    // probably have to base64 encode the file 💀. would work, just feels a little scuffed.
-    // plus I've always wanted an excuse to use msgpack or capnproto lol
-    data: String,
-    tempoBpm: Union(Number, Null),
+    data: InstanceOf<Uint8Array<ArrayBufferLike>>(Uint8Array),
+    mimeType: String,
 });
 
-const TimelineEventTypes = {
+export const TimelineEventTypes = {
     GoToPointEvent: "goto_point",
     WaitEvent: "wait",
     StartPointEvent: "start_point",
@@ -78,8 +73,11 @@ export function timelineLayerToSpline(layer: TimelineLayer): Spline {
     return {
         start: startPoint.target,
         points: events
-            .filter((event) => event.type === "goto_point")
-            .map((event) => event.target),
+            .filter((event) => event.type === TimelineEventTypes.GoToPointEvent)
+            .map(
+                (event) =>
+                    (event as Static<typeof GoToPointEventSchema>).target,
+            ),
     };
 }
 

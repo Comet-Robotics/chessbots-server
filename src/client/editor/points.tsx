@@ -6,21 +6,21 @@ import { useDraggable } from "./hooks";
 
 export function SplinePoint({
     point,
-    moveFn,
-    switchToQuadraticFn = undefined,
-    switchToCubicFn = undefined,
-    deleteFn = undefined,
+    onMove,
+    onSwitchToQuadratic = undefined,
+    onSwitchToCubic = undefined,
+    onDelete = undefined,
 }: {
     point: Point;
-    moveFn: (x: number, y: number) => void;
-    deleteFn?: () => void;
-    switchToQuadraticFn?: () => void;
-    switchToCubicFn?: () => void;
+    onMove: (x: number, y: number) => void;
+    onDelete?: () => void;
+    onSwitchToQuadratic?: () => void;
+    onSwitchToCubic?: () => void;
 }) {
     // TODO: fix context menu positioning
     const mainPointRef = useRef<HTMLElement>(null);
     useDraggable(mainPointRef, (screenX, screenY) =>
-        moveFn(screenX + robotSize / 4, screenY + robotSize / 4),
+        onMove(screenX + robotSize / 4, screenY + robotSize / 4),
     );
 
     const mainPointColor =
@@ -37,20 +37,20 @@ export function SplinePoint({
                     {point.type === SplinePointType.CubicBezier && (
                         <MenuItem
                             text="Switch to Quadratic"
-                            onClick={switchToQuadraticFn}
+                            onClick={onSwitchToQuadratic}
                         />
                     )}
                     {point.type === SplinePointType.QuadraticBezier && (
                         <MenuItem
                             text="Switch to Cubic"
-                            onClick={switchToCubicFn}
+                            onClick={onSwitchToCubic}
                         />
                     )}
                     <MenuItem
                         text="Delete..."
                         intent="danger"
-                        onClick={deleteFn}
-                        disabled={!deleteFn}
+                        onClick={onDelete}
+                        disabled={!onDelete}
                     />
                     <MenuDivider />
                     <MenuItem disabled={true} text={`Type: ${point.type}`} />
@@ -75,14 +75,14 @@ export function SplinePoint({
 }
 export function SplineControlPoint({
     point,
-    moveControlFn,
+    onMove,
 }: {
     point: Coords;
-    moveControlFn: (x: number, y: number) => void;
+    onMove: (x: number, y: number) => void;
 }) {
     const controlPointRef = useRef<HTMLElement>(null);
     useDraggable(controlPointRef, (screenX, screenY) =>
-        moveControlFn(screenX + robotSize / 4, screenY + robotSize / 4),
+        onMove(screenX + robotSize / 4, screenY + robotSize / 4),
     );
 
     return (

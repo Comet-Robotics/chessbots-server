@@ -1,4 +1,4 @@
-import { useReducer, useMemo } from "react";
+import { useReducer, useMemo, useCallback } from "react";
 import {
     type Spline,
     type Coords,
@@ -103,12 +103,23 @@ export function SplineEditor({ initialSpline }: { initialSpline: Spline }) {
                     return { ...state, points: newPoints };
                 }
             }
-
-            return state;
         },
         initialSpline,
     );
     const path = useMemo(() => splineToSvgDrawAttribute(spline), [spline]);
+
+    const onDeleteStartPoint = useMemo(() => {
+        return spline.points.length > 0 ?
+                () => dispatch({ type: "DELETE_START_POINT" })
+            :   undefined;
+    }, [spline.points.length]);
+
+    const onMoveStartPoint = useCallback(
+        (x: number, y: number) => {
+            dispatch({ type: "MOVE_START_POINT", coords: { x, y } });
+        },
+        [dispatch],
+    );
     return (
         <>
             <svg
@@ -125,33 +136,27 @@ export function SplineEditor({ initialSpline }: { initialSpline: Spline }) {
             </svg>
             <SplinePoint
                 point={spline.start}
-                deleteFn={
-                    spline.points.length > 0 ?
-                        () => dispatch({ type: "DELETE_START_POINT" })
-                    :   undefined
-                }
-                moveFn={(x, y) =>
-                    dispatch({ type: "MOVE_START_POINT", coords: { x, y } })
-                }
+                onDelete={onDeleteStartPoint}
+                onMove={onMoveStartPoint}
             />
             {spline.points.map((point, index) => (
                 <>
                     <SplinePoint
                         point={point}
-                        deleteFn={() =>
+                        onDelete={() =>
                             dispatch({ type: "DELETE_POINT", index })
                         }
-                        moveFn={(x, y) =>
+                        onMove={(x, y) =>
                             dispatch({
                                 type: "MOVE_POINT_ENDPOINT",
                                 coords: { x, y },
                                 index,
                             })
                         }
-                        switchToQuadraticFn={() =>
+                        onSwitchToQuadratic={() =>
                             dispatch({ type: "SWITCH_TO_QUADRATIC", index })
                         }
-                        switchToCubicFn={() =>
+                        onSwitchToCubic={() =>
                             dispatch({ type: "SWITCH_TO_CUBIC", index })
                         }
                     />
@@ -159,7 +164,7 @@ export function SplineEditor({ initialSpline }: { initialSpline: Spline }) {
                     {point.type === SplinePointType.CubicBezier && (
                         <SplineControlPoint
                             point={point.controlPoint}
-                            moveControlFn={(x, y) =>
+                            onMove={(x, y) =>
                                 dispatch({
                                     type: "MOVE_CONTROL_POINT",
                                     coords: { x, y },

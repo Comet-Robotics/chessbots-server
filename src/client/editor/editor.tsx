@@ -5,6 +5,7 @@ import {
     useCallback,
     useEffect,
     useMemo,
+    useRef,
     useState,
 } from "react";
 import {
@@ -30,6 +31,8 @@ import {
     ShowfileSchema,
     timelineLayerToSpline,
     EVENT_TYPE_TO_COLOR,
+    type TimelineLayer,
+    TimelineEventTypes,
 } from "../../common/show";
 import { diff } from "deep-object-diff";
 import {
@@ -44,6 +47,7 @@ import {
     useTime,
     useTransform,
 } from "motion/react";
+import { SplinePointType } from "../../common/spline";
 
 const RULER_TICK_INTERVAL_MS = 250;
 const RULER_EXTRA_TICK_COUNT = 10;
@@ -53,6 +57,9 @@ const RULER_TICK_GAP = "1rem";
 function millisToXPosition(millis: number): string {
     return `calc(${millis} / ${RULER_TICK_INTERVAL_MS} * ${RULER_TICK_GAP})`;
 }
+
+// TODO: reading blob.bytes works in safari but not chrome. why?
+// TODO: ui for adding/removing audio - remove current hotkey as this was mainly for testing
 
 export function Editor() {
     const [initialShow, setInitialShow] = useState(createNewShowfile());
@@ -65,6 +72,8 @@ export function Editor() {
         undo,
         redo,
     } = useStateWithTrackedHistory(initialShow);
+
+    const { audio } = show;
 
     // TODO: fix viewport height / timeline height
     const [unsavedChanges, setUnsavedChanges] =
@@ -82,7 +91,8 @@ export function Editor() {
     const openShowfile = useCallback(async () => {
         const blob = await fileOpen({
             mimeTypes: ["application/chessbots-showfile"],
-            extensions: ["cbor"],
+            extensions: [".cbor"],
+            description: "Chess Bots Showfile",
         });
 
         let data: unknown | null = null;
@@ -105,8 +115,6 @@ export function Editor() {
         setInitialShow(show);
         setShow(show);
         if (blob.handle) setFsHandle(blob.handle);
-
-        console.log(show);
     }, [setShow]);
 
     const saveShowfile = useCallback(async () => {
@@ -117,7 +125,7 @@ export function Editor() {
             blob,
             {
                 mimeTypes: ["application/chessbots-showfile"],
-                extensions: ["cbor"],
+                extensions: [".cbor"],
                 fileName: show.name + ".cbor",
             },
             fsHandle,
@@ -125,6 +133,18 @@ export function Editor() {
 
         setInitialShow(show);
     }, [fsHandle, show]);
+
+    const loadAudioFromFile = useCallback(async () => {
+        const blob = await fileOpen({
+            mimeTypes: ["audio/mpeg", "audio/wav"],
+            extensions: [".mp3", ".wav"],
+        });
+        const audio = await blob.bytes();
+        setShow({
+            ...show,
+            audio: { startMs: 0, data: audio, tempoBpm: null, mimeType: blob.type },
+        });
+    }, [setShow, show]);
 
     // TODO: figure out how to get this from the showfile
     const SEQUENCE_LENGTH_MS = 5 * 1000;
@@ -181,15 +201,84 @@ export function Editor() {
                     togglePlaying();
                 },
             },
+            {
+                combo: "mod+shift+f",
+                group: "Edit",
+                global: true,
+                label: "Load Audio",
+                onKeyDown: (e) => {
+                    e.preventDefault();
+                    loadAudioFromFile();
+                },
+            },
         ],
-        [redo, undo, saveShowfile, openShowfile, togglePlaying],
+        [
+            redo,
+            undo,
+            saveShowfile,
+            openShowfile,
+            togglePlaying,
+            loadAudioFromFile,
+        ],
     );
 
+    const editName = useCallback(
+        (value: string) => setShow({ ...show, name: value }),
+        [show, setShow],
+    );
     const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys);
+
+    const audioRef = useRef(new Audio());
+
+    useEffect(() => {
+        if (!audio) return;
+
+        audioRef.current.src = URL.createObjectURL(new Blob([audio.data], {
+            type: audio.mimeType,
+        }));
+        audioRef.current.load();
+    }, [audio]);
+
+    useEffect(() => {
+        if (!audioRef.current) return;
+
+        if (playing && audioRef.current.paused) {
+            audioRef.current.currentTime = Math.min(
+                currentTimestamp.get() / 1000,
+                audioRef.current.duration,
+            );
+            audioRef.current.play();
+        }
+
+        if (!playing && !audioRef.current.paused) {
+            audioRef.current.pause();
+        }
+    }, [playing, currentTimestamp]);
+
+    const addRobot = useCallback(() => {
+        const newLayer: TimelineLayer = [
+            {
+                type: TimelineEventTypes.StartPointEvent,
+                target: {
+                    type: SplinePointType.StartPoint,
+                    point: {
+                        x: 0,
+                        y: 70,
+                    },
+                },
+                durationMs: 7500,
+            },
+            [],
+        ];
+        setShow({
+            ...show,
+            timeline: [...show.timeline, newLayer],
+        });
+    }, [show, setShow]);
 
     return (
         <div
-            style={{ height: "100vh" }}
+            style={{ maxHeight: "100vh" }}
             onKeyDown={handleKeyDown}
             onKeyUp={handleKeyUp}
         >
@@ -205,9 +294,7 @@ export function Editor() {
                         <EditableText
                             placeholder="Click to edit..."
                             value={show.name}
-                            onChange={(value) =>
-                                setShow({ ...show, name: value })
-                            }
+                            onChange={editName}
                         />
                     </H2>
                     {unsavedChanges && (
@@ -255,12 +342,13 @@ export function Editor() {
                         <SplineEditor initialSpline={spline} />
                     ))}
             </RobotGrid>
-            {/* TODO: implement add button  */}
             <Section
                 title="Timeline"
                 compact
                 style={{ height: "100%" }}
-                rightElement={<Button icon="add" text="Add Robot" />}
+                rightElement={
+                    <Button icon="add" text="Add Robot" onClick={addRobot} />
+                }
             >
                 <ButtonGroup>
                     <Button
@@ -290,11 +378,18 @@ export function Editor() {
                             }}
                         />
                     </TimelineLayer>
-                    {/* TODO: support deleting robots */}
                     <TimelineLayer title="Audio"> Stuff here</TimelineLayer>
                     {show.timeline.map(([startPoint, remainingEvents], i) => {
                         return (
-                            <TimelineLayer title={`Robot ${i + 1}`}>
+                            <TimelineLayer
+                                title={`Robot ${i + 1}`}
+                                onDelete={() =>
+                                    setShow({
+                                        ...show,
+                                        timeline: show.timeline.toSpliced(i, 1),
+                                    })
+                                }
+                            >
                                 <div style={{ display: "flex" }}>
                                     <TimelineEvent event={startPoint} />
                                     {remainingEvents.map((event) => {
@@ -340,9 +435,8 @@ const TimelineEvent = forwardRef<HTMLDivElement, { event: TimelineEvents }>(
 
 const TimelineLayer = forwardRef<
     HTMLDivElement,
-    PropsWithChildren<{ title: string }>
->(function TimelineCard(props, ref) {
-    const { title, children } = props;
+    PropsWithChildren<{ title: string; onDelete?: () => void }>
+>(function TimelineCard({ title, children, onDelete }, ref) {
     // TODO: add borders between columns. v low priority
     // https://codepen.io/Kevin-Geary/pen/BavwqYX
     // https://www.youtube.com/watch?v=EQYft7JPKto
@@ -355,7 +449,17 @@ const TimelineLayer = forwardRef<
                 gridColumn: "1 / span 2",
             }}
         >
-            <Text style={{ fontWeight: "bold" }}>{title}</Text>
+            <span>
+                <Text style={{ fontWeight: "bold" }}>{title}</Text>
+                {onDelete && (
+                    <Button
+                        icon="trash"
+                        variant="minimal"
+                        onClick={onDelete}
+                        style={{ gridColumn: "1 / span 2" }}
+                    />
+                )}
+            </span>
             {children}
         </SectionCard>
     );
@@ -408,15 +512,16 @@ function usePlayHead(endDurationMs: number, startMs = 0) {
         currentTimestamp.set(timestamp);
     };
 
-    const togglePlaying = () => {
+    const togglePlaying = useCallback(() => {
         setPlaying((p) => {
-            if (!p) {
+            const newPlaying = !p;
+            if (newPlaying) {
                 // When starting playback, initialize the lastAccessedTime
                 lastAccessedTime.set(time.get());
             }
-            return !p;
+            return newPlaying;
         });
-    };
+    }, [setPlaying, time, lastAccessedTime]);
 
     useMotionValueEvent(time, "change", (currentTime) => {
         if (!playing) {
@@ -426,17 +531,15 @@ function usePlayHead(endDurationMs: number, startMs = 0) {
         const prevTime = lastAccessedTime.get();
         const elapsedMs = currentTime - prevTime;
 
-        // Update timestamp based on elapsed time
         const newTimestamp = currentTimestamp.get() + elapsedMs;
 
         if (newTimestamp >= endDurationMs) {
-            // Loop back to start when reaching the end
+            setPlaying(false);
             currentTimestamp.set(0);
         } else {
             currentTimestamp.set(newTimestamp);
         }
 
-        // Update last accessed time for next calculation
         lastAccessedTime.set(currentTime);
     });
 
