@@ -4,6 +4,7 @@ import {
     useState,
     useReducer,
     useCallback,
+    useMemo,
 } from "react";
 
 export function useDraggable(
@@ -130,8 +131,8 @@ export function useStateWithTrackedHistory<T>(initialValue: T) {
 
     const undo = useCallback(() => dispatch({ type: "undo" }), []);
     const redo = useCallback(() => dispatch({ type: "redo" }), []);
-    const canUndo = state.index > 0;
-    const canRedo = state.index < state.history.length - 1;
+    const canUndo = useMemo(() => state.index > 0, [state.index]);
+    const canRedo = useMemo(() => state.index < state.history.length - 1, [state.index, state.history.length]);
 
     const setValue = useCallback((value: T) => {
         dispatch({ type: "set", value });
