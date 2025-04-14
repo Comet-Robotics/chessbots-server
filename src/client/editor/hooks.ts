@@ -1,3 +1,4 @@
+import { useMotionValue, useTime, useMotionValueEvent } from "motion/react";
 import {
     type RefObject,
     useEffect,
@@ -144,4 +145,48 @@ export function useStateWithTrackedHistory<T>(initialValue: T) {
     const { value } = state;
 
     return { value, setValue, canUndo, canRedo, undo, redo };
+}
+
+export function usePlayHead(endDurationMs: number, startMs = 0) {
+    const [playing, setPlaying] = useState(false);
+    const currentTimestamp = useMotionValue(startMs);
+    const time = useTime();
+    const lastAccessedTime = useMotionValue(0);
+
+    const setTimestamp = (timestamp: number) => {
+        currentTimestamp.set(timestamp);
+    };
+
+    const togglePlaying = useCallback(() => {
+        setPlaying((p) => {
+            const newPlaying = !p;
+            if (newPlaying) {
+                // When starting playback, initialize the lastAccessedTime
+                lastAccessedTime.set(time.get());
+            }
+            return newPlaying;
+        });
+    }, [setPlaying, time, lastAccessedTime]);
+
+    useMotionValueEvent(time, "change", (currentTime) => {
+        if (!playing) {
+            return;
+        }
+
+        const prevTime = lastAccessedTime.get();
+        const elapsedMs = currentTime - prevTime;
+
+        const newTimestamp = currentTimestamp.get() + elapsedMs;
+
+        if (newTimestamp >= endDurationMs) {
+            setPlaying(false);
+            currentTimestamp.set(0);
+        } else {
+            currentTimestamp.set(newTimestamp);
+        }
+
+        lastAccessedTime.set(currentTime);
+    });
+
+    return { currentTimestamp, playing, togglePlaying, setTimestamp };
 }
