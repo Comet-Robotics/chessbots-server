@@ -536,6 +536,11 @@ export function Editor() {
                         disabled={!canRedo}
                         onClick={redo}
                     />
+                    <Button
+                        className="bp5-minimal"
+                        text="Load New Audio" 
+                        onClick={loadAudioFromFile}
+                    />
                 </ButtonGroup>
             </Card>
             {/* TODO: render robots */}
