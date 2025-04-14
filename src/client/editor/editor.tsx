@@ -66,12 +66,18 @@ function millisToXPosition(millis: number): string {
     return `calc(${millis} / ${RULER_TICK_INTERVAL_MS} * ${RULER_TICK_GAP})`;
 }
 
-// TODO: reading blob.bytes works in safari but not chrome. why?
-// TODO: ui for adding/removing audio - remove current hotkey as this was mainly for testing
+// TODO: figure out how to get this from the showfile
+const SEQUENCE_LENGTH_MS = 10 * 1000;
 
-export function Editor() {
+// TODO: ui for adding/removing audio - remove current hotkey as this was mainly for testing
+function useShowfile() {
     const [initialShow, setInitialShow] = useState(createNewShowfile());
+
     const [fsHandle, setFsHandle] = useState<FileSystemFileHandle | null>(null);
+
+    const [unsavedChanges, setUnsavedChanges] =
+        usePreventExitWithUnsavedChanges();
+
     const {
         value: show,
         setValue: setShow,
@@ -80,13 +86,6 @@ export function Editor() {
         undo,
         redo,
     } = useStateWithTrackedHistory(initialShow);
-
-    const { audio } = show;
-
-    // TODO: fix viewport height / timeline height
-    const [unsavedChanges, setUnsavedChanges] =
-        usePreventExitWithUnsavedChanges();
-
     useEffect(() => {
         const result = diff(initialShow, show);
         if (Object.keys(result).length === 0) {
@@ -156,15 +155,6 @@ export function Editor() {
             },
         });
     }, [setShow, show]);
-
-    // TODO: figure out how to get this from the showfile
-    const SEQUENCE_LENGTH_MS = 10 * 1000;
-
-    const { currentTimestamp, playing, togglePlaying } =
-        usePlayHead(SEQUENCE_LENGTH_MS);
-    const seekBarWidth = useTransform(() =>
-        millisToXPosition(currentTimestamp.get()),
-    );
 
     const handleStartPointMove = useCallback(
         (layerIndex: number, newCoords: Coords) => {
@@ -313,14 +303,15 @@ export function Editor() {
             const eventToUpdate = events[pointIndex];
 
             if (eventToUpdate?.type !== TimelineEventTypes.GoToPointEvent) {
-                console.warn("Tried to switch point type on non-GoToPointEvent")
-                return
+                console.warn(
+                    "Tried to switch point type on non-GoToPointEvent",
+                );
+                return;
             }
             let newTarget: CubicBezier | QuadraticBezier;
             if (
                 newType === SplinePointType.CubicBezier &&
-                eventToUpdate.target.type ===
-                    SplinePointType.QuadraticBezier
+                eventToUpdate.target.type === SplinePointType.QuadraticBezier
             ) {
                 newTarget = {
                     type: SplinePointType.CubicBezier,
@@ -339,7 +330,7 @@ export function Editor() {
                     endPoint: eventToUpdate.target.endPoint,
                 };
             } else {
-                console.warn("Tried to switch point type with invalid type")
+                console.warn("Tried to switch point type with invalid type");
                 return;
             }
 
@@ -351,6 +342,133 @@ export function Editor() {
             setShow({ ...show, timeline: newTimeline });
         },
         [show, setShow],
+    );
+
+    const editName = useCallback(
+        (value: string) => setShow({ ...show, name: value }),
+        [show, setShow],
+    );
+
+    const addRobot = useCallback(() => {
+        const newLayer: TimelineLayer = [
+            {
+                type: TimelineEventTypes.StartPointEvent,
+                target: {
+                    type: SplinePointType.StartPoint,
+                    point: {
+                        x: 0,
+                        y: 70,
+                    },
+                },
+                durationMs: 7500,
+            },
+            [],
+        ];
+        setShow({
+            ...show,
+            timeline: [...show.timeline, newLayer],
+        });
+    }, [show, setShow]);
+
+    const { currentTimestamp, playing, togglePlaying } =
+        usePlayHead(SEQUENCE_LENGTH_MS);
+
+    const { audio } = show;
+    const audioRef = useRef(new Audio());
+    useEffect(() => {
+        if (!audio) return;
+
+        audioRef.current.src = URL.createObjectURL(
+            new Blob([audio.data], {
+                type: audio.mimeType,
+            }),
+        );
+        audioRef.current.load();
+    }, [audio]);
+
+    useEffect(() => {
+        if (!audioRef.current) return;
+
+        if (audioRef.current.readyState !== 4) {
+            return;
+        }
+
+        if (playing && audioRef.current.paused) {
+            audioRef.current.currentTime = Math.min(
+                currentTimestamp.get() / 1000,
+                audioRef.current.duration,
+            );
+            audioRef.current.play();
+        }
+
+        if (!playing && !audioRef.current.paused) {
+            audioRef.current.pause();
+        }
+    }, [playing, currentTimestamp]);
+
+    const deleteLayer = useCallback(
+        (i: number) =>
+            setShow({
+                ...show,
+                timeline: show.timeline.toSpliced(i, 1),
+            }),
+        [show, setShow],
+    );
+
+    return {
+        show,
+        unsavedChanges,
+        loadAudioFromFile,
+        handleStartPointMove,
+        handlePointMove,
+        handleControlPointMove,
+        handleDeleteStartPoint,
+        handleDeletePoint,
+        handleSwitchPointType,
+        saveShowfile,
+        openShowfile,
+        editName,
+        undo,
+        redo,
+        addRobot,
+        currentTimestamp,
+        playing,
+        togglePlaying,
+        deleteLayer,
+        canRedo,
+        canUndo,
+    };
+}
+
+export function Editor() {
+    const {
+        show,
+        unsavedChanges,
+        loadAudioFromFile,
+        handleStartPointMove,
+        handlePointMove,
+        handleControlPointMove,
+        handleDeleteStartPoint,
+        handleDeletePoint,
+        handleSwitchPointType,
+        saveShowfile,
+        openShowfile,
+        undo,
+        redo,
+        editName,
+        addRobot,
+        currentTimestamp,
+        playing,
+        togglePlaying,
+        canUndo,
+        canRedo,
+        deleteLayer,
+    } = useShowfile();
+
+    // TODO: fix viewport height / timeline height
+
+    const seekBarWidth = useTransform(() =>
+        millisToXPosition(currentTimestamp.get()),
     );
 
     const hotkeys = useMemo<HotkeyConfig[]>(
@@ -420,66 +538,7 @@ export function Editor() {
         ],
     );
 
-    const editName = useCallback(
-        (value: string) => setShow({ ...show, name: value }),
-        [show, setShow],
-    );
     const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys);
-
-    const audioRef = useRef(new Audio());
-
-    useEffect(() => {
-        if (!audio) return;
-
-        audioRef.current.src = URL.createObjectURL(
-            new Blob([audio.data], {
-                type: audio.mimeType,
-            }),
-        );
-        audioRef.current.load();
-    }, [audio]);
-
-    useEffect(() => {
-        if (!audioRef.current) return;
-
-
-        if (audioRef.current.readyState !== 4) {
-            return;
-        }
-
-        if (playing && audioRef.current.paused) {
-            audioRef.current.currentTime = Math.min(
-                currentTimestamp.get() / 1000,
-                audioRef.current.duration,
-            );
-            audioRef.current.play();
-        }
-
-        if (!playing && !audioRef.current.paused) {
-            audioRef.current.pause();
-        }
-    }, [playing, currentTimestamp]);
-
-    const addRobot = useCallback(() => {
-        const newLayer: TimelineLayer = [
-            {
-                type: TimelineEventTypes.StartPointEvent,
-                target: {
-                    type: SplinePointType.StartPoint,
-                    point: {
-                        x: 0,
-                        y: 70,
-                    },
-                },
-                durationMs: 7500,
-            },
-            [],
-        ];
-        setShow({
-            ...show,
-            timeline: [...show.timeline, newLayer],
-        });
-    }, [show, setShow]);
 
     return (
         <div
@@ -538,14 +597,13 @@ export function Editor() {
                     />
                     <Button
                         className="bp5-minimal"
-                        text="Load New Audio" 
+                        text="Load New Audio"
                         onClick={loadAudioFromFile}
                     />
                 </ButtonGroup>
             </Card>
             {/* TODO: render robots */}
             <RobotGrid robotState={{}}>
-                {/* TODO: think more about how state changes will make it up from the editor to this component */}
                 {show.timeline.map((layer, index) => (
                     <SplineEditor
                         key={`spline-editor-${index}`}
@@ -611,12 +669,7 @@ export function Editor() {
                             <TimelineLayer
                                 key={`timeline-layer-${i}`}
                                 title={`Robot ${i + 1}`}
-                                onDelete={() =>
-                                    setShow({
-                                        ...show,
-                                        timeline: show.timeline.toSpliced(i, 1),
-                                    })
-                                }
+                                onDelete={() => deleteLayer(i)}
                             >
                                 <div style={{ display: "flex" }}>
                                     <TimelineEvent event={startPoint} />
@@ -651,7 +704,10 @@ const TimelineEvent = forwardRef<HTMLDivElement, { event: TimelineEvents }>(
                     width: millisToXPosition(event.durationMs),
                     backgroundColor: EVENT_TYPE_TO_COLOR[event.type],
                     color: "white",
-                    visibility: event.type === TimelineEventTypes.WaitEvent ? "hidden" : "inherit",
+                    visibility:
+                        event.type === TimelineEventTypes.WaitEvent ?
+                            "hidden"
+                        :   "inherit",
                 }}
                 compact
                 elevation={Elevation.TWO}
@@ -713,10 +769,11 @@ function Ruler({ sequenceLengthMs }: { sequenceLengthMs: number }) {
                 )
                     .fill(1)
                     .map((_, i) => {
-                        // Check if this tick marks a 1000ms interval (every 4 ticks if RULER_TICK_INTERVAL_MS is 250)
+                        // 1000ms interval (every 4 ticks if RULER_TICK_INTERVAL_MS is 250)
                         const isMajorTick =
                             i % (1000 / RULER_TICK_INTERVAL_MS) === 0;
 
+                        // 500ms interval
                         const isSecondaryTick =
                             i % (1000 / RULER_TICK_INTERVAL_MS) === 5;
                         return (
@@ -724,7 +781,10 @@ function Ruler({ sequenceLengthMs }: { sequenceLengthMs: number }) {
                                 key={`tick-${i}`}
                                 style={{
                                     borderRight: "1px solid gray",
-                                    height: isMajorTick ? "1rem" : isSecondaryTick ? "0.8rem" : "0.5rem",
+                                    height:
+                                        isMajorTick ? "1rem"
+                                        : isSecondaryTick ? "0.8rem"
+                                        : "0.5rem",
                                 }}
                             />
                         );
