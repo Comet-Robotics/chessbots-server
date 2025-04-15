@@ -18,12 +18,6 @@ import {
 } from "./spline";
 import { Colors } from "@blueprintjs/core";
 
-const AudioSchema = RuntypesRecord({
-    data: InstanceOf<Uint8Array>(Uint8Array),
-    mimeType: String,
-});
-export type Audio = Static<typeof AudioSchema>;
-
 export const TimelineEventTypes = {
     GoToPointEvent: "goto_point",
     WaitEvent: "wait",
@@ -51,6 +45,8 @@ const StartPointEventSchema = RuntypesRecord({
 export type StartPointEvent = Static<typeof StartPointEventSchema>;
 
 const TimelineEventSchema = Union(GoToPointEventSchema, WaitEventSchema);
+// TODO: refactor this to be an object consisting of 2 keys: 
+// startPoint and remainingEvents so that it is more self-documenting
 const TimelineLayerSchema = Tuple(
     StartPointEventSchema,
     Array(TimelineEventSchema),
@@ -61,14 +57,33 @@ export type TimelineEvents =
     | Static<typeof TimelineEventSchema>
     | StartPointEvent;
 
+/**
+ * The showfile schema. 
+ * 
+ * @remarks
+ * At runtime this is a regular JS object. When saved as a file, it is stored as binary in the Concise Binary Object Representation (CBOR) format.
+ * The main reason for using a binary format is to allow the audio file to be included inline with the file. Alternatives include base64 encoding the audio file so 
+ * it could be stored as a string in a JSON file, or storing the audio file separately, perhaps using a ZIP file.
+ */
 export const ShowfileSchema = RuntypesRecord({
+    // Be sure to increment the schema version number when making breaking changes to the showfile schema.
     $chessbots_show_schema_version: Literal(1),
+    // The timeline is an array of timeline 'layers' - a layer consists of an array that includes all the events for one robot.
     timeline: Array(TimelineLayerSchema),
-    audio: Optional(AudioSchema),
+    audio: Optional(RuntypesRecord({
+      data: InstanceOf<Uint8Array>(Uint8Array),
+      mimeType: String,
+  })),
     name: String,
 });
 export type Showfile = Static<typeof ShowfileSchema>;
 
+
+/**
+ * Converts a timeline layer to a spline.
+ * @param layer - the timeline layer to convert.
+ * @returns - the spline representation of the timeline layer.
+ */
 export function timelineLayerToSpline(layer: TimelineLayer): Spline {
     const [startPoint, events] = layer;
     return {
@@ -82,7 +97,10 @@ export function timelineLayerToSpline(layer: TimelineLayer): Spline {
     };
 }
 
-// TODO: empty showfile
+/**
+ * Creates a new empty showfile.
+ * @returns The new empty showfile.
+ */
 export function createNewShowfile(): Showfile {
     return {
         $chessbots_show_schema_version: 1,
