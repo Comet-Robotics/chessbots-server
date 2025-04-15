@@ -14,6 +14,7 @@ import {
     GoToPointEvent,
     TimelineLayer,
     NonStartPointEvent,
+    TimelineDurationUpdateMode,
 } from "../../common/show";
 import {
     SplinePointType,
@@ -29,6 +30,12 @@ import {
 
 export function useShowfile() {
     const [initialShow, setInitialShow] = useState(createNewShowfile());
+
+    // See comment on TimelineDurationUpdateMode declaration in src/common/show.ts for more info.
+    const [timelineDurationUpdateMode, setTimelineDurationUpdateMode] =
+        useState<
+            (typeof TimelineDurationUpdateMode)[keyof typeof TimelineDurationUpdateMode]
+        >(TimelineDurationUpdateMode.Ripple);
 
     const [fsHandle, setFsHandle] = useState<FileSystemFileHandle | null>(null);
 
@@ -390,6 +397,54 @@ export function useShowfile() {
         [show, setShow],
     );
 
+    const updateTimelineEventDurations = useCallback(
+        (layerIndex: number, eventId: string, deltaMs: number) => {
+            const newTimeline = [...show.timeline];
+            const layer = newTimeline[layerIndex];
+            if (!layer) {
+                console.log("Layer not found");
+                return;
+            }
+
+            const [startPoint, remainingEvents] = layer;
+
+            const updatedEventList = [startPoint, ...remainingEvents];
+            const eventToUpdateIndex = updatedEventList.findIndex(
+                (event) => event.id === eventId,
+            );
+            if (eventToUpdateIndex === -1) {
+                console.log("Event not found", updatedEventList, layer);
+                return;
+            }
+
+            const shouldUpdateSubsequentEventDuration =
+                timelineDurationUpdateMode ===
+                    TimelineDurationUpdateMode.Rolling &&
+                eventToUpdateIndex < updatedEventList.length - 1;
+
+            const eventToUpdate = updatedEventList[eventToUpdateIndex];
+            const newDurationMs = eventToUpdate.durationMs + deltaMs;
+            eventToUpdate.durationMs = newDurationMs;
+            updatedEventList[eventToUpdateIndex] = eventToUpdate;
+
+            if (shouldUpdateSubsequentEventDuration) {
+                const subsequentEventIndex = eventToUpdateIndex + 1;
+                const subsequentEvent = updatedEventList[subsequentEventIndex];
+                const newSubsequentEventDurationMs =
+                    subsequentEvent.durationMs - deltaMs;
+                subsequentEvent.durationMs = newSubsequentEventDurationMs;
+                updatedEventList[subsequentEventIndex] = subsequentEvent;
+            }
+
+            newTimeline[layerIndex] = [
+                updatedEventList[0] as StartPointEvent,
+                updatedEventList.slice(1) as NonStartPointEvent[],
+            ];
+            setShow({ ...show, timeline: newTimeline });
+        },
+        [show, setShow, timelineDurationUpdateMode],
+    );
+
     return {
         updateTimelineEventOrders,
         show,
@@ -414,5 +469,8 @@ export function useShowfile() {
         canRedo,
         canUndo,
         sequenceLengthMs,
+        timelineDurationUpdateMode,
+        setTimelineDurationUpdateMode,
+        updateTimelineEventDurations,
     };
 }

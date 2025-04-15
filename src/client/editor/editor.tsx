@@ -1,4 +1,10 @@
-import { forwardRef, type PropsWithChildren, useMemo } from "react";
+import {
+    forwardRef,
+    type PropsWithChildren,
+    useEffect,
+    useMemo,
+    useRef,
+} from "react";
 import {
     Section,
     Text,
@@ -11,7 +17,7 @@ import {
     Tag,
     useHotkeys,
     type HotkeyConfig,
-    Elevation,
+    SegmentedControl,
 } from "@blueprintjs/core";
 import { RobotGrid } from "../debug/simulator";
 import {
@@ -19,20 +25,31 @@ import {
     EVENT_TYPE_TO_COLOR,
     type TimelineLayer,
     NonStartPointEvent,
+    TimelineDurationUpdateMode,
 } from "../../common/show";
 import { SplineEditor } from "./spline-editor";
-import { motion, useTransform } from "motion/react";
+import { motion, useDragControls, useTransform } from "motion/react";
 import { useShowfile } from "./showfile-state";
 import { Reorder } from "motion/react";
+import interact from "interactjs";
 
 const RULER_TICK_INTERVAL_MS = 100;
-const RULER_EXTRA_TICK_COUNT = 20;
 // TODO: make ruler tick size configurable so we can zoom. relatively low priority. would be nice if gestures could be supported too
-const RULER_TICK_GAP = "0.5rem";
+const RULER_TICK_GAP_PX = 12;
 
-function millisToXPosition(millis: number): string {
-    return `calc(${millis} / ${RULER_TICK_INTERVAL_MS} * ${RULER_TICK_GAP})`;
+const RULER_EXTRA_TICK_COUNT = Math.round(
+    window.innerWidth / 4 / RULER_TICK_GAP_PX,
+);
+
+function millisToPixels(millis: number): number {
+    return (millis / RULER_TICK_INTERVAL_MS) * RULER_TICK_GAP_PX;
 }
+
+function pixelsToMillis(pixels: number): number {
+    return (pixels / RULER_TICK_GAP_PX) * RULER_TICK_INTERVAL_MS;
+}
+
+// function
 
 // TODO: ui for adding/removing audio - remove current hotkey as this was mainly for testing
 
@@ -61,12 +78,15 @@ export function Editor() {
         deleteLayer,
         sequenceLengthMs,
         updateTimelineEventOrders,
+        updateTimelineEventDurations,
+        setTimelineDurationUpdateMode,
+        timelineDurationUpdateMode,
     } = useShowfile();
 
     // TODO: fix viewport height / timeline height
 
     const seekBarWidth = useTransform(() =>
-        millisToXPosition(currentTimestamp.get()),
+        millisToPixels(currentTimestamp.get()),
     );
 
     const hotkeys = useMemo<HotkeyConfig[]>(
@@ -230,7 +250,31 @@ export function Editor() {
                 compact
                 style={{ height: "100%" }}
                 rightElement={
-                    <Button icon="add" text="Add Robot" onClick={addRobot} />
+                    <>
+                        <SegmentedControl
+                            options={[
+                                {
+                                    label: "Ripple",
+                                    value: TimelineDurationUpdateMode.Ripple,
+                                },
+                                {
+                                    label: "Rolling",
+                                    value: TimelineDurationUpdateMode.Rolling,
+                                },
+                            ]}
+                            onValueChange={(value) =>
+                                setTimelineDurationUpdateMode(
+                                    value as (typeof TimelineDurationUpdateMode)[keyof typeof TimelineDurationUpdateMode],
+                                )
+                            }
+                            value={timelineDurationUpdateMode}
+                        />
+                        <Button
+                            icon="add"
+                            text="Add Robot"
+                            onClick={addRobot}
+                        />
+                    </>
                 }
             >
                 <ButtonGroup>
@@ -241,13 +285,14 @@ export function Editor() {
                         variant="outlined"
                     />
                 </ButtonGroup>
+
                 <div
                     style={{
                         overflowY: "scroll",
                         maxHeight: "100%",
                         display: "grid",
                         gridTemplateColumns: "max-content 1fr",
-                        gap: `0rem ${RULER_TICK_GAP}`,
+                        gap: `0rem ${RULER_TICK_GAP_PX}`,
                     }}
                 >
                     <Ruler sequenceLengthMs={sequenceLengthMs} />
@@ -262,84 +307,156 @@ export function Editor() {
                         />
                     </TimelineLayer>
                     <TimelineLayer title="Audio"> Stuff here</TimelineLayer>
-                    {show.timeline.map(([startPoint, remainingEvents], i) => {
-                        return (
-                            <TimelineLayer
-                                key={`timeline-layer-${i}`}
-                                title={`Robot ${i + 1}`}
-                                onDelete={() => deleteLayer(i)}
-                            >
-                                <div style={{ display: "flex" }}>
-                                    <TimelineEvent event={startPoint} />
-                                    <Reorder.Group
-                                        as="div"
-                                        axis="x"
-                                        style={{ display: "contents" }}
-                                        values={[
-                                            startPoint,
-                                            ...remainingEvents,
-                                        ]}
-                                        onReorder={(newIndices) => {
-                                            updateTimelineEventOrders(
-                                                i,
-                                                newIndices as NonStartPointEvent[],
-                                            );
-                                        }}
-                                    >
-                                        {remainingEvents.map((event) => {
-                                            return (
-                                                <Reorder.Item
-                                                    value={event}
-                                                    key={event.id}
-                                                >
-                                                    <TimelineEvent
+                    {show.timeline.map(
+                        ([startPoint, remainingEvents], layerIndex) => {
+                            return (
+                                <TimelineLayer
+                                    key={`timeline-layer-${layerIndex}`}
+                                    title={`Robot ${layerIndex + 1}`}
+                                    onDelete={() => deleteLayer(layerIndex)}
+                                >
+                                    <div style={{ display: "flex" }}>
+                                        <TimelineEvent
+                                            event={startPoint}
+                                            onDurationChange={(ms) =>
+                                                updateTimelineEventDurations(
+                                                    layerIndex,
+                                                    startPoint.id,
+                                                    ms,
+                                                )
+                                            }
+                                        />
+                                        <Reorder.Group
+                                            as="div"
+                                            axis="x"
+                                            style={{ display: "contents" }}
+                                            values={[
+                                                startPoint,
+                                                ...remainingEvents,
+                                            ]}
+                                            onReorder={(newIndices) => {
+                                                updateTimelineEventOrders(
+                                                    layerIndex,
+                                                    newIndices as NonStartPointEvent[],
+                                                );
+                                            }}
+                                        >
+                                            {remainingEvents.map((event) => {
+                                                return (
+                                                    <ReorderableTimelineEvent
                                                         event={event}
+                                                        key={event.id}
+                                                        onDurationChange={(
+                                                            ms,
+                                                        ) =>
+                                                            updateTimelineEventDurations(
+                                                                layerIndex,
+                                                                event.id,
+                                                                ms,
+                                                            )
+                                                        }
                                                     />
-                                                </Reorder.Item>
-                                            );
-                                        })}
-                                    </Reorder.Group>
-                                </div>
-                                {/* TODO: add ability to add events */}
-                            </TimelineLayer>
-                        );
-                    })}
+                                                );
+                                            })}
+                                        </Reorder.Group>
+                                    </div>
+                                    {/* TODO: add ability to add events */}
+                                </TimelineLayer>
+                            );
+                        },
+                    )}
                 </div>
             </Section>
         </div>
     );
 }
 
-const TimelineEvent = forwardRef<HTMLDivElement, { event: TimelineEvents }>(
-    function TimelineEvent(props, ref) {
-        const { event } = props;
-        // TODO: add context menu for deleting events and adding a new event before and after this one
+function ReorderableTimelineEvent({
+    event,
+    onDurationChange,
+}: PropsWithChildren<{
+    event: TimelineEvents;
+    onDurationChange: (ms: number) => void;
+}>) {
+    const controls = useDragControls();
 
-        // TODO: add handles to the edges of the event to edit durations. add a switch for ripple vs rolling edits
+    return (
+        <Reorder.Item
+            value={event}
+            dragListener={false}
+            dragControls={controls}
+        >
+            <TimelineEvent
+                event={event}
+                onPointerDownOnDragHandle={(e) => controls.start(e)}
+                onDurationChange={onDurationChange}
+            />
+        </Reorder.Item>
+    );
+}
 
-        // ripple edits mean that editing the duration of an event has a ripple effect on ALL the other events in the same layer, shifting all the subsequent event start times by the same amount (so only one event's duration is actually changing)
-        // rolling edits mean that editing the duration of an event also affects the duration of the event that immediately follows it in the same layer, such that adjusting the duration of this event doesn't shift the start timestamp of the subsequent events in the same layer
+function TimelineEvent(props: {
+    event: TimelineEvents;
+    onPointerDownOnDragHandle?: (
+        event: React.PointerEvent<HTMLDivElement>,
+    ) => void;
+    onDurationChange?: (deltaMs: number) => void;
+}) {
+    const ref = useRef<HTMLDivElement>(null);
+    const { event, onPointerDownOnDragHandle, onDurationChange } = props;
+    useEffect(() => {
+        if (!onDurationChange) return;
+        if (!ref.current) return;
+        const el = ref.current;
 
-        return (
-            <Card
-                ref={ref}
-                style={{
-                    width: millisToXPosition(event.durationMs),
-                    backgroundColor: EVENT_TYPE_TO_COLOR[event.type],
-                    color: "white",
-                    // visibility:
-                    //     event.type === TimelineEventTypes.WaitEvent ?
-                    //         "hidden"
-                    //     :   "inherit",
-                }}
-                compact
-                elevation={Elevation.TWO}
-            >
+        interact(el).resizable({
+            edges: {
+                right: true,
+            },
+            listeners: {
+                move: function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    onDurationChange(pixelsToMillis(event.deltaRect.width));
+                },
+            },
+        });
+    }, [event.type, onDurationChange]);
+
+    // TODO: add context menu for deleting events and adding a new event before and after this one
+
+    return (
+        <Card
+            ref={ref}
+            style={{
+                width: millisToPixels(event.durationMs),
+                backgroundColor: EVENT_TYPE_TO_COLOR[event.type],
+                color: "white",
+                boxSizing: "border-box",
+                display: "flex",
+                justifyContent: "space-between",
+                touchAction: "none",
+                overflow: "hidden",
+            }}
+            compact
+        >
+            <span style={{ cursor: "default", userSelect: "none" }}>
                 {event.type}
-            </Card>
-        );
-    },
-);
+            </span>
+            {onPointerDownOnDragHandle && (
+                <span
+                    style={{
+                        width: "1rem",
+                        height: "1rem",
+                        backgroundColor: "red",
+                        cursor: "grab",
+                    }}
+                    onPointerDown={onPointerDownOnDragHandle}
+                ></span>
+            )}
+        </Card>
+    );
+}
 
 const TimelineLayer = forwardRef<
     HTMLDivElement,
@@ -383,7 +500,7 @@ function Ruler({ sequenceLengthMs }: { sequenceLengthMs: number }) {
                     overflowX: "scroll",
                     justifyContent: "space-between",
                     alignItems: "start",
-                    gap: RULER_TICK_GAP,
+                    gap: RULER_TICK_GAP_PX,
                 }}
             >
                 {new Array(

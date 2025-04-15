@@ -68,7 +68,7 @@ export type TimelineEvents = NonStartPointEvent | StartPointEvent;
  */
 export const ShowfileSchema = RuntypesRecord({
     // Be sure to increment the schema version number when making breaking changes to the showfile schema.
-    $chessbots_show_schema_version: Literal(1),
+    $chessbots_show_schema_version: Literal(2),
     // The timeline is an array of timeline 'layers' - a layer consists of an array that includes all the events for one robot.
     timeline: Array(TimelineLayerSchema),
     audio: Optional(
@@ -105,7 +105,7 @@ export function timelineLayerToSpline(layer: TimelineLayer): Spline {
  */
 export function createNewShowfile(): Showfile {
     return {
-        $chessbots_show_schema_version: 1,
+        $chessbots_show_schema_version: 2,
         timeline: [
             [
                 {
@@ -172,3 +172,22 @@ export const EVENT_TYPE_TO_COLOR: Record<
     [TimelineEventTypes.WaitEvent]: Colors.GRAY2,
     [TimelineEventTypes.StartPointEvent]: Colors.GREEN2,
 };
+
+/*
+ * The timeline duration update mode determines how the duration of timeline events
+ * is updated when the user edits a timeline event's duration.
+ *
+ * Being in ripple edit mode means that editing the duration of an event has a 
+ * ripple effect on ALL the other events in the same layer, shifting
+ * all the subsequent event start times by the same amount (so only
+ * one event's duration is actually changing). 
+ * 
+ * Being in rolling edit mode mean that editing the duration of an event also affects the
+ * duration of the event that immediately follows it in the same layer, such
+ * that adjusting the duration of this event doesn't shift the start timestamp
+ * of the subsequent events in the same layer.
+ */
+export const TimelineDurationUpdateMode = {
+    Rolling: "rolling",
+    Ripple: "ripple",
+} as const;
