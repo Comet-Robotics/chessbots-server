@@ -72,7 +72,7 @@ function pointToSvgPathCommand(point: Point): string {
 
 /**
  * Converts a spline to a string that can be used as the `d` attribute of an SVG path, for a visual display of the spline.
- * @example 
+ * @example
  * ```jsx
  * <svg>
  *   <path d={splineToSvgDrawAttribute(spline)} stroke="purple" fill="none" />

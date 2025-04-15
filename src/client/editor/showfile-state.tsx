@@ -13,6 +13,7 @@ import {
     TimelineEventTypes,
     GoToPointEvent,
     TimelineLayer,
+    NonStartPointEvent,
 } from "../../common/show";
 import {
     SplinePointType,
@@ -202,6 +203,7 @@ export function useShowfile() {
                     firstGoToPointIndex
                 ] as GoToPointEvent;
                 const newStartPointEvent: StartPointEvent = {
+                    id: crypto.randomUUID(),
                     type: TimelineEventTypes.StartPointEvent,
                     durationMs: firstGoToPointEvent.durationMs, // Or use firstGoToPointEvent.durationMs?
                     target: {
@@ -309,6 +311,7 @@ export function useShowfile() {
     const addRobot = useCallback(() => {
         const newLayer: TimelineLayer = [
             {
+                id: crypto.randomUUID(),
                 type: TimelineEventTypes.StartPointEvent,
                 target: {
                     type: SplinePointType.StartPoint,
@@ -375,7 +378,20 @@ export function useShowfile() {
         [show, setShow],
     );
 
+    const updateTimelineEventOrders = useCallback(
+        (layerIndex: number, newList: NonStartPointEvent[]) => {
+            const newTimeline = [...show.timeline];
+            const layer = newTimeline[layerIndex];
+            if (!layer) return;
+            const [startPoint] = layer;
+            newTimeline[layerIndex] = [startPoint, newList];
+            setShow({ ...show, timeline: newTimeline });
+        },
+        [show, setShow],
+    );
+
     return {
+        updateTimelineEventOrders,
         show,
         unsavedChanges,
         loadAudioFromFile,

@@ -18,11 +18,12 @@ import {
     type TimelineEvents,
     EVENT_TYPE_TO_COLOR,
     type TimelineLayer,
-    TimelineEventTypes,
+    NonStartPointEvent,
 } from "../../common/show";
 import { SplineEditor } from "./spline-editor";
 import { motion, useTransform } from "motion/react";
 import { useShowfile } from "./showfile-state";
+import { Reorder } from "motion/react";
 
 const RULER_TICK_INTERVAL_MS = 100;
 const RULER_EXTRA_TICK_COUNT = 20;
@@ -59,6 +60,7 @@ export function Editor() {
         canRedo,
         deleteLayer,
         sequenceLengthMs,
+        updateTimelineEventOrders,
     } = useShowfile();
 
     // TODO: fix viewport height / timeline height
@@ -269,9 +271,34 @@ export function Editor() {
                             >
                                 <div style={{ display: "flex" }}>
                                     <TimelineEvent event={startPoint} />
-                                    {remainingEvents.map((event) => {
-                                        return <TimelineEvent event={event} />;
-                                    })}
+                                    <Reorder.Group
+                                        as="div"
+                                        axis="x"
+                                        style={{ display: "contents" }}
+                                        values={[
+                                            startPoint,
+                                            ...remainingEvents,
+                                        ]}
+                                        onReorder={(newIndices) => {
+                                            updateTimelineEventOrders(
+                                                i,
+                                                newIndices as NonStartPointEvent[],
+                                            );
+                                        }}
+                                    >
+                                        {remainingEvents.map((event) => {
+                                            return (
+                                                <Reorder.Item
+                                                    value={event}
+                                                    key={event.id}
+                                                >
+                                                    <TimelineEvent
+                                                        event={event}
+                                                    />
+                                                </Reorder.Item>
+                                            );
+                                        })}
+                                    </Reorder.Group>
                                 </div>
                                 {/* TODO: add ability to add events */}
                             </TimelineLayer>
@@ -300,10 +327,10 @@ const TimelineEvent = forwardRef<HTMLDivElement, { event: TimelineEvents }>(
                     width: millisToXPosition(event.durationMs),
                     backgroundColor: EVENT_TYPE_TO_COLOR[event.type],
                     color: "white",
-                    visibility:
-                        event.type === TimelineEventTypes.WaitEvent ?
-                            "hidden"
-                        :   "inherit",
+                    // visibility:
+                    //     event.type === TimelineEventTypes.WaitEvent ?
+                    //         "hidden"
+                    //     :   "inherit",
                 }}
                 compact
                 elevation={Elevation.TWO}
