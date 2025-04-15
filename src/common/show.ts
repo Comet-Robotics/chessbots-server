@@ -177,11 +177,11 @@ export const EVENT_TYPE_TO_COLOR: Record<
  * The timeline duration update mode determines how the duration of timeline events
  * is updated when the user edits a timeline event's duration.
  *
- * Being in ripple edit mode means that editing the duration of an event has a 
+ * Being in ripple edit mode means that editing the duration of an event has a
  * ripple effect on ALL the other events in the same layer, shifting
  * all the subsequent event start times by the same amount (so only
- * one event's duration is actually changing). 
- * 
+ * one event's duration is actually changing).
+ *
  * Being in rolling edit mode mean that editing the duration of an event also affects the
  * duration of the event that immediately follows it in the same layer, such
  * that adjusting the duration of this event doesn't shift the start timestamp
