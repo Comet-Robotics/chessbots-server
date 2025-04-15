@@ -54,6 +54,11 @@ export const PointSchema = Union(
 );
 export type Point = Static<typeof PointSchema>;
 
+/**
+ * Converts a point to an SVG path command. This is used in combination with the {@link splineToSvgDrawAttribute} function to convert a spline to a string that can be used as the `d` attribute of an SVG path.
+ * @param point - the point to convert.
+ * @returns - the SVG path command for the point.
+ */
 function pointToSvgPathCommand(point: Point): string {
     switch (point.type) {
         case SplinePointType.StartPoint:
@@ -65,6 +70,17 @@ function pointToSvgPathCommand(point: Point): string {
     }
 }
 
+/**
+ * Converts a spline to a string that can be used as the `d` attribute of an SVG path, for a visual display of the spline.
+ * @example 
+ * ```jsx
+ * <svg>
+ *   <path d={splineToSvgDrawAttribute(spline)} stroke="purple" fill="none" />
+ * </svg>
+ * ```
+ * @param spline - the spline to convert.
+ * @returns the SVG path for the spline.
+ */
 export function splineToSvgDrawAttribute(spline: Spline): string {
     let path = pointToSvgPathCommand(spline.start);
     for (const point of spline.points) {
