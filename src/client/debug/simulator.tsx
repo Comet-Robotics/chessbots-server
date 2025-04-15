@@ -341,10 +341,11 @@ function LogEntry(props: { message: SimulatorUpdateMessage; ts: Date }) {
  * @param props - the robot position and id
  * @returns the robot icon scaled to the board
  */
-function Robot(props: {
+export function Robot(props: {
     pos: SimulatedRobotLocation;
     robotId: string;
     onTopOfRobots: string[];
+    children?: React.ReactNode | undefined;
 }) {
     return (
         <div
@@ -380,6 +381,7 @@ function Robot(props: {
                     />
                 </div>
             </Tooltip>
+            {props.children}
         </div>
     );
 }

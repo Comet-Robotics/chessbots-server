@@ -1,4 +1,4 @@
-import { Point } from "../../common/spline";
+import { Spline } from "../../common/spline";
 import { Position } from "../../server/robot/position";
 
 export type ShowFile = {
@@ -18,5 +18,5 @@ export type RobotTimeline = MovementEvent[];
 export type MovementEvent = {
     startMs:number,
     durationMs:number,
-    target:Point;
+    target:Spline;
 }
