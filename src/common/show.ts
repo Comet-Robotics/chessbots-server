@@ -47,16 +47,17 @@ const StartPointEventSchema = RuntypesRecord({
 });
 export type StartPointEvent = Static<typeof StartPointEventSchema>;
 
-const TimelineEventSchema = Union(GoToPointEventSchema, WaitEventSchema);
-export type NonStartPointEvent = Static<typeof TimelineEventSchema>;
+const NonStartPointEventSchema = Union(GoToPointEventSchema, WaitEventSchema);
+export type NonStartPointEvent = Static<typeof NonStartPointEventSchema>;
+
 // TODO: refactor this to be an object consisting of 2 keys:
 // startPoint and remainingEvents so that it is more self-documenting
 const TimelineLayerSchema = Tuple(
     StartPointEventSchema,
-    Array(TimelineEventSchema),
+    Array(NonStartPointEventSchema),
 );
 export type TimelineLayer = Static<typeof TimelineLayerSchema>;
-export type TimelineEvents = NonStartPointEvent | StartPointEvent;
+export type TimelineEvents = GoToPointEvent | WaitEvent | StartPointEvent;
 
 /**
  * The showfile schema.
@@ -100,8 +101,8 @@ export function timelineLayerToSpline(layer: TimelineLayer): Spline {
 }
 
 /**
- * Creates a new empty showfile.
- * @returns The new empty showfile.
+ * Creates a new example showfile.
+ * @returns The new example showfile.
  */
 export function createNewShowfile(): Showfile {
     return {
