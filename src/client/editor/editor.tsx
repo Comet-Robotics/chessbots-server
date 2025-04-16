@@ -1,17 +1,9 @@
-import {
-    forwardRef,
-    type PropsWithChildren,
-    useEffect,
-    useMemo,
-    useRef,
-} from "react";
+import { useMemo } from "react";
 import {
     Section,
-    Text,
     EditableText,
     Button,
     H2,
-    SectionCard,
     Card,
     ButtonGroup,
     Tag,
@@ -21,35 +13,21 @@ import {
 } from "@blueprintjs/core";
 import { RobotGrid } from "../debug/simulator";
 import {
-    type TimelineEvents,
-    EVENT_TYPE_TO_COLOR,
-    type TimelineLayer,
+    millisToPixels,
     NonStartPointEvent,
+    RULER_TICK_GAP_PX,
     TimelineDurationUpdateMode,
 } from "../../common/show";
 import { SplineEditor } from "./spline-editor";
-import { motion, useDragControls, useTransform } from "motion/react";
+import { motion, useTransform } from "motion/react";
 import { useShowfile } from "./showfile-state";
 import { Reorder } from "motion/react";
-import interact from "interactjs";
-
-const RULER_TICK_INTERVAL_MS = 100;
-// TODO: make ruler tick size configurable so we can zoom. relatively low priority. would be nice if gestures could be supported too
-const RULER_TICK_GAP_PX = 12;
-
-const RULER_EXTRA_TICK_COUNT = Math.round(
-    window.innerWidth / 4 / RULER_TICK_GAP_PX,
-);
-
-function millisToPixels(millis: number): number {
-    return (millis / RULER_TICK_INTERVAL_MS) * RULER_TICK_GAP_PX;
-}
-
-function pixelsToMillis(pixels: number): number {
-    return (pixels / RULER_TICK_GAP_PX) * RULER_TICK_INTERVAL_MS;
-}
-
-// function
+import {
+    Ruler,
+    TimelineLayer,
+    TimelineEvent,
+    ReorderableTimelineEvent,
+} from "./timeline";
 
 // TODO: ui for adding/removing audio - remove current hotkey as this was mainly for testing
 
@@ -368,168 +346,5 @@ export function Editor() {
                 </div>
             </Section>
         </div>
-    );
-}
-
-function ReorderableTimelineEvent({
-    event,
-    onDurationChange,
-}: PropsWithChildren<{
-    event: TimelineEvents;
-    onDurationChange: (ms: number) => void;
-}>) {
-    const controls = useDragControls();
-
-    return (
-        <Reorder.Item
-            value={event}
-            dragListener={false}
-            dragControls={controls}
-        >
-            <TimelineEvent
-                event={event}
-                onPointerDownOnDragHandle={(e) => controls.start(e)}
-                onDurationChange={onDurationChange}
-            />
-        </Reorder.Item>
-    );
-}
-
-function TimelineEvent(props: {
-    event: TimelineEvents;
-    onPointerDownOnDragHandle?: (
-        event: React.PointerEvent<HTMLDivElement>,
-    ) => void;
-    onDurationChange?: (deltaMs: number) => void;
-}) {
-    const ref = useRef<HTMLDivElement>(null);
-    const { event, onPointerDownOnDragHandle, onDurationChange } = props;
-    useEffect(() => {
-        if (!onDurationChange) return;
-        if (!ref.current) return;
-        const el = ref.current;
-
-        interact(el).resizable({
-            edges: {
-                right: true,
-            },
-            listeners: {
-                move: function (event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    onDurationChange(pixelsToMillis(event.deltaRect.width));
-                },
-            },
-        });
-    }, [event.type, onDurationChange]);
-
-    // TODO: add context menu for deleting events and adding a new event before and after this one
-
-    return (
-        <Card
-            ref={ref}
-            style={{
-                width: millisToPixels(event.durationMs),
-                backgroundColor: EVENT_TYPE_TO_COLOR[event.type],
-                color: "white",
-                boxSizing: "border-box",
-                display: "flex",
-                justifyContent: "space-between",
-                touchAction: "none",
-                overflow: "hidden",
-            }}
-            compact
-        >
-            <span style={{ cursor: "default", userSelect: "none" }}>
-                {event.type}
-            </span>
-            {onPointerDownOnDragHandle && (
-                <span
-                    style={{
-                        width: "1rem",
-                        height: "1rem",
-                        backgroundColor: "red",
-                        cursor: "grab",
-                    }}
-                    onPointerDown={onPointerDownOnDragHandle}
-                ></span>
-            )}
-        </Card>
-    );
-}
-
-const TimelineLayer = forwardRef<
-    HTMLDivElement,
-    PropsWithChildren<{ title: string; onDelete?: () => void }>
->(function TimelineCard({ title, children, onDelete }, ref) {
-    // TODO: add borders between columns. v low priority
-    // https://codepen.io/Kevin-Geary/pen/BavwqYX
-    // https://www.youtube.com/watch?v=EQYft7JPKto
-    return (
-        <SectionCard
-            ref={ref}
-            style={{
-                display: "grid",
-                gridTemplateColumns: "subgrid",
-                gridColumn: "1 / span 2",
-            }}
-        >
-            <span>
-                <Text style={{ fontWeight: "bold" }}>{title}</Text>
-                {onDelete && (
-                    <Button
-                        icon="trash"
-                        variant="minimal"
-                        onClick={onDelete}
-                        style={{ gridColumn: "1 / span 2" }}
-                    />
-                )}
-            </span>
-            {children}
-        </SectionCard>
-    );
-});
-
-function Ruler({ sequenceLengthMs }: { sequenceLengthMs: number }) {
-    return (
-        <TimelineLayer title="Ruler">
-            <div
-                style={{
-                    display: "flex",
-                    width: "max-content",
-                    overflowX: "scroll",
-                    justifyContent: "space-between",
-                    alignItems: "start",
-                    gap: RULER_TICK_GAP_PX,
-                }}
-            >
-                {new Array(
-                    Math.round(sequenceLengthMs / RULER_TICK_INTERVAL_MS) +
-                        RULER_EXTRA_TICK_COUNT,
-                )
-                    .fill(1)
-                    .map((_, i) => {
-                        // 1000ms interval (every 4 ticks if RULER_TICK_INTERVAL_MS is 250)
-                        const isMajorTick =
-                            i % (1000 / RULER_TICK_INTERVAL_MS) === 0;
-
-                        // 500ms interval
-                        const isSecondaryTick =
-                            i % (1000 / RULER_TICK_INTERVAL_MS) === 5;
-                        return (
-                            <div
-                                key={`tick-${i}`}
-                                style={{
-                                    borderRight: "1px solid gray",
-                                    height:
-                                        isMajorTick ? "1rem"
-                                        : isSecondaryTick ? "0.8rem"
-                                        : "0.5rem",
-                                }}
-                            />
-                        );
-                    })}
-            </div>
-        </TimelineLayer>
     );
 }

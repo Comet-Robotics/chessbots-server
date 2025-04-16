@@ -189,3 +189,19 @@ export const TimelineDurationUpdateMode = {
     Rolling: "rolling",
     Ripple: "ripple",
 } as const;
+
+export const RULER_TICK_INTERVAL_MS = 100;
+// TODO: make ruler tick size configurable so we can zoom. relatively low priority. would be nice if gestures could be supported too
+export const RULER_TICK_GAP_PX = 12;
+
+export const RULER_EXTRA_TICK_COUNT = Math.round(
+    window.innerWidth / 4 / RULER_TICK_GAP_PX,
+);
+
+export function millisToPixels(millis: number): number {
+    return (millis / RULER_TICK_INTERVAL_MS) * RULER_TICK_GAP_PX;
+}
+
+export function pixelsToMillis(pixels: number): number {
+    return (pixels / RULER_TICK_GAP_PX) * RULER_TICK_INTERVAL_MS;
+}
