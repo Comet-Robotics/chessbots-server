@@ -7,7 +7,6 @@ import {
     Union,
     type Static,
     Optional,
-    Tuple,
     InstanceOf,
 } from "runtypes";
 import {
@@ -47,16 +46,15 @@ const StartPointEventSchema = RuntypesRecord({
 });
 export type StartPointEvent = Static<typeof StartPointEventSchema>;
 
-const TimelineEventSchema = Union(GoToPointEventSchema, WaitEventSchema);
-export type NonStartPointEvent = Static<typeof TimelineEventSchema>;
-// TODO: refactor this to be an object consisting of 2 keys:
-// startPoint and remainingEvents so that it is more self-documenting
-const TimelineLayerSchema = Tuple(
-    StartPointEventSchema,
-    Array(TimelineEventSchema),
-);
+const NonStartPointEventSchema = Union(GoToPointEventSchema, WaitEventSchema);
+export type NonStartPointEvent = Static<typeof NonStartPointEventSchema>;
+
+const TimelineLayerSchema = RuntypesRecord({
+    startPoint: StartPointEventSchema,
+    remainingEvents: Array(NonStartPointEventSchema),
+});
 export type TimelineLayer = Static<typeof TimelineLayerSchema>;
-export type TimelineEvents = NonStartPointEvent | StartPointEvent;
+export type TimelineEvents = GoToPointEvent | WaitEvent | StartPointEvent;
 
 /**
  * The showfile schema.
@@ -68,8 +66,8 @@ export type TimelineEvents = NonStartPointEvent | StartPointEvent;
  */
 export const ShowfileSchema = RuntypesRecord({
     // Be sure to increment the schema version number when making breaking changes to the showfile schema.
-    $chessbots_show_schema_version: Literal(2),
-    // The timeline is an array of timeline 'layers' - a layer consists of an array that includes all the events for one robot.
+    $chessbots_show_schema_version: Literal(3),
+    // The timeline is an array of timeline 'layers'. A layer consists of an array that includes all the events for one robot.
     timeline: Array(TimelineLayerSchema),
     audio: Optional(
         RuntypesRecord({
@@ -87,10 +85,10 @@ export type Showfile = Static<typeof ShowfileSchema>;
  * @returns - the spline representation of the timeline layer.
  */
 export function timelineLayerToSpline(layer: TimelineLayer): Spline {
-    const [startPoint, events] = layer;
+    const { startPoint, remainingEvents } = layer;
     return {
         start: startPoint.target,
-        points: events
+        points: remainingEvents
             .filter((event) => event.type === TimelineEventTypes.GoToPointEvent)
             .map(
                 (event) =>
@@ -100,15 +98,15 @@ export function timelineLayerToSpline(layer: TimelineLayer): Spline {
 }
 
 /**
- * Creates a new empty showfile.
- * @returns The new empty showfile.
+ * Creates a new example showfile.
+ * @returns The new example showfile.
  */
 export function createNewShowfile(): Showfile {
     return {
-        $chessbots_show_schema_version: 2,
+        $chessbots_show_schema_version: 3,
         timeline: [
-            [
-                {
+            {
+                startPoint: {
                     type: TimelineEventTypes.StartPointEvent,
                     target: {
                         type: SplinePointType.StartPoint,
@@ -120,7 +118,7 @@ export function createNewShowfile(): Showfile {
                     durationMs: 7500,
                     id: "4f21401d-07cf-434f-a73c-6482ab82f210",
                 },
-                [
+                remainingEvents: [
                     {
                         type: TimelineEventTypes.GoToPointEvent,
                         durationMs: 1000,
@@ -158,7 +156,7 @@ export function createNewShowfile(): Showfile {
                         id: "4f21401d-07cf-434f-a73c-6482ab82f214",
                     },
                 ],
-            ],
+            },
         ],
         name: `Show ${new Date().toDateString()} ${new Date().toLocaleTimeString()}`,
     };
@@ -177,11 +175,11 @@ export const EVENT_TYPE_TO_COLOR: Record<
  * The timeline duration update mode determines how the duration of timeline events
  * is updated when the user edits a timeline event's duration.
  *
- * Being in ripple edit mode means that editing the duration of an event has a 
+ * Being in ripple edit mode means that editing the duration of an event has a
  * ripple effect on ALL the other events in the same layer, shifting
  * all the subsequent event start times by the same amount (so only
- * one event's duration is actually changing). 
- * 
+ * one event's duration is actually changing).
+ *
  * Being in rolling edit mode mean that editing the duration of an event also affects the
  * duration of the event that immediately follows it in the same layer, such
  * that adjusting the duration of this event doesn't shift the start timestamp

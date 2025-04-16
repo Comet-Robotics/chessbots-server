@@ -9,8 +9,8 @@ import {
 
 export enum SplinePointType {
     StartPoint = "start",
-    CubicBezier = "cubic",
     QuadraticBezier = "quadratic",
+    CubicBezier = "cubic",
 }
 
 export const CoordsSchema = Record({
@@ -56,8 +56,11 @@ export type Point = Static<typeof PointSchema>;
 
 /**
  * Converts a point to an SVG path command. This is used in combination with the {@link splineToSvgDrawAttribute} function to convert a spline to a string that can be used as the `d` attribute of an SVG path.
+ *
+ * @remarks
+ * For more context on the implementation/syntax, check out this MDN article about SVG paths: https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorials/SVG_from_scratch/Paths
  * @param point - the point to convert.
- * @returns - the SVG path command for the point.
+ * @returns the SVG path command for the point.
  */
 function pointToSvgPathCommand(point: Point): string {
     switch (point.type) {
