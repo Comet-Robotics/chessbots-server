@@ -7,7 +7,6 @@ import {
     Union,
     type Static,
     Optional,
-    Tuple,
     InstanceOf,
 } from "runtypes";
 import {
@@ -50,12 +49,10 @@ export type StartPointEvent = Static<typeof StartPointEventSchema>;
 const NonStartPointEventSchema = Union(GoToPointEventSchema, WaitEventSchema);
 export type NonStartPointEvent = Static<typeof NonStartPointEventSchema>;
 
-// TODO: refactor this to be an object consisting of 2 keys:
-// startPoint and remainingEvents so that it is more self-documenting
-const TimelineLayerSchema = Tuple(
-    StartPointEventSchema,
-    Array(NonStartPointEventSchema),
-);
+const TimelineLayerSchema = RuntypesRecord({
+    startPoint: StartPointEventSchema,
+    remainingEvents: Array(NonStartPointEventSchema),
+});
 export type TimelineLayer = Static<typeof TimelineLayerSchema>;
 export type TimelineEvents = GoToPointEvent | WaitEvent | StartPointEvent;
 
@@ -69,8 +66,8 @@ export type TimelineEvents = GoToPointEvent | WaitEvent | StartPointEvent;
  */
 export const ShowfileSchema = RuntypesRecord({
     // Be sure to increment the schema version number when making breaking changes to the showfile schema.
-    $chessbots_show_schema_version: Literal(2),
-    // The timeline is an array of timeline 'layers' - a layer consists of an array that includes all the events for one robot.
+    $chessbots_show_schema_version: Literal(3),
+    // The timeline is an array of timeline 'layers'. A layer consists of an array that includes all the events for one robot.
     timeline: Array(TimelineLayerSchema),
     audio: Optional(
         RuntypesRecord({
@@ -88,10 +85,10 @@ export type Showfile = Static<typeof ShowfileSchema>;
  * @returns - the spline representation of the timeline layer.
  */
 export function timelineLayerToSpline(layer: TimelineLayer): Spline {
-    const [startPoint, events] = layer;
+    const { startPoint, remainingEvents } = layer;
     return {
         start: startPoint.target,
-        points: events
+        points: remainingEvents
             .filter((event) => event.type === TimelineEventTypes.GoToPointEvent)
             .map(
                 (event) =>
@@ -106,10 +103,10 @@ export function timelineLayerToSpline(layer: TimelineLayer): Spline {
  */
 export function createNewShowfile(): Showfile {
     return {
-        $chessbots_show_schema_version: 2,
+        $chessbots_show_schema_version: 3,
         timeline: [
-            [
-                {
+            {
+                startPoint: {
                     type: TimelineEventTypes.StartPointEvent,
                     target: {
                         type: SplinePointType.StartPoint,
@@ -121,7 +118,7 @@ export function createNewShowfile(): Showfile {
                     durationMs: 7500,
                     id: "4f21401d-07cf-434f-a73c-6482ab82f210",
                 },
-                [
+                remainingEvents: [
                     {
                         type: TimelineEventTypes.GoToPointEvent,
                         durationMs: 1000,
@@ -159,7 +156,7 @@ export function createNewShowfile(): Showfile {
                         id: "4f21401d-07cf-434f-a73c-6482ab82f214",
                     },
                 ],
-            ],
+            },
         ],
         name: `Show ${new Date().toDateString()} ${new Date().toLocaleTimeString()}`,
     };

@@ -33,7 +33,7 @@ export function SplineEditor({
     onDeletePoint,
     onSwitchPointType,
 }: SplineEditorProps) {
-    const [, remainingEvents] = layer;
+    const { remainingEvents } = layer;
     const spline = useMemo(() => timelineLayerToSpline(layer), [layer]);
 
     const path = useMemo(() => splineToSvgDrawAttribute(spline), [spline]);

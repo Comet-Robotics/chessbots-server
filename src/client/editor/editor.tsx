@@ -308,7 +308,7 @@ export function Editor() {
                     </TimelineLayer>
                     <TimelineLayer title="Audio"> Stuff here</TimelineLayer>
                     {show.timeline.map(
-                        ([startPoint, remainingEvents], layerIndex) => {
+                        ({ startPoint, remainingEvents }, layerIndex) => {
                             return (
                                 <TimelineLayer
                                     key={`timeline-layer-${layerIndex}`}

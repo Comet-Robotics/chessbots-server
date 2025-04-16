@@ -126,12 +126,15 @@ export function useShowfile() {
             const newTimeline = [...show.timeline];
             const layer = newTimeline[layerIndex];
             if (layer) {
-                const [startPoint, remainingEvents] = layer;
+                const { startPoint, remainingEvents } = layer;
                 const newStartPointEvent: StartPointEvent = {
                     ...startPoint,
                     target: { ...startPoint.target, point: newCoords },
                 };
-                newTimeline[layerIndex] = [newStartPointEvent, remainingEvents];
+                newTimeline[layerIndex] = {
+                    startPoint: newStartPointEvent,
+                    remainingEvents,
+                };
                 setShow({ ...show, timeline: newTimeline });
             }
         },
@@ -143,7 +146,7 @@ export function useShowfile() {
             const newTimeline = [...show.timeline];
             const layer = newTimeline[layerIndex];
             if (!layer) return;
-            const [startPoint, remainingEvents] = layer;
+            const { startPoint, remainingEvents } = layer;
             const events = [...remainingEvents];
             const eventToUpdate = events[pointIndex];
 
@@ -158,7 +161,10 @@ export function useShowfile() {
                         endPoint: newCoords,
                     },
                 };
-                newTimeline[layerIndex] = [startPoint, events];
+                newTimeline[layerIndex] = {
+                    startPoint,
+                    remainingEvents: events,
+                };
                 setShow({ ...show, timeline: newTimeline });
             }
         },
@@ -170,7 +176,7 @@ export function useShowfile() {
             const newTimeline = [...show.timeline];
             const layer = newTimeline[layerIndex];
             if (!layer) return;
-            const [startPoint, remainingEvents] = layer;
+            const { startPoint, remainingEvents } = layer;
             const events = [...remainingEvents];
             const eventToUpdate = events[pointIndex];
 
@@ -185,7 +191,10 @@ export function useShowfile() {
                         controlPoint: newCoords,
                     },
                 };
-                newTimeline[layerIndex] = [startPoint, events];
+                newTimeline[layerIndex] = {
+                    startPoint,
+                    remainingEvents: events,
+                };
                 setShow({ ...show, timeline: newTimeline });
             }
         },
@@ -198,7 +207,7 @@ export function useShowfile() {
             const layer = newTimeline[layerIndex];
             if (!layer) return;
 
-            const [, remainingEvents] = layer;
+            const { remainingEvents } = layer;
 
             // Promote the first GoToPoint event (if any) to be the new start point
             const firstGoToPointIndex = remainingEvents.findIndex(
@@ -222,10 +231,10 @@ export function useShowfile() {
                     firstGoToPointIndex,
                     1,
                 );
-                newTimeline[layerIndex] = [
-                    newStartPointEvent,
-                    newRemainingEvents,
-                ];
+                newTimeline[layerIndex] = {
+                    startPoint: newStartPointEvent,
+                    remainingEvents: newRemainingEvents,
+                };
                 setShow({ ...show, timeline: newTimeline });
             } else {
                 console.warn(
@@ -243,9 +252,9 @@ export function useShowfile() {
             if (!layer) {
                 return;
             }
-            const [startPoint, remainingEvents] = layer;
+            const { startPoint, remainingEvents } = layer;
             const events = remainingEvents.toSpliced(pointIndex, 1); // Remove the event
-            newTimeline[layerIndex] = [startPoint, events];
+            newTimeline[layerIndex] = { startPoint, remainingEvents: events };
             setShow({ ...show, timeline: newTimeline });
         },
         [show, setShow],
@@ -263,7 +272,7 @@ export function useShowfile() {
             const layer = newTimeline[layerIndex];
             if (!layer) return;
 
-            const [startPoint, remainingEvents] = layer;
+            const { startPoint, remainingEvents } = layer;
             const events = [...remainingEvents];
 
             const eventToUpdate = events[pointIndex];
@@ -304,7 +313,7 @@ export function useShowfile() {
                 ...eventToUpdate,
                 target: newTarget,
             };
-            newTimeline[layerIndex] = [startPoint, events];
+            newTimeline[layerIndex] = { startPoint, remainingEvents: events };
             setShow({ ...show, timeline: newTimeline });
         },
         [show, setShow],
@@ -316,8 +325,8 @@ export function useShowfile() {
     );
 
     const addRobot = useCallback(() => {
-        const newLayer: TimelineLayer = [
-            {
+        const newLayer: TimelineLayer = {
+            startPoint: {
                 id: crypto.randomUUID(),
                 type: TimelineEventTypes.StartPointEvent,
                 target: {
@@ -329,8 +338,8 @@ export function useShowfile() {
                 },
                 durationMs: 7500,
             },
-            [],
-        ];
+            remainingEvents: [],
+        };
         setShow({
             ...show,
             timeline: [...show.timeline, newLayer],
@@ -390,8 +399,8 @@ export function useShowfile() {
             const newTimeline = [...show.timeline];
             const layer = newTimeline[layerIndex];
             if (!layer) return;
-            const [startPoint] = layer;
-            newTimeline[layerIndex] = [startPoint, newList];
+            const { startPoint } = layer;
+            newTimeline[layerIndex] = { startPoint, remainingEvents: newList };
             setShow({ ...show, timeline: newTimeline });
         },
         [show, setShow],
@@ -406,7 +415,7 @@ export function useShowfile() {
                 return;
             }
 
-            const [startPoint, remainingEvents] = layer;
+            const { startPoint, remainingEvents } = layer;
 
             const updatedEventList = [startPoint, ...remainingEvents];
             const eventToUpdateIndex = updatedEventList.findIndex(
@@ -436,10 +445,12 @@ export function useShowfile() {
                 updatedEventList[subsequentEventIndex] = subsequentEvent;
             }
 
-            newTimeline[layerIndex] = [
-                updatedEventList[0] as StartPointEvent,
-                updatedEventList.slice(1) as NonStartPointEvent[],
-            ];
+            newTimeline[layerIndex] = {
+                startPoint: updatedEventList[0] as StartPointEvent,
+                remainingEvents: updatedEventList.slice(
+                    1,
+                ) as NonStartPointEvent[],
+            };
             setShow({ ...show, timeline: newTimeline });
         },
         [show, setShow, timelineDurationUpdateMode],
