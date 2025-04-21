@@ -58,6 +58,11 @@ export function useDraggable(
     }, [elRef, updatePosition]);
 }
 
+/*
+ * A hook that prevents the user from exiting the page with unsaved changes.
+ *
+ * The hook provides a boolean indicating if there are unsaved changes, and a function to set the unsaved changes state.
+ */
 export function usePreventExitWithUnsavedChanges() {
     const [unsavedChanges, setUnsavedChanges] = useState(false);
 
@@ -79,6 +84,17 @@ export function usePreventExitWithUnsavedChanges() {
     return [unsavedChanges, setUnsavedChanges] as const;
 }
 
+/*
+ * A hook that provides a state with a history of changes, and undo/redo functionality.
+ *
+ * The state is a simple object with a value and a history of values, and an index into the history.
+ * The value is the current state of the state, and the history is an array of all the previous states.
+ * The index is the index into the history of the current state.
+ *
+ * The hook also provides functions to set the value, undo, redo, and check if the state can be undone or redone.
+ *
+ * The hook also provides a callback to replace the current value with a new value, which is useful for the first time you load data since that shouldn't count as a tracked action.
+ */
 export function useStateWithTrackedHistory<T>(initialValue: T) {
     type Action =
         | { type: "set"; value: T }

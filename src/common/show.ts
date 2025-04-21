@@ -205,3 +205,7 @@ export function millisToPixels(millis: number): number {
 export function pixelsToMillis(pixels: number): number {
     return (pixels / RULER_TICK_GAP_PX) * RULER_TICK_INTERVAL_MS;
 }
+
+
+export const CHESSBOTS_SHOWFILE_MIME_TYPE = 'application/chessbots-showfile';
+export const CHESSBOTS_SHOWFILE_EXTENSION = '.cbor';

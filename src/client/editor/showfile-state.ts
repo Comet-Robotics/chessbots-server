@@ -15,6 +15,8 @@ import {
     TimelineLayer,
     NonStartPointEvent,
     TimelineDurationUpdateMode,
+    CHESSBOTS_SHOWFILE_MIME_TYPE,
+    CHESSBOTS_SHOWFILE_EXTENSION,
 } from "../../common/show";
 import {
     SplinePointType,
@@ -29,6 +31,7 @@ import {
 } from "./hooks";
 
 export function useShowfile() {
+    // used to store the initial showfile state before any changes were made in the editor, so we have something to compare against to see if there are unsaved changes
     const [initialShow, setInitialShow] = useState(createNewShowfile());
 
     // See comment on TimelineDurationUpdateMode declaration in src/common/show.ts for more info.
@@ -37,6 +40,9 @@ export function useShowfile() {
             (typeof TimelineDurationUpdateMode)[keyof typeof TimelineDurationUpdateMode]
         >(TimelineDurationUpdateMode.Ripple);
 
+    // used to store the handle to the file system file that the showfile is currently loaded from, 
+    // so we can save to the same file we've already opened. not all the browsers' file system API 
+    // implementations support this - Chrome does, Safari doesn't, not sure about Firefox.
     const [fsHandle, setFsHandle] = useState<FileSystemFileHandle | null>(null);
 
     const [unsavedChanges, setUnsavedChanges] =
@@ -51,19 +57,22 @@ export function useShowfile() {
         redo,
     } = useStateWithTrackedHistory(initialShow);
 
+    // update the unsaved changes state whenever the showfile changes
     useEffect(() => {
         const result = diff(initialShow, show);
-        if (Object.keys(result).length === 0) {
+        const differenceBetweenSavedShowAndCurrentShow = Object.keys(result).length === 0;
+        if (differenceBetweenSavedShowAndCurrentShow) {
             setUnsavedChanges(false);
         } else {
             setUnsavedChanges(true);
         }
     }, [initialShow, show, setUnsavedChanges]);
 
+    // handles opening a showfile from the file system, parsing it, and loading it into the editor
     const openShowfile = useCallback(async () => {
         const blob = await fileOpen({
-            mimeTypes: ["application/chessbots-showfile"],
-            extensions: [".cbor"],
+            mimeTypes: [CHESSBOTS_SHOWFILE_MIME_TYPE],
+            extensions: [CHESSBOTS_SHOWFILE_EXTENSION],
             description: "Chess Bots Showfile",
         });
 
@@ -89,16 +98,17 @@ export function useShowfile() {
         if (blob.handle) setFsHandle(blob.handle);
     }, [setShow]);
 
+    // handles encoding the showfile as a CBOR and saving it to the file system
     const saveShowfile = useCallback(async () => {
         const blob = new Blob([cborEncode(show)], {
-            type: "application/chessbots-showfile",
+            type: CHESSBOTS_SHOWFILE_MIME_TYPE,
         });
         await fileSave(
             blob,
             {
-                mimeTypes: ["application/chessbots-showfile"],
-                extensions: [".cbor"],
-                fileName: show.name + ".cbor",
+                mimeTypes: [CHESSBOTS_SHOWFILE_MIME_TYPE],
+                extensions: [CHESSBOTS_SHOWFILE_EXTENSION],
+                fileName: show.name + CHESSBOTS_SHOWFILE_EXTENSION,
             },
             fsHandle,
         );
@@ -106,6 +116,8 @@ export function useShowfile() {
         setInitialShow(show);
     }, [fsHandle, show]);
 
+
+    // handles loading an audio file from the file system, and adding it to the showfile
     const loadAudioFromFile = useCallback(async () => {
         const blob = await fileOpen({
             mimeTypes: ["audio/mpeg", "audio/wav"],
@@ -221,10 +233,10 @@ export function useShowfile() {
                 const newStartPointEvent: StartPointEvent = {
                     id: crypto.randomUUID(),
                     type: TimelineEventTypes.StartPointEvent,
-                    durationMs: firstGoToPointEvent.durationMs, // Or use firstGoToPointEvent.durationMs?
+                    durationMs: firstGoToPointEvent.durationMs, 
                     target: {
-                        type: SplinePointType.StartPoint, // Convert midpoint to start point
-                        point: firstGoToPointEvent.target.endPoint, // Use the endpoint as the new start
+                        type: SplinePointType.StartPoint, 
+                        point: firstGoToPointEvent.target.endPoint, 
                     },
                 };
                 const newRemainingEvents = remainingEvents.toSpliced(
@@ -349,6 +361,7 @@ export function useShowfile() {
     // TODO: figure out how to get this from the showfile
     const sequenceLengthMs = 10 * 1000;
 
+    // TODO: continue adding comments to code below this line
     const { currentTimestamp, playing, togglePlaying } =
         usePlayHead(sequenceLengthMs);
 
