@@ -1,3 +1,5 @@
+// TODO: support selecting active layer for point addition
+
 import { useMemo } from "react";
 import {
     Section,
@@ -10,9 +12,12 @@ import {
     useHotkeys,
     type HotkeyConfig,
     SegmentedControl,
+    Divider,
+    NumericInput,
 } from "@blueprintjs/core";
-import { RobotGrid } from "../debug/simulator";
+import { RobotGrid, robotSize } from "../debug/simulator";
 import {
+    GridCursorMode,
     millisToPixels,
     NonStartPointEvent,
     RULER_TICK_GAP_PX,
@@ -28,6 +33,8 @@ import {
     TimelineEvent,
     ReorderableTimelineEvent,
 } from "./timeline";
+import { Midpoint, SplinePointType } from "../../common/spline";
+
 
 // TODO: ui for adding/removing audio - remove current hotkey as this was mainly for testing
 
@@ -59,6 +66,13 @@ export function Editor() {
         updateTimelineEventDurations,
         setTimelineDurationUpdateMode,
         timelineDurationUpdateMode,
+        gridCursorMode,
+        setGridCursorMode,
+        defaultPointType,
+        setDefaultPointType,
+        setDefaultEventDurationMs,
+        defaultEventDurationMs,
+        addPointToSelectedLayer
     } = useShowfile();
 
     // TODO: fix viewport height / timeline height
@@ -200,6 +214,18 @@ export function Editor() {
             </Card>
             {/* TODO: render robots */}
             <RobotGrid robotState={{}}>
+                {
+                    gridCursorMode === GridCursorMode.Pen && (
+                        <div style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", cursor: "crosshair" }} onClick={(e) => {
+                            const { x: mouseX, y: mouseY } = e.nativeEvent;
+                            const { left: gridOriginX, top: gridOriginY } = e.currentTarget.getBoundingClientRect();
+                            const x = mouseX - gridOriginX;
+                            const y = mouseY - gridOriginY;
+                            addPointToSelectedLayer(x + robotSize / 4, y + robotSize / 4);
+                        }}>
+                        </div>
+                    )
+                }
                 {show.timeline.map((layer, index) => (
                     <SplineEditor
                         key={`spline-editor-${index}`}
@@ -247,6 +273,51 @@ export function Editor() {
                             }
                             value={timelineDurationUpdateMode}
                         />
+                        <Divider />
+                        {
+                            gridCursorMode === GridCursorMode.Pen && (
+                                <>
+                                <SegmentedControl
+                                    options={[
+                                        {
+                                            label: "Quadratic",
+                                            value: SplinePointType.QuadraticBezier,
+                                        },
+                                        {
+                                            label: "Cubic",
+                                            value: SplinePointType.CubicBezier,
+                                        },
+                                    ]}
+                                    onValueChange={(value) =>
+                                        setDefaultPointType(
+                                            value as Midpoint["type"],
+                                        )
+                                    }
+                                    value={defaultPointType}
+                                />
+                                <NumericInput value={defaultEventDurationMs} style={{ width: "5rem" }} onValueChange={(value) => setDefaultEventDurationMs(value)} />
+                                </>
+                            )
+                        }
+                        <SegmentedControl
+                            options={[
+                                {
+                                    label: "Cursor",
+                                    value: GridCursorMode.Cursor,
+                                },
+                                {
+                                    label: "Pen",
+                                    value: GridCursorMode.Pen,
+                                },
+                            ]}
+                            onValueChange={(value) =>
+                                setGridCursorMode(
+                                    value as (typeof GridCursorMode)[keyof typeof GridCursorMode],
+                                )
+                            }
+                            value={gridCursorMode}
+                        />
+                        <Divider />
                         <Button
                             icon="add"
                             text="Add Robot"

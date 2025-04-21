@@ -17,12 +17,14 @@ import {
     TimelineDurationUpdateMode,
     CHESSBOTS_SHOWFILE_MIME_TYPE,
     CHESSBOTS_SHOWFILE_EXTENSION,
+    GridCursorMode,
 } from "../../common/show";
 import {
     SplinePointType,
     CubicBezier,
     QuadraticBezier,
     type Coords,
+    type Midpoint,
 } from "../../common/spline";
 import {
     usePlayHead,
@@ -34,11 +36,23 @@ export function useShowfile() {
     // used to store the initial showfile state before any changes were made in the editor, so we have something to compare against to see if there are unsaved changes
     const [initialShow, setInitialShow] = useState(createNewShowfile());
 
-    // See comment on TimelineDurationUpdateMode declaration in src/common/show.ts for more info.
+    // See comment on TimelineDurationUpdateMode declaration in src/common/show.ts for context
     const [timelineDurationUpdateMode, setTimelineDurationUpdateMode] =
         useState<
             (typeof TimelineDurationUpdateMode)[keyof typeof TimelineDurationUpdateMode]
         >(TimelineDurationUpdateMode.Ripple);
+    
+    const [gridCursorMode, setGridCursorMode] = useState<
+        (typeof GridCursorMode)[keyof typeof GridCursorMode]
+    >(GridCursorMode.Pen);
+
+    const [defaultPointType, setDefaultPointType] = useState<
+        Midpoint["type"]
+    >(SplinePointType.QuadraticBezier);
+
+    const [defaultEventDurationMs, setDefaultEventDurationMs] = useState(750);
+
+    const [selectedLayerIndex, setSelectedLayerIndex] = useState(0);
 
     // used to store the handle to the file system file that the showfile is currently loaded from, 
     // so we can save to the same file we've already opened. not all the browsers' file system API 
@@ -469,6 +483,52 @@ export function useShowfile() {
         [show, setShow, timelineDurationUpdateMode],
     );
 
+    const addPointToSelectedLayer = useCallback(
+        (x: number, y: number) => {
+            const newTimeline = [...show.timeline];
+            const layer = newTimeline[selectedLayerIndex];
+            if (!layer) return;
+            const { startPoint, remainingEvents } = layer;
+            const newEvents = [...remainingEvents];
+            switch (defaultPointType) {
+                case SplinePointType.QuadraticBezier:
+                    newEvents.push({
+                        type: TimelineEventTypes.GoToPointEvent,
+                        durationMs: defaultEventDurationMs,
+                        target: {
+                            type: SplinePointType.QuadraticBezier,
+                            endPoint: { x, y },
+                        },
+                        id: crypto.randomUUID()
+                    });
+                    break;
+                case SplinePointType.CubicBezier:
+                    newEvents.push({
+                        type: TimelineEventTypes.GoToPointEvent,
+                        durationMs: defaultEventDurationMs,
+                        target: {
+                            type: SplinePointType.CubicBezier,
+                            endPoint: { x, y },
+                            controlPoint: { x: x + 10, y: y + 10 },
+                        },
+                        id: crypto.randomUUID()
+                    });
+                    break;
+                default:
+                    console.warn("Tried to add point with invalid point type");
+                    return;
+            }
+
+            newTimeline[selectedLayerIndex] = {
+                startPoint,
+                remainingEvents: newEvents,
+            };
+            setShow({ ...show, timeline: newTimeline });
+            
+        },
+        [show, setShow, selectedLayerIndex, defaultPointType, defaultEventDurationMs],
+    );
+
     return {
         updateTimelineEventOrders,
         show,
@@ -496,5 +556,12 @@ export function useShowfile() {
         timelineDurationUpdateMode,
         setTimelineDurationUpdateMode,
         updateTimelineEventDurations,
+        gridCursorMode,
+        setGridCursorMode,
+        defaultPointType,
+        setDefaultPointType,
+        setDefaultEventDurationMs,
+        defaultEventDurationMs,
+        addPointToSelectedLayer
     };
 }

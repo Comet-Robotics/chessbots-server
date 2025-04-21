@@ -190,6 +190,23 @@ export const TimelineDurationUpdateMode = {
     Ripple: "ripple",
 } as const;
 
+
+/*
+ * The grid cursor mode determines the behavior of the cursor when on the grid.
+ *
+ * Being in cursor mode means that the cursor is a normal cursor, and the user 
+ * can click and drag points that already exist on the grid. The user is not able 
+ * to add new points to the grid.
+ *
+ * Being in pen mode means that the user is able to add new points to the grid
+ * by clicking on the locations where they want to add points. The user is still
+ * able to drag existing points on the grid as in cursor mode.
+ */
+export const GridCursorMode = {
+    Cursor: "cursor",
+    Pen: "pen",
+} as const;
+
 export const RULER_TICK_INTERVAL_MS = 100;
 // TODO: make ruler tick size configurable so we can zoom. relatively low priority. would be nice if gestures could be supported too
 export const RULER_TICK_GAP_PX = 12;
