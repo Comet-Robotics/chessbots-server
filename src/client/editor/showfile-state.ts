@@ -534,6 +534,12 @@ export function useShowfile() {
         ],
     );
 
+    const removeAudio = useCallback(() => {
+        setShow({
+            ...show,
+            audio: undefined,
+        });
+    }, [show, setShow]);
     return {
         updateTimelineEventOrders,
         show,
@@ -568,5 +574,8 @@ export function useShowfile() {
         setDefaultEventDurationMs,
         defaultEventDurationMs,
         addPointToSelectedLayer,
+        setSelectedLayerIndex,
+        selectedLayerIndex,
+        removeAudio
     };
 }

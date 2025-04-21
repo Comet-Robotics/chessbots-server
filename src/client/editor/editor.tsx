@@ -1,4 +1,5 @@
 // TODO: support selecting active layer for point addition
+// TODO: how to add wait events?
 
 import { useMemo } from "react";
 import {
@@ -72,6 +73,9 @@ export function Editor() {
         setDefaultEventDurationMs,
         defaultEventDurationMs,
         addPointToSelectedLayer,
+        setSelectedLayerIndex,
+        selectedLayerIndex,
+        removeAudio
     } = useShowfile();
 
     // TODO: fix viewport height / timeline height
@@ -125,17 +129,7 @@ export function Editor() {
                     e.preventDefault();
                     togglePlaying();
                 },
-            },
-            {
-                combo: "mod+shift+f",
-                group: "Edit",
-                global: true,
-                label: "Load Audio",
-                onKeyDown: (e) => {
-                    e.preventDefault();
-                    loadAudioFromFile();
-                },
-            },
+            }
         ],
         [
             redo,
@@ -143,7 +137,6 @@ export function Editor() {
             saveShowfile,
             openShowfile,
             togglePlaying,
-            loadAudioFromFile,
         ],
     );
 
@@ -206,9 +199,16 @@ export function Editor() {
                     />
                     <Button
                         className="bp5-minimal"
-                        text="Load New Audio"
+                        text="Load New Audio..."
                         onClick={loadAudioFromFile}
                     />
+                    {show.audio && (
+                        <Button
+                            className="bp5-minimal"
+                            text="Remove Audio"
+                            onClick={removeAudio}
+                        />
+                    )}
                 </ButtonGroup>
             </Card>
             {/* TODO: render robots */}
@@ -369,7 +369,6 @@ export function Editor() {
                             }}
                         />
                     </TimelineLayer>
-                    <TimelineLayer title="Audio"> Stuff here</TimelineLayer>
                     {show.timeline.map(
                         ({ startPoint, remainingEvents }, layerIndex) => {
                             return (
@@ -377,6 +376,10 @@ export function Editor() {
                                     key={`timeline-layer-${layerIndex}`}
                                     title={`Robot ${layerIndex + 1}`}
                                     onDelete={() => deleteLayer(layerIndex)}
+                                    onActive={() =>
+                                        setSelectedLayerIndex(layerIndex)
+                                    }
+                                    active={selectedLayerIndex === layerIndex}
                                 >
                                     <div style={{ display: "flex" }}>
                                         <TimelineEvent

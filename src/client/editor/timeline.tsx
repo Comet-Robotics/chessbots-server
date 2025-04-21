@@ -116,8 +116,13 @@ export function TimelineEvent(props: {
 
 export const TimelineLayer = forwardRef<
     HTMLDivElement,
-    PropsWithChildren<{ title: string; onDelete?: () => void }>
->(function TimelineCard({ title, children, onDelete }, ref) {
+    PropsWithChildren<{
+        title: string;
+        onDelete?: () => void;
+        onActive?: () => void;
+        active?: boolean;
+    }>
+>(function TimelineCard({ title, children, onDelete, onActive, active }, ref) {
     // TODO: add borders between columns. v low priority
     // https://codepen.io/Kevin-Geary/pen/BavwqYX
     // https://www.youtube.com/watch?v=EQYft7JPKto
@@ -128,10 +133,18 @@ export const TimelineLayer = forwardRef<
                 display: "grid",
                 gridTemplateColumns: "subgrid",
                 gridColumn: "1 / span 2",
+                ...(active ? { border: "1px solid red" } : {}),
             }}
         >
             <span>
-                <Text style={{ fontWeight: "bold" }}>{title}</Text>
+                <Text style={{ fontWeight: "bold" }}>{title} {onActive && (
+                <Button
+                    icon="asterisk"
+                    variant="minimal"
+                    onClick={onActive}
+                />
+            )}</Text>
+                {}
                 {onDelete && (
                     <Button
                         icon="trash"
@@ -141,6 +154,7 @@ export const TimelineLayer = forwardRef<
                     />
                 )}
             </span>
+            
             {children}
         </SectionCard>
     );
