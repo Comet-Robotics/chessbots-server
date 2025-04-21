@@ -35,7 +35,6 @@ import {
 } from "./timeline";
 import { Midpoint, SplinePointType } from "../../common/spline";
 
-
 // TODO: ui for adding/removing audio - remove current hotkey as this was mainly for testing
 
 export function Editor() {
@@ -72,7 +71,7 @@ export function Editor() {
         setDefaultPointType,
         setDefaultEventDurationMs,
         defaultEventDurationMs,
-        addPointToSelectedLayer
+        addPointToSelectedLayer,
     } = useShowfile();
 
     // TODO: fix viewport height / timeline height
@@ -214,18 +213,29 @@ export function Editor() {
             </Card>
             {/* TODO: render robots */}
             <RobotGrid robotState={{}}>
-                {
-                    gridCursorMode === GridCursorMode.Pen && (
-                        <div style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%", cursor: "crosshair" }} onClick={(e) => {
+                {gridCursorMode === GridCursorMode.Pen && (
+                    <div
+                        style={{
+                            position: "absolute",
+                            left: 0,
+                            top: 0,
+                            width: "100%",
+                            height: "100%",
+                            cursor: "crosshair",
+                        }}
+                        onClick={(e) => {
                             const { x: mouseX, y: mouseY } = e.nativeEvent;
-                            const { left: gridOriginX, top: gridOriginY } = e.currentTarget.getBoundingClientRect();
+                            const { left: gridOriginX, top: gridOriginY } =
+                                e.currentTarget.getBoundingClientRect();
                             const x = mouseX - gridOriginX;
                             const y = mouseY - gridOriginY;
-                            addPointToSelectedLayer(x + robotSize / 4, y + robotSize / 4);
-                        }}>
-                        </div>
-                    )
-                }
+                            addPointToSelectedLayer(
+                                x + robotSize / 4,
+                                y + robotSize / 4,
+                            );
+                        }}
+                    ></div>
+                )}
                 {show.timeline.map((layer, index) => (
                     <SplineEditor
                         key={`spline-editor-${index}`}
@@ -274,9 +284,8 @@ export function Editor() {
                             value={timelineDurationUpdateMode}
                         />
                         <Divider />
-                        {
-                            gridCursorMode === GridCursorMode.Pen && (
-                                <>
+                        {gridCursorMode === GridCursorMode.Pen && (
+                            <>
                                 <SegmentedControl
                                     options={[
                                         {
@@ -295,10 +304,15 @@ export function Editor() {
                                     }
                                     value={defaultPointType}
                                 />
-                                <NumericInput value={defaultEventDurationMs} style={{ width: "5rem" }} onValueChange={(value) => setDefaultEventDurationMs(value)} />
-                                </>
-                            )
-                        }
+                                <NumericInput
+                                    value={defaultEventDurationMs}
+                                    style={{ width: "5rem" }}
+                                    onValueChange={(value) =>
+                                        setDefaultEventDurationMs(value)
+                                    }
+                                />
+                            </>
+                        )}
                         <SegmentedControl
                             options={[
                                 {

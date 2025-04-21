@@ -41,21 +41,21 @@ export function useShowfile() {
         useState<
             (typeof TimelineDurationUpdateMode)[keyof typeof TimelineDurationUpdateMode]
         >(TimelineDurationUpdateMode.Ripple);
-    
+
     const [gridCursorMode, setGridCursorMode] = useState<
         (typeof GridCursorMode)[keyof typeof GridCursorMode]
     >(GridCursorMode.Pen);
 
-    const [defaultPointType, setDefaultPointType] = useState<
-        Midpoint["type"]
-    >(SplinePointType.QuadraticBezier);
+    const [defaultPointType, setDefaultPointType] = useState<Midpoint["type"]>(
+        SplinePointType.QuadraticBezier,
+    );
 
     const [defaultEventDurationMs, setDefaultEventDurationMs] = useState(750);
 
     const [selectedLayerIndex, setSelectedLayerIndex] = useState(0);
 
-    // used to store the handle to the file system file that the showfile is currently loaded from, 
-    // so we can save to the same file we've already opened. not all the browsers' file system API 
+    // used to store the handle to the file system file that the showfile is currently loaded from,
+    // so we can save to the same file we've already opened. not all the browsers' file system API
     // implementations support this - Chrome does, Safari doesn't, not sure about Firefox.
     const [fsHandle, setFsHandle] = useState<FileSystemFileHandle | null>(null);
 
@@ -74,7 +74,8 @@ export function useShowfile() {
     // update the unsaved changes state whenever the showfile changes
     useEffect(() => {
         const result = diff(initialShow, show);
-        const differenceBetweenSavedShowAndCurrentShow = Object.keys(result).length === 0;
+        const differenceBetweenSavedShowAndCurrentShow =
+            Object.keys(result).length === 0;
         if (differenceBetweenSavedShowAndCurrentShow) {
             setUnsavedChanges(false);
         } else {
@@ -129,7 +130,6 @@ export function useShowfile() {
 
         setInitialShow(show);
     }, [fsHandle, show]);
-
 
     // handles loading an audio file from the file system, and adding it to the showfile
     const loadAudioFromFile = useCallback(async () => {
@@ -247,10 +247,10 @@ export function useShowfile() {
                 const newStartPointEvent: StartPointEvent = {
                     id: crypto.randomUUID(),
                     type: TimelineEventTypes.StartPointEvent,
-                    durationMs: firstGoToPointEvent.durationMs, 
+                    durationMs: firstGoToPointEvent.durationMs,
                     target: {
-                        type: SplinePointType.StartPoint, 
-                        point: firstGoToPointEvent.target.endPoint, 
+                        type: SplinePointType.StartPoint,
+                        point: firstGoToPointEvent.target.endPoint,
                     },
                 };
                 const newRemainingEvents = remainingEvents.toSpliced(
@@ -499,7 +499,7 @@ export function useShowfile() {
                             type: SplinePointType.QuadraticBezier,
                             endPoint: { x, y },
                         },
-                        id: crypto.randomUUID()
+                        id: crypto.randomUUID(),
                     });
                     break;
                 case SplinePointType.CubicBezier:
@@ -511,7 +511,7 @@ export function useShowfile() {
                             endPoint: { x, y },
                             controlPoint: { x: x + 10, y: y + 10 },
                         },
-                        id: crypto.randomUUID()
+                        id: crypto.randomUUID(),
                     });
                     break;
                 default:
@@ -524,9 +524,14 @@ export function useShowfile() {
                 remainingEvents: newEvents,
             };
             setShow({ ...show, timeline: newTimeline });
-            
         },
-        [show, setShow, selectedLayerIndex, defaultPointType, defaultEventDurationMs],
+        [
+            show,
+            setShow,
+            selectedLayerIndex,
+            defaultPointType,
+            defaultEventDurationMs,
+        ],
     );
 
     return {
@@ -562,6 +567,6 @@ export function useShowfile() {
         setDefaultPointType,
         setDefaultEventDurationMs,
         defaultEventDurationMs,
-        addPointToSelectedLayer
+        addPointToSelectedLayer,
     };
 }

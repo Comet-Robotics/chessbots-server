@@ -190,12 +190,11 @@ export const TimelineDurationUpdateMode = {
     Ripple: "ripple",
 } as const;
 
-
 /*
  * The grid cursor mode determines the behavior of the cursor when on the grid.
  *
- * Being in cursor mode means that the cursor is a normal cursor, and the user 
- * can click and drag points that already exist on the grid. The user is not able 
+ * Being in cursor mode means that the cursor is a normal cursor, and the user
+ * can click and drag points that already exist on the grid. The user is not able
  * to add new points to the grid.
  *
  * Being in pen mode means that the user is able to add new points to the grid
@@ -223,6 +222,5 @@ export function pixelsToMillis(pixels: number): number {
     return (pixels / RULER_TICK_GAP_PX) * RULER_TICK_INTERVAL_MS;
 }
 
-
-export const CHESSBOTS_SHOWFILE_MIME_TYPE = 'application/chessbots-showfile';
-export const CHESSBOTS_SHOWFILE_EXTENSION = '.cbor';
+export const CHESSBOTS_SHOWFILE_MIME_TYPE = "application/chessbots-showfile";
+export const CHESSBOTS_SHOWFILE_EXTENSION = ".cbor";
