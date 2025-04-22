@@ -37,7 +37,7 @@ export function Playback() {
                 if (totalTime < showFile.timelines[x][y].startMs) {
                     times.push(showFile.timelines[x][y].startMs - totalTime);
                     totalTime += showFile.timelines[x][y].startMs - totalTime;
-                    lengths.push(lengths[y - 1] + 0.00001);
+                    lengths.push(lengths[y - 1]);
                 }
                 totalTime += showFile.timelines[x][y].durationMs;
                 times.push(showFile.timelines[x][y].durationMs);
@@ -176,13 +176,22 @@ export function Playback() {
                     setDragging(false);
                 }}
             >
-                <svg width={"720px"}>
+                <svg width={"720px"} height={"100px"}>
+                    \
                     <path
                         id={"timelinePath"}
                         d={"M 0 50 H 720"}
+                        strokeWidth={100}
+                        stroke={"Grey"}
+                    />
+                    <line
+                        x1="0"
+                        y1="50"
+                        x2="720"
+                        y2="50"
+                        strokeWidth={3}
                         stroke="purple"
-                        strokeWidth={10}
-                        fill="none"
+                        width={"720px"}
                     />
                     <circle
                         r="12"
