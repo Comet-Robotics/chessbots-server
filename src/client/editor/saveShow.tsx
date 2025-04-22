@@ -16,7 +16,7 @@ export type ShowFile = {
 export type RobotTimeline = MovementEvent[];
 
 export type MovementEvent = {
-    startMs:number,
-    durationMs:number,
-    target:Spline;
-}
+    startMs: number;
+    durationMs: number;
+    target: Spline;
+};
