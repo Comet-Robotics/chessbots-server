@@ -1,5 +1,6 @@
 import { Card, Button, H1, Tooltip, Collapse } from "@blueprintjs/core";
 import {
+    CSSProperties,
     type PropsWithChildren,
     useEffect,
     useReducer,
@@ -352,25 +353,27 @@ function LogEntry(props: { message: SimulatorUpdateMessage; ts: Date }) {
  * @param props - the robot position and id
  * @returns the robot icon scaled to the board
  */
-function Robot(props: {
+export function Robot({pos, robotId, onTopOfRobots, style}: {
     pos: SimulatedRobotLocation;
     robotId: string;
     onTopOfRobots: string[];
+    style?: CSSProperties
 }) {
     return (
         <div
             className="robot"
             style={{
                 position: "absolute",
-                left: `${props.pos.position.x * tileSize - 0.25 * tileSize}px`,
-                bottom: `${props.pos.position.y * tileSize - 0.25 * tileSize}px`,
+                left: `${pos.position.x * tileSize - 0.25 * tileSize}px`,
+                bottom: `${pos.position.y * tileSize - 0.25 * tileSize}px`,
+                ...style
             }}
         >
-            <Tooltip content={`${props.robotId}: ${JSON.stringify(props.pos)}`}>
+            <Tooltip content={`${robotId}: ${JSON.stringify(pos)}`}>
                 <div
-                    className={robotColor(props.onTopOfRobots.length)}
+                    className={robotColor(onTopOfRobots.length)}
                     style={{
-                        transform: `rotate(-${clampHeading(props.pos.headingRadians)}rad)`,
+                        transform: `rotate(-${clampHeading(pos.headingRadians)}rad)`,
                         borderRadius: "50%",
                         display: "flex",
                         justifyContent: "flex-end",
