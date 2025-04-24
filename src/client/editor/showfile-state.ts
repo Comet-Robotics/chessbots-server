@@ -1,11 +1,9 @@
-// @ts-expect-error: chessbots client is a CommonJS module, but this library is a ES Module, so we need to tell TypeScript that it's okay
 import { decode as cborDecode, encode as cborEncode } from "cbor-x";
 
-// @ts-expect-error: chessbots client is a CommonJS module, but this library is a ES Module, so we need to tell TypeScript that it's okay
 import { fileOpen, fileSave } from "browser-fs-access";
 
 import { diff } from "deep-object-diff";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
     createNewShowfile,
     ShowfileSchema,
@@ -372,8 +370,25 @@ export function useShowfile() {
         });
     }, [show, setShow]);
 
-    // TODO: figure out how to get this from the showfile
-    const sequenceLengthMs = 10 * 1000;
+    // Calculate sequenceLengthMs dynamically
+    const sequenceLengthMs = useMemo(() => {
+        let maxDuration = 0;
+        show.timeline.forEach(layer => {
+            let currentLayerDuration = 0;
+            // Add start point duration first if it exists
+            if (layer.startPoint) {
+                 currentLayerDuration += layer.startPoint.durationMs;
+            }
+            // Add remaining events durations
+            layer.remainingEvents.forEach(event => {
+                currentLayerDuration += event.durationMs;
+            });
+            maxDuration = Math.max(maxDuration, currentLayerDuration);
+        });
+        // Use the max duration across all layers.
+        // Provide a default minimum duration if there are no events.
+        return maxDuration > 0 ? maxDuration : 10000; // Default to 10s
+    }, [show.timeline]);
 
     // TODO: continue adding comments to code below this line
     const { currentTimestamp, playing, togglePlaying } =

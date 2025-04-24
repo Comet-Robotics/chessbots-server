@@ -16,17 +16,14 @@ import {
     NumericInput,
     Pre,
 } from "@blueprintjs/core";
-import { RobotGrid, robotSize, Robot } from "../debug/simulator";
+import { RobotGrid, robotSize } from "../debug/simulator";
 import {
     GridCursorMode,
     millisToPixels,
     NonStartPointEvent,
     RULER_TICK_GAP_PX,
     TimelineDurationUpdateMode,
-    TimelineEvents,
-    TimelineEventTypes,
 } from "../../common/show";
-import { SplineEditor } from "./spline-editor";
 import {
     Ruler,
     TimelineLayer,
@@ -38,9 +35,69 @@ import {
     motion,
     MotionValue,
     useTransform,
+    useAnimate,
+    useMotionValueEvent,
 } from "motion/react";
 import { useShowfile } from "./showfile-state";
 import { Reorder } from "motion/react";
+import { getRobotStateAtTime } from "../../common/getRobotStateAtTime";
+import { MotionRobot } from "./motion-robot";
+import { TimelineLayerType } from "../../common/show";
+import { SplineEditor } from "./spline-editor";
+
+// Helper component to manage animation for a single robot
+function AnimatedRobotRenderer({
+    layer,
+    timestamp,
+    robotId,
+}: {
+    layer: TimelineLayerType;
+    timestamp: MotionValue<number>;
+    robotId: string;
+}) {
+    const [scope, animate] = useAnimate();
+
+    // Get initial state to avoid undefined on first render
+    const initialState = getRobotStateAtTime(layer, timestamp.get());
+
+    useMotionValueEvent(timestamp, "change", (latestTimestamp) => {
+        const { position, headingRadians } = getRobotStateAtTime(
+            layer,
+            latestTimestamp,
+        );
+        const targetX = position.x - robotSize / 2;
+        const targetY = position.y - robotSize / 2;
+        const targetRotate = headingRadians * (180 / Math.PI);
+
+        // Animate using transform
+        if (scope.current) {
+            animate(
+                scope.current,
+                {
+                    transform: `translateX(${targetX}px) translateY(${targetY}px) rotate(${targetRotate}deg)`,
+                },
+                { duration: 0, ease: "linear" },
+            );
+        }
+    });
+
+    // Calculate initial transform string
+    const initialX = initialState.position.x - robotSize / 2;
+    const initialY = initialState.position.y - robotSize / 2;
+    const initialRotate = initialState.headingRadians * (180 / Math.PI);
+    const initialTransform = `translateX(${initialX}px) translateY(${initialY}px) rotate(${initialRotate}deg)`;
+
+    return (
+        <MotionRobot
+            ref={scope}
+            robotId={robotId}
+            // Set initial position via style prop using transform
+            style={{
+                transform: initialTransform,
+            }}
+        />
+    );
+}
 
 export function Editor() {
     const {
@@ -215,70 +272,100 @@ export function Editor() {
                     )}
                 </ButtonGroup>
             </Card>
-            <div style={{display: "flex", flexDirection: "row"}}>
-            <Section
-                title="Grid"
-                compact
-                >
+            <div style={{ display: "flex", flexDirection: "row" }}>
+                <Section title="Grid" compact>
+                    <RobotGrid robotState={{}}>
+                        {gridCursorMode === GridCursorMode.Pen && (
+                            <div
+                                style={{
+                                    position: "absolute",
+                                    left: 0,
+                                    top: 0,
+                                    width: "100%",
+                                    height: "100%",
+                                    cursor: "crosshair",
+                                }}
+                                onClick={(e) => {
+                                    const { x: mouseX, y: mouseY } =
+                                        e.nativeEvent;
+                                    const {
+                                        left: gridOriginX,
+                                        top: gridOriginY,
+                                    } = e.currentTarget.getBoundingClientRect();
+                                    const x = mouseX - gridOriginX;
+                                    const y = mouseY - gridOriginY;
+                                    addPointToSelectedLayer(
+                                        x + robotSize / 4,
+                                        y + robotSize / 4,
+                                    );
+                                }}
+                            ></div>
+                        )}
+                        {show.timeline.map((layer, index) => (
+                            <>
+                                {/* TODO: render bots */}
 
-                
-            <RobotGrid robotState={{}}>
-                {gridCursorMode === GridCursorMode.Pen && (
-                    <div
-                        style={{
-                            position: "absolute",
-                            left: 0,
-                            top: 0,
-                            width: "100%",
-                            height: "100%",
-                            cursor: "crosshair",
-                        }}
-                        onClick={(e) => {
-                            const { x: mouseX, y: mouseY } = e.nativeEvent;
-                            const { left: gridOriginX, top: gridOriginY } =
-                                e.currentTarget.getBoundingClientRect();
-                            const x = mouseX - gridOriginX;
-                            const y = mouseY - gridOriginY;
-                            addPointToSelectedLayer(
-                                x + robotSize / 4,
-                                y + robotSize / 4,
-                            );
-                        }}
-                    ></div>
-                )}
-                {show.timeline.map((layer, index) => (
-                    <>
-                        <SplineEditor
-                            key={`spline-editor-${index}`}
-                            layer={layer}
-                            onStartPointMove={(coords) =>
-                                handleStartPointMove(index, coords)
-                            }
-                            onPointMove={(pointIdx, coords) =>
-                                handlePointMove(index, pointIdx, coords)
-                            }
-                            onControlPointMove={(pointIdx, coords) =>
-                                handleControlPointMove(index, pointIdx, coords)
-                            }
-                            onDeleteStartPoint={() =>
-                                handleDeleteStartPoint(index)
-                            }
-                            onDeletePoint={(pointIdx) =>
-                                handleDeletePoint(index, pointIdx)
-                            }
-                            onSwitchPointType={(pointIdx, newType) =>
-                                handleSwitchPointType(index, pointIdx, newType)
-                            }
-                        />
-                        {/* TODO: render bots */}
-                    </>
-                ))}
-            </RobotGrid>
-            </Section>
-            <Section title="Debug" compact collapsible >
-                <Pre style={{height: "52.5vh", overflow: "scroll"}}>{JSON.stringify({...show, audio: show.audio ? {data: "[binary data]", mimeType: show.audio.mimeType} : undefined}, null, 2)}</Pre>
-
-            </Section>
+                                <SplineEditor
+                                    key={`spline-editor-${index}`}
+                                    layer={layer}
+                                    onStartPointMove={(coords) =>
+                                        handleStartPointMove(index, coords)
+                                    }
+                                    onPointMove={(pointIdx, coords) =>
+                                        handlePointMove(index, pointIdx, coords)
+                                    }
+                                    onControlPointMove={(pointIdx, coords) =>
+                                        handleControlPointMove(
+                                            index,
+                                            pointIdx,
+                                            coords,
+                                        )
+                                    }
+                                    onDeleteStartPoint={() =>
+                                        handleDeleteStartPoint(index)
+                                    }
+                                    onDeletePoint={(pointIdx) =>
+                                        handleDeletePoint(index, pointIdx)
+                                    }
+                                    onSwitchPointType={(pointIdx, newType) =>
+                                        handleSwitchPointType(
+                                            index,
+                                            pointIdx,
+                                            newType,
+                                        )
+                                    }
+                                />
+                            </>
+                        ))}
+                        {/* Render Animated Robots separately */}
+                        {show.timeline.map((layer, index) => (
+                            <AnimatedRobotRenderer
+                                key={`animated-robot-${index}`}
+                                layer={layer}
+                                timestamp={currentTimestamp}
+                                robotId={`Robot ${index + 1}`}
+                            />
+                        ))}
+                    </RobotGrid>
+                </Section>
+                <Section title="Debug" compact collapsible>
+                    <Pre style={{ height: "52.5vh", overflow: "scroll" }}>
+                        {JSON.stringify(
+                            {
+                                ...show,
+                                audio:
+                                    show.audio ?
+                                        {
+                                            data: "[binary data]",
+                                            mimeType: show.audio.mimeType,
+                                        }
+                                    :   undefined,
+                            },
+                            null,
+                            2,
+                        )}
+                    </Pre>
+                </Section>
             </div>
             <Section
                 title="Timeline"
@@ -456,36 +543,4 @@ export function Editor() {
             </Section>
         </div>
     );
-}
-
-
-const addTimestampToTimelineEvents = (events: TimelineEvents[]) => {
-    let endTimestamp = 0;
-
-    const eventsWithTs = events.map((e) => {
-        endTimestamp += e.durationMs;
-
-        return {
-            ...e,
-            endTimestamp,
-        };
-    });
-
-    return eventsWithTs;
-};
-
-
-
-
-/*
- * Splits an array into tuples of max length n.
- */
-function arrayToNTuples<T>(array: T[], n: number): T[][] {
-    return array.reduce((acc, item, index) => {
-        if (index % n === 0) {
-            acc.push([]);
-        }
-        acc[acc.length - 1].push(item);
-        return acc;
-    }, [] as T[][]);
 }
