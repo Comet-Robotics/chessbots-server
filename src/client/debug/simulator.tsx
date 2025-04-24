@@ -1,6 +1,7 @@
 import { Card, Button, H1, Tooltip, Collapse } from "@blueprintjs/core";
 import {
     CSSProperties,
+    forwardRef,
     type PropsWithChildren,
     useEffect,
     useReducer,
@@ -353,19 +354,23 @@ function LogEntry(props: { message: SimulatorUpdateMessage; ts: Date }) {
  * @param props - the robot position and id
  * @returns the robot icon scaled to the board
  */
-export function Robot({
+export const Robot = forwardRef<
+    HTMLDivElement,
+    {
+        pos: SimulatedRobotLocation;
+        robotId: string;
+        onTopOfRobots: string[];
+        style?: CSSProperties;
+    }
+>(function Robot({
     pos,
     robotId,
     onTopOfRobots,
     style,
-}: {
-    pos: SimulatedRobotLocation;
-    robotId: string;
-    onTopOfRobots: string[];
-    style?: CSSProperties;
-}) {
+}, ref) {
     return (
         <div
+            ref={ref}
             className="robot"
             style={{
                 position: "absolute",
@@ -401,4 +406,4 @@ export function Robot({
             </Tooltip>
         </div>
     );
-}
+});
