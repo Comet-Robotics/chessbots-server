@@ -1,4 +1,3 @@
-// TODO: support selecting active layer for point addition
 // TODO: how to add wait events?
 
 import { useMemo } from "react";
@@ -36,7 +35,6 @@ import {
 } from "./timeline";
 import { Midpoint, SplinePointType } from "../../common/spline";
 
-// TODO: ui for adding/removing audio - remove current hotkey as this was mainly for testing
 
 export function Editor() {
     const {
@@ -111,14 +109,20 @@ export function Editor() {
                 group: "Edit",
                 global: true,
                 label: "Undo",
-                onKeyDown: undo,
+                onKeyDown: (e) => {
+                    e.preventDefault();
+                    undo();
+                },
             },
             {
                 combo: "mod+y",
                 group: "Edit",
                 global: true,
                 label: "Redo",
-                onKeyDown: redo,
+                onKeyDown: (e) => {
+                    e.preventDefault();
+                    redo();
+                },
             },
             {
                 combo: "space",
