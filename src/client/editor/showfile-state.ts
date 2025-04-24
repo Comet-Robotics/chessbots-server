@@ -576,6 +576,6 @@ export function useShowfile() {
         addPointToSelectedLayer,
         setSelectedLayerIndex,
         selectedLayerIndex,
-        removeAudio
+        removeAudio,
     };
 }

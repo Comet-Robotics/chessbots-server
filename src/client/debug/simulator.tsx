@@ -353,11 +353,16 @@ function LogEntry(props: { message: SimulatorUpdateMessage; ts: Date }) {
  * @param props - the robot position and id
  * @returns the robot icon scaled to the board
  */
-export function Robot({pos, robotId, onTopOfRobots, style}: {
+export function Robot({
+    pos,
+    robotId,
+    onTopOfRobots,
+    style,
+}: {
     pos: SimulatedRobotLocation;
     robotId: string;
     onTopOfRobots: string[];
-    style?: CSSProperties
+    style?: CSSProperties;
 }) {
     return (
         <div
@@ -366,7 +371,7 @@ export function Robot({pos, robotId, onTopOfRobots, style}: {
                 position: "absolute",
                 left: `${pos.position.x * tileSize - 0.25 * tileSize}px`,
                 bottom: `${pos.position.y * tileSize - 0.25 * tileSize}px`,
-                ...style
+                ...style,
             }}
         >
             <Tooltip content={`${robotId}: ${JSON.stringify(pos)}`}>

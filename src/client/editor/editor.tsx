@@ -35,7 +35,6 @@ import {
 } from "./timeline";
 import { Midpoint, SplinePointType } from "../../common/spline";
 
-
 export function Editor() {
     const {
         show,
@@ -73,7 +72,7 @@ export function Editor() {
         addPointToSelectedLayer,
         setSelectedLayerIndex,
         selectedLayerIndex,
-        removeAudio
+        removeAudio,
     } = useShowfile();
 
     // TODO: fix viewport height / timeline height
@@ -133,15 +132,9 @@ export function Editor() {
                     e.preventDefault();
                     togglePlaying();
                 },
-            }
+            },
         ],
-        [
-            redo,
-            undo,
-            saveShowfile,
-            openShowfile,
-            togglePlaying,
-        ],
+        [redo, undo, saveShowfile, openShowfile, togglePlaying],
     );
 
     const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys);
@@ -241,26 +234,30 @@ export function Editor() {
                     ></div>
                 )}
                 {show.timeline.map((layer, index) => (
-                    <SplineEditor
-                        key={`spline-editor-${index}`}
-                        layer={layer}
-                        onStartPointMove={(coords) =>
-                            handleStartPointMove(index, coords)
-                        }
-                        onPointMove={(pointIdx, coords) =>
-                            handlePointMove(index, pointIdx, coords)
-                        }
-                        onControlPointMove={(pointIdx, coords) =>
-                            handleControlPointMove(index, pointIdx, coords)
-                        }
-                        onDeleteStartPoint={() => handleDeleteStartPoint(index)}
-                        onDeletePoint={(pointIdx) =>
-                            handleDeletePoint(index, pointIdx)
-                        }
-                        onSwitchPointType={(pointIdx, newType) =>
-                            handleSwitchPointType(index, pointIdx, newType)
-                        }
-                    />
+                    <>
+                        <SplineEditor
+                            key={`spline-editor-${index}`}
+                            layer={layer}
+                            onStartPointMove={(coords) =>
+                                handleStartPointMove(index, coords)
+                            }
+                            onPointMove={(pointIdx, coords) =>
+                                handlePointMove(index, pointIdx, coords)
+                            }
+                            onControlPointMove={(pointIdx, coords) =>
+                                handleControlPointMove(index, pointIdx, coords)
+                            }
+                            onDeleteStartPoint={() =>
+                                handleDeleteStartPoint(index)
+                            }
+                            onDeletePoint={(pointIdx) =>
+                                handleDeletePoint(index, pointIdx)
+                            }
+                            onSwitchPointType={(pointIdx, newType) =>
+                                handleSwitchPointType(index, pointIdx, newType)
+                            }
+                        />
+                    </>
                 ))}
             </RobotGrid>
             <Section

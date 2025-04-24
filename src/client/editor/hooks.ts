@@ -97,10 +97,10 @@ export function usePreventExitWithUnsavedChanges() {
  */
 export function useStateWithTrackedHistory<T>(initialValue: T) {
     type Action =
-    | { type: "set"; value: T }
-    | { type: "undo" }
-    | { type: "redo" }
-    | { type: "replace"; value: T };
+        | { type: "set"; value: T }
+        | { type: "undo" }
+        | { type: "redo" }
+        | { type: "replace"; value: T };
     type State = {
         history: T[];
         index: number;
@@ -125,7 +125,7 @@ export function useStateWithTrackedHistory<T>(initialValue: T) {
                     };
                 }
                 case "redo": {
-                     // Cannot redo if already at the latest state
+                    // Cannot redo if already at the latest state
                     if (state.index === state.history.length - 1) return state;
                     return {
                         ...state,
@@ -148,13 +148,19 @@ export function useStateWithTrackedHistory<T>(initialValue: T) {
         },
     );
 
-    const value = useMemo(() => state.history[state.index], [state.history, state.index]);
-    const setValue = useCallback((newValue: T) => {
-        // Avoid adding identical consecutive states to history
-        if (newValue !== value) {
-             dispatch({ type: "set", value: newValue });
-        }
-    }, [value]); // Add value dependency to check against current value
+    const value = useMemo(
+        () => state.history[state.index],
+        [state.history, state.index],
+    );
+    const setValue = useCallback(
+        (newValue: T) => {
+            // Avoid adding identical consecutive states to history
+            if (newValue !== value) {
+                dispatch({ type: "set", value: newValue });
+            }
+        },
+        [value],
+    ); // Add value dependency to check against current value
 
     const undo = useCallback(() => dispatch({ type: "undo" }), []);
     const redo = useCallback(() => dispatch({ type: "redo" }), []);
@@ -163,11 +169,10 @@ export function useStateWithTrackedHistory<T>(initialValue: T) {
         () => state.index < state.history.length - 1,
         [state.index, state.history.length],
     );
-     // Add a function to replace the state without affecting history tracking logic like 'set' does
+    // Add a function to replace the state without affecting history tracking logic like 'set' does
     const replaceState = useCallback((newValue: T) => {
         dispatch({ type: "replace", value: newValue });
     }, []);
-
 
     return { value, setValue, canUndo, canRedo, undo, redo, replaceState }; // Expose replaceState if needed
 }
