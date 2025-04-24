@@ -12,7 +12,7 @@ import {
     StartPointEvent,
     TimelineEventTypes,
     GoToPointEvent,
-    TimelineLayer,
+    TimelineLayerType,
     NonStartPointEvent,
     TimelineDurationUpdateMode,
     CHESSBOTS_SHOWFILE_MIME_TYPE,
@@ -351,7 +351,7 @@ export function useShowfile() {
     );
 
     const addRobot = useCallback(() => {
-        const newLayer: TimelineLayer = {
+        const newLayer: TimelineLayerType = {
             startPoint: {
                 id: crypto.randomUUID(),
                 type: TimelineEventTypes.StartPointEvent,

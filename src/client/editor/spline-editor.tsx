@@ -6,13 +6,13 @@ import {
 } from "../../common/spline";
 import { SplinePoint, SplineControlPoint } from "./points";
 import {
-    type TimelineLayer,
+    type TimelineLayerType,
     timelineLayerToSpline,
     TimelineEventTypes,
 } from "../../common/show";
 
 interface SplineEditorProps {
-    layer: TimelineLayer;
+    layer: TimelineLayerType;
     onStartPointMove: (newCoords: Coords) => void;
     onPointMove: (pointIndex: number, newCoords: Coords) => void;
     onControlPointMove: (pointIndex: number, newCoords: Coords) => void;

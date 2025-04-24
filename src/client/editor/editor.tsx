@@ -270,17 +270,13 @@ export function Editor() {
                                 handleSwitchPointType(index, pointIdx, newType)
                             }
                         />
-                        <AnimatableRobot
-                            robotId={`robot-${index}`}
-                            timestamp={currentTimestamp}
-                            layer={layer}
-                        />
+                        {/* TODO: render bots */}
                     </>
                 ))}
             </RobotGrid>
             </Section>
-            <Section title="Debug" compact collapsible>
-                <Pre style={{height: "60vh", overflow: "scroll"}}>{JSON.stringify({...show, audio: show.audio ? {data: "[binary data]", mimeType: show.audio.mimeType} : undefined}, null, 2)}</Pre>
+            <Section title="Debug" compact collapsible >
+                <Pre style={{height: "52.5vh", overflow: "scroll"}}>{JSON.stringify({...show, audio: show.audio ? {data: "[binary data]", mimeType: show.audio.mimeType} : undefined}, null, 2)}</Pre>
 
             </Section>
             </div>
@@ -478,35 +474,7 @@ const addTimestampToTimelineEvents = (events: TimelineEvents[]) => {
     return eventsWithTs;
 };
 
-const MotionRobot = motion.create(Robot);
 
-function AnimatableRobot({
-    robotId,
-    layer: {startPoint, remainingEvents},
-    timestamp,
-}: {
-    robotId: string;
-    layer: TimelineLayer;
-    timestamp: MotionValue<number>;
-}) {
-    const allEventsWithTimestamp = addTimestampToTimelineEvents([startPoint, ...remainingEvents].filter(e => e.type !== TimelineEventTypes.WaitEvent));
-    const pairedEvents = arrayToNTuples(allEventsWithTimestamp, 2);
-
-    // const offsetPath = useTransform(timestamp, pairedEvents.map(([e1]) => e1.endTimestamp));
-    return (
-        <MotionRobot
-            pos={{
-                position: {
-                    x: 0,
-                    y: 0,
-                },
-                headingRadians: 0,
-            }}
-            onTopOfRobots={[]}
-            robotId={robotId}
-        />
-    );
-}
 
 
 /*

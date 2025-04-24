@@ -53,7 +53,7 @@ const TimelineLayerSchema = RuntypesRecord({
     startPoint: StartPointEventSchema,
     remainingEvents: Array(NonStartPointEventSchema),
 });
-export type TimelineLayer = Static<typeof TimelineLayerSchema>;
+export type TimelineLayerType = Static<typeof TimelineLayerSchema>;
 export type TimelineEvents = GoToPointEvent | WaitEvent | StartPointEvent;
 
 /**
@@ -84,7 +84,7 @@ export type Showfile = Static<typeof ShowfileSchema>;
  * @param layer - the timeline layer to convert.
  * @returns - the spline representation of the timeline layer.
  */
-export function timelineLayerToSpline(layer: TimelineLayer): Spline {
+export function timelineLayerToSpline(layer: TimelineLayerType): Spline {
     const { startPoint, remainingEvents } = layer;
     return {
         start: startPoint.target,
@@ -111,8 +111,8 @@ export function createNewShowfile(): Showfile {
                     target: {
                         type: SplinePointType.StartPoint,
                         point: {
-                            x: 0,
-                            y: 70,
+                            x: 20,
+                            y: 140,
                         },
                     },
                     durationMs: 7500,
