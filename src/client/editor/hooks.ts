@@ -97,54 +97,64 @@ export function usePreventExitWithUnsavedChanges() {
  */
 export function useStateWithTrackedHistory<T>(initialValue: T) {
     type Action =
-        | { type: "set"; value: T }
-        | { type: "undo" }
-        | { type: "redo" }
-        | { type: "replace"; value: T };
+    | { type: "set"; value: T }
+    | { type: "undo" }
+    | { type: "redo" }
+    | { type: "replace"; value: T };
     type State = {
-        value: T;
         history: T[];
         index: number;
     };
     const [state, dispatch] = useReducer(
-        (state: State, action: Action) => {
+        (state: State, action: Action): State => {
             switch (action.type) {
-                case "set":
+                case "set": {
+                    // Truncate history after the current index if we've undone previously
+                    const newHistory = state.history.slice(0, state.index + 1);
+                    newHistory.push(action.value);
                     return {
-                        ...state,
-                        value: action.value,
-                        history: [...state.history, state.value],
-                        index: state.history.length,
+                        history: newHistory,
+                        index: newHistory.length - 1,
                     };
-                case "undo":
-                    if (state.index === 0) return state;
+                }
+                case "undo": {
+                    if (state.index === 0) return state; // Cannot undo past the initial state
                     return {
                         ...state,
-                        value: state.history[state.index - 1],
                         index: state.index - 1,
                     };
-                case "redo":
-                    if (state.index === state.history.length) return state;
+                }
+                case "redo": {
+                     // Cannot redo if already at the latest state
+                    if (state.index === state.history.length - 1) return state;
                     return {
                         ...state,
-                        value: state.history[state.index + 1],
                         index: state.index + 1,
                     };
-                case "replace":
+                }
+                case "replace": {
+                    // Reset history with the new value
                     return {
-                        ...state,
-                        value: action.value,
-                        history: [],
+                        history: [action.value],
                         index: 0,
                     };
+                }
             }
         },
+        // Initial state: history contains only the initial value at index 0
         {
-            value: initialValue,
-            history: [],
+            history: [initialValue],
             index: 0,
         },
     );
+
+    const value = useMemo(() => state.history[state.index], [state.history, state.index]);
+    const setValue = useCallback((newValue: T) => {
+        // Avoid adding identical consecutive states to history
+        if (newValue !== value) {
+             dispatch({ type: "set", value: newValue });
+        }
+    }, [value]); // Add value dependency to check against current value
 
     const undo = useCallback(() => dispatch({ type: "undo" }), []);
     const redo = useCallback(() => dispatch({ type: "redo" }), []);
@@ -153,14 +163,13 @@ export function useStateWithTrackedHistory<T>(initialValue: T) {
         () => state.index < state.history.length - 1,
         [state.index, state.history.length],
     );
-
-    const setValue = useCallback((value: T) => {
-        dispatch({ type: "set", value });
+     // Add a function to replace the state without affecting history tracking logic like 'set' does
+    const replaceState = useCallback((newValue: T) => {
+        dispatch({ type: "replace", value: newValue });
     }, []);
 
-    const { value } = state;
 
-    return { value, setValue, canUndo, canRedo, undo, redo };
+    return { value, setValue, canUndo, canRedo, undo, redo, replaceState }; // Expose replaceState if needed
 }
 
 export function usePlayHead(endDurationMs: number, startMs = 0) {
