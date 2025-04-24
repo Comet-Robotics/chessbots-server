@@ -14,19 +14,19 @@ import {
     SegmentedControl,
     Divider,
     NumericInput,
+    Pre,
 } from "@blueprintjs/core";
-import { RobotGrid, robotSize } from "../debug/simulator";
+import { RobotGrid, robotSize, Robot } from "../debug/simulator";
 import {
     GridCursorMode,
     millisToPixels,
     NonStartPointEvent,
     RULER_TICK_GAP_PX,
     TimelineDurationUpdateMode,
+    TimelineEvents,
+    TimelineEventTypes,
 } from "../../common/show";
 import { SplineEditor } from "./spline-editor";
-import { motion, useTransform } from "motion/react";
-import { useShowfile } from "./showfile-state";
-import { Reorder } from "motion/react";
 import {
     Ruler,
     TimelineLayer,
@@ -34,6 +34,13 @@ import {
     ReorderableTimelineEvent,
 } from "./timeline";
 import { Midpoint, SplinePointType } from "../../common/spline";
+import {
+    motion,
+    MotionValue,
+    useTransform,
+} from "motion/react";
+import { useShowfile } from "./showfile-state";
+import { Reorder } from "motion/react";
 
 export function Editor() {
     const {
@@ -208,7 +215,13 @@ export function Editor() {
                     )}
                 </ButtonGroup>
             </Card>
-            {/* TODO: render robots */}
+            <div style={{display: "flex", flexDirection: "row"}}>
+            <Section
+                title="Grid"
+                compact
+                >
+
+                
             <RobotGrid robotState={{}}>
                 {gridCursorMode === GridCursorMode.Pen && (
                     <div
@@ -257,9 +270,20 @@ export function Editor() {
                                 handleSwitchPointType(index, pointIdx, newType)
                             }
                         />
+                        <AnimatableRobot
+                            robotId={`robot-${index}`}
+                            timestamp={currentTimestamp}
+                            layer={layer}
+                        />
                     </>
                 ))}
             </RobotGrid>
+            </Section>
+            <Section title="Debug" compact collapsible>
+                <Pre style={{height: "60vh", overflow: "scroll"}}>{JSON.stringify({...show, audio: show.audio ? {data: "[binary data]", mimeType: show.audio.mimeType} : undefined}, null, 2)}</Pre>
+
+            </Section>
+            </div>
             <Section
                 title="Timeline"
                 compact
@@ -436,4 +460,64 @@ export function Editor() {
             </Section>
         </div>
     );
+}
+
+
+const addTimestampToTimelineEvents = (events: TimelineEvents[]) => {
+    let endTimestamp = 0;
+
+    const eventsWithTs = events.map((e) => {
+        endTimestamp += e.durationMs;
+
+        return {
+            ...e,
+            endTimestamp,
+        };
+    });
+
+    return eventsWithTs;
+};
+
+const MotionRobot = motion.create(Robot);
+
+function AnimatableRobot({
+    robotId,
+    layer: {startPoint, remainingEvents},
+    timestamp,
+}: {
+    robotId: string;
+    layer: TimelineLayer;
+    timestamp: MotionValue<number>;
+}) {
+    const allEventsWithTimestamp = addTimestampToTimelineEvents([startPoint, ...remainingEvents].filter(e => e.type !== TimelineEventTypes.WaitEvent));
+    const pairedEvents = arrayToNTuples(allEventsWithTimestamp, 2);
+
+    // const offsetPath = useTransform(timestamp, pairedEvents.map(([e1]) => e1.endTimestamp));
+    return (
+        <MotionRobot
+            pos={{
+                position: {
+                    x: 0,
+                    y: 0,
+                },
+                headingRadians: 0,
+            }}
+            onTopOfRobots={[]}
+            robotId={robotId}
+        />
+    );
+}
+
+
+/*
+ * Splits an array into tuples of max length n.
+ */
+function arrayToNTuples<T>(array: T[], n: number): T[][] {
+    return array.reduce((acc, item, index) => {
+        if (index % n === 0) {
+            acc.push([]);
+        }
+        acc[acc.length - 1].push(item);
+        return acc;
+    }, [] as T[][]);
 }
