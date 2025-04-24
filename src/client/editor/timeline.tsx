@@ -1,4 +1,4 @@
-import { Card, SectionCard, Button, Text } from "@blueprintjs/core";
+import { Card, SectionCard, Button, Text, ContextMenu, Menu, MenuItem } from "@blueprintjs/core";
 import interact from "interactjs";
 import { useDragControls, Reorder } from "motion/react";
 import { forwardRef, PropsWithChildren, useEffect, useRef } from "react";
@@ -67,6 +67,13 @@ export function TimelineEvent(props: {
     // TODO: add context menu for deleting events and adding a new event before and after this one
 
     return (
+        <ContextMenu content={
+            <Menu>
+                {/* TODO: add wait, spin before/after current event */}
+                <MenuItem text="Delete..." intent="danger" />
+            </Menu>
+        }>
+            
         <Card
             ref={ref}
             style={{
@@ -111,6 +118,7 @@ export function TimelineEvent(props: {
                 </span>
             )}
         </Card>
+        </ContextMenu>
     );
 }
 
