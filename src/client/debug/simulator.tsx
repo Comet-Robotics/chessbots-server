@@ -362,12 +362,7 @@ export const Robot = forwardRef<
         onTopOfRobots: string[];
         style?: CSSProperties;
     }
->(function Robot({
-    pos,
-    robotId,
-    onTopOfRobots,
-    style,
-}, ref) {
+>(function Robot({ pos, robotId, onTopOfRobots, style }, ref) {
     return (
         <div
             ref={ref}

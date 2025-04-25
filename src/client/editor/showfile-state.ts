@@ -1,5 +1,7 @@
+// @ts-expect-error: chessbots client is a CommonJS module, but this library is a ES Module, so we need to tell TypeScript that it's okay
 import { decode as cborDecode, encode as cborEncode } from "cbor-x";
 
+// @ts-expect-error: chessbots client is a CommonJS module, but this library is a ES Module, so we need to tell TypeScript that it's okay
 import { fileOpen, fileSave } from "browser-fs-access";
 
 import { diff } from "deep-object-diff";
@@ -373,14 +375,14 @@ export function useShowfile() {
     // Calculate sequenceLengthMs dynamically
     const sequenceLengthMs = useMemo(() => {
         let maxDuration = 0;
-        show.timeline.forEach(layer => {
+        show.timeline.forEach((layer) => {
             let currentLayerDuration = 0;
             // Add start point duration first if it exists
             if (layer.startPoint) {
-                 currentLayerDuration += layer.startPoint.durationMs;
+                currentLayerDuration += layer.startPoint.durationMs;
             }
             // Add remaining events durations
-            layer.remainingEvents.forEach(event => {
+            layer.remainingEvents.forEach((event) => {
                 currentLayerDuration += event.durationMs;
             });
             maxDuration = Math.max(maxDuration, currentLayerDuration);
