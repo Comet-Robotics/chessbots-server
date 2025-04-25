@@ -136,12 +136,25 @@ export function SplineEditor({
 }
 
 function navigateAndIdentifyTimelineElement(element: HTMLElement) {
-    element?.scrollIntoView({
+    element.scrollIntoView({
         inline: "start",
         block: "end",
     });
     const originalBackgroundColor = element.style.backgroundColor;
-    element.style.backgroundColor = "black";
+    const flashColor = "black";
+    element.style.backgroundColor = flashColor;
+    setTimeout(() => {
+        element.style.backgroundColor = originalBackgroundColor;
+    }, 100);
+    setTimeout(() => {
+        element.style.backgroundColor = flashColor;
+    }, 200);
+    setTimeout(() => {
+        element.style.backgroundColor = originalBackgroundColor;
+    }, 300);
+    setTimeout(() => {
+        element.style.backgroundColor = flashColor;
+    }, 400);
     setTimeout(() => {
         element.style.backgroundColor = originalBackgroundColor;
     }, 500);

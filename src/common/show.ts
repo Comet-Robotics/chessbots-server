@@ -55,7 +55,7 @@ const TurnEventSchema = RuntypesRecord({
 });
 export type TurnEvent = Static<typeof TurnEventSchema>;
 
-const NonStartPointEventSchema = Union(
+export const NonStartPointEventSchema = Union(
     GoToPointEventSchema,
     WaitEventSchema,
     TurnEventSchema,
@@ -132,10 +132,16 @@ export function createNewShowfile(): Showfile {
                             y: 140,
                         },
                     },
-                    durationMs: 7500,
+                    durationMs: 3000,
                     id: "4f21401d-07cf-434f-a73c-6482ab82f210",
                 },
                 remainingEvents: [
+                    {
+                        id: "a8e97232-8f22-4cc2-bcc4-ab523eeb801d",
+                        type: TimelineEventTypes.TurnEvent,
+                        durationMs: 750,
+                        radians: 2 * Math.PI,
+                    },
                     {
                         type: TimelineEventTypes.GoToPointEvent,
                         durationMs: 1000,

@@ -364,15 +364,18 @@ export function useShowfile() {
                         y: 70,
                     },
                 },
-                durationMs: 7500,
+                durationMs: defaultEventDurationMs,
             },
             remainingEvents: [],
         };
+        const layers = [...show.timeline, newLayer];
         setShow({
             ...show,
-            timeline: [...show.timeline, newLayer],
+            timeline: layers,
         });
-    }, [show, setShow]);
+
+        setSelectedLayerIndex(layers.length - 1);
+    }, [show, setShow, defaultEventDurationMs]);
 
     // Calculate sequenceLengthMs dynamically
     const sequenceLengthMs = useMemo(() => {
@@ -623,6 +626,31 @@ export function useShowfile() {
         [show, defaultEventDurationMs, setShow],
     );
 
+    const getLayerIndexFromEventId = useCallback(
+        (eventId: string) => {
+            const layerIndex = show.timeline.findIndex((layer) =>
+                layer.remainingEvents.find((event) => event.id === eventId),
+            );
+            return layerIndex;
+        },
+        [show],
+    );
+
+    const addBulkEventsToSelectedLayer = useCallback(
+        (events: NonStartPointEvent[]) => {
+            const newTimeline = [...show.timeline];
+            const layer = newTimeline[selectedLayerIndex];
+            if (!layer) return;
+            const { startPoint } = layer;
+            newTimeline[selectedLayerIndex] = {
+                startPoint,
+                remainingEvents: [...layer.remainingEvents, ...events],
+            };
+            setShow({ ...show, timeline: newTimeline });
+        },
+        [show, selectedLayerIndex, setShow],
+    );
+
     const showfileApi = useMemo(
         () => ({
             updateTimelineEventOrders,
@@ -665,6 +693,8 @@ export function useShowfile() {
             setTimestamp,
             addWaitEventAtIndex,
             addTurnEventAtIndex,
+            getLayerIndexFromEventId,
+            addBulkEventsToSelectedLayer,
         }),
         [
             updateTimelineEventOrders,
@@ -707,6 +737,8 @@ export function useShowfile() {
             setTimestamp,
             addWaitEventAtIndex,
             addTurnEventAtIndex,
+            getLayerIndexFromEventId,
+            addBulkEventsToSelectedLayer,
         ],
     );
 
