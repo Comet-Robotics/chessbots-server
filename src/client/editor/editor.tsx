@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import {
     Section,
     EditableText,
@@ -225,6 +225,18 @@ export function Editor() {
             },
         });
     }, [setTimestamp]);
+
+    const handleSeekBarClick = useCallback(
+        (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+            const { x: mouseX } = e.nativeEvent;
+            const seekBar = seekBarRef.current;
+            if (!seekBar) return;
+            const { x: seekBarStartX } = seekBar.getBoundingClientRect();
+            const newTimestamp = pixelsToMillis(mouseX - seekBarStartX);
+            setTimestamp(newTimestamp);
+        },
+        [setTimestamp],
+    );
     return (
         <div
             style={{ maxHeight: "100vh" }}
@@ -509,15 +521,21 @@ export function Editor() {
                 >
                     <Ruler sequenceLengthMs={sequenceLengthMs} />
                     <TimelineLayer title="Seek">
-                        <motion.div
-                            ref={seekBarRef}
-                            style={{
-                                display: "flex",
-                                backgroundColor: "red",
-                                height: "1rem",
-                                width: seekBarWidth,
-                            }}
-                        />
+                        <div
+                            style={{ width: "100%" }}
+                            onClick={handleSeekBarClick}
+                        >
+                            <motion.div
+                                ref={seekBarRef}
+                                style={{
+                                    display: "flex",
+                                    backgroundColor: "red",
+                                    height: "1rem",
+                                    width: seekBarWidth,
+                                }}
+                                onClick={handleSeekBarClick}
+                            />
+                        </div>
                     </TimelineLayer>
                     {show.timeline.map(
                         ({ startPoint, remainingEvents }, layerIndex) => {

@@ -201,7 +201,6 @@ export const TimelineLayer = forwardRef<
                         />
                     )}
                 </Text>
-                {}
                 {onDelete && (
                     <Button
                         icon="trash"

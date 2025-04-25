@@ -79,7 +79,9 @@ export function SplineEditor({
                 onMove={(x, y) => onStartPointMove({ x, y })}
                 onJumpToPoint={() => {
                     // TODO: i don't like that we're touching elements by ids and mucking w dom outside of react - see if theres a way to refactor this in a more idiomatic react way
-                    const el = document.getElementById(`timeline-event-${layer.startPoint.id}`)
+                    const el = document.getElementById(
+                        `timeline-event-${layer.startPoint.id}`,
+                    );
                     navigateAndIdentifyTimelineElement(el as HTMLElement);
                 }}
             />
@@ -107,9 +109,12 @@ export function SplineEditor({
                         }
                         onJumpToPoint={() => {
                             const originalIndex = getOriginalEventIndex(index);
-                            const el = document.getElementById(`timeline-event-${layer.remainingEvents[originalIndex].id}`)
-                            navigateAndIdentifyTimelineElement(el as HTMLElement);
-
+                            const el = document.getElementById(
+                                `timeline-event-${layer.remainingEvents[originalIndex].id}`,
+                            );
+                            navigateAndIdentifyTimelineElement(
+                                el as HTMLElement,
+                            );
                         }}
                     />
                     {/* TODO: add line between control point and end point */}

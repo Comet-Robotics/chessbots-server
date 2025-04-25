@@ -49,8 +49,8 @@ export function SplinePoint({
                         />
                     )}
                     <MenuItem
-                    text="Jump to Point on Timeline"
-                    onClick={onJumpToPoint}
+                        text="Jump to Point on Timeline"
+                        onClick={onJumpToPoint}
                     />
                     <MenuItem
                         text="Delete..."
