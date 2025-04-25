@@ -599,7 +599,7 @@ export function useShowfile() {
         [show, defaultEventDurationMs, setShow],
     );
 
-    return {
+    const showfileApi = useMemo(() => ({
         updateTimelineEventOrders,
         show,
         unsavedChanges,
@@ -639,5 +639,47 @@ export function useShowfile() {
         deleteTimelineEvent,
         setTimestamp,
         addWaitEventAtIndex,
-    };
+    }), [
+        updateTimelineEventOrders,
+        show,
+        unsavedChanges,
+        loadAudioFromFile,
+        handleStartPointMove,
+        handlePointMove,
+        handleControlPointMove,
+        handleDeleteStartPoint,
+        handleDeletePoint,
+        handleSwitchPointType,
+        saveShowfile,
+        openShowfile,
+        editName,
+        undo,
+        redo,
+        addRobot,
+        currentTimestamp,
+        playing,
+        togglePlaying,
+        deleteLayer,
+        canRedo,
+        canUndo,
+        sequenceLengthMs,
+        timelineDurationUpdateMode,
+        setTimelineDurationUpdateMode,
+        updateTimelineEventDurations,
+        gridCursorMode,
+        setGridCursorMode,
+        defaultPointType,
+        setDefaultPointType,
+        setDefaultEventDurationMs,
+        defaultEventDurationMs,
+        addPointToSelectedLayer,
+        setSelectedLayerIndex,
+        selectedLayerIndex,
+        removeAudio,
+        deleteTimelineEvent,
+        setTimestamp,
+        addWaitEventAtIndex,
+    ]);
+
+    return showfileApi;
 }
