@@ -83,6 +83,47 @@ export class RotateToStartCommand extends RobotCommand {
     }
 }
 
+export class DriveCubicSplineCommand extends RobotCommand {
+    constructor(
+        robotId: string,
+        public startPosition: Position,
+        public endPosition: Position,
+        public controlPosition: Position,
+        public timeDeltaMs: number,
+    ) {
+        super(robotId);
+    }
+
+    public async execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+        return robot.sendDriveCubicPacket(
+            this.startPosition,
+            this.endPosition,
+            this.controlPosition,
+            this.timeDeltaMs,
+        );
+    }
+}
+
+export class DriveQuadraticSplineCommand extends RobotCommand {
+    constructor(
+        robotId: string,
+        public startPosition: Position,
+        public endPosition: Position,
+        public timeDeltaMs: number,
+    ) {
+        super(robotId);
+    }
+    public async execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+        return robot.sendDriveQuadraticPacket(
+            this.startPosition,
+            this.endPosition,
+            this.timeDeltaMs,
+        );
+    }
+}
+
 /**
  * Drives a robot for a distance equal to a number of tiles. Distance
  * may be negative, indicating the robot drives backwards.
