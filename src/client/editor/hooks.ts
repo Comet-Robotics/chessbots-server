@@ -179,6 +179,7 @@ export function useStateWithTrackedHistory<T>(initialValue: T) {
 
 export function usePlayHead(endDurationMs: number, startMs = 0) {
     const [playing, setPlaying] = useState(false);
+    const [stoppedAtEnd, setStoppedAtEnd] = useState(false);
     const currentTimestamp = useMotionValue(startMs);
     const time = useTime();
     const lastAccessedTime = useMotionValue(0);
@@ -191,12 +192,16 @@ export function usePlayHead(endDurationMs: number, startMs = 0) {
         setPlaying((p) => {
             const newPlaying = !p;
             if (newPlaying) {
+                if (stoppedAtEnd) {
+                    currentTimestamp.set(0);
+                }
+                setStoppedAtEnd(false);
                 // When starting playback, initialize the lastAccessedTime
                 lastAccessedTime.set(time.get());
             }
             return newPlaying;
         });
-    }, [setPlaying, time, lastAccessedTime]);
+    }, [stoppedAtEnd, lastAccessedTime, time, currentTimestamp]);
 
     useMotionValueEvent(time, "change", (currentTime) => {
         if (!playing) {
@@ -210,7 +215,7 @@ export function usePlayHead(endDurationMs: number, startMs = 0) {
 
         if (newTimestamp >= endDurationMs) {
             setPlaying(false);
-            currentTimestamp.set(0);
+            setStoppedAtEnd(true);
         } else {
             currentTimestamp.set(newTimestamp);
         }
