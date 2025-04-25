@@ -131,6 +131,16 @@ export function getRobotStateAtTime(
                         ),
                 };
             }
+
+            if (currentEvent.type === TimelineEventTypes.TurnEvent) {
+                const radians = currentEvent.radians;
+                const currentHeading = previousHeadingRad + radians * progress;
+
+                return {
+                    position: previousPoint,
+                    headingRadians: currentHeading,
+                };
+            }
         }
 
         // Update state for the next iteration

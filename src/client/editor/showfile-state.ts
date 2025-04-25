@@ -19,6 +19,7 @@ import {
     CHESSBOTS_SHOWFILE_EXTENSION,
     GridCursorMode,
     WaitEvent,
+    TurnEvent,
 } from "../../common/show";
 import {
     SplinePointType,
@@ -599,6 +600,29 @@ export function useShowfile() {
         [show, defaultEventDurationMs, setShow],
     );
 
+    const addTurnEventAtIndex = useCallback(
+        (layerIndex: number, eventIndex: number) => {
+            const newTimeline = [...show.timeline];
+            const layer = newTimeline[layerIndex];
+            if (!layer) return;
+            const { startPoint, remainingEvents } = layer;
+            const events = [...remainingEvents];
+            const eventToAdd: TurnEvent = {
+                id: crypto.randomUUID(),
+                type: TimelineEventTypes.TurnEvent,
+                durationMs: defaultEventDurationMs,
+                radians: 2 * Math.PI,
+            };
+            events.splice(eventIndex, 0, eventToAdd);
+            newTimeline[layerIndex] = {
+                startPoint,
+                remainingEvents: events,
+            };
+            setShow({ ...show, timeline: newTimeline });
+        },
+        [show, defaultEventDurationMs, setShow],
+    );
+
     const showfileApi = useMemo(
         () => ({
             updateTimelineEventOrders,
@@ -640,6 +664,7 @@ export function useShowfile() {
             deleteTimelineEvent,
             setTimestamp,
             addWaitEventAtIndex,
+            addTurnEventAtIndex,
         }),
         [
             updateTimelineEventOrders,
@@ -681,6 +706,7 @@ export function useShowfile() {
             deleteTimelineEvent,
             setTimestamp,
             addWaitEventAtIndex,
+            addTurnEventAtIndex,
         ],
     );
 

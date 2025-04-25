@@ -55,7 +55,11 @@ const TurnEventSchema = RuntypesRecord({
 });
 export type TurnEvent = Static<typeof TurnEventSchema>;
 
-const NonStartPointEventSchema = Union(GoToPointEventSchema, WaitEventSchema);
+const NonStartPointEventSchema = Union(
+    GoToPointEventSchema,
+    WaitEventSchema,
+    TurnEventSchema,
+);
 export type NonStartPointEvent = Static<typeof NonStartPointEventSchema>;
 
 const TimelineLayerSchema = RuntypesRecord({

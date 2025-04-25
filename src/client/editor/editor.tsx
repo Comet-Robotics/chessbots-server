@@ -140,6 +140,7 @@ export function Editor() {
         deleteTimelineEvent,
         setTimestamp,
         addWaitEventAtIndex,
+        addTurnEventAtIndex,
     } = useShowfile();
 
     // TODO: fix viewport height / timeline height
@@ -559,6 +560,18 @@ export function Editor() {
                                                     ms,
                                                 )
                                             }
+                                            onAddWaitEvent={() => {
+                                                addWaitEventAtIndex(
+                                                    layerIndex,
+                                                    0,
+                                                );
+                                            }}
+                                            onAddTurnEvent={(e) => {
+                                                addTurnEventAtIndex(
+                                                    layerIndex,
+                                                    0,
+                                                );
+                                            }}
                                         />
                                         <Reorder.Group
                                             as="div"
@@ -608,6 +621,23 @@ export function Editor() {
                                                                         eventIndex,
                                                                     )
                                                                 :   addWaitEventAtIndex(
+                                                                        layerIndex,
+                                                                        eventIndex +
+                                                                            1,
+                                                                    )
+                                                            }
+                                                            onAddTurnEvent={(
+                                                                position,
+                                                            ) =>
+                                                                (
+                                                                    position ===
+                                                                    "before"
+                                                                ) ?
+                                                                    addTurnEventAtIndex(
+                                                                        layerIndex,
+                                                                        eventIndex,
+                                                                    )
+                                                                :   addTurnEventAtIndex(
                                                                         layerIndex,
                                                                         eventIndex +
                                                                             1,

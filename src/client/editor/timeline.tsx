@@ -25,11 +25,13 @@ export function ReorderableTimelineEvent({
     onDurationChange,
     onDelete,
     onAddWaitEvent,
+    onAddTurnEvent,
 }: PropsWithChildren<{
     event: TimelineEvents;
     onDurationChange: (ms: number) => void;
     onDelete?: () => void;
     onAddWaitEvent?: (position: "before" | "after") => void;
+    onAddTurnEvent?: (position: "before" | "after") => void;
 }>) {
     const controls = useDragControls();
 
@@ -45,6 +47,7 @@ export function ReorderableTimelineEvent({
                 onDurationChange={onDurationChange}
                 onDelete={onDelete}
                 onAddWaitEvent={onAddWaitEvent}
+                onAddTurnEvent={onAddTurnEvent}
             />
         </Reorder.Item>
     );
@@ -58,6 +61,7 @@ export function TimelineEvent(props: {
     onDurationChange?: (deltaMs: number) => void;
     onDelete?: () => void;
     onAddWaitEvent?: (position: "before" | "after") => void;
+    onAddTurnEvent?: (position: "before" | "after") => void;
 }) {
     const ref = useRef<HTMLDivElement>(null);
     const {
@@ -66,6 +70,7 @@ export function TimelineEvent(props: {
         onDurationChange,
         onDelete,
         onAddWaitEvent,
+        onAddTurnEvent,
     } = props;
     useEffect(() => {
         if (!onDurationChange) return;
@@ -86,8 +91,6 @@ export function TimelineEvent(props: {
         });
     }, [event.type, onDurationChange]);
 
-    // TODO: add context menu for adding a new event before and after this one
-
     return (
         <ContextMenu
             content={
@@ -106,13 +109,21 @@ export function TimelineEvent(props: {
                                 text="Add Wait After"
                                 onClick={() => onAddWaitEvent("after")}
                             />
-                        </>
-                    )}
-                    {onAddWaitEvent && (
-                        <>
                             <MenuItem
                                 text="Add Wait Before"
                                 onClick={() => onAddWaitEvent("before")}
+                            />
+                        </>
+                    )}
+                    {onAddTurnEvent && (
+                        <>
+                            <MenuItem
+                                text="Add 360 Turn After"
+                                onClick={() => onAddTurnEvent("after")}
+                            />
+                            <MenuItem
+                                text="Add 360 Turn Before"
+                                onClick={() => onAddTurnEvent("before")}
                             />
                         </>
                     )}
