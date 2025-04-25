@@ -327,37 +327,54 @@ export function Editor() {
                             <>
                                 {/* TODO: render bots */}
 
-                                <div style={{opacity: selectedLayerIndex === index ? 1 : 0.35}}>
-                                <SplineEditor
-                                    key={`spline-editor-${index}`}
-                                    layer={layer}
-                                    onStartPointMove={(coords) =>
-                                        handleStartPointMove(index, coords)
-                                    }
-                                    onPointMove={(pointIdx, coords) =>
-                                        handlePointMove(index, pointIdx, coords)
-                                    }
-                                    onControlPointMove={(pointIdx, coords) =>
-                                        handleControlPointMove(
-                                            index,
+                                <div
+                                    style={{
+                                        opacity:
+                                            selectedLayerIndex === index ? 1 : (
+                                                0.35
+                                            ),
+                                    }}
+                                >
+                                    <SplineEditor
+                                        key={`spline-editor-${index}`}
+                                        layer={layer}
+                                        onStartPointMove={(coords) =>
+                                            handleStartPointMove(index, coords)
+                                        }
+                                        onPointMove={(pointIdx, coords) =>
+                                            handlePointMove(
+                                                index,
+                                                pointIdx,
+                                                coords,
+                                            )
+                                        }
+                                        onControlPointMove={(
                                             pointIdx,
                                             coords,
-                                        )
-                                    }
-                                    onDeleteStartPoint={() =>
-                                        handleDeleteStartPoint(index)
-                                    }
-                                    onDeletePoint={(pointIdx) =>
-                                        handleDeletePoint(index, pointIdx)
-                                    }
-                                    onSwitchPointType={(pointIdx, newType) =>
-                                        handleSwitchPointType(
-                                            index,
+                                        ) =>
+                                            handleControlPointMove(
+                                                index,
+                                                pointIdx,
+                                                coords,
+                                            )
+                                        }
+                                        onDeleteStartPoint={() =>
+                                            handleDeleteStartPoint(index)
+                                        }
+                                        onDeletePoint={(pointIdx) =>
+                                            handleDeletePoint(index, pointIdx)
+                                        }
+                                        onSwitchPointType={(
                                             pointIdx,
                                             newType,
-                                        )
-                                    }
-                                />
+                                        ) =>
+                                            handleSwitchPointType(
+                                                index,
+                                                pointIdx,
+                                                newType,
+                                            )
+                                        }
+                                    />
                                 </div>
                             </>
                         ))}
