@@ -131,10 +131,10 @@ export class Robot {
     }
 
     public async sendDriveCubicPacket(
-        startPosition: Position,
-        endPosition: Position,
-        controlPositionA: Position,
-        controlPositionB: Position,
+        startPosition: { x: number; y: number },
+        endPosition: { x: number; y: number },
+        controlPositionA: { x: number; y: number },
+        controlPositionB: { x: number; y: number },
         timeDeltaMs: number,
     ): Promise<void> {
         const tunnel = this.getTunnel();
@@ -149,9 +149,9 @@ export class Robot {
     }
 
     public async sendDriveQuadraticPacket(
-        startPosition: Position,
-        endPosition: Position,
-        controlPosition: Position,
+        startPosition: { x: number; y: number },
+        endPosition: { x: number; y: number },
+        controlPosition: { x: number; y: number },
         timeDeltaMs: number,
     ): Promise<void> {
         const tunnel = this.getTunnel();

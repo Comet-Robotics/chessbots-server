@@ -86,10 +86,10 @@ export class RotateToStartCommand extends RobotCommand {
 export class DriveCubicSplineCommand extends RobotCommand {
     constructor(
         robotId: string,
-        public startPosition: Position,
-        public endPosition: Position,
-        public controlPositionA: Position,
-        public controlPositionB: Position,
+        public startPosition: { x: number; y: number },
+        public endPosition: { x: number; y: number },
+        public controlPositionA: { x: number; y: number },
+        public controlPositionB: { x: number; y: number },
         public timeDeltaMs: number,
     ) {
         super(robotId);
@@ -124,9 +124,9 @@ export class SpinRadiansCommand extends RobotCommand {
 export class DriveQuadraticSplineCommand extends RobotCommand {
     constructor(
         robotId: string,
-        public startPosition: Position,
-        public endPosition: Position,
-        public controlPosition: Position,
+        public startPosition: { x: number; y: number },
+        public endPosition: { x: number; y: number },
+        public controlPosition: { x: number; y: number },
         public timeDeltaMs: number,
     ) {
         super(robotId);
@@ -139,6 +139,13 @@ export class DriveQuadraticSplineCommand extends RobotCommand {
             this.controlPosition,
             this.timeDeltaMs,
         );
+    }
+}
+
+export class StopCommand extends RobotCommand {
+    public async execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+        return robot.sendDrivePacket(0);
     }
 }
 

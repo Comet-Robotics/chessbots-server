@@ -32,8 +32,12 @@ import { VirtualBotTunnel, virtualRobots } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
-import { DriveTicksCommand } from "../command/move-command";
-import { Command, ParallelCommandGroup } from "../command/command";
+import { DriveQuadraticSplineCommand } from "../command/move-command";
+import {
+    Command,
+    ParallelCommandGroup,
+    SequentialCommandGroup,
+} from "../command/command";
 
 export const executor = new CommandExecutor();
 
@@ -214,11 +218,32 @@ apiRouter.get("/do-parallel", async (_, res) => {
     for (const [, robot] of robotsEntries) {
         console.log("Moving robot " + robot.id);
         // await robot.sendDrivePacket(1);
-        commands.push(new DriveTicksCommand(robot.id, 200000));
+        commands.push(
+            new SequentialCommandGroup([
+                new DriveQuadraticSplineCommand(
+                    robot.id,
+                    { x: 0, y: 0 },
+                    { x: 3, y: 3 },
+                    { x: 0, y: 3 },
+                    4000,
+                ),
+                new DriveQuadraticSplineCommand(
+                    robot.id,
+                    { x: 0, y: 0 },
+                    { x: 0, y: 0 },
+                    { x: 0, y: 0 },
+                    30,
+                ),
+            ]),
+        );
     }
+    const start = Date.now();
+    console.log("Starting command group");
     await new ParallelCommandGroup(commands).execute();
+    const time = Date.now() - start;
+    console.log("Finished command group in " + time + "ms");
 
-    res.send({ message: "success" });
+    res.send({ message: "success", timeMs: time });
 });
 
 /**
