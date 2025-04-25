@@ -23,9 +23,11 @@ import {
 export function ReorderableTimelineEvent({
     event,
     onDurationChange,
+    onDelete,
 }: PropsWithChildren<{
     event: TimelineEvents;
     onDurationChange: (ms: number) => void;
+    onDelete: () => void;
 }>) {
     const controls = useDragControls();
 
@@ -39,6 +41,7 @@ export function ReorderableTimelineEvent({
                 event={event}
                 onPointerDownOnDragHandle={(e) => controls.start(e)}
                 onDurationChange={onDurationChange}
+                onDelete={onDelete}
             />
         </Reorder.Item>
     );
@@ -50,9 +53,10 @@ export function TimelineEvent(props: {
         event: React.PointerEvent<HTMLDivElement>,
     ) => void;
     onDurationChange?: (deltaMs: number) => void;
+    onDelete?: () => void;
 }) {
     const ref = useRef<HTMLDivElement>(null);
-    const { event, onPointerDownOnDragHandle, onDurationChange } = props;
+    const { event, onPointerDownOnDragHandle, onDurationChange, onDelete } = props;
     useEffect(() => {
         if (!onDurationChange) return;
         if (!ref.current) return;
@@ -72,14 +76,14 @@ export function TimelineEvent(props: {
         });
     }, [event.type, onDurationChange]);
 
-    // TODO: add context menu for deleting events and adding a new event before and after this one
+    // TODO: add context menu for adding a new event before and after this one
 
     return (
         <ContextMenu
             content={
                 <Menu>
                     {/* TODO: add wait, spin before/after current event */}
-                    <MenuItem text="Delete..." intent="danger" />
+                    <MenuItem text="Delete..." intent="danger" onClick={onDelete} />
                 </Menu>
             }
         >

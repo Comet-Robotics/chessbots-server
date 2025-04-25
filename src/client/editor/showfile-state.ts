@@ -557,6 +557,24 @@ export function useShowfile() {
             audio: undefined,
         });
     }, [show, setShow]);
+
+    const deleteTimelineEvent = useCallback(
+        (layerIndex: number, eventId: string) => {
+            const newTimeline = [...show.timeline];
+            const layer = newTimeline[layerIndex];
+            if (!layer) {
+                return;
+            }
+            const { startPoint, remainingEvents } = layer;
+            const eventIndex = remainingEvents.findIndex(
+                (event) => event.id === eventId,
+            );
+            const events = remainingEvents.toSpliced(eventIndex, 1); // Remove the event
+            newTimeline[layerIndex] = { startPoint, remainingEvents: events };
+            setShow({ ...show, timeline: newTimeline });
+        },
+        [show, setShow],
+    );
     return {
         updateTimelineEventOrders,
         show,
@@ -594,5 +612,6 @@ export function useShowfile() {
         setSelectedLayerIndex,
         selectedLayerIndex,
         removeAudio,
+        deleteTimelineEvent
     };
 }

@@ -137,6 +137,7 @@ export function Editor() {
         setSelectedLayerIndex,
         selectedLayerIndex,
         removeAudio,
+        deleteTimelineEvent
     } = useShowfile();
 
     // TODO: fix viewport height / timeline height
@@ -527,6 +528,12 @@ export function Editor() {
                                                                 layerIndex,
                                                                 event.id,
                                                                 ms,
+                                                            )
+                                                        }
+                                                        onDelete={() =>
+                                                            deleteTimelineEvent(
+                                                                layerIndex,
+                                                                event.id,
                                                             )
                                                         }
                                                     />
