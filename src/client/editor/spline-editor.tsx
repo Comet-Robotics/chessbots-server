@@ -77,6 +77,11 @@ export function SplineEditor({
                     spline.points.length > 0 ? onDeleteStartPoint : undefined
                 }
                 onMove={(x, y) => onStartPointMove({ x, y })}
+                onJumpToPoint={() => {
+                    // TODO: i don't like that we're touching elements by ids and mucking w dom outside of react - see if theres a way to refactor this in a more idiomatic react way
+                    const el = document.getElementById(`timeline-event-${layer.startPoint.id}`)
+                    navigateAndIdentifyTimelineElement(el as HTMLElement);
+                }}
             />
             {spline.points.map((point, index) => (
                 <Fragment key={`point-group-${index}`}>
@@ -100,6 +105,12 @@ export function SplineEditor({
                                 SplinePointType.CubicBezier,
                             )
                         }
+                        onJumpToPoint={() => {
+                            const originalIndex = getOriginalEventIndex(index);
+                            const el = document.getElementById(`timeline-event-${layer.remainingEvents[originalIndex].id}`)
+                            navigateAndIdentifyTimelineElement(el as HTMLElement);
+
+                        }}
                     />
                     {/* TODO: add line between control point and end point */}
                     {point.type === SplinePointType.CubicBezier && (
@@ -117,4 +128,16 @@ export function SplineEditor({
             ))}
         </>
     );
+}
+
+function navigateAndIdentifyTimelineElement(element: HTMLElement) {
+    element?.scrollIntoView({
+        inline: "start",
+        block: "end",
+    });
+    const originalBackgroundColor = element.style.backgroundColor;
+    element.style.backgroundColor = "black";
+    setTimeout(() => {
+        element.style.backgroundColor = originalBackgroundColor;
+    }, 500);
 }

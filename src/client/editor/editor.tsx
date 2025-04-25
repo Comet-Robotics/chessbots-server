@@ -411,7 +411,7 @@ export function Editor() {
             <Section
                 title="Timeline"
                 compact
-                style={{ height: "100%" }}
+                style={{ height: "28vh", overflow: "scroll" }}
                 rightElement={
                     <>
                         <SegmentedControl

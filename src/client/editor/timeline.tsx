@@ -121,6 +121,7 @@ export function TimelineEvent(props: {
         >
             <Card
                 ref={ref}
+                id={`timeline-event-${event.id}`}
                 style={{
                     width: millisToPixels(event.durationMs),
                     backgroundColor: EVENT_TYPE_TO_COLOR[event.type],

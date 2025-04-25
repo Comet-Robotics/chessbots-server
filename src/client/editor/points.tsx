@@ -7,6 +7,7 @@ import { useDraggable } from "./hooks";
 export function SplinePoint({
     point,
     onMove,
+    onJumpToPoint,
     onSwitchToQuadratic = undefined,
     onSwitchToCubic = undefined,
     onDelete = undefined,
@@ -16,6 +17,7 @@ export function SplinePoint({
     onDelete?: () => void;
     onSwitchToQuadratic?: () => void;
     onSwitchToCubic?: () => void;
+    onJumpToPoint: () => void;
 }) {
     // TODO: fix context menu positioning
     const mainPointRef = useRef<HTMLElement>(null);
@@ -46,6 +48,10 @@ export function SplinePoint({
                             onClick={onSwitchToCubic}
                         />
                     )}
+                    <MenuItem
+                    text="Jump to Point on Timeline"
+                    onClick={onJumpToPoint}
+                    />
                     <MenuItem
                         text="Delete..."
                         intent="danger"
