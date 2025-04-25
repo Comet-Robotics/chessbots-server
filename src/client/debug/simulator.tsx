@@ -1,5 +1,13 @@
 import { Card, Button, H1, Tooltip, Collapse } from "@blueprintjs/core";
-import { useEffect, useReducer, useRef, useState } from "react";
+import {
+    CSSProperties,
+    forwardRef,
+    type PropsWithChildren,
+    useEffect,
+    useReducer,
+    useRef,
+    useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { get, useSocket } from "../api";
 import {
@@ -22,8 +30,10 @@ import {
 } from "../check-dark-mode";
 
 const tileSize = 60;
-const robotSize = tileSize / 2;
+export const robotSize = tileSize / 2;
 const cellCount = 12;
+
+export type RobotState = { [robotId: string]: SimulatedRobotLocation };
 
 /**
  * Creates a robot simulator for testing robot commands
@@ -33,8 +43,6 @@ const cellCount = 12;
  */
 export function Simulator() {
     const navigate = useNavigate();
-
-    type RobotState = { [robotId: string]: SimulatedRobotLocation };
 
     type Action =
         | { type: "SET_ALL_ROBOTS"; payload: RobotState }
@@ -150,45 +158,7 @@ export function Simulator() {
                 </Button>
             </div>
             <div style={{ display: "flex", gap: "1rem", width: "95vw" }}>
-                <div
-                    style={{
-                        display: "grid",
-                        gridTemplateColumns: `repeat(${cellCount}, ${tileSize}px)`,
-                        gridTemplateRows: `repeat(${cellCount}, ${tileSize}px)`,
-                        position: "relative",
-                    }}
-                >
-                    {new Array(cellCount * cellCount)
-                        .fill(undefined)
-                        .map((_, i) => {
-                            const row = Math.floor(i / cellCount);
-                            const col = i % cellCount;
-                            const isCenterCell =
-                                row >= 2 && row < 10 && col >= 2 && col < 10;
-                            return (
-                                <div
-                                    key={i}
-                                    style={{
-                                        borderWidth: "1px",
-                                        borderStyle: "solid",
-                                        borderColor: simBorderColor(),
-                                        backgroundColor:
-                                            !isCenterCell ? simRingCellColor()
-                                            :   "transparent",
-                                    }}
-                                />
-                            );
-                        })}
-                    {/* TODO: implement onTopOfRobots */}
-                    {Object.entries(robotState).map(([robotId, pos]) => (
-                        <Robot
-                            pos={pos}
-                            robotId={robotId}
-                            key={robotId}
-                            onTopOfRobots={[]}
-                        />
-                    ))}
-                </div>
+                <RobotGrid robotState={robotState} />
                 <div
                     style={{
                         width: "100%",
@@ -238,6 +208,54 @@ const openInEditor = async (frame: StackFrame) => {
     });
     await fetch(`/__open-in-editor?${params.toString()}`);
 };
+
+// TODO: refactor out of debug since we use it in more than just simulator?
+export function RobotGrid({
+    robotState,
+    children,
+}: PropsWithChildren<{ robotState: RobotState }>) {
+    return (
+        <div
+            style={{
+                display: "grid",
+                gridTemplateColumns: `repeat(${cellCount}, ${tileSize}px)`,
+                gridTemplateRows: `repeat(${cellCount}, ${tileSize}px)`,
+                position: "relative",
+            }}
+        >
+            {new Array(cellCount * cellCount).fill(undefined).map((_, i) => {
+                const row = Math.floor(i / cellCount);
+                const col = i % cellCount;
+                const isCenterCell =
+                    row >= 2 && row < 10 && col >= 2 && col < 10;
+                return (
+                    <div
+                        key={i}
+                        style={{
+                            borderWidth: "1px",
+                            borderStyle: "solid",
+                            borderColor: simBorderColor(),
+                            backgroundColor:
+                                !isCenterCell ? simRingCellColor() : (
+                                    "transparent"
+                                ),
+                        }}
+                    />
+                );
+            })}
+            {/* TODO: implement onTopOfRobots */}
+            {Object.entries(robotState).map(([robotId, pos]) => (
+                <Robot
+                    pos={pos}
+                    robotId={robotId}
+                    key={robotId}
+                    onTopOfRobots={[]}
+                />
+            ))}
+            {children}
+        </div>
+    );
+}
 
 /**
  * the message log, used to show the commands sent to the robot
@@ -336,25 +354,31 @@ function LogEntry(props: { message: SimulatorUpdateMessage; ts: Date }) {
  * @param props - the robot position and id
  * @returns the robot icon scaled to the board
  */
-function Robot(props: {
-    pos: SimulatedRobotLocation;
-    robotId: string;
-    onTopOfRobots: string[];
-}) {
+export const Robot = forwardRef<
+    HTMLDivElement,
+    {
+        pos: SimulatedRobotLocation;
+        robotId: string;
+        onTopOfRobots: string[];
+        style?: CSSProperties;
+    }
+>(function Robot({ pos, robotId, onTopOfRobots, style }, ref) {
     return (
         <div
+            ref={ref}
             className="robot"
             style={{
                 position: "absolute",
-                left: `${props.pos.position.x * tileSize - 0.25 * tileSize}px`,
-                bottom: `${props.pos.position.y * tileSize - 0.25 * tileSize}px`,
+                left: `${pos.position.x * tileSize - 0.25 * tileSize}px`,
+                bottom: `${pos.position.y * tileSize - 0.25 * tileSize}px`,
+                ...style,
             }}
         >
-            <Tooltip content={`${props.robotId}: ${JSON.stringify(props.pos)}`}>
+            <Tooltip content={`${robotId}: ${JSON.stringify(pos)}`}>
                 <div
-                    className={robotColor(props.onTopOfRobots.length)}
+                    className={robotColor(onTopOfRobots.length)}
                     style={{
-                        transform: `rotate(-${clampHeading(props.pos.headingRadians)}rad)`,
+                        transform: `rotate(-${clampHeading(pos.headingRadians)}rad)`,
                         borderRadius: "50%",
                         display: "flex",
                         justifyContent: "flex-end",
@@ -377,4 +401,4 @@ function Robot(props: {
             </Tooltip>
         </div>
     );
-}
+});
