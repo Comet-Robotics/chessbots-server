@@ -21,6 +21,7 @@ export const TimelineEventTypes = {
     GoToPointEvent: "goto_point",
     WaitEvent: "wait",
     StartPointEvent: "start_point",
+    TurnEvent: "turn",
 } as const;
 
 export const GoToPointEventSchema = RuntypesRecord({
@@ -46,6 +47,14 @@ const StartPointEventSchema = RuntypesRecord({
 });
 export type StartPointEvent = Static<typeof StartPointEventSchema>;
 
+const TurnEventSchema = RuntypesRecord({
+    type: Literal(TimelineEventTypes.TurnEvent),
+    radians: Number,
+    durationMs: Number,
+    id: String,
+});
+export type TurnEvent = Static<typeof TurnEventSchema>;
+
 const NonStartPointEventSchema = Union(GoToPointEventSchema, WaitEventSchema);
 export type NonStartPointEvent = Static<typeof NonStartPointEventSchema>;
 
@@ -54,7 +63,11 @@ const TimelineLayerSchema = RuntypesRecord({
     remainingEvents: Array(NonStartPointEventSchema),
 });
 export type TimelineLayerType = Static<typeof TimelineLayerSchema>;
-export type TimelineEvents = GoToPointEvent | WaitEvent | StartPointEvent;
+export type TimelineEvents =
+    | GoToPointEvent
+    | WaitEvent
+    | StartPointEvent
+    | TurnEvent;
 
 /**
  * The showfile schema.
@@ -169,6 +182,7 @@ export const EVENT_TYPE_TO_COLOR: Record<
     [TimelineEventTypes.GoToPointEvent]: Colors.BLUE2,
     [TimelineEventTypes.WaitEvent]: Colors.GRAY2,
     [TimelineEventTypes.StartPointEvent]: Colors.GREEN2,
+    [TimelineEventTypes.TurnEvent]: Colors.ORANGE2,
 };
 
 /*
