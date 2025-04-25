@@ -133,7 +133,8 @@ export class Robot {
     public async sendDriveCubicPacket(
         startPosition: Position,
         endPosition: Position,
-        controlPosition: Position,
+        controlPositionA: Position,
+        controlPositionB: Position,
         timeDeltaMs: number,
     ): Promise<void> {
         const tunnel = this.getTunnel();
@@ -141,7 +142,8 @@ export class Robot {
             type: PacketType.DRIVE_CUBIC_SPLINE,
             startPosition: startPosition,
             endPosition: endPosition,
-            controlPosition: controlPosition,
+            controlPositionA: controlPositionA,
+            controlPositionB: controlPositionB,
             timeDeltaMs: timeDeltaMs,
         });
     }
@@ -149,12 +151,14 @@ export class Robot {
     public async sendDriveQuadraticPacket(
         startPosition: Position,
         endPosition: Position,
+        controlPosition: Position,
         timeDeltaMs: number,
     ): Promise<void> {
         const tunnel = this.getTunnel();
         await tunnel.send({
             type: PacketType.DRIVE_QUADRATIC_SPLINE,
             startPosition: startPosition,
+            controlPosition: controlPosition,
             endPosition: endPosition,
             timeDeltaMs: timeDeltaMs,
         });

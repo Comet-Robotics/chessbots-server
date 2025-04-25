@@ -165,7 +165,8 @@ export const DRIVE_CUBIC_SPLINE_SCHEMA = Record({
     type: Literal(PacketType.DRIVE_CUBIC_SPLINE),
     startPosition: Position,
     endPosition: Position,
-    controlPosition: Position,
+    controlPositionA: Position,
+    controlPositionB: Position,
     timeDeltaMs: Int32,
 });
 
@@ -173,6 +174,7 @@ export const DRIVE_QUADRATIC_SPLINE_SCHEMA = Record({
     type: Literal(PacketType.DRIVE_QUADRATIC_SPLINE),
     startPosition: Position,
     endPosition: Position,
+    controlPosition: Position,
     timeDeltaMs: Int32,
 });
 

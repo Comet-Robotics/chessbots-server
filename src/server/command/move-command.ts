@@ -88,7 +88,8 @@ export class DriveCubicSplineCommand extends RobotCommand {
         robotId: string,
         public startPosition: Position,
         public endPosition: Position,
-        public controlPosition: Position,
+        public controlPositionA: Position,
+        public controlPositionB: Position,
         public timeDeltaMs: number,
     ) {
         super(robotId);
@@ -99,7 +100,8 @@ export class DriveCubicSplineCommand extends RobotCommand {
         return robot.sendDriveCubicPacket(
             this.startPosition,
             this.endPosition,
-            this.controlPosition,
+            this.controlPositionA,
+            this.controlPositionB,
             this.timeDeltaMs,
         );
     }
@@ -124,6 +126,7 @@ export class DriveQuadraticSplineCommand extends RobotCommand {
         robotId: string,
         public startPosition: Position,
         public endPosition: Position,
+        public controlPosition: Position,
         public timeDeltaMs: number,
     ) {
         super(robotId);
@@ -133,6 +136,7 @@ export class DriveQuadraticSplineCommand extends RobotCommand {
         return robot.sendDriveQuadraticPacket(
             this.startPosition,
             this.endPosition,
+            this.controlPosition,
             this.timeDeltaMs,
         );
     }
