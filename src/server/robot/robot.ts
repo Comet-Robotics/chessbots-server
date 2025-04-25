@@ -124,6 +124,39 @@ export class Robot {
      */
     public async sendDriveTicksPacket(distanceTicks: number): Promise<void> {
         const tunnel = this.getTunnel();
-        await tunnel.send({ type: PacketType.DRIVE_TICKS, tickDistance: distanceTicks });
+        await tunnel.send({
+            type: PacketType.DRIVE_TICKS,
+            tickDistance: distanceTicks,
+        });
+    }
+
+    public async sendDriveCubicPacket(
+        startPosition: Position,
+        endPosition: Position,
+        controlPosition: Position,
+        timeDeltaMs: number,
+    ): Promise<void> {
+        const tunnel = this.getTunnel();
+        await tunnel.send({
+            type: PacketType.DRIVE_CUBIC_SPLINE,
+            startPosition: startPosition,
+            endPosition: endPosition,
+            controlPosition: controlPosition,
+            timeDeltaMs: timeDeltaMs,
+        });
+    }
+
+    public async sendDriveQuadraticPacket(
+        startPosition: Position,
+        endPosition: Position,
+        timeDeltaMs: number,
+    ): Promise<void> {
+        const tunnel = this.getTunnel();
+        await tunnel.send({
+            type: PacketType.DRIVE_QUADRATIC_SPLINE,
+            startPosition: startPosition,
+            endPosition: endPosition,
+            timeDeltaMs: timeDeltaMs,
+        });
     }
 }

@@ -23,6 +23,8 @@ export enum PacketType {
     ACTION_FAIL = "ACTION_FAIL",
     DRIVE_TANK = "DRIVE_TANK",
     ESTOP = "ESTOP",
+    DRIVE_CUBIC_SPLINE = "DRIVE_CUBIC_SPLINE",
+    DRIVE_QUADRATIC_SPLINE = "DRIVE_QUADRATIC_SPLINE",
 }
 
 const Float = NumberType.withConstraint((n) => Number.isFinite(n), {
@@ -35,6 +37,11 @@ const Uint32 = Int32.withConstraint((n) => n >= 0, { name: "uint32" });
 const VarId = Uint32;
 const MotorPower = Float.withConstraint((n) => -1 <= n && n <= 1, {
     name: "motor_power",
+});
+
+const Position = Record({
+    x: Float,
+    y: Float,
 });
 
 // MUST be kept in sync with chessBotArduino/include/packet.h PacketType
@@ -152,6 +159,22 @@ export const DRIVE_TANK_SCHEMA = Record({
     left: MotorPower,
     right: MotorPower,
 });
+
+export const DRIVE_CUBIC_SPLINE_SCHEMA = Record({
+    type: Literal(PacketType.DRIVE_CUBIC_SPLINE),
+    startPosition: Position,
+    endPosition: Position,
+    controlPosition: Position,
+    timeDeltaMs: Int32,
+});
+
+export const DRIVE_QUADRATIC_SPLINE_SCHEMA = Record({
+    type: Literal(PacketType.DRIVE_QUADRATIC_SPLINE),
+    startPosition: Position,
+    endPosition: Position,
+    timeDeltaMs: Int32,
+});
+
 export const ESTOP_SCHEMA = Record({ type: Literal(PacketType.ESTOP) });
 
 export const Packet = Union(
@@ -169,6 +192,8 @@ export const Packet = Union(
     ACTION_FAIL_SCHEMA,
     DRIVE_TANK_SCHEMA,
     ESTOP_SCHEMA,
+    DRIVE_CUBIC_SPLINE_SCHEMA,
+    DRIVE_QUADRATIC_SPLINE_SCHEMA,
 );
 export type Packet = Static<typeof Packet>;
 
