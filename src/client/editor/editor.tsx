@@ -1,6 +1,4 @@
-// TODO: how to add wait events?
-
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
     Section,
     EditableText,
@@ -21,6 +19,7 @@ import {
     GridCursorMode,
     millisToPixels,
     NonStartPointEvent,
+    pixelsToMillis,
     RULER_TICK_GAP_PX,
     TimelineDurationUpdateMode,
 } from "../../common/show";
@@ -44,6 +43,7 @@ import { getRobotStateAtTime } from "../../common/getRobotStateAtTime";
 import { MotionRobot } from "./motion-robot";
 import { TimelineLayerType } from "../../common/show";
 import { SplineEditor } from "./spline-editor";
+import interact from "interactjs";
 
 // Helper component to manage animation for a single robot
 function AnimatedRobotRenderer({
@@ -137,7 +137,9 @@ export function Editor() {
         setSelectedLayerIndex,
         selectedLayerIndex,
         removeAudio,
-        deleteTimelineEvent
+        deleteTimelineEvent,
+        setTimestamp,
+        addWaitEventAtIndex,
     } = useShowfile();
 
     // TODO: fix viewport height / timeline height
@@ -204,6 +206,25 @@ export function Editor() {
 
     const { handleKeyDown, handleKeyUp } = useHotkeys(hotkeys);
 
+    const seekBarRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!seekBarRef.current) return;
+        const el = seekBarRef.current;
+        interact(el).resizable({
+            edges: {
+                right: true,
+            },
+            listeners: {
+                move: function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const newTimestamp = pixelsToMillis(event.rect.width);
+                    setTimestamp(newTimestamp);
+                },
+            },
+        });
+    }, [setTimestamp]);
     return (
         <div
             style={{ maxHeight: "100vh" }}
@@ -470,6 +491,7 @@ export function Editor() {
                     <Ruler sequenceLengthMs={sequenceLengthMs} />
                     <TimelineLayer title="Seek">
                         <motion.div
+                            ref={seekBarRef}
                             style={{
                                 display: "flex",
                                 backgroundColor: "red",
@@ -516,29 +538,48 @@ export function Editor() {
                                                 );
                                             }}
                                         >
-                                            {remainingEvents.map((event) => {
-                                                return (
-                                                    <ReorderableTimelineEvent
-                                                        event={event}
-                                                        key={event.id}
-                                                        onDurationChange={(
-                                                            ms,
-                                                        ) =>
-                                                            updateTimelineEventDurations(
-                                                                layerIndex,
-                                                                event.id,
+                                            {remainingEvents.map(
+                                                (event, eventIndex) => {
+                                                    return (
+                                                        <ReorderableTimelineEvent
+                                                            event={event}
+                                                            key={event.id}
+                                                            onDurationChange={(
                                                                 ms,
-                                                            )
-                                                        }
-                                                        onDelete={() =>
-                                                            deleteTimelineEvent(
-                                                                layerIndex,
-                                                                event.id,
-                                                            )
-                                                        }
-                                                    />
-                                                );
-                                            })}
+                                                            ) =>
+                                                                updateTimelineEventDurations(
+                                                                    layerIndex,
+                                                                    event.id,
+                                                                    ms,
+                                                                )
+                                                            }
+                                                            onDelete={() =>
+                                                                deleteTimelineEvent(
+                                                                    layerIndex,
+                                                                    event.id,
+                                                                )
+                                                            }
+                                                            onAddWaitEvent={(
+                                                                position,
+                                                            ) =>
+                                                                (
+                                                                    position ===
+                                                                    "before"
+                                                                ) ?
+                                                                    addWaitEventAtIndex(
+                                                                        layerIndex,
+                                                                        eventIndex,
+                                                                    )
+                                                                :   addWaitEventAtIndex(
+                                                                        layerIndex,
+                                                                        eventIndex +
+                                                                            1,
+                                                                    )
+                                                            }
+                                                        />
+                                                    );
+                                                },
+                                            )}
                                         </Reorder.Group>
                                     </div>
                                     {/* TODO: add ability to add events */}

@@ -24,10 +24,12 @@ export function ReorderableTimelineEvent({
     event,
     onDurationChange,
     onDelete,
+    onAddWaitEvent,
 }: PropsWithChildren<{
     event: TimelineEvents;
     onDurationChange: (ms: number) => void;
-    onDelete: () => void;
+    onDelete?: () => void;
+    onAddWaitEvent?: (position: "before" | "after") => void;
 }>) {
     const controls = useDragControls();
 
@@ -42,6 +44,7 @@ export function ReorderableTimelineEvent({
                 onPointerDownOnDragHandle={(e) => controls.start(e)}
                 onDurationChange={onDurationChange}
                 onDelete={onDelete}
+                onAddWaitEvent={onAddWaitEvent}
             />
         </Reorder.Item>
     );
@@ -54,9 +57,16 @@ export function TimelineEvent(props: {
     ) => void;
     onDurationChange?: (deltaMs: number) => void;
     onDelete?: () => void;
+    onAddWaitEvent?: (position: "before" | "after") => void;
 }) {
     const ref = useRef<HTMLDivElement>(null);
-    const { event, onPointerDownOnDragHandle, onDurationChange, onDelete } = props;
+    const {
+        event,
+        onPointerDownOnDragHandle,
+        onDurationChange,
+        onDelete,
+        onAddWaitEvent,
+    } = props;
     useEffect(() => {
         if (!onDurationChange) return;
         if (!ref.current) return;
@@ -82,8 +92,30 @@ export function TimelineEvent(props: {
         <ContextMenu
             content={
                 <Menu>
-                    {/* TODO: add wait, spin before/after current event */}
-                    <MenuItem text="Delete..." intent="danger" onClick={onDelete} />
+                    {/* TODO: add spin before/after current event */}
+                    {onDelete && (
+                        <MenuItem
+                            text="Delete"
+                            intent="danger"
+                            onClick={onDelete}
+                        />
+                    )}
+                    {onAddWaitEvent && (
+                        <>
+                            <MenuItem
+                                text="Add Wait After"
+                                onClick={() => onAddWaitEvent("after")}
+                            />
+                        </>
+                    )}
+                    {onAddWaitEvent && (
+                        <>
+                            <MenuItem
+                                text="Add Wait Before"
+                                onClick={() => onAddWaitEvent("before")}
+                            />
+                        </>
+                    )}
                 </Menu>
             }
         >

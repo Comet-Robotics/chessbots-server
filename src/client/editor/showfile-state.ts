@@ -18,6 +18,7 @@ import {
     CHESSBOTS_SHOWFILE_MIME_TYPE,
     CHESSBOTS_SHOWFILE_EXTENSION,
     GridCursorMode,
+    WaitEvent,
 } from "../../common/show";
 import {
     SplinePointType,
@@ -393,7 +394,7 @@ export function useShowfile() {
     }, [show.timeline]);
 
     // TODO: continue adding comments to code below this line
-    const { currentTimestamp, playing, togglePlaying } =
+    const { currentTimestamp, playing, togglePlaying, setTimestamp } =
         usePlayHead(sequenceLengthMs);
 
     const { audio } = show;
@@ -575,6 +576,29 @@ export function useShowfile() {
         },
         [show, setShow],
     );
+
+    const addWaitEventAtIndex = useCallback(
+        (layerIndex: number, eventIndex: number) => {
+            const newTimeline = [...show.timeline];
+            const layer = newTimeline[layerIndex];
+            if (!layer) return;
+            const { startPoint, remainingEvents } = layer;
+            const events = [...remainingEvents];
+            const eventToAdd: WaitEvent = {
+                id: crypto.randomUUID(),
+                type: TimelineEventTypes.WaitEvent,
+                durationMs: defaultEventDurationMs,
+            };
+            events.splice(eventIndex, 0, eventToAdd);
+            newTimeline[layerIndex] = {
+                startPoint,
+                remainingEvents: events,
+            };
+            setShow({ ...show, timeline: newTimeline });
+        },
+        [show, defaultEventDurationMs, setShow],
+    );
+
     return {
         updateTimelineEventOrders,
         show,
@@ -612,6 +636,8 @@ export function useShowfile() {
         setSelectedLayerIndex,
         selectedLayerIndex,
         removeAudio,
-        deleteTimelineEvent
+        deleteTimelineEvent,
+        setTimestamp,
+        addWaitEventAtIndex,
     };
 }
