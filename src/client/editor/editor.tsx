@@ -327,6 +327,7 @@ export function Editor() {
                             <>
                                 {/* TODO: render bots */}
 
+                                <div style={{opacity: selectedLayerIndex === index ? 1 : 0.35}}>
                                 <SplineEditor
                                     key={`spline-editor-${index}`}
                                     layer={layer}
@@ -357,6 +358,7 @@ export function Editor() {
                                         )
                                     }
                                 />
+                                </div>
                             </>
                         ))}
                         {/* Render Animated Robots separately */}
