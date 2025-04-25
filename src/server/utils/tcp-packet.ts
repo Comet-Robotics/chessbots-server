@@ -25,6 +25,7 @@ export enum PacketType {
     ESTOP = "ESTOP",
     DRIVE_CUBIC_SPLINE = "DRIVE_CUBIC_SPLINE",
     DRIVE_QUADRATIC_SPLINE = "DRIVE_QUADRATIC_SPLINE",
+    SPIN_RADIANS = "SPIN_RADIANS",
 }
 
 const Float = NumberType.withConstraint((n) => Number.isFinite(n), {
@@ -175,6 +176,12 @@ export const DRIVE_QUADRATIC_SPLINE_SCHEMA = Record({
     timeDeltaMs: Int32,
 });
 
+export const SPIN_RADIANS_SCHEMA = Record({
+    type: Literal(PacketType.SPIN_RADIANS),
+    radians: Float,
+    timeDeltaMs: Int32,
+});
+
 export const ESTOP_SCHEMA = Record({ type: Literal(PacketType.ESTOP) });
 
 export const Packet = Union(
@@ -194,6 +201,7 @@ export const Packet = Union(
     ESTOP_SCHEMA,
     DRIVE_CUBIC_SPLINE_SCHEMA,
     DRIVE_QUADRATIC_SPLINE_SCHEMA,
+    SPIN_RADIANS_SCHEMA,
 );
 export type Packet = Static<typeof Packet>;
 

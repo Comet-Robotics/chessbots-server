@@ -33,7 +33,7 @@ import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
 import { DriveTicksCommand } from "../command/move-command";
-import { ParallelCommandGroup } from "../command/command";
+import { Command, ParallelCommandGroup } from "../command/command";
 
 export const executor = new CommandExecutor();
 
@@ -210,7 +210,7 @@ apiRouter.get("/do-parallel", async (_, res) => {
     console.log("Starting parallel command group");
     const robotsEntries = Array.from(robotManager.idsToRobots.entries());
     console.log(robotsEntries);
-    const commands: any[] = [];
+    const commands: Command[] = [];
     for (const [, robot] of robotsEntries) {
         console.log("Moving robot " + robot.id);
         // await robot.sendDrivePacket(1);

@@ -87,7 +87,9 @@ export class WaitCommand extends CommandBase {
         super();
     }
     public async execute(): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, this.durationSec * 1000));
+        return new Promise((resolve) =>
+            setTimeout(resolve, this.durationSec * 1000),
+        );
     }
 }
 

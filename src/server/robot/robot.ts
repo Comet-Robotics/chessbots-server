@@ -159,4 +159,16 @@ export class Robot {
             timeDeltaMs: timeDeltaMs,
         });
     }
+
+    public async sendSpinPacket(
+        radians: number,
+        timeDeltaMs: number,
+    ): Promise<void> {
+        const tunnel = this.getTunnel();
+        await tunnel.send({
+            type: PacketType.SPIN_RADIANS,
+            radians: radians,
+            timeDeltaMs: timeDeltaMs,
+        });
+    }
 }

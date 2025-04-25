@@ -105,6 +105,20 @@ export class DriveCubicSplineCommand extends RobotCommand {
     }
 }
 
+export class SpinRadiansCommand extends RobotCommand {
+    constructor(
+        robotId: string,
+        public radians: number,
+        public timeDeltaMs: number,
+    ) {
+        super(robotId);
+    }
+    public async execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+        return robot.sendSpinPacket(this.radians, this.timeDeltaMs);
+    }
+}
+
 export class DriveQuadraticSplineCommand extends RobotCommand {
     constructor(
         robotId: string,
