@@ -16,6 +16,7 @@ interface SplineEditorProps {
     onStartPointMove: (newCoords: Coords) => void;
     onPointMove: (pointIndex: number, newCoords: Coords) => void;
     onControlPointMove: (pointIndex: number, newCoords: Coords) => void;
+    onControlPoint2Move: (pointIndex: number, newCoords: Coords) => void;
     onDeleteStartPoint: () => void;
     onDeletePoint: (pointIndex: number) => void;
     onSwitchPointType: (
@@ -29,6 +30,7 @@ export function SplineEditor({
     onStartPointMove,
     onPointMove,
     onControlPointMove,
+    onControlPoint2Move,
     onDeleteStartPoint,
     onDeletePoint,
     onSwitchPointType,
@@ -119,13 +121,35 @@ export function SplineEditor({
                     />
                     {/* TODO: add line between control point and end point */}
                     {point.type === SplinePointType.CubicBezier && (
+                        <>
+                            <SplineControlPoint
+                                point={point.controlPoint}
+                                onMove={(x, y) =>
+                                    onControlPointMove(
+                                        getOriginalEventIndex(index),
+                                        { x, y },
+                                    )
+                                }
+                            />
+                            <SplineControlPoint
+                                point={point.controlPoint2}
+                                onMove={(x, y) =>
+                                    onControlPoint2Move(
+                                        getOriginalEventIndex(index),
+                                        { x, y },
+                                    )
+                                }
+                            />
+                        </>
+                    )}
+                    {point.type === SplinePointType.QuadraticBezier && (
                         <SplineControlPoint
                             point={point.controlPoint}
                             onMove={(x, y) =>
-                                onControlPointMove(
-                                    getOriginalEventIndex(index),
-                                    { x, y },
-                                )
+                            onControlPointMove(
+                                getOriginalEventIndex(index),
+                                { x, y }
+                            )
                             }
                         />
                     )}

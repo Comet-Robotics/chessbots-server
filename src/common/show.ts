@@ -1,3 +1,6 @@
+// @ts-expect-error: chessbots client is a CommonJS module, but this library is a ES Module, so we need to tell TypeScript that it's okay
+import { decode as cborDecode } from "cbor-x";
+
 import {
     Number,
     String,
@@ -82,7 +85,7 @@ export type TimelineEvents =
  */
 export const ShowfileSchema = RuntypesRecord({
     // Be sure to increment the schema version number when making breaking changes to the showfile schema.
-    $chessbots_show_schema_version: Literal(3),
+    $chessbots_show_schema_version: Literal(4),
     // The timeline is an array of timeline 'layers'. A layer consists of an array that includes all the events for one robot.
     timeline: Array(TimelineLayerSchema),
     audio: Optional(
@@ -119,7 +122,7 @@ export function timelineLayerToSpline(layer: TimelineLayerType): Spline {
  */
 export function createNewShowfile(): Showfile {
     return {
-        $chessbots_show_schema_version: 3,
+        $chessbots_show_schema_version: 4,
         timeline: [
             {
                 startPoint: {
@@ -147,6 +150,7 @@ export function createNewShowfile(): Showfile {
                         target: {
                             type: SplinePointType.QuadraticBezier,
                             endPoint: { x: 100, y: 100 },
+                            controlPoint: { x: 60, y: 120 }
                         },
                         id: "4f21401d-07cf-434f-a73c-6482ab82f211",
                     },
@@ -165,6 +169,10 @@ export function createNewShowfile(): Showfile {
                                 x: 300,
                                 y: 40,
                             },
+                            controlPoint2: {
+                                x: 310,
+                                y: 60,
+                            },
                         },
                         id: "4f21401d-07cf-434f-a73c-6482ab82f213",
                     },
@@ -174,6 +182,7 @@ export function createNewShowfile(): Showfile {
                         target: {
                             type: SplinePointType.QuadraticBezier,
                             endPoint: { x: 70, y: 70 },
+                            controlPoint: { x: 85, y: 90 },
                         },
                         id: "4f21401d-07cf-434f-a73c-6482ab82f214",
                     },
@@ -186,3 +195,21 @@ export function createNewShowfile(): Showfile {
 
 export const CHESSBOTS_SHOWFILE_MIME_TYPE = "application/chessbots-showfile";
 export const CHESSBOTS_SHOWFILE_EXTENSION = ".cbor";
+
+export const loadShowfileFromBinary = (binary: Buffer | Uint8Array) => {
+    let decodedCborData: unknown | null = null;
+
+    try {
+        decodedCborData = cborDecode(binary);
+    } catch (e) {
+        return null;
+    }
+
+    const result = ShowfileSchema.validate(decodedCborData);
+
+    if (result.success) {
+        return result.value
+    }
+
+    return null
+}

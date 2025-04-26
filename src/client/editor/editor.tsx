@@ -112,6 +112,7 @@ export function Editor() {
         handleStartPointMove,
         handlePointMove,
         handleControlPointMove,
+        handleControlPoint2Move,
         handleDeleteStartPoint,
         handleDeletePoint,
         handleSwitchPointType,
@@ -501,6 +502,16 @@ export function Editor() {
                                                 coords,
                                             )
                                         }
+                                        onControlPoint2Move={(
+                                            pointIdx,
+                                            coords,
+                                        ) =>
+                                            handleControlPoint2Move(
+                                                index,
+                                                pointIdx,
+                                                coords,
+                                            )
+                                        }
                                         onDeleteStartPoint={() =>
                                             handleDeleteStartPoint(index)
                                         }
@@ -642,7 +653,7 @@ export function Editor() {
                 </ButtonGroup>
                 <Button
                     onClick={async () => {
-                        post("/do-big", { show: "a" });
+                        post("/do-big", { show });
                     }}
                 />
 

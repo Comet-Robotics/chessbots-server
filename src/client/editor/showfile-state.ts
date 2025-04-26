@@ -1,5 +1,5 @@
 // @ts-expect-error: chessbots client is a CommonJS module, but this library is a ES Module, so we need to tell TypeScript that it's okay
-import { decode as cborDecode, encode as cborEncode } from "cbor-x";
+import { encode as cborEncode } from "cbor-x";
 
 // @ts-expect-error: chessbots client is a CommonJS module, but this library is a ES Module, so we need to tell TypeScript that it's okay
 import { fileOpen, fileSave } from "browser-fs-access";
@@ -8,7 +8,7 @@ import { diff } from "deep-object-diff";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
     createNewShowfile,
-    ShowfileSchema,
+    loadShowfileFromBinary,
     StartPointEvent,
     TimelineEventTypes,
     GoToPointEvent,
@@ -95,22 +95,10 @@ export function useShowfile() {
             description: "Chess Bots Showfile",
         });
 
-        let data: unknown | null = null;
-        try {
-            data = cborDecode(new Uint8Array(await blob.arrayBuffer()));
-        } catch (e) {
-            // TODO: toast or alert
-            console.warn("Failed to decode showfile as CBOR", e);
-            return;
-        }
-
-        const show = ShowfileSchema.check(data);
-
-        if (!show) {
-            // TODO: toast or alert
-            console.warn("File was CBOR but not a valid showfile", data);
-            return;
-        }
+        const show = loadShowfileFromBinary(
+            new Uint8Array(await blob.arrayBuffer()),
+        );
+        if (!show) return;
 
         setInitialShow(show);
         setShow(show);
@@ -211,8 +199,7 @@ export function useShowfile() {
             const eventToUpdate = events[pointIndex];
 
             if (
-                eventToUpdate?.type === TimelineEventTypes.GoToPointEvent &&
-                eventToUpdate.target.type === SplinePointType.CubicBezier
+                eventToUpdate?.type === TimelineEventTypes.GoToPointEvent
             ) {
                 events[pointIndex] = {
                     ...eventToUpdate,
@@ -230,7 +217,35 @@ export function useShowfile() {
         },
         [show, setShow],
     );
-
+    const handleControlPoint2Move = useCallback(
+        (layerIndex: number, pointIndex: number, newCoords: Coords) => {
+            const newTimeline = [...show.timeline];
+            const layer = newTimeline[layerIndex];
+            if (!layer) return;
+            const { startPoint, remainingEvents } = layer;
+            const events = [...remainingEvents];
+            const eventToUpdate = events[pointIndex];
+    
+            if (
+                eventToUpdate?.type === TimelineEventTypes.GoToPointEvent
+                && eventToUpdate.target.type === SplinePointType.CubicBezier
+            ) {
+                events[pointIndex] = {
+                    ...eventToUpdate,
+                    target: {
+                        ...eventToUpdate.target,
+                        controlPoint2: newCoords,
+                    },
+                };
+                newTimeline[layerIndex] = {
+                    startPoint,
+                    remainingEvents: events,
+                };
+                setShow({ ...show, timeline: newTimeline });
+            }
+        },
+        [show, setShow],
+    );
     const handleDeleteStartPoint = useCallback(
         (layerIndex: number) => {
             const newTimeline = [...show.timeline];
@@ -324,6 +339,10 @@ export function useShowfile() {
                         x: eventToUpdate.target.endPoint.x - 20,
                         y: eventToUpdate.target.endPoint.y - 20,
                     },
+                    controlPoint2: {
+                        x: eventToUpdate.target.endPoint.x + 20,
+                        y: eventToUpdate.target.endPoint.y + 20,
+                    },
                     endPoint: eventToUpdate.target.endPoint,
                 };
             } else if (
@@ -333,6 +352,10 @@ export function useShowfile() {
                 newTarget = {
                     type: SplinePointType.QuadraticBezier,
                     endPoint: eventToUpdate.target.endPoint,
+                    controlPoint: {
+                        x: eventToUpdate.target.endPoint.x + 20,
+                        y: eventToUpdate.target.endPoint.y + 20,
+                    },
                 };
             } else {
                 console.warn("Tried to switch point type with invalid type");
@@ -523,6 +546,7 @@ export function useShowfile() {
                         durationMs: defaultEventDurationMs,
                         target: {
                             type: SplinePointType.QuadraticBezier,
+                            controlPoint: { x: x - 10, y: y - 10 },
                             endPoint: { x, y },
                         },
                         id: crypto.randomUUID(),
@@ -536,6 +560,7 @@ export function useShowfile() {
                             type: SplinePointType.CubicBezier,
                             endPoint: { x, y },
                             controlPoint: { x: x + 10, y: y + 10 },
+                            controlPoint2: { x: x - 10, y: y - 10 },
                         },
                         id: crypto.randomUUID(),
                     });
@@ -664,6 +689,7 @@ export function useShowfile() {
             handleStartPointMove,
             handlePointMove,
             handleControlPointMove,
+            handleControlPoint2Move,
             handleDeleteStartPoint,
             handleDeletePoint,
             handleSwitchPointType,
@@ -709,6 +735,7 @@ export function useShowfile() {
             handleStartPointMove,
             handlePointMove,
             handleControlPointMove,
+            handleControlPoint2Move,
             handleDeleteStartPoint,
             handleDeletePoint,
             handleSwitchPointType,

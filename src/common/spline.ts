@@ -28,6 +28,7 @@ export type StartPointSchema = Static<typeof StartPointSchema>;
 export const CubicBezierSchema = Record({
     type: Literal(SplinePointType.CubicBezier),
     controlPoint: CoordsSchema,
+    controlPoint2: CoordsSchema,
     endPoint: CoordsSchema,
 });
 export type CubicBezier = Static<typeof CubicBezierSchema>;
@@ -35,6 +36,7 @@ export type CubicBezier = Static<typeof CubicBezierSchema>;
 export const QuadraticBezierSchema = Record({
     type: Literal(SplinePointType.QuadraticBezier),
     endPoint: CoordsSchema,
+    controlPoint: CoordsSchema,
 });
 export type QuadraticBezier = Static<typeof QuadraticBezierSchema>;
 
