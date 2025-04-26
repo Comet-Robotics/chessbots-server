@@ -653,7 +653,7 @@ export function Editor() {
                 </ButtonGroup>
                 <Button
                     onClick={async () => {
-                        post("/do-big", { show });
+                        post("/do-big", { show: JSON.stringify(show) });
                     }}
                 />
 

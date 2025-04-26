@@ -256,10 +256,10 @@ apiRouter.get("/do-parallel", async (_, res) => {
 apiRouter.post("/do-big", async (req, res) => {
     console.log("Parsing show");
 
-    const validateResult = ShowfileSchema.validate(req.body.show);
+    const validateResult = ShowfileSchema.validate(JSON.parse(req.query.show as string));
 
     if (!validateResult.success) {
-        res.json({ error: "Showfile is invalid" });
+        res.status(400).json({ error: "Showfile is invalid" });
         console.log("Show parsing failed");
         return;
     }
