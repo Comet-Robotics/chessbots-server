@@ -46,6 +46,7 @@ import { TimelineLayerType } from "../../common/show";
 import { SplineEditor } from "./spline-editor";
 import interact from "interactjs";
 import { Array as RArray } from "runtypes";
+import { post } from "../api";
 
 // Helper component to manage animation for a single robot
 function AnimatedRobotRenderer({
@@ -637,6 +638,9 @@ export function Editor() {
                         variant="outlined"
                     />
                 </ButtonGroup>
+                <Button 
+                    onClick={async()=>{post("/do-big",{show:"a"})}}
+                />
 
                 <div
                     style={{

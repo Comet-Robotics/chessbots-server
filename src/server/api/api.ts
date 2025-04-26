@@ -1,6 +1,7 @@
 import { WebsocketRequestHandler } from "express-ws";
 import { Router } from "express";
-
+//import { decode as cborDecode, encode as cborEncode } from "cbor";
+import('cbor2');
 import { parseMessage } from "../../common/message/parse-message";
 import {
     GameFinishedMessage,
@@ -32,12 +33,19 @@ import { VirtualBotTunnel, virtualRobots } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
-import { DriveQuadraticSplineCommand } from "../command/move-command";
+import { DriveCubicSplineCommand, DriveQuadraticSplineCommand } from "../command/move-command";
 import {
     Command,
     ParallelCommandGroup,
     SequentialCommandGroup,
 } from "../command/command";
+import { CHESSBOTS_SHOWFILE_EXTENSION, CHESSBOTS_SHOWFILE_MIME_TYPE, GoToPointEvent, ShowfileSchema } from "../../common/show";
+import { CubicBezier, SplinePointType } from "../../common/spline";
+// @ts-expect-error: chessbots client is a CommonJS module, but this library is a ES Module, so we need to tell TypeScript that it's okay
+import { decode as cborDecode} from "cbor-x";
+
+// @ts-expect-error: chessbots client is a CommonJS module, but this library is a ES Module, so we need to tell TypeScript that it's okay
+import { fileOpen } from "browser-fs-access";
 
 export const executor = new CommandExecutor();
 
@@ -245,6 +253,67 @@ apiRouter.get("/do-parallel", async (_, res) => {
 
     res.send({ message: "success", timeMs: time });
 });
+
+apiRouter.post("/do-big", async (_, res) => {
+    console.log("starting test group");
+    const start = Date.now();
+    
+    const blob = await fileOpen({
+                mimeTypes: [CHESSBOTS_SHOWFILE_MIME_TYPE],
+                extensions: [CHESSBOTS_SHOWFILE_EXTENSION],
+                description: "Chess Bots Showfile",
+            });
+
+    const data = cborDecode(new Uint8Array(await blob.arrayBuffer()));
+    const show = ShowfileSchema.check(data);
+    if(show){
+        const shows = show///JSON.parse(req.query.show.toString()) as Showfile;
+        const robotsEntries = Array.from(robotManager.idsToRobots.entries());
+        const commands: Command[] = [];
+        for(let x = 0; x < shows.timeline.length; x++){
+            let start = shows.timeline[x].startPoint.target.point;
+            const cmd:Command[] = [];
+            for(let y = 0; y < shows.timeline[x].remainingEvents.length; y++){
+                if(shows.timeline[x].remainingEvents[y].type === "goto_point"){
+                    const goto = shows.timeline[x].remainingEvents[y] as GoToPointEvent;
+                    if(goto.target.type === SplinePointType.QuadraticBezier){
+                        cmd.push(new DriveQuadraticSplineCommand(
+                            robotsEntries[x][1].id,
+                            start,
+                            goto.target.endPoint,
+                            goto.target.endPoint,
+                            shows.timeline[x].remainingEvents[y].durationMs
+                        ))
+                    } else if (goto.target.type === SplinePointType.CubicBezier){
+                        const go2 = goto.target as CubicBezier;
+                        cmd.push(new DriveCubicSplineCommand(
+                            robotsEntries[x][1].id,
+                            start,
+                            goto.target.endPoint,
+                            go2.controlPoint,
+                            goto.target.endPoint,
+                            shows.timeline[x].remainingEvents[y].durationMs
+                        ))
+                    }
+                    start = goto.target.endPoint;
+                } else if (shows.timeline[x].remainingEvents[y].type === "wait"){
+                    cmd.push(new DriveQuadraticSplineCommand(
+                        robotsEntries[x][1].id,
+                        start,
+                        start,
+                        start,
+                        shows.timeline[x].remainingEvents[y].durationMs
+                    ))
+                } 
+            }
+            commands.push(new SequentialCommandGroup(commands));
+        }
+        await new ParallelCommandGroup(commands).execute();
+        console.log("finally");
+    }
+    const time = Date.now() - start;
+    res.send({ message: "success", timeMs: time });
+})
 
 /**
  * get the current state of the virtual robots for the simulator

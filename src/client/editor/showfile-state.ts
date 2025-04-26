@@ -401,6 +401,10 @@ export function useShowfile() {
     const { currentTimestamp, playing, togglePlaying, setTimestamp } =
         usePlayHead(sequenceLengthMs);
 
+    const startShow = useEffect(()=>{
+
+    })
+
     const { audio } = show;
     const audioRef = useRef(new Audio());
     useEffect(() => {
@@ -672,6 +676,7 @@ export function useShowfile() {
             currentTimestamp,
             playing,
             togglePlaying,
+            startShow,
             deleteLayer,
             canRedo,
             canUndo,
@@ -716,6 +721,7 @@ export function useShowfile() {
             currentTimestamp,
             playing,
             togglePlaying,
+            startShow,
             deleteLayer,
             canRedo,
             canUndo,
