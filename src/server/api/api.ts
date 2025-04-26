@@ -1,6 +1,5 @@
 import { WebsocketRequestHandler } from "express-ws";
 import { Router } from "express";
-//import { decode as cborDecode, encode as cborEncode } from "cbor";
 
 import { parseMessage } from "../../common/message/parse-message";
 import {
@@ -43,8 +42,8 @@ import {
     ParallelCommandGroup,
     SequentialCommandGroup,
 } from "../command/command";
-import { GoToPointEvent, ShowfileSchema } from "../../common/show";
-import { CubicBezier, SplinePointType } from "../../common/spline";
+import { ShowfileSchema, TimelineEventTypes } from "../../common/show";
+import { SplinePointType } from "../../common/spline";
 
 export const executor = new CommandExecutor();
 
@@ -268,100 +267,102 @@ apiRouter.post("/do-big", async (req, res) => {
 
     const show = validateResult.value;
 
-    const robotsEntries = Array.from(robotManager.idsToRobots.entries());
-    const commandGroups: Command[] = [];
+    const connectedRobotIds = Array.from(robotManager.idsToRobots.keys());
+
+    if (connectedRobotIds.length < show.timeline.length) {
+        const r = { error: `Not enough robots connected. Got ${connectedRobotIds.length}, expected ${show.timeline.length}` }
+        res.status(400).json(r);
+        console.log(r);
+        return;
+    }
+
+    const commandGroupsForAllRobots: Command[] = [];
     for (
         let timelineLayerIndex = 0;
         timelineLayerIndex < show.timeline.length;
         timelineLayerIndex++
     ) {
-        let start = show.timeline[timelineLayerIndex].startPoint.target.point;
-        const cmd: Command[] = [];
+        // TODO: make a way to map robot ids to timeline layers, so we can choose which physical robot to use for each timeline layer
+        const robotId = connectedRobotIds[timelineLayerIndex];
+        const layer = show.timeline[timelineLayerIndex];
+        let start = layer.startPoint.target.point;
+        const sequentialCommandsForCurrentRobot: Command[] = [];
         for (
-            let y = 0;
-            y < show.timeline[timelineLayerIndex].remainingEvents.length;
-            y++
+            let eventIndex = 0;
+            eventIndex < layer.remainingEvents.length;
+            eventIndex++
         ) {
-            const event = show.timeline[timelineLayerIndex].remainingEvents[y];
-            if (event.type === "goto_point") {
-                const goto = show.timeline[timelineLayerIndex].remainingEvents[
-                    y
-                ] as GoToPointEvent;
-                if (goto.target.type === SplinePointType.QuadraticBezier) {
-                    cmd.push(
+            const event = layer.remainingEvents[eventIndex];
+            if (event.type === TimelineEventTypes.GoToPointEvent) {
+                if (event.target.type === SplinePointType.QuadraticBezier) {
+                    sequentialCommandsForCurrentRobot.push(
                         new DriveQuadraticSplineCommand(
-                            robotsEntries[timelineLayerIndex][1].id,
+                            robotId,
                             start,
-                            goto.target.endPoint,
-                            goto.target.endPoint,
-                            show.timeline[timelineLayerIndex].remainingEvents[
-                                y
-                            ].durationMs,
+                            event.target.endPoint,
+                            event.target.controlPoint,
+                            event.durationMs,
                         ),
                     );
-                } else if (goto.target.type === SplinePointType.CubicBezier) {
-                    const go2 = goto.target as CubicBezier;
-                    cmd.push(
+                } else if (event.target.type === SplinePointType.CubicBezier) {
+                    sequentialCommandsForCurrentRobot.push(
                         new DriveCubicSplineCommand(
-                            robotsEntries[timelineLayerIndex][1].id,
+                            robotId,
                             start,
-                            goto.target.endPoint,
-                            go2.controlPoint,
-                            goto.target.endPoint,
-                            show.timeline[timelineLayerIndex].remainingEvents[
-                                y
-                            ].durationMs,
+                            event.target.endPoint,
+                            event.target.controlPoint,
+                            event.target.controlPoint2,
+                            event.durationMs,
                         ),
                     );
                 }
-                start = goto.target.endPoint;
-            } else if (event.type === "wait") {
-                cmd.push(
+                start = event.target.endPoint;
+            } else if (event.type === TimelineEventTypes.WaitEvent) {
+                sequentialCommandsForCurrentRobot.push(
                     new DriveQuadraticSplineCommand(
-                        robotsEntries[timelineLayerIndex][1].id,
+                        robotId,
                         start,
                         start,
                         start,
-                        show.timeline[timelineLayerIndex].remainingEvents[
-                            y
-                        ].durationMs,
+                        event.durationMs,
                     ),
                 );
-            } else if (event.type === "turn") {
-                cmd.push(
+            } else if (event.type === TimelineEventTypes.TurnEvent) {
+                sequentialCommandsForCurrentRobot.push(
                     new SpinRadiansCommand(
-                        robotsEntries[timelineLayerIndex][1].id,
+                        robotId,
                         event.radians,
                         event.durationMs,
                     ),
                 );
             }
         }
-        if (cmd.length === 0) {
-            console.warn(
-                "No commands found for robot " +
-                    robotsEntries[timelineLayerIndex][1].id,
-            );
+        if (sequentialCommandsForCurrentRobot.length === 0) {
+            console.warn("No commands found for robot " + robotId);
             continue;
         }
-        // using this as a scuffed stop command
-        cmd.push(
+
+        // adding this command which tells the robot to start and stop moving at the same place as a scuffed stop command.
+        // otherwise the robot will keep moving at the speed of the last command it was given.
+        sequentialCommandsForCurrentRobot.push(
             new DriveQuadraticSplineCommand(
-                robotsEntries[timelineLayerIndex][1].id,
+                connectedRobotIds[timelineLayerIndex][1].id,
                 start,
                 start,
                 start,
                 0,
             ),
         );
-        commandGroups.push(new SequentialCommandGroup(cmd));
+        commandGroupsForAllRobots.push(
+            new SequentialCommandGroup(sequentialCommandsForCurrentRobot),
+        );
     }
     const start = Date.now();
     console.log("Executing commands");
-    await new ParallelCommandGroup(commandGroups).execute();
-    const time = Date.now() - start;
-    console.log("Command execution completed", { time });
-    res.send({ message: "success", timeMs: time });
+    await new ParallelCommandGroup(commandGroupsForAllRobots).execute();
+    const timeMs = Date.now() - start;
+    console.log("Command execution completed", { timeMs });
+    res.send({ message: "success", timeMs });
 });
 
 /**
