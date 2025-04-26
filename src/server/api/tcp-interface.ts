@@ -289,7 +289,6 @@ export class BotTunnel {
  */
 export class TCPServer {
     private server: net.Server;
-    priv;
 
     /**
      * creates a tcp server on port from server config and registers passed in ids with their corresponding bot tunnels
@@ -304,7 +303,7 @@ export class TCPServer {
     ) {
         this.server = net.createServer();
         this.server.on("connection", this.handleConnection.bind(this));
-        this.server.listen(config["tcpServerPort"], () => {
+        this.server.listen(config["tcpServerPort"], "0.0.0.0", () => {
             console.log(
                 "TCP bot server listening to %j",
                 this.server.address(),
