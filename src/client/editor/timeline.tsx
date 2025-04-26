@@ -10,15 +10,15 @@ import {
 import interact from "interactjs";
 import { useDragControls, Reorder } from "motion/react";
 import { forwardRef, PropsWithChildren, useEffect, useRef } from "react";
+import { TimelineEvents } from "../../common/show";
 import {
-    TimelineEvents,
     EVENT_TYPE_TO_COLOR,
     millisToPixels,
     RULER_TICK_GAP_PX,
     RULER_TICK_INTERVAL_MS,
     RULER_EXTRA_TICK_COUNT,
     pixelsToMillis,
-} from "../../common/show";
+} from "../../common/show-interface-utils";
 
 export function ReorderableTimelineEvent({
     event,

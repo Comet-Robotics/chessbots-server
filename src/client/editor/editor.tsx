@@ -16,14 +16,16 @@ import {
 } from "@blueprintjs/core";
 import { RobotGrid, robotSize } from "../debug/simulator";
 import {
-    GridCursorMode,
-    millisToPixels,
     NonStartPointEvent,
     NonStartPointEventSchema,
+} from "../../common/show";
+import {
+    GridCursorMode,
+    millisToPixels,
     pixelsToMillis,
     RULER_TICK_GAP_PX,
     TimelineDurationUpdateMode,
-} from "../../common/show";
+} from "../../common/show-interface-utils";
 import {
     Ruler,
     TimelineLayer,

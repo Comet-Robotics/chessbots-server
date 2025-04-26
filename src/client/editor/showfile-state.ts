@@ -14,13 +14,15 @@ import {
     GoToPointEvent,
     TimelineLayerType,
     NonStartPointEvent,
-    TimelineDurationUpdateMode,
     CHESSBOTS_SHOWFILE_MIME_TYPE,
     CHESSBOTS_SHOWFILE_EXTENSION,
-    GridCursorMode,
     WaitEvent,
     TurnEvent,
 } from "../../common/show";
+import {
+    TimelineDurationUpdateMode,
+    GridCursorMode,
+} from "../../common/show-interface-utils";
 import {
     SplinePointType,
     CubicBezier,
