@@ -335,6 +335,20 @@ apiRouter.post("/do-big", async (req, res) => {
                 );
             }
         }
+        if (cmd.length === 0) {
+            console.warn("No commands found for robot " + robotsEntries[timelineLayerIndex][1].id);
+            continue;
+        }
+        // using this as a scuffed stop command
+        cmd.push(
+            new DriveQuadraticSplineCommand(
+                robotsEntries[timelineLayerIndex][1].id,
+                start, 
+                start,
+                start,
+                0,
+            ),
+        )
         commandGroups.push(new SequentialCommandGroup(cmd));
     }
     const start = Date.now();
