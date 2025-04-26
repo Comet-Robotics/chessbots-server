@@ -146,10 +146,10 @@ export function SplineEditor({
                         <SplineControlPoint
                             point={point.controlPoint}
                             onMove={(x, y) =>
-                            onControlPointMove(
-                                getOriginalEventIndex(index),
-                                { x, y }
-                            )
+                                onControlPointMove(
+                                    getOriginalEventIndex(index),
+                                    { x, y },
+                                )
                             }
                         />
                     )}

@@ -198,9 +198,7 @@ export function useShowfile() {
             const events = [...remainingEvents];
             const eventToUpdate = events[pointIndex];
 
-            if (
-                eventToUpdate?.type === TimelineEventTypes.GoToPointEvent
-            ) {
+            if (eventToUpdate?.type === TimelineEventTypes.GoToPointEvent) {
                 events[pointIndex] = {
                     ...eventToUpdate,
                     target: {
@@ -225,10 +223,10 @@ export function useShowfile() {
             const { startPoint, remainingEvents } = layer;
             const events = [...remainingEvents];
             const eventToUpdate = events[pointIndex];
-    
+
             if (
-                eventToUpdate?.type === TimelineEventTypes.GoToPointEvent
-                && eventToUpdate.target.type === SplinePointType.CubicBezier
+                eventToUpdate?.type === TimelineEventTypes.GoToPointEvent &&
+                eventToUpdate.target.type === SplinePointType.CubicBezier
             ) {
                 events[pointIndex] = {
                     ...eventToUpdate,

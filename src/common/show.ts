@@ -150,7 +150,7 @@ export function createNewShowfile(): Showfile {
                         target: {
                             type: SplinePointType.QuadraticBezier,
                             endPoint: { x: 100, y: 100 },
-                            controlPoint: { x: 60, y: 120 }
+                            controlPoint: { x: 60, y: 120 },
                         },
                         id: "4f21401d-07cf-434f-a73c-6482ab82f211",
                     },
@@ -208,8 +208,8 @@ export const loadShowfileFromBinary = (binary: Buffer | Uint8Array) => {
     const result = ShowfileSchema.validate(decodedCborData);
 
     if (result.success) {
-        return result.value
+        return result.value;
     }
 
-    return null
-}
+    return null;
+};
