@@ -638,8 +638,10 @@ export function Editor() {
                         variant="outlined"
                     />
                 </ButtonGroup>
-                <Button 
-                    onClick={async()=>{post("/do-big",{show:"a"})}}
+                <Button
+                    onClick={async () => {
+                        post("/do-big", { show: "a" });
+                    }}
                 />
 
                 <div

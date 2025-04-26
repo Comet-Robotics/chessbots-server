@@ -40,10 +40,9 @@ export type RobotState = { [robotId: string]: SimulatedRobotLocation };
  *
  * does not require physical robots to be connected
  * @returns the simulator screen as a card
-*/
+ */
 export function Simulator() {
     const navigate = useNavigate();
-
 
     type Action =
         | { type: "SET_ALL_ROBOTS"; payload: RobotState }
@@ -160,7 +159,6 @@ export function Simulator() {
             </div>
             <div style={{ display: "flex", gap: "1rem", width: "95vw" }}>
                 <RobotGrid robotState={robotState} />
-                <RobotGrid robotState={robotState} />
                 <div
                     style={{
                         width: "100%",
@@ -211,41 +209,52 @@ const openInEditor = async (frame: StackFrame) => {
     await fetch(`/__open-in-editor?${params.toString()}`);
 };
 
-export function RobotGrid({robotState}: {robotState: RobotState}) {
-    return <div
-        style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${cellCount}, ${tileSize}px)`,
-            gridTemplateRows: `repeat(${cellCount}, ${tileSize}px)`,
-            position: "relative",
-        }}
-    >
-        {new Array(cellCount * cellCount)
-            .fill(undefined)
-            .map((_, i) => {
+// TODO: refactor out of debug since we use it in more than just simulator?
+export function RobotGrid({
+    robotState,
+    children,
+}: PropsWithChildren<{ robotState: RobotState }>) {
+    return (
+        <div
+            style={{
+                display: "grid",
+                gridTemplateColumns: `repeat(${cellCount}, ${tileSize}px)`,
+                gridTemplateRows: `repeat(${cellCount}, ${tileSize}px)`,
+                position: "relative",
+            }}
+        >
+            {new Array(cellCount * cellCount).fill(undefined).map((_, i) => {
                 const row = Math.floor(i / cellCount);
                 const col = i % cellCount;
-                const isCenterCell = row >= 2 && row < 10 && col >= 2 && col < 10;
+                const isCenterCell =
+                    row >= 2 && row < 10 && col >= 2 && col < 10;
                 return (
                     <div
                         key={i}
                         style={{
-                            border: "1px solid black",
-                            backgroundColor: !isCenterCell ? "lightgray" : (
-                                "transparent"
-                            ),
-                        }} />
+                            borderWidth: "1px",
+                            borderStyle: "solid",
+                            borderColor: simBorderColor(),
+                            backgroundColor:
+                                !isCenterCell ? simRingCellColor() : (
+                                    "transparent"
+                                ),
+                        }}
+                    />
                 );
             })}
-        {/* TODO: implement onTopOfRobots */}
-        {Object.entries(robotState).map(([robotId, pos]) => (
-            <Robot
-                pos={pos}
-                robotId={robotId}
-                key={robotId}
-                onTopOfRobots={[]} />
-        ))}
-    </div>;
+            {/* TODO: implement onTopOfRobots */}
+            {Object.entries(robotState).map(([robotId, pos]) => (
+                <Robot
+                    pos={pos}
+                    robotId={robotId}
+                    key={robotId}
+                    onTopOfRobots={[]}
+                />
+            ))}
+            {children}
+        </div>
+    );
 }
 
 /**
