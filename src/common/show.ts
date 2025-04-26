@@ -141,7 +141,7 @@ export function createNewShowfile(): Showfile {
                     {
                         id: "a8e97232-8f22-4cc2-bcc4-ab523eeb801d",
                         type: TimelineEventTypes.TurnEvent,
-                        durationMs: 750,
+                        durationMs: 1750,
                         radians: 2 * Math.PI,
                     },
                     {

@@ -54,7 +54,7 @@ export function useShowfile() {
         SplinePointType.QuadraticBezier,
     );
 
-    const [defaultEventDurationMs, setDefaultEventDurationMs] = useState(750);
+    const [defaultEventDurationMs, setDefaultEventDurationMs] = useState(3750);
 
     const [selectedLayerIndex, setSelectedLayerIndex] = useState(0);
 
