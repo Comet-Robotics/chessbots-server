@@ -270,7 +270,9 @@ apiRouter.post("/do-big", async (req, res) => {
     const connectedRobotIds = Array.from(robotManager.idsToRobots.keys());
 
     if (connectedRobotIds.length < show.timeline.length) {
-        const r = { error: `Not enough robots connected. Got ${connectedRobotIds.length}, expected ${show.timeline.length}` }
+        const r = {
+            error: `Not enough robots connected. Got ${connectedRobotIds.length}, expected ${show.timeline.length}`,
+        };
         res.status(400).json(r);
         console.log(r);
         return;
@@ -346,7 +348,7 @@ apiRouter.post("/do-big", async (req, res) => {
         // otherwise the robot will keep moving at the speed of the last command it was given.
         sequentialCommandsForCurrentRobot.push(
             new DriveQuadraticSplineCommand(
-                connectedRobotIds[timelineLayerIndex][1].id,
+                connectedRobotIds[timelineLayerIndex],
                 start,
                 start,
                 start,
