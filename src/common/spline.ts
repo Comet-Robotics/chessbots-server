@@ -69,9 +69,9 @@ function pointToSvgPathCommand(point: Point): string {
         case SplinePointType.StartPoint:
             return `M${point.point.x},${point.point.y}`;
         case SplinePointType.CubicBezier:
-            return `S${point.controlPoint.x},${point.controlPoint.y} ${point.endPoint.x},${point.endPoint.y}`;
+            return `C${point.controlPoint.x},${point.controlPoint.y} ${point.controlPoint2.x},${point.controlPoint2.y} ${point.endPoint.x},${point.endPoint.y}`;
         case SplinePointType.QuadraticBezier:
-            return `T${point.endPoint.x},${point.endPoint.y}`;
+            return `Q${point.controlPoint.x},${point.controlPoint.y} ${point.endPoint.x},${point.endPoint.y}`;
     }
 }
 
