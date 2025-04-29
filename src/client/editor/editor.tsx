@@ -472,71 +472,51 @@ export function Editor() {
                             ></div>
                         )}
                         {show.timeline.map((layer, index) => (
-                            <>
-                                {/* TODO: render bots */}
-
-                                <div
-                                    style={{
-                                        opacity:
-                                            selectedLayerIndex === index ? 1 : (
-                                                0.35
-                                            ),
-                                    }}
-                                >
-                                    <SplineEditor
-                                        key={`spline-editor-${index}`}
-                                        layer={layer}
-                                        onStartPointMove={(coords) =>
-                                            handleStartPointMove(index, coords)
-                                        }
-                                        onPointMove={(pointIdx, coords) =>
-                                            handlePointMove(
-                                                index,
-                                                pointIdx,
-                                                coords,
-                                            )
-                                        }
-                                        onControlPointMove={(
+                            <div
+                                style={{
+                                    opacity:
+                                        selectedLayerIndex === index ? 1 : 0.35,
+                                }}
+                            >
+                                <SplineEditor
+                                    key={`spline-editor-${index}`}
+                                    layer={layer}
+                                    onStartPointMove={(coords) =>
+                                        handleStartPointMove(index, coords)
+                                    }
+                                    onPointMove={(pointIdx, coords) =>
+                                        handlePointMove(index, pointIdx, coords)
+                                    }
+                                    onControlPointMove={(pointIdx, coords) =>
+                                        handleControlPointMove(
+                                            index,
                                             pointIdx,
                                             coords,
-                                        ) =>
-                                            handleControlPointMove(
-                                                index,
-                                                pointIdx,
-                                                coords,
-                                            )
-                                        }
-                                        onControlPoint2Move={(
+                                        )
+                                    }
+                                    onControlPoint2Move={(pointIdx, coords) =>
+                                        handleControlPoint2Move(
+                                            index,
                                             pointIdx,
                                             coords,
-                                        ) =>
-                                            handleControlPoint2Move(
-                                                index,
-                                                pointIdx,
-                                                coords,
-                                            )
-                                        }
-                                        onDeleteStartPoint={() =>
-                                            handleDeleteStartPoint(index)
-                                        }
-                                        onDeletePoint={(pointIdx) =>
-                                            handleDeletePoint(index, pointIdx)
-                                        }
-                                        onSwitchPointType={(
+                                        )
+                                    }
+                                    onDeleteStartPoint={() =>
+                                        handleDeleteStartPoint(index)
+                                    }
+                                    onDeletePoint={(pointIdx) =>
+                                        handleDeletePoint(index, pointIdx)
+                                    }
+                                    onSwitchPointType={(pointIdx, newType) =>
+                                        handleSwitchPointType(
+                                            index,
                                             pointIdx,
                                             newType,
-                                        ) =>
-                                            handleSwitchPointType(
-                                                index,
-                                                pointIdx,
-                                                newType,
-                                            )
-                                        }
-                                    />
-                                </div>
-                            </>
+                                        )
+                                    }
+                                />
+                            </div>
                         ))}
-                        {/* Render Animated Robots separately */}
                         {show.timeline.map((layer, index) => (
                             <AnimatedRobotRenderer
                                 key={`animated-robot-${index}`}
@@ -547,38 +527,43 @@ export function Editor() {
                         ))}
                     </RobotGrid>
                 </Section>
-                <Section title="Debug" compact collapsible>
-                    <SectionCard padded={false}>
-                        <Pre style={{ height: "52.5vh", overflow: "scroll" }}>
-                            {JSON.stringify(
-                                {
-                                    ...show,
-                                    audio:
-                                        show.audio ?
-                                            {
-                                                data: "[binary data]",
-                                                mimeType: show.audio.mimeType,
-                                            }
-                                        :   undefined,
-                                },
-                                null,
-                                2,
-                            )}
-                        </Pre>
-                    </SectionCard>
-                </Section>
-                <Section title="Inspect" compact collapsible>
-                    <SectionCard>
-                        {selectedTimelineEventIndex !== null ?
-                            <p>Coming soon: event editor.</p>
-                        :   <NonIdealState
-                                icon="asterisk"
-                                title="No event selected"
-                                description="Select an event on the timeline to manually edit its properties."
-                            />
-                        }
-                    </SectionCard>
-                </Section>
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                    <Section title="Debug" compact collapsible>
+                        <SectionCard padded={false}>
+                            <Pre
+                                style={{ height: "52.5vh", overflow: "scroll" }}
+                            >
+                                {JSON.stringify(
+                                    {
+                                        ...show,
+                                        audio:
+                                            show.audio ?
+                                                {
+                                                    data: "[binary data]",
+                                                    mimeType:
+                                                        show.audio.mimeType,
+                                                }
+                                            :   undefined,
+                                    },
+                                    null,
+                                    2,
+                                )}
+                            </Pre>
+                        </SectionCard>
+                    </Section>
+                    <Section title="Inspect" compact collapsible>
+                        <SectionCard>
+                            {selectedTimelineEventIndex !== null ?
+                                <p>Coming soon: event editor.</p>
+                            :   <NonIdealState
+                                    icon="asterisk"
+                                    title="No event selected"
+                                    description="Select an event on the timeline to manually edit its properties."
+                                />
+                            }
+                        </SectionCard>
+                    </Section>
+                </div>
             </div>
             <Section
                 title="Timeline"
@@ -840,7 +825,6 @@ export function Editor() {
                                             )}
                                         </Reorder.Group>
                                     </div>
-                                    {/* TODO: add ability to add events */}
                                 </TimelineLayer>
                             );
                         },
