@@ -18,6 +18,7 @@ import {
     SplinePointType,
     StartPointSchema,
 } from "./spline";
+import { Uint32 } from "../server/utils/tcp-packet";
 
 
 export const TimelineEventTypes = {
@@ -28,7 +29,7 @@ export const TimelineEventTypes = {
 } as const;
 
 export const GoToPointEventSchema = RuntypesRecord({
-    durationMs: Number,
+    durationMs: Uint32,
     target: MidpointSchema,
     type: Literal(TimelineEventTypes.GoToPointEvent),
     id: String,
@@ -36,7 +37,7 @@ export const GoToPointEventSchema = RuntypesRecord({
 export type GoToPointEvent = Static<typeof GoToPointEventSchema>;
 
 const WaitEventSchema = RuntypesRecord({
-    durationMs: Number,
+    durationMs: Uint32,
     type: Literal(TimelineEventTypes.WaitEvent),
     id: String,
 });
@@ -45,7 +46,7 @@ export type WaitEvent = Static<typeof WaitEventSchema>;
 const StartPointEventSchema = RuntypesRecord({
     type: Literal(TimelineEventTypes.StartPointEvent),
     target: StartPointSchema,
-    durationMs: Number,
+    durationMs: Uint32,
     id: String,
 });
 export type StartPointEvent = Static<typeof StartPointEventSchema>;
@@ -53,7 +54,7 @@ export type StartPointEvent = Static<typeof StartPointEventSchema>;
 const TurnEventSchema = RuntypesRecord({
     type: Literal(TimelineEventTypes.TurnEvent),
     radians: Number,
-    durationMs: Number,
+    durationMs: Uint32,
     id: String,
 });
 export type TurnEvent = Static<typeof TurnEventSchema>;

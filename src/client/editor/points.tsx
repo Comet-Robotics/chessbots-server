@@ -53,7 +53,7 @@ export function SplinePoint({
                         onClick={onJumpToPoint}
                     />
                     <MenuItem
-                        text="Delete..."
+                        text="Delete"
                         intent="danger"
                         onClick={onDelete}
                         disabled={!onDelete}

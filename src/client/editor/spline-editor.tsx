@@ -114,9 +114,8 @@ export function SplineEditor({
                             const el = document.getElementById(
                                 `timeline-event-${layer.remainingEvents[originalIndex].id}`,
                             );
-                            navigateAndIdentifyTimelineElement(
-                                el as HTMLElement,
-                            );
+                            if (!el) return;
+                            navigateAndIdentifyTimelineElement(el);
                         }}
                     />
                     {/* TODO: add line between control point and end point */}

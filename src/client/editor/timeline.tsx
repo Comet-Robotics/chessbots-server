@@ -95,7 +95,9 @@ export function TimelineEvent(props: {
                 move: function (event) {
                     event.preventDefault();
                     event.stopPropagation();
-                    onDurationChange(pixelsToMillis(event.deltaRect.width));
+                    onDurationChange(
+                        Math.floor(pixelsToMillis(event.deltaRect.width)),
+                    );
                 },
             },
         });
@@ -105,7 +107,6 @@ export function TimelineEvent(props: {
         <ContextMenu
             content={
                 <Menu>
-                    {/* TODO: add spin before/after current event */}
                     {onDelete && (
                         <MenuItem
                             text="Delete"
@@ -199,7 +200,7 @@ export const TimelineLayer = forwardRef<
         onActive?: () => void;
         active?: boolean;
     }>
->(function TimelineCard({ title, children, onDelete, onActive, active }, ref) {
+>(function TimelineLayer({ title, children, onDelete, onActive, active }, ref) {
     // TODO: add borders between columns. v low priority
     // https://codepen.io/Kevin-Geary/pen/BavwqYX
     // https://www.youtube.com/watch?v=EQYft7JPKto
