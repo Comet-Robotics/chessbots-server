@@ -57,6 +57,8 @@ export function useShowfile() {
     const [defaultEventDurationMs, setDefaultEventDurationMs] = useState(3750);
 
     const [selectedLayerIndex, setSelectedLayerIndex] = useState(0);
+    const [selectedTimelineEventIndex, setSelectedTimelineEventIndex] =
+        useState<{ layerIndex: number; eventId: string } | null>(null);
 
     // used to store the handle to the file system file that the showfile is currently loaded from,
     // so we can save to the same file we've already opened. not all the browsers' file system API
@@ -724,6 +726,8 @@ export function useShowfile() {
             addTurnEventAtIndex,
             getLayerIndexFromEventId,
             addBulkEventsToSelectedLayer,
+            selectedTimelineEventIndex,
+            setSelectedTimelineEventIndex
         }),
         [
             updateTimelineEventOrders,
@@ -770,6 +774,8 @@ export function useShowfile() {
             addTurnEventAtIndex,
             getLayerIndexFromEventId,
             addBulkEventsToSelectedLayer,
+            selectedTimelineEventIndex,
+            setSelectedTimelineEventIndex
         ],
     );
 

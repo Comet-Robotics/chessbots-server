@@ -26,12 +26,16 @@ export function ReorderableTimelineEvent({
     onDelete,
     onAddWaitEvent,
     onAddTurnEvent,
+    onSelect,
+    selected
 }: PropsWithChildren<{
     event: TimelineEvents;
     onDurationChange: (ms: number) => void;
     onDelete?: () => void;
     onAddWaitEvent?: (position: "before" | "after") => void;
     onAddTurnEvent?: (position: "before" | "after") => void;
+    onSelect: () => void;
+    selected: boolean
 }>) {
     const controls = useDragControls();
 
@@ -48,6 +52,8 @@ export function ReorderableTimelineEvent({
                 onDelete={onDelete}
                 onAddWaitEvent={onAddWaitEvent}
                 onAddTurnEvent={onAddTurnEvent}
+                onSelect={onSelect}
+                selected={selected}
             />
         </Reorder.Item>
     );
@@ -62,6 +68,8 @@ export function TimelineEvent(props: {
     onDelete?: () => void;
     onAddWaitEvent?: (position: "before" | "after") => void;
     onAddTurnEvent?: (position: "before" | "after") => void;
+    selected: boolean
+    onSelect: () => void
 }) {
     const ref = useRef<HTMLDivElement>(null);
     const {
@@ -71,6 +79,8 @@ export function TimelineEvent(props: {
         onDelete,
         onAddWaitEvent,
         onAddTurnEvent,
+        onSelect,
+        selected
     } = props;
     useEffect(() => {
         if (!onDurationChange) return;
@@ -142,8 +152,10 @@ export function TimelineEvent(props: {
                     justifyContent: "space-between",
                     touchAction: "none",
                     overflow: "hidden",
+                    ...(selected ? { border: "1px solid red" } : {})
                 }}
                 compact
+                onClick={onSelect}
             >
                 <span style={{ cursor: "default", userSelect: "none" }}>
                     {event.type}

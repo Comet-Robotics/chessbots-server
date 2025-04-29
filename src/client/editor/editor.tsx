@@ -13,6 +13,8 @@ import {
     Divider,
     NumericInput,
     Pre,
+    NonIdealState,
+    SectionCard,
 } from "@blueprintjs/core";
 import { RobotGrid, robotSize } from "../debug/simulator";
 import {
@@ -149,6 +151,8 @@ export function Editor() {
         addTurnEventAtIndex,
         getLayerIndexFromEventId,
         addBulkEventsToSelectedLayer,
+        selectedTimelineEventIndex,
+        setSelectedTimelineEventIndex,
     } = useShowfile();
 
     // TODO: fix viewport height / timeline height
@@ -544,22 +548,38 @@ export function Editor() {
                     </RobotGrid>
                 </Section>
                 <Section title="Debug" compact collapsible>
-                    <Pre style={{ height: "52.5vh", overflow: "scroll" }}>
-                        {JSON.stringify(
-                            {
-                                ...show,
-                                audio:
-                                    show.audio ?
-                                        {
-                                            data: "[binary data]",
-                                            mimeType: show.audio.mimeType,
-                                        }
-                                    :   undefined,
-                            },
-                            null,
-                            2,
-                        )}
-                    </Pre>
+                    <SectionCard padded={false}>
+                        <Pre style={{ height: "52.5vh", overflow: "scroll" }}>
+                            {JSON.stringify(
+                                {
+                                    ...show,
+                                    audio:
+                                        show.audio ?
+                                            {
+                                                data: "[binary data]",
+                                                mimeType: show.audio.mimeType,
+                                            }
+                                        :   undefined,
+                                },
+                                null,
+                                2,
+                            )}
+                        </Pre>
+                    </SectionCard>
+                </Section>
+                <Section title="Inspect" compact collapsible>
+                    <SectionCard>
+                        {selectedTimelineEventIndex !== null ?
+                            <p>
+                                Coming soon: event editor.
+                            </p>
+                        :   <NonIdealState
+                                icon="asterisk"
+                                title="No event selected"
+                                description="Select an event on the timeline to manually edit its properties."
+                            />
+                        }
+                    </SectionCard>
                 </Section>
             </div>
             <Section
@@ -718,6 +738,18 @@ export function Editor() {
                                                     0,
                                                 );
                                             }}
+                                            selected={
+                                                selectedTimelineEventIndex?.layerIndex ===
+                                                    layerIndex &&
+                                                selectedTimelineEventIndex?.eventId ===
+                                                    startPoint.id
+                                            }
+                                            onSelect={() => {
+                                                setSelectedTimelineEventIndex({
+                                                    layerIndex,
+                                                    eventId: startPoint.id,
+                                                });
+                                            }}
                                         />
                                         <Reorder.Group
                                             as="div"
@@ -789,6 +821,21 @@ export function Editor() {
                                                                             1,
                                                                     )
                                                             }
+                                                            selected={
+                                                                selectedTimelineEventIndex?.layerIndex ===
+                                                                    layerIndex &&
+                                                                selectedTimelineEventIndex?.eventId ===
+                                                                    event.id
+                                                            }
+                                                            onSelect={() => {
+                                                                setSelectedTimelineEventIndex(
+                                                                    {
+                                                                        layerIndex,
+                                                                        eventId:
+                                                                            event.id,
+                                                                    },
+                                                                );
+                                                            }}
                                                         />
                                                     );
                                                 },
