@@ -352,7 +352,7 @@ apiRouter.post("/do-big", async (req, res) => {
                 start,
                 start,
                 start,
-                0,
+                30,
             ),
         );
         commandGroupsForAllRobots.push(
