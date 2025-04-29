@@ -27,7 +27,7 @@ export function ReorderableTimelineEvent({
     onAddWaitEvent,
     onAddTurnEvent,
     onSelect,
-    selected
+    selected,
 }: PropsWithChildren<{
     event: TimelineEvents;
     onDurationChange: (ms: number) => void;
@@ -35,7 +35,7 @@ export function ReorderableTimelineEvent({
     onAddWaitEvent?: (position: "before" | "after") => void;
     onAddTurnEvent?: (position: "before" | "after") => void;
     onSelect: () => void;
-    selected: boolean
+    selected: boolean;
 }>) {
     const controls = useDragControls();
 
@@ -68,8 +68,8 @@ export function TimelineEvent(props: {
     onDelete?: () => void;
     onAddWaitEvent?: (position: "before" | "after") => void;
     onAddTurnEvent?: (position: "before" | "after") => void;
-    selected: boolean
-    onSelect: () => void
+    selected: boolean;
+    onSelect: () => void;
 }) {
     const ref = useRef<HTMLDivElement>(null);
     const {
@@ -80,7 +80,7 @@ export function TimelineEvent(props: {
         onAddWaitEvent,
         onAddTurnEvent,
         onSelect,
-        selected
+        selected,
     } = props;
     useEffect(() => {
         if (!onDurationChange) return;
@@ -152,7 +152,7 @@ export function TimelineEvent(props: {
                     justifyContent: "space-between",
                     touchAction: "none",
                     overflow: "hidden",
-                    ...(selected ? { border: "1px solid red" } : {})
+                    ...(selected ? { border: "1px solid red" } : {}),
                 }}
                 compact
                 onClick={onSelect}

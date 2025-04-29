@@ -727,7 +727,7 @@ export function useShowfile() {
             getLayerIndexFromEventId,
             addBulkEventsToSelectedLayer,
             selectedTimelineEventIndex,
-            setSelectedTimelineEventIndex
+            setSelectedTimelineEventIndex,
         }),
         [
             updateTimelineEventOrders,
@@ -775,7 +775,7 @@ export function useShowfile() {
             getLayerIndexFromEventId,
             addBulkEventsToSelectedLayer,
             selectedTimelineEventIndex,
-            setSelectedTimelineEventIndex
+            setSelectedTimelineEventIndex,
         ],
     );
 

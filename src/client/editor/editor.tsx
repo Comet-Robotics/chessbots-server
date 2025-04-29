@@ -570,9 +570,7 @@ export function Editor() {
                 <Section title="Inspect" compact collapsible>
                     <SectionCard>
                         {selectedTimelineEventIndex !== null ?
-                            <p>
-                                Coming soon: event editor.
-                            </p>
+                            <p>Coming soon: event editor.</p>
                         :   <NonIdealState
                                 icon="asterisk"
                                 title="No event selected"
