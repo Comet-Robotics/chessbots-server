@@ -19,6 +19,7 @@ import {
     StartPointSchema,
 } from "./spline";
 
+
 export const TimelineEventTypes = {
     GoToPointEvent: "goto_point",
     WaitEvent: "wait",
@@ -74,6 +75,7 @@ export type TimelineEvents =
     | WaitEvent
     | StartPointEvent
     | TurnEvent;
+
 
 /**
  * The showfile schema.
@@ -144,13 +146,13 @@ export function createNewShowfile(): Showfile {
                         durationMs: 1750,
                         radians: 2 * Math.PI,
                     },
-                    {
                         type: TimelineEventTypes.GoToPointEvent,
                         durationMs: 1000,
                         target: {
                             type: SplinePointType.QuadraticBezier,
                             endPoint: { x: 100, y: 100 },
                             controlPoint: { x: 60, y: 120 },
+
                         },
                         id: "4f21401d-07cf-434f-a73c-6482ab82f211",
                     },
