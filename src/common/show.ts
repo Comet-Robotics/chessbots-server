@@ -20,7 +20,6 @@ import {
 } from "./spline";
 import { Uint32 } from "../server/utils/tcp-packet";
 
-
 export const TimelineEventTypes = {
     GoToPointEvent: "goto_point",
     WaitEvent: "wait",
@@ -76,7 +75,6 @@ export type TimelineEvents =
     | WaitEvent
     | StartPointEvent
     | TurnEvent;
-
 
 /**
  * The showfile schema.
@@ -138,29 +136,29 @@ export function createNewShowfile(): Showfile {
                         },
                     },
                     durationMs: 3000,
-                    id: "4f21401d-07cf-434f-a73c-6482ab82f210",
+                    id: crypto.randomUUID(),
                 },
                 remainingEvents: [
                     {
-                        id: "a8e97232-8f22-4cc2-bcc4-ab523eeb801d",
+                        id: crypto.randomUUID(),
                         type: TimelineEventTypes.TurnEvent,
                         durationMs: 1750,
                         radians: 2 * Math.PI,
                     },
+                    {
                         type: TimelineEventTypes.GoToPointEvent,
                         durationMs: 1000,
                         target: {
                             type: SplinePointType.QuadraticBezier,
                             endPoint: { x: 100, y: 100 },
                             controlPoint: { x: 60, y: 120 },
-
                         },
-                        id: "4f21401d-07cf-434f-a73c-6482ab82f211",
+                        id: crypto.randomUUID(),
                     },
                     {
                         type: TimelineEventTypes.WaitEvent,
                         durationMs: 5000,
-                        id: "4f21401d-07cf-434f-a73c-6482ab82f212",
+                        id: crypto.randomUUID(),
                     },
                     {
                         type: TimelineEventTypes.GoToPointEvent,
@@ -177,7 +175,7 @@ export function createNewShowfile(): Showfile {
                                 y: 60,
                             },
                         },
-                        id: "4f21401d-07cf-434f-a73c-6482ab82f213",
+                        id: crypto.randomUUID(),
                     },
                     {
                         type: TimelineEventTypes.GoToPointEvent,
@@ -187,7 +185,7 @@ export function createNewShowfile(): Showfile {
                             endPoint: { x: 70, y: 70 },
                             controlPoint: { x: 85, y: 90 },
                         },
-                        id: "4f21401d-07cf-434f-a73c-6482ab82f214",
+                        id: crypto.randomUUID(),
                     },
                 ],
             },
