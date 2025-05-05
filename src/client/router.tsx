@@ -7,6 +7,7 @@ import { Lobby } from "./setup/lobby";
 import { Home } from "./home";
 import { Debug2 } from "./debug/debug2";
 import { Simulator } from "./debug/simulator";
+import { Editor } from "./editor/editor";
 
 export const router = createBrowserRouter([
     {
@@ -40,5 +41,9 @@ export const router = createBrowserRouter([
     {
         path: "/game",
         element: <Game />,
+    },
+    {
+        path: "/editor",
+        element: <Editor />,
     },
 ]);

@@ -4,6 +4,7 @@
     "task.autoDetect": "off",
     "cSpell.words": [
         "blueprintjs",
+        "cbor",
         "Chessbots",
         "Premoves",
         "runtypes",

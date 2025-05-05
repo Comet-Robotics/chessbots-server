@@ -1,7 +1,7 @@
 import { FULL_ROTATION, RADIAN, clampHeading } from "../../common/units";
 import { Position, ZERO_POSITION } from "./position";
 import { GridIndices } from "./grid-indices";
-import { tcpServer } from "../api/api";
+import { tcpServer } from "../api/managers";
 import type { BotTunnel } from "../api/tcp-interface";
 import { PacketType } from "../utils/tcp-packet";
 
@@ -112,6 +112,67 @@ export class Robot {
      */
     public async sendDrivePacket(tileDistance: number): Promise<void> {
         const tunnel = this.getTunnel();
-        await tunnel.send({ type: PacketType.DRIVE_TILES, tileDistance });
+        console.log(tileDistance);
+        await tunnel.send({ type: PacketType.DRIVE_TANK, left: 1, right: 1 });
+    }
+
+    /**
+     * Send a packet to the robot indicating distance to drive, in ticks. Returns a promise that finishes when the
+     * robot finishes the action.
+     *
+     * @param distanceTicks - The distance to drive forward or backwards by, in ticks.
+     */
+    public async sendDriveTicksPacket(distanceTicks: number): Promise<void> {
+        const tunnel = this.getTunnel();
+        await tunnel.send({
+            type: PacketType.DRIVE_TICKS,
+            tickDistance: distanceTicks,
+        });
+    }
+
+    public async sendDriveCubicPacket(
+        startPosition: { x: number; y: number },
+        endPosition: { x: number; y: number },
+        controlPositionA: { x: number; y: number },
+        controlPositionB: { x: number; y: number },
+        timeDeltaMs: number,
+    ): Promise<void> {
+        const tunnel = this.getTunnel();
+        await tunnel.send({
+            type: PacketType.DRIVE_CUBIC_SPLINE,
+            startPosition: startPosition,
+            endPosition: endPosition,
+            controlPositionA: controlPositionA,
+            controlPositionB: controlPositionB,
+            timeDeltaMs: timeDeltaMs,
+        });
+    }
+
+    public async sendDriveQuadraticPacket(
+        startPosition: { x: number; y: number },
+        endPosition: { x: number; y: number },
+        controlPosition: { x: number; y: number },
+        timeDeltaMs: number,
+    ): Promise<void> {
+        const tunnel = this.getTunnel();
+        await tunnel.send({
+            type: PacketType.DRIVE_QUADRATIC_SPLINE,
+            startPosition: startPosition,
+            controlPosition: controlPosition,
+            endPosition: endPosition,
+            timeDeltaMs: timeDeltaMs,
+        });
+    }
+
+    public async sendSpinPacket(
+        radians: number,
+        timeDeltaMs: number,
+    ): Promise<void> {
+        const tunnel = this.getTunnel();
+        await tunnel.send({
+            type: PacketType.SPIN_RADIANS,
+            radians: radians,
+            timeDeltaMs: timeDeltaMs,
+        });
     }
 }
