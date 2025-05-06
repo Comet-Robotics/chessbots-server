@@ -62,16 +62,17 @@ export function SplineEditor({
     return (
         <>
             <svg
+                viewBox="0 0 12 12"
                 style={{
                     position: "absolute",
                     left: 0,
                     top: 0,
-                    width: "100%",
-                    height: "100%",
+                    width: 720,
+                    height: 720,
                     pointerEvents: "none",
                 }}
             >
-                <path d={path} stroke="purple" strokeWidth={3} fill="none" />
+                <path d={path} stroke="purple" strokeWidth={.03} fill="none" />
             </svg>
             <SplinePoint
                 point={spline.start}

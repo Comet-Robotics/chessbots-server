@@ -131,8 +131,8 @@ export function createNewShowfile(): Showfile {
                     target: {
                         type: SplinePointType.StartPoint,
                         point: {
-                            x: 20,
-                            y: 140,
+                            x: 2,
+                            y: 2,
                         },
                     },
                     durationMs: 3000,
@@ -140,50 +140,13 @@ export function createNewShowfile(): Showfile {
                 },
                 remainingEvents: [
                     {
-                        id: crypto.randomUUID(),
-                        type: TimelineEventTypes.TurnEvent,
-                        durationMs: 1750,
-                        radians: 2 * Math.PI,
-                    },
-                    {
-                        type: TimelineEventTypes.GoToPointEvent,
-                        durationMs: 1000,
-                        target: {
-                            type: SplinePointType.QuadraticBezier,
-                            endPoint: { x: 100, y: 100 },
-                            controlPoint: { x: 60, y: 120 },
-                        },
-                        id: crypto.randomUUID(),
-                    },
-                    {
-                        type: TimelineEventTypes.WaitEvent,
-                        durationMs: 5000,
-                        id: crypto.randomUUID(),
-                    },
-                    {
                         type: TimelineEventTypes.GoToPointEvent,
                         durationMs: 1000,
                         target: {
                             type: SplinePointType.CubicBezier,
-                            endPoint: { x: 315, y: 50 },
-                            controlPoint: {
-                                x: 300,
-                                y: 40,
-                            },
-                            controlPoint2: {
-                                x: 310,
-                                y: 60,
-                            },
-                        },
-                        id: crypto.randomUUID(),
-                    },
-                    {
-                        type: TimelineEventTypes.GoToPointEvent,
-                        durationMs: 1000,
-                        target: {
-                            type: SplinePointType.QuadraticBezier,
-                            endPoint: { x: 70, y: 70 },
-                            controlPoint: { x: 85, y: 90 },
+                            endPoint: { x: 3, y: 3 },
+                            controlPoint: { x: 2.5, y: 1 },
+                            controlPoint2: { x: 2.5, y: 3},
                         },
                         id: crypto.randomUUID(),
                     },
