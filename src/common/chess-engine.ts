@@ -243,15 +243,6 @@ export class ChessEngine {
     }
 
     /**
-     * Makes a move on the chessboard.
-     * @returns the move that was made.
-     */
-    move(move: string): string {
-        this.chess.move(move);
-        return move;
-    }
-
-    /**
      * Returns true if a move is a promotion, and false otherwise.
      * Assumes that chess hasn't been updated yet
      */
