@@ -57,14 +57,15 @@ const parseErrorStack = (stack: string): StackFrame[] => {
         }
         const [, functionName, fileName, lineNumber, columnNumber] = match;
         if (!fileName || !lineNumber || !columnNumber) {
-            console.warn(`Invalid stack frame: ${line}`);
-            return result;
+            console.warn(
+                `Failed to parse location details from stack frame: ${line}`,
+            );
         }
         result.push({
             fileName,
             functionName,
-            lineNumber: parseInt(lineNumber),
-            columnNumber: parseInt(columnNumber),
+            lineNumber: lineNumber ? parseInt(lineNumber) : undefined,
+            columnNumber: columnNumber ? parseInt(columnNumber) : undefined,
         });
         return result;
     }, []);
