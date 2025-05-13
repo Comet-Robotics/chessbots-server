@@ -311,7 +311,8 @@ function constructFinalCommand(
     numCollisions: number,
 ): MovePiece {
     const from = move.from;
-    console.log(from, robotManager.indicesToIds);
+    const indicesToIds = robotManager.getIndicesToIds();
+    console.log(from, indicesToIds);
     const mainPiece = robotManager.getRobotAtIndices(from).id;
     const dirToEdge = directionToEdge(from);
 
