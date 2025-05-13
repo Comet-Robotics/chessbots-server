@@ -41,8 +41,8 @@ export class MoveMessage extends Message {
 }
 
 /**
- * A message used to broadcast the state of the virtual chessboard 
- * to other connected clients. `chess` is a Forsyth-Edwards 
+ * A message used to broadcast the state of the virtual chessboard
+ * to other connected clients. `chess` is a Forsyth-Edwards
  * Notation (FEN) string used to represent the state of the chessboard.
  */
 export class SetChessMessage extends Message {
