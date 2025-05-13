@@ -29,7 +29,7 @@ interface NavbarMenuProps {
     sendMessage: SendMessage;
     side: Side;
     difficulty?: string;
-    AiDifficulty?: number;
+    aiDifficulty?: number;
     setRotation: Dispatch<React.SetStateAction<number>>; //set state type
 }
 
@@ -47,13 +47,13 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
             <Button minimal disabled text={"rating: " + props.difficulty} />
         :   null;
 
-    const AiArray = ["Baby", "Beginner", "Intermediate", "Advances"];
-    const AiDifficultyButton =
-        props.AiDifficulty ?
+    const aiArray = ["Baby", "Beginner", "Intermediate", "Advances"];
+    const aiDifficultyButton =
+        props.aiDifficulty ?
             <Button
                 minimal
                 disabled
-                text={"AI Difficulty: " + AiArray[props.AiDifficulty]}
+                text={"AI Difficulty: " + aiArray[props.aiDifficulty]}
             />
         :   null;
 
@@ -116,7 +116,7 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
             </NavbarGroup>
             <NavbarGroup align="right">
                 {difficultyButton}
-                {AiDifficultyButton}
+                {aiDifficultyButton}
                 {rotateButton}
                 <Button
                     icon={darkModeIcon()}

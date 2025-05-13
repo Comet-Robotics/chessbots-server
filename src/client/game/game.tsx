@@ -162,7 +162,7 @@ export function Game(): JSX.Element {
                 sendMessage={sendMessage}
                 side={side}
                 difficulty={data.difficulty}
-                AiDifficulty={data.AiDifficulty}
+                aiDifficulty={data.aiDifficulty}
                 setRotation={setRotation}
             />
             <div id="body-container" className={bgColor()}>

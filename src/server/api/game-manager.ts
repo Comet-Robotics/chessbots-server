@@ -24,6 +24,14 @@ import { materializePath } from "../robot/path-materializer";
 import { executor } from "./api";
 import { DO_SAVES } from "../utils/env";
 
+type GameState = {
+    side: Side;
+    position: string;
+    gameEndReason: GameEndReason | undefined;
+    aiDifficulty?: number;
+    difficulty?: number;
+};
+
 /**
  * The manager for game communication
  */
@@ -61,7 +69,7 @@ export abstract class GameManager {
      * A method which is invoked whenever a game first connects.
      * Should respond with the game's side, position, and whether the game is finished.
      */
-    public getGameState(clientType: ClientType): object {
+    public getGameState(clientType: ClientType): GameState {
         let side: Side;
         if (clientType === ClientType.HOST) {
             side = this.reverse ? oppositeSide(this.hostSide) : this.hostSide;
@@ -280,10 +288,10 @@ export class ComputerGameManager extends GameManager {
         }
     }
 
-    public getGameState(clientType: ClientType): object {
+    public getGameState(clientType: ClientType): GameState {
         return {
             ...super.getGameState(clientType),
-            AiDifficulty: this.difficulty,
+            aiDifficulty: this.difficulty,
         };
     }
 }
@@ -387,7 +395,7 @@ export class PuzzleGameManager extends GameManager {
         return super.getGameEndReason();
     }
 
-    public getGameState(clientType: ClientType): object {
+    public getGameState(clientType: ClientType): GameState {
         return {
             ...super.getGameState(clientType),
             difficulty: this.difficulty,
