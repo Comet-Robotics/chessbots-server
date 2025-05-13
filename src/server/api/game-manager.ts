@@ -320,13 +320,28 @@ export class PuzzleGameManager extends GameManager {
                 this.moves[this.moveNumber].from === message.move.from &&
                 this.moves[this.moveNumber].to === message.move.to
             ) {
+                const command = materializePath(message.move);
+
                 this.socketManager.sendToAll(new MoveMessage(message.move));
                 this.chess.makeMove(message.move);
                 this.moveNumber++;
+
+                console.log("running executor");
+                console.dir(command, { depth: null });
+                await executor.execute(command);
+                console.log("executor done");
+
                 //if there is another move, make it
                 if (this.moves[this.moveNumber]) {
+                    const command = materializePath(message.move);
+
                     this.chess.makeMove(this.moves[this.moveNumber]);
 
+                    console.log("running executor");
+                    console.dir(command, { depth: null });
+                    await executor.execute(command);
+                    console.log("executor done");
+                   
                     setTimeout(() => {
                         this.socketManager.sendToAll(
                             new MoveMessage(this.moves[this.moveNumber]),
