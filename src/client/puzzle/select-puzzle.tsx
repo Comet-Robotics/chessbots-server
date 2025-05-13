@@ -38,7 +38,10 @@ export function SelectPuzzle(props: SelectPuzzleProps) {
             onClick={async () => {
                 if (props.selectedPuzzle && props.puzzles) {
                     //convert puzzle to map and send to start puzzles
-                    const puzzle = props.puzzles as Record<string, PuzzleComponents>;
+                    const puzzle = props.puzzles as Record<
+                        string,
+                        PuzzleComponents
+                    >;
                     const promise = post("/start-puzzle-game", {
                         puzzle: JSON.stringify(puzzle[props.selectedPuzzle]),
                     });

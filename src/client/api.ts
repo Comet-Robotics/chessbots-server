@@ -11,7 +11,6 @@ import { useQuery } from "@tanstack/react-query";
  */
 export function useEffectQuery<T>(
     queryKey: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     queryFn: () => Promise<T>,
     retry?: boolean | number,
 ) {

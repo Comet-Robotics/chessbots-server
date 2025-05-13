@@ -12,7 +12,8 @@ export function SetupPuzzle() {
     //get puzzles from api
     const { isPending, data, isError } = useEffectQuery(
         "get-puzzles",
-        async () => (await get("/get-puzzles")) as Record<string, PuzzleComponents>,
+        async () =>
+            (await get("/get-puzzles")) as Record<string, PuzzleComponents>,
         false,
     );
 
