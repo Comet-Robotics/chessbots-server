@@ -341,7 +341,6 @@ export class PuzzleGameManager extends GameManager {
                     console.dir(command, { depth: null });
                     await executor.execute(command);
                     console.log("executor done");
-                   
                     setTimeout(() => {
                         this.socketManager.sendToAll(
                             new MoveMessage(this.moves[this.moveNumber]),
