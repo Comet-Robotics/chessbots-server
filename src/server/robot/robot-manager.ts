@@ -17,7 +17,7 @@ export class RobotManager {
      * Maps robot locations to their ids.
      */
     getIndicesToIds(): Map<string, string> {
-        return this.idsToRobots.values().reduce((acc, robot) => {
+        return Array.from(this.idsToRobots.values()).reduce((acc, robot) => {
             acc.set(robot.defaultIndices.toString(), robot.id);
             return acc;
         }, new Map<string, string>());
@@ -67,7 +67,7 @@ export class RobotManager {
      * Returns `true` if a Robot is at the specified position, and `false` otherwise.
      */
     isRobotAtIndices(indices: GridIndices): boolean {
-        const indicesToIds = this.getIndicesToIds()
+        const indicesToIds = this.getIndicesToIds();
         return indicesToIds.has(indices.toString());
     }
 
@@ -76,7 +76,7 @@ export class RobotManager {
      * Throws if no robot is found.
      */
     getRobotAtIndices(indices: GridIndices): Robot {
-        const indicesToIds = this.getIndicesToIds()
+        const indicesToIds = this.getIndicesToIds();
         const robotId = indicesToIds.get(indices.toString());
         if (robotId === undefined) {
             throw new Error("Failed to find robot at indices " + indices);
@@ -85,7 +85,7 @@ export class RobotManager {
     }
 
     updateRobot(robotId: string, indices: GridIndices) {
-        const indicesToIds = this.getIndicesToIds()
+        const indicesToIds = this.getIndicesToIds();
         // if (indicesToIds.has(indices.toString())) {
         //     indicesToIds.delete(indices.toString());
         // }
