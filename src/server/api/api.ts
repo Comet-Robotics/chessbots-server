@@ -4,9 +4,11 @@ import { Router } from "express";
 import { parseMessage } from "../../common/message/parse-message";
 import {
     GameFinishedMessage,
+    GameEndMessage,
     GameHoldMessage,
     GameInterruptedMessage,
     MoveMessage,
+    SetChessMessage,
 } from "../../common/message/game-message";
 import {
     DriveRobotMessage,
@@ -21,11 +23,13 @@ import {
     ComputerGameManager,
     GameManager,
     HumanGameManager,
+    PuzzleGameManager,
 } from "./game-manager";
 import { ChessEngine } from "../../common/chess-engine";
-import { Side } from "../../common/game-types";
+import { Move, Side } from "../../common/game-types";
 import { USE_VIRTUAL_ROBOTS } from "../utils/env";
 import { SaveManager } from "./save-manager";
+import { readFileSync } from "fs";
 
 import { CommandExecutor } from "../command/executor";
 import { VirtualBotTunnel, virtualRobots } from "../simulator";
@@ -60,8 +64,10 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
         } else if (
             message instanceof GameInterruptedMessage ||
             message instanceof MoveMessage ||
+            message instanceof SetChessMessage ||
             message instanceof GameHoldMessage ||
-            message instanceof GameFinishedMessage
+            message instanceof GameFinishedMessage ||
+            message instanceof GameEndMessage
         ) {
             // TODO: Handle game manager not existing
             await gameManager?.handleMessage(message, req.cookies.id);
@@ -178,6 +184,23 @@ apiRouter.post("/start-human-game", (req, res) => {
     return res.send({ message: "success" });
 });
 
+apiRouter.post("/start-puzzle-game", (req, res) => {
+    //get puzzle components
+    const puzzle = JSON.parse(req.query.puzzle as string) as PuzzleComponents;
+    const fen = puzzle.fen;
+    const moves = puzzle.moves;
+    const difficulty = puzzle.rating;
+    //create game manager
+    gameManager = new PuzzleGameManager(
+        new ChessEngine(),
+        socketManager,
+        fen,
+        moves,
+        difficulty,
+    );
+    return res.send({ message: "success" });
+});
+
 /**
  * Returns all registered robot ids
  */
@@ -237,24 +260,21 @@ apiRouter.get("/get-simulator-robot-state", (_, res) => {
     });
 });
 
+export interface PuzzleComponents {
+    fen: string;
+    moves: Move[];
+    rating: number;
+}
+
 /**
- * Returns a list of available puzzles to play.
+ * Returns a list of available puzzles to play from puzzles.json.
  */
 apiRouter.get("/get-puzzles", (_, res) => {
-    return res.send({
-        puzzles: [
-            {
-                name: "Puzzle 1",
-                id: "puzzleId1",
-                rating: "1200",
-            },
-            {
-                name: "Puzzle 2",
-                id: "puzzleId2",
-                rating: "1400",
-            },
-        ],
-    });
+    const puzzles: Record<string, PuzzleComponents> = JSON.parse(
+        readFileSync("./src/server/api/puzzles.json", "utf-8"),
+    );
+    const out: string = JSON.stringify(puzzles);
+    return res.send(out);
 });
 
 /**
