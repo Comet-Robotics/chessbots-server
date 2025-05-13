@@ -270,7 +270,7 @@ export interface PuzzleComponents {
  * Returns a list of available puzzles to play from puzzles.json.
  */
 apiRouter.get("/get-puzzles", (_, res) => {
-    const puzzles: Map<string, PuzzleComponents> = JSON.parse(
+    const puzzles: Record<string, PuzzleComponents> = JSON.parse(
         readFileSync("./src/server/api/puzzles.json", "utf-8"),
     );
     const out: string = JSON.stringify(puzzles);

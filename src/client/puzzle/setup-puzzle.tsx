@@ -4,6 +4,7 @@ import { SelectPuzzle } from "./select-puzzle";
 import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { get, useEffectQuery } from "../api";
 import { Navigate } from "react-router-dom";
+import { PuzzleComponents } from "../../server/api/api";
 
 export function SetupPuzzle() {
     const [selectedPuzzle, setSelectedPuzzle] = useState<string | undefined>();
@@ -11,11 +12,7 @@ export function SetupPuzzle() {
     //get puzzles from api
     const { isPending, data, isError } = useEffectQuery(
         "get-puzzles",
-        async () => {
-            return get("/get-puzzles").then((puzzles) => {
-                return puzzles;
-            });
-        },
+        async () => (await get("/get-puzzles")) as Record<string, PuzzleComponents>,
         false,
     );
 
@@ -26,21 +23,17 @@ export function SetupPuzzle() {
                 title="Loading..."
             />
         );
-    } else if (isError) {
+    } else if (isError || data === undefined) {
         return <Navigate to="/home" />;
     }
 
-    if (data === undefined) {
-        return <Spinner intent="primary" />;
-    } else {
-        return (
-            <SetupBase>
-                <SelectPuzzle
-                    puzzles={data}
-                    selectedPuzzle={selectedPuzzle}
-                    onPuzzleSelected={setSelectedPuzzle}
-                />
-            </SetupBase>
-        );
-    }
+    return (
+        <SetupBase>
+            <SelectPuzzle
+                puzzles={data}
+                selectedPuzzle={selectedPuzzle}
+                onPuzzleSelected={setSelectedPuzzle}
+            />
+        </SetupBase>
+    );
 }
