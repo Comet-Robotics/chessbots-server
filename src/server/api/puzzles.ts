@@ -1,4 +1,6 @@
-{
+import { PuzzleComponents } from "./api";
+
+const puzzles: Record<string, PuzzleComponents> = {
     "Puzzle 1": {
         "fen": "8/1p3p1k/8/p1p2Kr1/P2pP3/1P1P4/2P5/8 w - - 0 1",
         "moves": [{ "from": "f5", "to": "g5" }],
@@ -41,3 +43,5 @@
         "rating": 2915
     }
 }
+
+export default puzzles;

@@ -29,13 +29,14 @@ import { ChessEngine } from "../../common/chess-engine";
 import { Move, Side } from "../../common/game-types";
 import { USE_VIRTUAL_ROBOTS } from "../utils/env";
 import { SaveManager } from "./save-manager";
-import { readFileSync } from "fs";
 
 import { CommandExecutor } from "../command/executor";
 import { VirtualBotTunnel, virtualRobots } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
+import { GridIndices } from "../robot/grid-indices";
+import puzzles from "./puzzles";
 
 export const tcpServer: TCPServer | null =
     USE_VIRTUAL_ROBOTS ? null : new TCPServer();
@@ -294,15 +295,14 @@ export interface PuzzleComponents {
     fen: string;
     moves: Move[];
     rating: number;
+    // the key is a physical robot id. value is the grid index where the robot should be at the start of the game.
+    robotDefaultPositions?: Record<string, GridIndices>;
 }
 
 /**
- * Returns a list of available puzzles to play from puzzles.json.
+ * Returns a list of available puzzles.
  */
 apiRouter.get("/get-puzzles", (_, res) => {
-    const puzzles: Record<string, PuzzleComponents> = JSON.parse(
-        readFileSync("./src/server/api/puzzles.json", "utf-8"),
-    );
     const out: string = JSON.stringify(puzzles);
     return res.send(out);
 });

@@ -22,6 +22,9 @@ export class Robot {
         public readonly startHeadingRadians: number = 0,
         private _position: Position = ZERO_POSITION,
     ) {
+        if (startHeadingRadians === undefined || Number.isNaN(startHeadingRadians)) {
+            throw new Error("startHeadingRadians must be a number");
+        }
         this._headingRadians = startHeadingRadians;
     }
 
