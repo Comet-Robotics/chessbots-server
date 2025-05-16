@@ -18,7 +18,7 @@ const srcDir = path.resolve(__dirname, "../");
 
 /**
  * get the current error stack
- * @param justMyCode - restricts the scope of the stack to just the code in the chessBot project. ex: if there is an error thrown in a file in the node_modules folder, this will not be included in the stack.
+ * @param justMyCode - restricts the scope of the stack to just the code in the chessbots-server project. Example: if there is an error thrown in a file in the node_modules folder, this will not be included in the stack.
  * @returns - the stack of the error
  */
 function getStack(justMyCode = true) {
@@ -31,11 +31,11 @@ function getStack(justMyCode = true) {
     const cleanedStack = parseErrorStack(stack);
 
     if (justMyCode) {
-        const chessBotCodeEndFrame = cleanedStack.findIndex(
+        const chessBotsCodeEndFrame = cleanedStack.findIndex(
             (frame) => !frame.fileName.startsWith(srcDir),
         );
-        if (chessBotCodeEndFrame !== -1) {
-            cleanedStack.splice(chessBotCodeEndFrame);
+        if (chessBotsCodeEndFrame !== -1) {
+            cleanedStack.splice(chessBotsCodeEndFrame);
         }
     }
 
@@ -57,14 +57,15 @@ const parseErrorStack = (stack: string): StackFrame[] => {
         }
         const [, functionName, fileName, lineNumber, columnNumber] = match;
         if (!fileName || !lineNumber || !columnNumber) {
-            console.warn(`Invalid stack frame: ${line}`);
-            return result;
+            console.warn(
+                `Failed to parse location details from stack frame: ${line}`,
+            );
         }
         result.push({
             fileName,
             functionName,
-            lineNumber: parseInt(lineNumber),
-            columnNumber: parseInt(columnNumber),
+            lineNumber: lineNumber ? parseInt(lineNumber) : undefined,
+            columnNumber: columnNumber ? parseInt(columnNumber) : undefined,
         });
         return result;
     }, []);
@@ -191,14 +192,14 @@ export class VirtualRobot extends Robot {
 
 const virtualBotIds = Array(32)
     .fill(undefined)
-    .map((_, i) => `virtual-robot-${(i + 1).toString()}`);
+    .map((_, i) => `robot-${(i + 1).toString()}`);
 
 /**
  * a map of all the created virtual robots with ids, positions, and homes
  */
 export const virtualRobots = new Map<string, VirtualRobot>(
     virtualBotIds.map((id, idx) => {
-        const realRobotConfig = config[id.replace("virtual-", "")];
+        const realRobotConfig = config[id];
         return [
             id,
             new VirtualRobot(
@@ -213,8 +214,8 @@ export const virtualRobots = new Map<string, VirtualRobot>(
                 ),
                 getStartHeading(idx < 16 ? Side.WHITE : Side.BLACK),
                 new Position(
-                    realRobotConfig.defaultPosition.x + 0.5,
-                    realRobotConfig.defaultPosition.y + 0.5,
+                    realRobotConfig.homePosition.x,
+                    realRobotConfig.homePosition.y,
                 ),
             ),
         ] as const;

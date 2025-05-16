@@ -6,7 +6,15 @@ export abstract class Pair<T extends Pair<T>> {
         // Pair is implemented atomically and doesn't support mutation
         protected readonly item1: number,
         protected readonly item2: number,
-    ) {}
+    ) {
+        if (item1 === undefined || item2 === undefined) {
+            throw new Error("Pair must have two items");
+        }
+
+        if (Number.isNaN(item1) || Number.isNaN(item2)) {
+            throw new Error("Pair items must be numbers, got " + item1 + " and " + item2);
+        }
+    }
 
     /**
      * An abstract method used to dynamically generate new instances of the class at runtime.
