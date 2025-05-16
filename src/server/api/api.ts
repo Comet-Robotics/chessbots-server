@@ -37,6 +37,8 @@ import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
 import { GridIndices } from "../robot/grid-indices";
 import puzzles from "./puzzles";
+import { moveMainPiece } from "../robot/path-materializer";
+import { Square } from "chess.js";
 
 export const tcpServer: TCPServer | null =
     USE_VIRTUAL_ROBOTS ? null : new TCPServer();
@@ -185,7 +187,7 @@ apiRouter.post("/start-human-game", (req, res) => {
     return res.send({ message: "success" });
 });
 
-apiRouter.post("/start-puzzle-game", (req, res) => {
+apiRouter.post("/start-puzzle-game", async (req, res) => {
     //get puzzle components
     const puzzle = JSON.parse(req.query.puzzle as string) as PuzzleComponents;
     const fen = puzzle.fen;
@@ -200,32 +202,17 @@ apiRouter.post("/start-puzzle-game", (req, res) => {
         difficulty,
     );
 
-    // TODO: this is very bad and not good practice. MAKE ME REFACTOR THIS BEFORE I MERGE
-    // @ts-ignore
-    const piecesInPuzzle = (gameManager.chess.chess.board() as {color: 'w' | 'b', square: string, type: string}[][]).flatMap((p) => {
-        return p
-    }).filter(p => p)
 
-    /* DICTATED BRAINDUMP SINCE I AM BEING FORCED OUT OF MAKERSPACE AGAINST MY WILL --
-
-
-    Okay, so, so far I've written code to get all the pieces, all the piece types and locations and colors that are in a puzzle, and so far all we do is check that we have enough robots connected to the server to start the game. And if there's not, we throw an error. From here there's a couple things that need to happen. We know there's enough robots to get this puzzle going. 
-    
-    Challenge one: we need to figure out how exactly we're going to figure out what the piece type and color on the physical robots. Because right now there's no direct association of a piece type + color to a robot, at least on the server where i need this information. So we might have to infer that from the state of the chessboard on the client, which is going to be interesting, especially on the initial start of the application, because on the server side of things we don't have a game manager to pull the state of the board from. So that's, that's challenge one. 
-    
-    Challenge two: use some heuristics to specifically map a puzzle piece to a physical robot. We'll do this by:
-    * creating a map of grid indices to the needed piece type and color
-    * iterating through the piecesInPuzzle list to build a map of grid indices to the physical robot which should be moved to that location
-        * for each puzzle chess piece, we select a robot which has the correct color and type. for the purposes of an MVP, we can just use the first piece we find which match the color and type conditions. to make movement more efficient, we should prioritize minimizing movement by selecting the physical robot which is closest to the final destination.
-    
-    Once we do that, we just need to execute those moves so the needed robots are the correct start position for the puzzle, and get all the other robots out of the way to their home positions, and then we can allow the player to play the puzzle. So this should probably all take place in the start puzzle game endpoint, so that players can't take actions in the puzzle until all the pieces have moved into the correct positions to allow the game to be played.
-
-    And I think that's everything that needs to happen. It's just some kind of annoying stuff. Yeah, cool.
-
-    */
-
-    if (robotManager.idsToRobots.size < piecesInPuzzle.length) {
-        return res.status(400).send({ message: "Not enough robots to start game" });
+    if (puzzle.robotDefaultPositions) {
+        for (const [robotId, startSquare] of Object.entries(puzzle.robotDefaultPositions)) {
+            const robot = robotManager.getRobot(robotId);
+            if (robot) {
+                const command = moveMainPiece({from: new GridIndices(robot.position.x, robot.position.y), to: GridIndices.squareToGrid(startSquare)});
+                await executor.execute(command);
+            } else {
+                return res.status(400).send({ message: "Missing robot " + robotId + " which is required to start the puzzle, because it is included in the puzzle's robotDefaultPositions map." });
+            }
+        }
     }
 
 
@@ -295,8 +282,8 @@ export interface PuzzleComponents {
     fen: string;
     moves: Move[];
     rating: number;
-    // the key is a physical robot id. value is the grid index where the robot should be at the start of the game.
-    robotDefaultPositions?: Record<string, GridIndices>;
+    // the key is a physical robot id. value is the square where the robot should be at the start of the game.
+    robotDefaultPositions?: Record<string, Square>;
 }
 
 /**

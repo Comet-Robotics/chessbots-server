@@ -4,7 +4,22 @@ const puzzles: Record<string, PuzzleComponents> = {
     "Puzzle 1": {
         "fen": "8/1p3p1k/8/p1p2Kr1/P2pP3/1P1P4/2P5/8 w - - 0 1",
         "moves": [{ "from": "f5", "to": "g5" }],
-        "rating": 511
+        "rating": 511,
+        "robotDefaultPositions": {
+            "robot-1": "c2",
+            "robot-2": "b3",
+            "robot-3": "d3",
+            "robot-4": "a4",
+            "robot-5": "d4",
+            "robot-6": "e4",
+            "robot-7": "a5",
+            "robot-8": "c5",
+            "robot-9": "f5",
+            "robot-10": "g5",
+            "robot-11": "b7",
+            "robot-12": "f7",
+            "robot-13": "h7",
+        }
     },
     "Puzzle 2": {
         "fen": "5rk1/p5pp/4q3/8/1P1P4/2P4P/P2p1RP1/5RK1 w",

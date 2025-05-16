@@ -56,8 +56,8 @@ export class RobotManager {
             ),
             config[robotId].startHeading * DEGREE,
             new Position(
-                config[robotId].homePosition.x,
-                config[robotId].homePosition.y,
+                config[robotId].defaultPosition.x,
+                config[robotId].defaultPosition.y,
             ),
         );
         this.addRobot(robot);
