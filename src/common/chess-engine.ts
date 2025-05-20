@@ -160,7 +160,7 @@ export class ChessEngine {
             const to: GridIndices = GridIndices.squareToGrid(move.to);
             console.log("herererfdsfa");
             console.log(to);
-            console.log(robotManager.indicesToIds);
+            console.log(robotManager.getIndicesToIds());
             console.log(robotManager.isRobotAtIndices(to));
             return robotManager.getRobotAtIndices(to).id;
         }

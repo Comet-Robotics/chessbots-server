@@ -311,7 +311,8 @@ function constructFinalCommand(
     numCollisions: number,
 ): MovePiece {
     const from = move.from;
-    console.log(from, robotManager.indicesToIds);
+    const indicesToIds = robotManager.getIndicesToIds();
+    console.log(from, indicesToIds);
     const mainPiece = robotManager.getRobotAtIndices(from).id;
     const dirToEdge = directionToEdge(from);
 
@@ -382,7 +383,7 @@ function constructFinalCommand(
 
 // Takes in a move, and generates the commands required to get the main piece to it's destination
 // If there are pieces in the way, it shimmy's them out, and move them back after main piece passes
-function moveMainPiece(move: GridMove): MovePiece {
+export function moveMainPiece(move: GridMove): MovePiece {
     const driveCommands: DriveCommand[] = [];
     const rotateCommands: ReversibleRobotCommand[] = [];
     const collisionType = calcCollisionType(move);
@@ -545,6 +546,7 @@ function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
         }
         i += botDirectionToHome;
         if (i < 0) i += 36;
+        if (i >= 36) i -= 36;
     }
     if (arrayOfDeadzone[endInArray]) {
         moveCommands.push(
@@ -570,7 +572,7 @@ function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
     return goHome;
 }
 
-function gridIndicesToPosition(indices: GridIndices): Position {
+export function gridIndicesToPosition(indices: GridIndices): Position {
     return new Position(indices.i + 0.5, indices.j + 0.5);
 }
 

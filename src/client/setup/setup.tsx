@@ -135,6 +135,7 @@ function SetupMain(props: SetupMainProps) {
             <ButtonGroup variant="outlined">
                 {allSettings.map((item, idx) => (
                     <Button
+                        key={item[0]}
                         textClassName={textColor()}
                         //changed for better visibility
                         icon={item[1]}

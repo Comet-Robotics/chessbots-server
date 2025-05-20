@@ -11,7 +11,7 @@ import WebSocket from "ws";
 import { socketManager } from "../../api/managers";
 
 const mockSocket = vi.mocked(WebSocket.prototype);
-const TEST_ROBOT_ID = "virtual-robot-1";
+const TEST_ROBOT_ID = "robot-1";
 socketManager.registerSocket(TEST_ROBOT_ID, mockSocket);
 
 const mockBotTunnel = new VirtualBotTunnel(TEST_ROBOT_ID);

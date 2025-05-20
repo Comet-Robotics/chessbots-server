@@ -231,6 +231,10 @@ const openInEditor = async (frame: StackFrame) => {
         console.warn("No stack frame provided for opening in editor");
         return;
     }
+    if (!frame.lineNumber || !frame.columnNumber) {
+        console.warn("No line or column number provided for opening in editor");
+        return;
+    }
     const params = new URLSearchParams({
         file: frame.fileName,
         line: frame.lineNumber.toString(),

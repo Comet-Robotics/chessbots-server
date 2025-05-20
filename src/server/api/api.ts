@@ -29,13 +29,16 @@ import { ChessEngine } from "../../common/chess-engine";
 import { Move, Side } from "../../common/game-types";
 import { USE_VIRTUAL_ROBOTS } from "../utils/env";
 import { SaveManager } from "./save-manager";
-import { readFileSync } from "fs";
 
 import { CommandExecutor } from "../command/executor";
 import { VirtualBotTunnel, virtualRobots } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
+import { GridIndices } from "../robot/grid-indices";
+import puzzles from "./puzzles";
+import { moveMainPiece } from "../robot/path-materializer";
+import { Square } from "chess.js";
 
 export const tcpServer: TCPServer | null =
     USE_VIRTUAL_ROBOTS ? null : new TCPServer();
@@ -184,7 +187,7 @@ apiRouter.post("/start-human-game", (req, res) => {
     return res.send({ message: "success" });
 });
 
-apiRouter.post("/start-puzzle-game", (req, res) => {
+apiRouter.post("/start-puzzle-game", async (req, res) => {
     //get puzzle components
     const puzzle = JSON.parse(req.query.puzzle as string) as PuzzleComponents;
     const fen = puzzle.fen;
@@ -198,6 +201,32 @@ apiRouter.post("/start-puzzle-game", (req, res) => {
         moves,
         difficulty,
     );
+
+    if (puzzle.robotDefaultPositions) {
+        for (const [robotId, startSquare] of Object.entries(
+            puzzle.robotDefaultPositions,
+        )) {
+            const robot = robotManager.getRobot(robotId);
+            if (robot) {
+                const command = moveMainPiece({
+                    from: new GridIndices(
+                        Math.floor(robot.position.x),
+                        Math.floor(robot.position.y),
+                    ),
+                    to: GridIndices.squareToGrid(startSquare),
+                });
+                await executor.execute(command);
+            } else {
+                return res.status(400).send({
+                    message:
+                        "Missing robot " +
+                        robotId +
+                        " which is required to start the puzzle, because it is included in the puzzle's robotDefaultPositions map.",
+                });
+            }
+        }
+    }
+
     return res.send({ message: "success" });
 });
 
@@ -264,15 +293,14 @@ export interface PuzzleComponents {
     fen: string;
     moves: Move[];
     rating: number;
+    // the key is a physical robot id. value is the square where the robot should be at the start of the game.
+    robotDefaultPositions?: Record<string, Square>;
 }
 
 /**
- * Returns a list of available puzzles to play from puzzles.json.
+ * Returns a list of available puzzles.
  */
 apiRouter.get("/get-puzzles", (_, res) => {
-    const puzzles: Record<string, PuzzleComponents> = JSON.parse(
-        readFileSync("./src/server/api/puzzles.json", "utf-8"),
-    );
     const out: string = JSON.stringify(puzzles);
     return res.send(out);
 });

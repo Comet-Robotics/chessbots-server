@@ -8,8 +8,8 @@ export type SimulatedRobotLocation = {
 export type StackFrame = {
     fileName: string;
     functionName?: string;
-    lineNumber: number;
-    columnNumber: number;
+    lineNumber?: number;
+    columnNumber?: number;
 };
 
 /**
