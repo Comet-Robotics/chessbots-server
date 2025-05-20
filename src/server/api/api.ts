@@ -202,19 +202,32 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
         difficulty,
     );
 
-
     if (puzzle.robotDefaultPositions) {
-        for (const [robotId, startSquare] of Object.entries(puzzle.robotDefaultPositions)) {
+        for (const [robotId, startSquare] of Object.entries(
+            puzzle.robotDefaultPositions,
+        )) {
             const robot = robotManager.getRobot(robotId);
             if (robot) {
-                const command = moveMainPiece({from: new GridIndices(Math.floor(robot.position.x), Math.floor(robot.position.y)), to: GridIndices.squareToGrid(startSquare)});
+                const command = moveMainPiece({
+                    from: new GridIndices(
+                        Math.floor(robot.position.x),
+                        Math.floor(robot.position.y),
+                    ),
+                    to: GridIndices.squareToGrid(startSquare),
+                });
                 await executor.execute(command);
             } else {
-                return res.status(400).send({ message: "Missing robot " + robotId + " which is required to start the puzzle, because it is included in the puzzle's robotDefaultPositions map." });
+                return res
+                    .status(400)
+                    .send({
+                        message:
+                            "Missing robot " +
+                            robotId +
+                            " which is required to start the puzzle, because it is included in the puzzle's robotDefaultPositions map.",
+                    });
             }
         }
     }
-
 
     return res.send({ message: "success" });
 });

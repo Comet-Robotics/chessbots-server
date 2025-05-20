@@ -12,7 +12,9 @@ export abstract class Pair<T extends Pair<T>> {
         }
 
         if (Number.isNaN(item1) || Number.isNaN(item2)) {
-            throw new Error("Pair items must be numbers, got " + item1 + " and " + item2);
+            throw new Error(
+                "Pair items must be numbers, got " + item1 + " and " + item2,
+            );
         }
     }
 

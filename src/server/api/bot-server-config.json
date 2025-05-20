@@ -1,5 +1,5 @@
 {
-    "$comment": "We need to go in and add a startHeading to every robot - the server expects it to exist. Also, need to offset all the home and default positions by 0.5.", 
+    "$comment": "We need to go in and add a startHeading to every robot - the server expects it to exist. Also, need to offset all the home and default positions by 0.5.",
     "tcpServerPort": 3001,
     "bots": {
         "80:65:99:4d:f3:f0": "robot-15",

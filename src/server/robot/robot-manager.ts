@@ -18,7 +18,10 @@ export class RobotManager {
      */
     getIndicesToIds(): Map<string, string> {
         return Array.from(this.idsToRobots.values()).reduce((acc, robot) => {
-            const positionAsGridIndices = new GridIndices(Math.floor(robot.position.x), Math.floor(robot.position.y));
+            const positionAsGridIndices = new GridIndices(
+                Math.floor(robot.position.x),
+                Math.floor(robot.position.y),
+            );
             acc.set(positionAsGridIndices.toString(), robot.id);
             return acc;
         }, new Map<string, string>());

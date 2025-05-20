@@ -214,10 +214,12 @@ export const virtualRobots = new Map<string, VirtualRobot>(
                     realRobotConfig.defaultPosition.y,
                 ),
                 getStartHeading(idx < 16 ? Side.WHITE : Side.BLACK),
-                gridIndicesToPosition(new GridIndices(
-                    realRobotConfig.homePosition.x,
-                    realRobotConfig.homePosition.y,
-                )),
+                gridIndicesToPosition(
+                    new GridIndices(
+                        realRobotConfig.homePosition.x,
+                        realRobotConfig.homePosition.y,
+                    ),
+                ),
             ),
         ] as const;
     }),
