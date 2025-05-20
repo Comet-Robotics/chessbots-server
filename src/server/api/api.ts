@@ -217,14 +217,12 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
                 });
                 await executor.execute(command);
             } else {
-                return res
-                    .status(400)
-                    .send({
-                        message:
-                            "Missing robot " +
-                            robotId +
-                            " which is required to start the puzzle, because it is included in the puzzle's robotDefaultPositions map.",
-                    });
+                return res.status(400).send({
+                    message:
+                        "Missing robot " +
+                        robotId +
+                        " which is required to start the puzzle, because it is included in the puzzle's robotDefaultPositions map.",
+                });
             }
         }
     }
