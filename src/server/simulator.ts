@@ -13,6 +13,7 @@ import { socketManager } from "./api/managers";
 import { randomUUID } from "node:crypto";
 import { GridIndices } from "./robot/grid-indices";
 import { getStartHeading, Side } from "../common/game-types";
+import { gridIndicesToPosition } from "./robot/path-materializer";
 
 const srcDir = path.resolve(__dirname, "../");
 
@@ -213,10 +214,10 @@ export const virtualRobots = new Map<string, VirtualRobot>(
                     realRobotConfig.defaultPosition.y,
                 ),
                 getStartHeading(idx < 16 ? Side.WHITE : Side.BLACK),
-                new Position(
+                gridIndicesToPosition(new GridIndices(
                     realRobotConfig.homePosition.x,
                     realRobotConfig.homePosition.y,
-                ),
+                )),
             ),
         ] as const;
     }),

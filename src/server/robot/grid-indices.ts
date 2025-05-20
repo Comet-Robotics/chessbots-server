@@ -24,6 +24,10 @@ export class GridIndices extends Pair<GridIndices> {
         if (j < 0 || j > 11) {
             throw new Error("Index " + j + " is out of bounds.");
         }
+
+        if (Math.floor(i) !== i || Math.floor(j) !== j) {
+            throw new Error("Index " + i + " or " + j + " is not an integer.");
+        }
         super(i, j);
     }
 
