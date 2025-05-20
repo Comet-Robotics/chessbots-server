@@ -546,6 +546,7 @@ function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
         }
         i += botDirectionToHome;
         if (i < 0) i += 36;
+        if (i >= 36) i -= 36;
     }
     if (arrayOfDeadzone[endInArray]) {
         moveCommands.push(
@@ -571,7 +572,7 @@ function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
     return goHome;
 }
 
-function gridIndicesToPosition(indices: GridIndices): Position {
+export function gridIndicesToPosition(indices: GridIndices): Position {
     return new Position(indices.i + 0.5, indices.j + 0.5);
 }
 
