@@ -1,6 +1,5 @@
 import { DEGREE } from "../../common/units";
 import { GridIndices } from "./grid-indices";
-import { Position } from "./position";
 import { Robot } from "./robot";
 import config from "../api/bot-server-config.json";
 
@@ -47,6 +46,10 @@ export class RobotManager {
     }
 
     createRobotFromId(robotId: string) {
+        const robotConfig = config[robotId];
+        if (!robotConfig) {
+            throw new Error("Failed to find robot config for id " + robotId);
+        }
         const robot = new Robot(
             robotId,
             new GridIndices(
@@ -57,11 +60,7 @@ export class RobotManager {
                 config[robotId].defaultPosition.x,
                 config[robotId].defaultPosition.y,
             ),
-            config[robotId].startHeading * DEGREE,
-            new Position(
-                config[robotId].defaultPosition.x,
-                config[robotId].defaultPosition.y,
-            ),
+            config[robotId]?.startHeadingRadians * DEGREE,
         );
         this.addRobot(robot);
     }
