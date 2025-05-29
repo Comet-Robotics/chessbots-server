@@ -7,9 +7,9 @@ import { ClientManager } from "./client-manager";
 import { SocketManager } from "./socket-manager";
 import { virtualRobots } from "../simulator";
 import { USE_VIRTUAL_ROBOTS } from "../utils/env";
-import { Robot } from "../robot/robot";
-import { GridIndices } from "../robot/grid-indices";
-import { DEGREE } from "../../common/units";
+// import { Robot } from "../robot/robot";
+// import { GridIndices } from "../robot/grid-indices";
+// import { DEGREE } from "../../common/units";
 
 /**
  * A class which lazily creates a singleton instance of a class, allowing us to hold off on creating the
@@ -66,18 +66,18 @@ export const robotManager = new LazySingleton(
             USE_VIRTUAL_ROBOTS ?
                 Array.from(virtualRobots.values())
             :   [
-                    new Robot(
-                        "robot-12",
-                        new GridIndices(0, 5),
-                        new GridIndices(5, 3),
-                        90 * DEGREE,
-                    ),
-                    new Robot(
-                        "robot-4",
-                        new GridIndices(5, 0),
-                        new GridIndices(5, 2),
-                        90 * DEGREE,
-                    ),
+                    // new Robot(
+                    //     "robot-12",
+                    //     new GridIndices(0, 5),
+                    //     new GridIndices(5, 3),
+                    //     90 * DEGREE,
+                    // ),
+                    // new Robot(
+                    //     "robot-4",
+                    //     new GridIndices(5, 0),
+                    //     new GridIndices(5, 2),
+                    //     90 * DEGREE,
+                    // ),
                 ],
         ),
 ).lazyInstance;

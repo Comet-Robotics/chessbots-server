@@ -9,6 +9,7 @@ import {
 } from "../utils/tcp-packet";
 import { EventEmitter } from "@posva/event-emitter";
 import { randomUUID } from "node:crypto";
+import type { RobotManager } from "../robot/robot-manager";
 
 type RobotEventEmitter = EventEmitter<{
     actionComplete: {
@@ -296,7 +297,7 @@ export class TCPServer {
      *
      * @param connections - bot connections in a id:BotTunnel array
      */
-    constructor(private connections: { [id: string]: BotTunnel } = {}) {
+    constructor(private robotManager: RobotManager, private connections: { [id: string]: BotTunnel } = {}) {
         this.server = net.createServer();
         this.server.on("connection", this.handleConnection.bind(this));
         this.server.listen(config["tcpServerPort"], () => {
@@ -341,6 +342,7 @@ export class TCPServer {
                 tunnel.id = id;
                 tunnel.address = mac;
                 this.connections[id] = tunnel;
+                this.robotManager.createRobotFromId(id);
             }).bind(this),
         );
 

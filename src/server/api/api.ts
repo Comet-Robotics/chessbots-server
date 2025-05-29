@@ -41,7 +41,7 @@ import { moveMainPiece } from "../robot/path-materializer";
 import { Square } from "chess.js";
 
 export const tcpServer: TCPServer | null =
-    USE_VIRTUAL_ROBOTS ? null : new TCPServer(undefined);
+    USE_VIRTUAL_ROBOTS ? null : new TCPServer(robotManager);
 export const executor = new CommandExecutor();
 
 export let gameManager: GameManager | null = null;
