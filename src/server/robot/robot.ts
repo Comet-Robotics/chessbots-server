@@ -1,5 +1,5 @@
 import { FULL_ROTATION, RADIAN, clampHeading } from "../../common/units";
-import { Position, ZERO_POSITION } from "./position";
+import { Position } from "./position";
 import { GridIndices } from "./grid-indices";
 import { tcpServer } from "../api/api";
 import type { BotTunnel } from "../api/tcp-interface";
@@ -11,6 +11,7 @@ import { PacketType } from "../utils/tcp-packet";
  */
 export class Robot {
     private _headingRadians: number;
+    private _position: Position;
 
     constructor(
         public readonly id: string,
@@ -18,9 +19,12 @@ export class Robot {
          * The location the robot lives in when its not in use.
          */
         public readonly homeIndices: GridIndices,
+        /**
+         * The location the robot should be in at the beginning of a regular chess.
+         */
         public readonly defaultIndices: GridIndices,
         public readonly startHeadingRadians: number = 0,
-        private _position: Position = ZERO_POSITION,
+        position?: Position,
     ) {
         if (
             startHeadingRadians === undefined ||
@@ -29,6 +33,7 @@ export class Robot {
             throw new Error("startHeadingRadians must be a number");
         }
         this._headingRadians = startHeadingRadians;
+        this._position = position ?? Position.fromGridIndices(defaultIndices);
     }
 
     public get position(): Position {
