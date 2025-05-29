@@ -112,9 +112,7 @@ export class DriveCommand
         );
         robotManager.updateRobot(
             this.robotId,
-            GridIndices.fromPosition(
-                robot.position
-            ),
+            GridIndices.fromPosition(robot.position),
         );
         return robot.sendDrivePacket(this.tileDistance);
     }
@@ -151,9 +149,7 @@ export class RelativeMoveCommand
         const robot = robotManager.getRobot(this.robotId);
         robotManager.updateRobot(
             this.robotId,
-            GridIndices.fromPosition(
-                robot.position.add(this.position),
-            ),
+            GridIndices.fromPosition(robot.position.add(this.position)),
         );
         return robot.relativeMove(this.position);
     }
@@ -171,9 +167,7 @@ export class AbsoluteMoveCommand extends MoveCommand {
         const robot = robotManager.getRobot(this.robotId);
         robotManager.updateRobot(
             this.robotId,
-            GridIndices.fromPosition(
-                this.position
-            ),
+            GridIndices.fromPosition(this.position),
         );
         return robot.relativeMove(this.position.sub(robot.position));
     }

@@ -212,7 +212,7 @@ export const virtualRobots = new Map<string, VirtualRobot>(
                     realRobotConfig.defaultPosition.x,
                     realRobotConfig.defaultPosition.y,
                 ),
-                getStartHeading(idx < 16 ? Side.WHITE : Side.BLACK)
+                getStartHeading(idx < 16 ? Side.WHITE : Side.BLACK),
             ),
         ] as const;
     }),

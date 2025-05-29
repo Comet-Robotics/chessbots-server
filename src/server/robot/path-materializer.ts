@@ -572,7 +572,6 @@ function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
     return goHome;
 }
 
-
 // Command structure
 // No Capture: Sequential[ Parallel[Turn[all]], MovePiece[shimmys, main], Parallel[TurnToStart[all]] ]
 
@@ -590,7 +589,9 @@ export function materializePath(move: Move): Command {
         );
         console.log("capture " + capturePiece);
         if (capturePiece !== undefined) {
-            const captureSquare = GridIndices.fromPosition(robotManager.getRobot(capturePiece).position);
+            const captureSquare = GridIndices.fromPosition(
+                robotManager.getRobot(capturePiece).position,
+            );
 
             const captureCommand = returnToHome(captureSquare, capturePiece);
             const mainCommand = moveMainPiece(moveToGridMove(move));
