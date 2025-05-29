@@ -65,6 +65,18 @@ export const robotManager = new LazySingleton(
         new RobotManager(
             USE_VIRTUAL_ROBOTS ?
                 Array.from(virtualRobots.values())
+                // new Robot(
+                //     "robot-12",
+                //     new GridIndices(0, 5),
+                //     new GridIndices(5, 3),
+                //     90 * DEGREE,
+                // ),
+                // new Robot(
+                //     "robot-4",
+                //     new GridIndices(5, 0),
+                //     new GridIndices(5, 2),
+                //     90 * DEGREE,
+                // ),
             :   [
                     // new Robot(
                     //     "robot-12",

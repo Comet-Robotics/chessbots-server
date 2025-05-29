@@ -297,7 +297,10 @@ export class TCPServer {
      *
      * @param connections - bot connections in a id:BotTunnel array
      */
-    constructor(private robotManager: RobotManager, private connections: { [id: string]: BotTunnel } = {}) {
+    constructor(
+        private robotManager: RobotManager,
+        private connections: { [id: string]: BotTunnel } = {},
+    ) {
         this.server = net.createServer();
         this.server.on("connection", this.handleConnection.bind(this));
         this.server.listen(config["tcpServerPort"], () => {
