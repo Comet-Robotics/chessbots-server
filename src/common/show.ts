@@ -171,7 +171,7 @@ export const EVENT_TYPE_TO_COLOR: Record<
     [TimelineEventTypes.StartPointEvent]: Colors.GREEN2,
 };
 
-/*
+/**
  * The timeline duration update mode determines how the duration of timeline events
  * is updated when the user edits a timeline event's duration.
  *

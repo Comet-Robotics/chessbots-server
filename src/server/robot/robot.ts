@@ -6,7 +6,7 @@ import type { BotTunnel } from "../api/tcp-interface";
 import { PacketType } from "../utils/tcp-packet";
 
 /**
- * Represents a robot.
+ * Represents a physical robot.
  * Includes information about the current location as well as tooling for communication.
  */
 export class Robot {
