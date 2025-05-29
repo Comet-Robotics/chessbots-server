@@ -356,6 +356,7 @@ export class TCPServer {
      * @returns - tcp tunnel
      */
     public getTunnelFromId(id: string): BotTunnel {
+        console.log("Getting tunnel for id", id);
         return this.connections[id];
     }
 

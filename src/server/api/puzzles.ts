@@ -57,6 +57,36 @@ const puzzles: Record<string, PuzzleComponents> = {
         ],
         rating: 2915,
     },
+    "Puzzle 6": {
+        fen: "4k3/8/4p3/8/8/4P3/8/4K3 w - - 0 1",
+        moves: [
+            { from: "e3", to: "e4" },
+            { from: "e6", to: "e5" },
+            { from: "e1", to: "e2" },
+            { from: "e8", to: "e7" },
+        ],
+
+        rating: 1000,
+        robotDefaultPositions: {
+            "robot-4": "e3",
+            "robot-5": "e6",
+            "robot-12": "e1",
+            "robot-7": "e8",
+        },
+    },
+    "Puzzle 7": {
+        fen: "8/8/3k4/8/8/3K4/8/3R4 w - - 0 1",
+        moves: [
+            { from: "d3", to: "e3" },
+            { from: "d6", to: "d5" },
+        ],
+
+        rating: 1000,
+        robotDefaultPositions: {
+            "robot-4": "d3",
+            "robot-12": "d6",
+        },
+    },
 };
 
 export default puzzles;

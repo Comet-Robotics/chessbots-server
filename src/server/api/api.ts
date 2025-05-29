@@ -193,21 +193,15 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
     const fen = puzzle.fen;
     const moves = puzzle.moves;
     const difficulty = puzzle.rating;
-    //create game manager
-    gameManager = new PuzzleGameManager(
-        new ChessEngine(),
-        socketManager,
-        fen,
-        moves,
-        difficulty,
-    );
 
     if (puzzle.robotDefaultPositions) {
         for (const [robotId, startSquare] of Object.entries(
             puzzle.robotDefaultPositions,
         )) {
+            console.log(robotManager.idsToRobots);
             const robot = robotManager.getRobot(robotId);
             if (robot) {
+                console.log("before command is made");
                 const command = moveMainPiece({
                     from: new GridIndices(
                         Math.floor(robot.position.x),
@@ -215,7 +209,18 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
                     ),
                     to: GridIndices.squareToGrid(startSquare),
                 });
+                console.log(
+                    " command is made " +
+                        new GridIndices(
+                            Math.floor(robot.position.x),
+                            Math.floor(robot.position.y),
+                        ) +
+                        " to " +
+                        GridIndices.squareToGrid(startSquare),
+                );
+                console.log(`Moving robot ${robotId} to square ${startSquare}`);
                 await executor.execute(command);
+                console.log(`Moved robot ${robotId} to square ${startSquare}`);
             } else {
                 return res.status(400).send({
                     message:
@@ -226,6 +231,13 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
             }
         }
     }
+    gameManager = new PuzzleGameManager(
+        new ChessEngine(),
+        socketManager,
+        fen,
+        moves,
+        difficulty,
+    );
 
     return res.send({ message: "success" });
 });

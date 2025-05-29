@@ -22,6 +22,9 @@ export class CommandExecutor {
     private checkRequirements(command: Command) {
         for (const req of command.requirements) {
             for (const runningCmd of this.runningCommands) {
+                console.log(
+                    `Checking requirement ${req} against running command ${runningCmd}`,
+                );
                 if (runningCmd.requirements.has(req)) {
                     throw new RequirementError(
                         `Command already requires ${req}!`,
