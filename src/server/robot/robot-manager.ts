@@ -53,12 +53,12 @@ export class RobotManager {
         const robot = new Robot(
             robotId,
             new GridIndices(
-                config[robotId].homePosition.x,
-                config[robotId].homePosition.y,
+                config[robotId]?.homeIndices.x,
+                config[robotId]?.homeIndices.y,
             ),
             new GridIndices(
-                config[robotId].defaultPosition.x,
-                config[robotId].defaultPosition.y,
+                config[robotId]?.defaultIndices.x,
+                config[robotId]?.defaultIndices.y,
             ),
             config[robotId]?.startHeadingRadians * DEGREE,
         );

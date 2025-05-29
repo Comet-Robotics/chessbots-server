@@ -205,12 +205,12 @@ export const virtualRobots = new Map<string, VirtualRobot>(
             new VirtualRobot(
                 id,
                 new GridIndices(
-                    realRobotConfig.homePosition.x,
-                    realRobotConfig.homePosition.y,
+                    realRobotConfig.homeIndices.x,
+                    realRobotConfig.homeIndices.y,
                 ),
                 new GridIndices(
-                    realRobotConfig.defaultPosition.x,
-                    realRobotConfig.defaultPosition.y,
+                    realRobotConfig.defaultIndices.x,
+                    realRobotConfig.defaultIndices.y,
                 ),
                 getStartHeading(idx < 16 ? Side.WHITE : Side.BLACK),
             ),
