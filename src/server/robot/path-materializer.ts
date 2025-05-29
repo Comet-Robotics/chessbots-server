@@ -254,10 +254,10 @@ function findShimmyLocation(
             const orth1: Position = new Position(-normalY, normalX);
             const orth2: Position = new Position(normalY, -normalX);
             const orthPos1: Position = orth1.add(
-                gridIndicesToPosition(move.to),
+                Position.fromGridIndices(move.to),
             );
             const orthPos2: Position = orth2.add(
-                gridIndicesToPosition(move.to),
+                Position.fromGridIndices(move.to),
             );
 
             // distance calculations :)
@@ -572,9 +572,6 @@ function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
     return goHome;
 }
 
-export function gridIndicesToPosition(indices: GridIndices): Position {
-    return new Position(indices.i + 0.5, indices.j + 0.5);
-}
 
 // Command structure
 // No Capture: Sequential[ Parallel[Turn[all]], MovePiece[shimmys, main], Parallel[TurnToStart[all]] ]
@@ -593,16 +590,7 @@ export function materializePath(move: Move): Command {
         );
         console.log("capture " + capturePiece);
         if (capturePiece !== undefined) {
-            const captureSquareX = Math.floor(
-                robotManager.getRobot(capturePiece).position.x,
-            );
-            const captureSquareY = Math.floor(
-                robotManager.getRobot(capturePiece).position.y,
-            );
-            const captureSquare = new GridIndices(
-                captureSquareX,
-                captureSquareY,
-            );
+            const captureSquare = GridIndices.fromPosition(robotManager.getRobot(capturePiece).position);
 
             const captureCommand = returnToHome(captureSquare, capturePiece);
             const mainCommand = moveMainPiece(moveToGridMove(move));
@@ -627,37 +615,37 @@ export function materializePath(move: Move): Command {
             rookPiece = robotManager.getRobotAtIndices(new GridIndices(2, 2));
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
-                gridIndicesToPosition(new GridIndices(4, 2)),
+                Position.fromGridIndices(new GridIndices(4, 2)),
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(2, 1)),
+                Position.fromGridIndices(new GridIndices(2, 1)),
             );
             rookMove2 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(5, 1)),
+                Position.fromGridIndices(new GridIndices(5, 1)),
             );
             rookMove3 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(5, 2)),
+                Position.fromGridIndices(new GridIndices(5, 2)),
             );
         } else {
             rookPiece = robotManager.getRobotAtIndices(new GridIndices(2, 9));
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
-                gridIndicesToPosition(new GridIndices(4, 9)),
+                Position.fromGridIndices(new GridIndices(4, 9)),
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(2, 10)),
+                Position.fromGridIndices(new GridIndices(2, 10)),
             );
             rookMove2 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(5, 10)),
+                Position.fromGridIndices(new GridIndices(5, 10)),
             );
             rookMove3 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(5, 9)),
+                Position.fromGridIndices(new GridIndices(5, 9)),
             );
         }
         return new SequentialCommandGroup([
@@ -675,37 +663,37 @@ export function materializePath(move: Move): Command {
             rookPiece = robotManager.getRobotAtIndices(new GridIndices(9, 2));
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
-                gridIndicesToPosition(new GridIndices(8, 2)),
+                Position.fromGridIndices(new GridIndices(8, 2)),
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(9, 1)),
+                Position.fromGridIndices(new GridIndices(9, 1)),
             );
             rookMove2 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(7, 1)),
+                Position.fromGridIndices(new GridIndices(7, 1)),
             );
             rookMove3 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(7, 2)),
+                Position.fromGridIndices(new GridIndices(7, 2)),
             );
         } else {
             rookPiece = robotManager.getRobotAtIndices(new GridIndices(9, 9));
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
-                gridIndicesToPosition(new GridIndices(9, 8)),
+                Position.fromGridIndices(new GridIndices(9, 8)),
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(9, 10)),
+                Position.fromGridIndices(new GridIndices(9, 10)),
             );
             rookMove2 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(7, 10)),
+                Position.fromGridIndices(new GridIndices(7, 10)),
             );
             rookMove3 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(7, 9)),
+                Position.fromGridIndices(new GridIndices(7, 9)),
             );
         }
         return new SequentialCommandGroup([

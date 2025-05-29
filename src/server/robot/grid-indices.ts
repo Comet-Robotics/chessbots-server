@@ -1,5 +1,6 @@
 import { Square } from "chess.js";
 import { Pair } from "../utils/pair";
+import type { Position } from "./position";
 
 const FILE_LOOKUP = "abcdefgh";
 
@@ -48,6 +49,10 @@ export class GridIndices extends Pair<GridIndices> {
 
     toString(): string {
         return `${this.i}, ${this.j}`;
+    }
+
+    public static fromPosition(position: Position): GridIndices {
+        return new GridIndices(Math.floor(position.x), Math.floor(position.y));
     }
 }
 

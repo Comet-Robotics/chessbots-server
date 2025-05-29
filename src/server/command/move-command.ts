@@ -112,9 +112,8 @@ export class DriveCommand
         );
         robotManager.updateRobot(
             this.robotId,
-            new GridIndices(
-                Math.floor(robot.position.x),
-                Math.floor(robot.position.y),
+            GridIndices.fromPosition(
+                robot.position
             ),
         );
         return robot.sendDrivePacket(this.tileDistance);
@@ -152,9 +151,8 @@ export class RelativeMoveCommand
         const robot = robotManager.getRobot(this.robotId);
         robotManager.updateRobot(
             this.robotId,
-            new GridIndices(
-                Math.floor(robot.position.x + this.position.x),
-                Math.floor(robot.position.y + this.position.y),
+            GridIndices.fromPosition(
+                robot.position.add(this.position),
             ),
         );
         return robot.relativeMove(this.position);
@@ -173,9 +171,8 @@ export class AbsoluteMoveCommand extends MoveCommand {
         const robot = robotManager.getRobot(this.robotId);
         robotManager.updateRobot(
             this.robotId,
-            new GridIndices(
-                Math.floor(this.position.x),
-                Math.floor(this.position.y),
+            GridIndices.fromPosition(
+                this.position
             ),
         );
         return robot.relativeMove(this.position.sub(robot.position));

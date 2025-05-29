@@ -203,18 +203,12 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
             if (robot) {
                 console.log("before command is made");
                 const command = moveMainPiece({
-                    from: new GridIndices(
-                        Math.floor(robot.position.x),
-                        Math.floor(robot.position.y),
-                    ),
+                    from: GridIndices.fromPosition(robot.position),
                     to: GridIndices.squareToGrid(startSquare),
                 });
                 console.log(
                     " command is made " +
-                        new GridIndices(
-                            Math.floor(robot.position.x),
-                            Math.floor(robot.position.y),
-                        ) +
+                        GridIndices.fromPosition(robot.position) +
                         " to " +
                         GridIndices.squareToGrid(startSquare),
                 );
