@@ -52,15 +52,10 @@ const parseErrorStack = (stack: string): StackFrame[] => {
     const frames = lines.slice(1).reduce<StackFrame[]>((result, line) => {
         const match = line.match(/^\s+at (?:(.+) \()?(.+):(\d+):(\d+)\)?$/);
         if (!match) {
-            console.warn(`Invalid stack frame: ${line}`);
+            // stack frame not in the format we expect
             return result;
         }
         const [, functionName, fileName, lineNumber, columnNumber] = match;
-        if (!fileName || !lineNumber || !columnNumber) {
-            console.warn(
-                `Failed to parse location details from stack frame: ${line}`,
-            );
-        }
         result.push({
             fileName,
             functionName,
