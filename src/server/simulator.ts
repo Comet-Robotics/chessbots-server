@@ -185,8 +185,15 @@ export class VirtualBotTunnel extends BotTunnel {
  * virtual robots that can be moved around
  */
 export class VirtualRobot extends Robot {
+    private tunnel: BotTunnel;
+
+    constructor(id: string, homeIndices: GridIndices, defaultIndices: GridIndices, headingRadians: number) {
+        super(id, homeIndices, defaultIndices, headingRadians);
+        this.tunnel = new VirtualBotTunnel(id);
+    }
+
     public getTunnel(): BotTunnel {
-        return virtualBotTunnels.get(this.id)!;
+        return this.tunnel;
     }
 }
 
@@ -197,28 +204,28 @@ const virtualBotIds = Array(32)
 /**
  * a map of all the created virtual robots with ids, positions, and homes
  */
-export const virtualRobots = new Map<string, VirtualRobot>(
-    virtualBotIds.map((id, idx) => {
-        const realRobotConfig = config[id];
-        return [
-            id,
-            new VirtualRobot(
-                id,
-                new GridIndices(
-                    realRobotConfig.homeIndices.x,
-                    realRobotConfig.homeIndices.y,
-                ),
-                new GridIndices(
-                    realRobotConfig.defaultIndices.x,
-                    realRobotConfig.defaultIndices.y,
-                ),
-                getStartHeading(idx < 16 ? Side.WHITE : Side.BLACK),
-            ),
-        ] as const;
-    }),
-);
+export const virtualRobots = createVirtualRobots();
 
-/** a map of all the current virtual robot tunnels */
-const virtualBotTunnels = new Map<string, BotTunnel>(
-    virtualBotIds.map((id) => [id, new VirtualBotTunnel(id)]),
-);
+function createVirtualRobots() {
+    return new Map<string, VirtualRobot>(
+        virtualBotIds.map((id, idx) => {
+            const realRobotConfig = config[id];
+            return [
+                id,
+                new VirtualRobot(
+                    id,
+                    new GridIndices(
+                        realRobotConfig.homeIndices.x,
+                        realRobotConfig.homeIndices.y,
+                    ),
+                    new GridIndices(
+                        realRobotConfig.defaultIndices.x,
+                        realRobotConfig.defaultIndices.y,
+                    ),
+                    getStartHeading(idx < 16 ? Side.WHITE : Side.BLACK),
+                ),
+            ] as const;
+        }),
+    );
+}
+
