@@ -1,4 +1,3 @@
-import { robotManager } from "../api/managers";
 import { Move } from "../../common/game-types";
 import { gameManager } from "../api/api";
 import {
@@ -16,6 +15,7 @@ import { MovePiece, ReversibleRobotCommand } from "../command/move-piece";
 import { Position } from "./position";
 import { GridIndices } from "./grid-indices";
 import { error } from "console";
+import { robotManager } from "./robot-manager";
 
 export interface GridMove {
     from: GridIndices;

@@ -1,5 +1,10 @@
 import useWebSocket from "react-use-websocket";
-import { Message, RegisterWebsocketMessage , SendMessage , MessageHandler } from "../common/message/message";
+import {
+    Message,
+    RegisterWebsocketMessage,
+    SendMessage,
+    MessageHandler,
+} from "../common/message/message";
 import { useId, useMemo } from "react";
 import { parseMessage } from "../common/message/parse-message";
 import { useQuery } from "@tanstack/react-query";

@@ -1,4 +1,4 @@
-import { robotManager } from "../api/managers";
+import { robotManager } from "../robot/robot-manager";
 
 /**
  * An command which operates on one or more robots.

@@ -6,7 +6,8 @@ import {
     GameHoldMessage,
     GameInterruptedMessage,
     SetChessMessage,
- MoveMessage } from "../../common/message/game-message";
+    MoveMessage,
+} from "../../common/message/game-message";
 import {
     GameEndReason,
     GameHoldReason,

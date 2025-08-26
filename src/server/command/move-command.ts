@@ -1,7 +1,7 @@
 import { RobotCommand, Reversible } from "./command";
 import { Position } from "../robot/position";
-import { robotManager } from "../api/managers";
 import { GridIndices } from "../robot/grid-indices";
+import { robotManager } from "../robot/robot-manager";
 
 /**
  * Represents a rotation.
