@@ -1,8 +1,6 @@
-import type { Move } from "../../common/game-types";
-import { gameManager } from "../api/api";
-import type {
-    Command} from "../command/command";
+import { type Move } from "../../common/game-types";
 import {
+    type Command,
     ParallelCommandGroup,
     SequentialCommandGroup,
 } from "../command/command";
@@ -19,6 +17,7 @@ import { Position } from "./position";
 import { GridIndices } from "./grid-indices";
 import { error } from "console";
 import { robotManager } from "./robot-manager";
+import { gameManager } from "../api/managers";
 
 export interface GridMove {
     from: GridIndices;

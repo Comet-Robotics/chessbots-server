@@ -53,3 +53,5 @@ export class CommandExecutor {
         return this.runningCommands;
     }
 }
+
+export const executor = new CommandExecutor();

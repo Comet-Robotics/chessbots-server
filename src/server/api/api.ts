@@ -15,18 +15,15 @@ import {
     SetRobotVariableMessage,
 } from "../../common/message/robot-message";
 
-import { TCPServer } from "./tcp-interface";
 import type { Difficulty } from "../../common/client-types";
 import { RegisterWebsocketMessage } from "../../common/message/message";
-import { clientManager, socketManager } from "./managers";
+import { clientManager, gameManager, setGameManager, socketManager } from "./managers";
 import {
     ComputerGameManager,
-    GameManager,
     HumanGameManager,
     PuzzleGameManager,
 } from "./game-manager";
 import { ChessEngine } from "../../common/chess-engine";
-import type { Move} from "../../common/game-types";
 import { Side } from "../../common/game-types";
 import { USE_VIRTUAL_ROBOTS } from "../utils/env";
 import { SaveManager } from "./save-manager";
@@ -36,17 +33,11 @@ import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
 import { GridIndices } from "../robot/grid-indices";
-import puzzles from "./puzzles";
+import puzzles, { type PuzzleComponents } from "./puzzles";
 import { moveMainPiece } from "../robot/path-materializer";
-import type { Square } from "chess.js";
 import { robotManager } from "../robot/robot-manager";
-import { executor } from "./we-should-rename-this";
-
-export let gameManager: GameManager | null = null;
-
-export const tcpServer: TCPServer | null =
-    USE_VIRTUAL_ROBOTS ? null : new TCPServer(robotManager);
-
+import { tcpServer } from "./tcp-interface";
+import { executor } from "../command/executor";
 
 /**
  * An endpoint used to establish a websocket connection with the server.
@@ -100,7 +91,7 @@ apiRouter.get("/client-information", (req, res) => {
     if (oldSave) {
         // if the game was an ai game, create a computer game manager with the ai difficulty
         if (oldSave.aiDifficulty !== -1) {
-            gameManager = new ComputerGameManager(
+            setGameManager(new ComputerGameManager(
                 new ChessEngine(oldSave.game),
                 socketManager,
                 oldSave.host === req.cookies.id ?
@@ -111,16 +102,16 @@ apiRouter.get("/client-information", (req, res) => {
                 : Side.WHITE,
                 oldSave.aiDifficulty,
                 oldSave.host !== req.cookies.id,
-            );
+            ));
             // create a new human game manger with appropriate clients
         } else {
-            gameManager = new HumanGameManager(
+            setGameManager(new HumanGameManager(
                 new ChessEngine(oldSave.game),
                 socketManager,
                 oldSave.hostWhite ? Side.WHITE : Side.BLACK,
                 clientManager,
                 oldSave.host !== req.cookies.id,
-            );
+            ));
         }
     }
     /**
@@ -159,13 +150,13 @@ apiRouter.post("/start-computer-game", (req, res) => {
     const side = req.query.side as Side;
     const difficulty = parseInt(req.query.difficulty as string) as Difficulty;
     // create a new computer game manager
-    gameManager = new ComputerGameManager(
+    setGameManager(new ComputerGameManager(
         new ChessEngine(),
         socketManager,
         side,
         difficulty,
         false,
-    );
+    ));
     return res.send({ message: "success" });
 });
 
@@ -179,13 +170,13 @@ apiRouter.post("/start-computer-game", (req, res) => {
 apiRouter.post("/start-human-game", (req, res) => {
     const side = req.query.side as Side;
     // create a new human game manager
-    gameManager = new HumanGameManager(
+    setGameManager(new HumanGameManager(
         new ChessEngine(),
         socketManager,
         side,
         clientManager,
         false,
-    );
+    ));
     return res.send({ message: "success" });
 });
 
@@ -227,13 +218,13 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
             }
         }
     }
-    gameManager = new PuzzleGameManager(
+    setGameManager(new PuzzleGameManager(
         new ChessEngine(),
         socketManager,
         fen,
         moves,
         difficulty,
-    );
+    ));
 
     return res.send({ message: "success" });
 });
@@ -296,14 +287,6 @@ apiRouter.get("/get-simulator-robot-state", (_, res) => {
         messages: Array.from(VirtualBotTunnel.messages),
     });
 });
-
-export interface PuzzleComponents {
-    fen: string;
-    moves: Move[];
-    rating: number;
-    // the key is a physical robot id. value is the square where the robot should be at the start of the game.
-    robotDefaultPositions?: Record<string, Square>;
-}
 
 /**
  * Returns a list of available puzzles.

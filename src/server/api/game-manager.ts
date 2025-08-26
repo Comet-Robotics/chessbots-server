@@ -23,8 +23,8 @@ import {
 } from "../../common/game-end-reasons";
 import { SaveManager } from "./save-manager";
 import { materializePath } from "../robot/path-materializer";
-import { executor } from "./we-should-rename-this";
 import { DO_SAVES } from "../utils/env";
+import { executor } from "../command/executor";
 
 type GameState = {
     side: Side;

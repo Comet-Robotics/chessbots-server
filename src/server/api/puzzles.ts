@@ -1,4 +1,13 @@
-import type { PuzzleComponents } from "./api";
+import { type Square } from "chess.js";
+import { type Move } from "../../common/game-types";
+
+export interface PuzzleComponents {
+    fen: string;
+    moves: Move[];
+    rating: number;
+    // the key is a physical robot id. value is the square where the robot should be at the start of the game.
+    robotDefaultPositions?: Record<string, Square>;
+}
 
 const puzzles: Record<string, PuzzleComponents> = {
     "Puzzle 1": {

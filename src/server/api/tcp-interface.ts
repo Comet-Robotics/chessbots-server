@@ -9,7 +9,8 @@ import {
 } from "../utils/tcp-packet";
 import { EventEmitter } from "@posva/event-emitter";
 import { randomUUID } from "node:crypto";
-import type { RobotManager } from "../robot/robot-manager";
+import { robotManager, type RobotManager } from "../robot/robot-manager";
+import { USE_VIRTUAL_ROBOTS } from "../utils/env";
 
 type RobotEventEmitter = EventEmitter<{
     actionComplete: {
@@ -373,3 +374,6 @@ export class TCPServer {
         return Object.keys(this.connections);
     }
 }
+
+export const tcpServer: TCPServer | null =
+    USE_VIRTUAL_ROBOTS ? null : new TCPServer(robotManager);
