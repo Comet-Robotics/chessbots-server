@@ -19,8 +19,6 @@ import { TCPServer } from "./tcp-interface";
 import type { Difficulty } from "../../common/client-types";
 import { RegisterWebsocketMessage } from "../../common/message/message";
 import { clientManager, socketManager } from "./managers";
-import type {
-    GameManager} from "./game-manager";
 import {
     ComputerGameManager,
     HumanGameManager,
@@ -32,7 +30,6 @@ import { Side } from "../../common/game-types";
 import { USE_VIRTUAL_ROBOTS } from "../utils/env";
 import { SaveManager } from "./save-manager";
 
-import { CommandExecutor } from "../command/executor";
 import { VirtualBotTunnel } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
@@ -42,12 +39,11 @@ import puzzles from "./puzzles";
 import { moveMainPiece } from "../robot/path-materializer";
 import type { Square } from "chess.js";
 import { robotManager } from "../robot/robot-manager";
+import { executor, gameManager } from "./we-should-rename-this";
 
 export const tcpServer: TCPServer | null =
     USE_VIRTUAL_ROBOTS ? null : new TCPServer(robotManager);
-export const executor = new CommandExecutor();
 
-export let gameManager: GameManager | null = null;
 
 /**
  * An endpoint used to establish a websocket connection with the server.
