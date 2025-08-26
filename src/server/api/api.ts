@@ -21,6 +21,7 @@ import { RegisterWebsocketMessage } from "../../common/message/message";
 import { clientManager, socketManager } from "./managers";
 import {
     ComputerGameManager,
+    GameManager,
     HumanGameManager,
     PuzzleGameManager,
 } from "./game-manager";
@@ -39,7 +40,9 @@ import puzzles from "./puzzles";
 import { moveMainPiece } from "../robot/path-materializer";
 import type { Square } from "chess.js";
 import { robotManager } from "../robot/robot-manager";
-import { executor, gameManager } from "./we-should-rename-this";
+import { executor } from "./we-should-rename-this";
+
+export let gameManager: GameManager | null = null;
 
 export const tcpServer: TCPServer | null =
     USE_VIRTUAL_ROBOTS ? null : new TCPServer(robotManager);
