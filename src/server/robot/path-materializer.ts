@@ -4,8 +4,7 @@ import {
     ParallelCommandGroup,
     SequentialCommandGroup,
 } from "../command/command";
-import type {
-    MoveCommand} from "../command/move-command";
+import type { MoveCommand } from "../command/move-command";
 import {
     AbsoluteMoveCommand,
     DriveCommand,
@@ -23,6 +22,14 @@ export interface GridMove {
     from: GridIndices;
     to: GridIndices;
 }
+
+enum CollisionType {
+    HORIZONTAL = 0,
+    VERTICAL = 1,
+    DIAGONAL = 2,
+    HORSE = 3,
+}
+
 const arrayOfCornersIndicies = [0, 9, 18, 27];
 
 const arrayOfDeadzone = [
@@ -71,23 +78,23 @@ function moveToGridMove(move: Move): GridMove {
     };
 }
 
-function calcCollisionType(gridMove: GridMove): number {
+function calcCollisionType(gridMove: GridMove): CollisionType {
     const from = gridMove.from;
     const to = gridMove.to;
 
     // Horizontal
     if (from.j === to.j) {
-        return 0;
+        return CollisionType.HORIZONTAL;
         // Vertical
     } else if (from.i === to.i) {
-        return 1;
+        return CollisionType.VERTICAL;
     } else {
         // Diagonal
         if (Math.abs(from.i - to.i) === Math.abs(from.j - to.j)) {
-            return 2;
+            return CollisionType.DIAGONAL;
             // Horse
         } else {
-            return 3;
+            return CollisionType.HORSE;
         }
     }
 }
@@ -99,14 +106,14 @@ function addToCollisions(collisions: string[], x: number, y: number) {
     }
 }
 
-function detectCollisions(gridMove: GridMove, collisionType: number): string[] {
+function detectCollisions(gridMove: GridMove, collisionType: CollisionType): string[] {
     const from = gridMove.from;
     const to = gridMove.to;
     const collisions: string[] = [];
     const direction: [number, number] = directionToEdge(to);
     switch (collisionType) {
         // Horizontal
-        case 0: {
+        case CollisionType.HORIZONTAL: {
             if (to.i < from.i) {
                 for (let i = from.i - 1; i > to.i; i--) {
                     addToCollisions(collisions, i, from.j);
@@ -131,7 +138,7 @@ function detectCollisions(gridMove: GridMove, collisionType: number): string[] {
             break;
         }
         // Vertical
-        case 1: {
+        case CollisionType.VERTICAL: {
             if (to.j < from.j) {
                 for (let j = from.j - 1; j > to.j; j--) {
                     addToCollisions(collisions, from.i, j);
@@ -156,7 +163,7 @@ function detectCollisions(gridMove: GridMove, collisionType: number): string[] {
             break;
         }
         // Diagonal
-        case 2: {
+        case CollisionType.DIAGONAL: {
             // Will be either positive or negative depending on direction
             const dx = to.i - from.i;
             const dy = to.j - from.j;
@@ -192,7 +199,7 @@ function detectCollisions(gridMove: GridMove, collisionType: number): string[] {
             break;
         }
         // Horse
-        case 3: {
+        case CollisionType.HORSE: {
             // Will be either positive or negative depending on direction
             const dx = to.i - from.i;
             const dy = to.j - from.j;
@@ -228,13 +235,13 @@ function detectCollisions(gridMove: GridMove, collisionType: number): string[] {
 function findShimmyLocation(
     pieceId: string,
     move: GridMove,
-    collisionType: number,
+    collisionType: CollisionType,
 ): Position {
     const shimmyPos: Position = robotManager.getRobot(pieceId).position;
     const axisShimmyAmount: number = 1 / 3;
     switch (collisionType) {
         // Horizontal
-        case 0: {
+        case CollisionType.HORIZONTAL: {
             const direction: [number, number] = directionToEdge(move.to);
             const gridY: number = Math.floor(shimmyPos.y);
             if (gridY === move.to.j) {
@@ -248,7 +255,7 @@ function findShimmyLocation(
             }
         }
         // Vertical
-        case 1: {
+        case CollisionType.VERTICAL: {
             const direction: [number, number] = directionToEdge(move.to);
             const gridX: number = move.from.i + direction[0];
             if (gridX === move.to.i) {
@@ -261,8 +268,8 @@ function findShimmyLocation(
                 return new Position(augmentX, shimmyPos.y);
             }
         }
-        case 2:
-        case 3: {
+        case CollisionType.DIAGONAL:
+        case CollisionType.HORSE: {
             const moveDistance: number = 0.5;
             const signedDistX: number = move.to.i - move.from.i;
             const signedDistY: number = move.to.j - move.from.j;
@@ -325,7 +332,7 @@ function constructFinalCommand(
     move: GridMove,
     driveCommands: DriveCommand[],
     rotateCommands: ReversibleRobotCommand[],
-    collisionType: number,
+    collisionType: CollisionType,
     numCollisions: number,
 ): MovePiece {
     const from = move.from;
@@ -337,7 +344,7 @@ function constructFinalCommand(
     if (mainPiece !== undefined) {
         console.log("main piece");
         const to = move.to;
-        if (collisionType === 0 && numCollisions > 1) {
+        if (collisionType === CollisionType.HORIZONTAL && numCollisions > 1) {
             const y = dirToEdge[1] * 0.5;
             const pos1 = new Position(from.i + 0.5, from.j + y + 0.5);
             const pos2 = new Position(to.i + 0.5, from.j + y + 0.5);
@@ -361,7 +368,7 @@ function constructFinalCommand(
                 ]);
             setupCommands.push(...rotateCommands, mainTurn1, ...driveCommands);
             return new MovePiece(setupCommands, mainDrive);
-        } else if (collisionType === 1 && numCollisions > 1) {
+        } else if (collisionType === CollisionType.VERTICAL && numCollisions > 1) {
             const x = dirToEdge[0] * 0.5;
             const pos1 = new Position(from.i + x + 0.5, from.j + 0.5);
             const pos2 = new Position(from.i + x + 0.5, to.j + 0.5);
