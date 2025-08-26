@@ -31,7 +31,7 @@ import { USE_VIRTUAL_ROBOTS } from "../utils/env";
 import { SaveManager } from "./save-manager";
 
 import { CommandExecutor } from "../command/executor";
-import { VirtualBotTunnel, virtualRobots } from "../simulator";
+import { VirtualBotTunnel } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
@@ -256,7 +256,7 @@ apiRouter.get("/get-ids", (_, res) => {
  * move a random robot forward and turn 45 degrees
  */
 apiRouter.get("/do-smth", async (_, res) => {
-    const robotsEntries = Array.from(virtualRobots.entries());
+    const robotsEntries = Array.from(robotManager.idsToRobots);
     const randomRobotIndex = Math.floor(Math.random() * robotsEntries.length);
     const [, robot] = robotsEntries[randomRobotIndex];
     await robot.sendDrivePacket(1);
@@ -272,19 +272,19 @@ apiRouter.get("/get-simulator-robot-state", (_, res) => {
     if (!USE_VIRTUAL_ROBOTS) {
         return res.status(400).send({ message: "Simulator is not enabled." });
     }
-    const robotsEntries = Array.from(virtualRobots.entries());
+    const robotsEntries = Array.from(robotManager.idsToRobots);
 
     // get all of the robots and their positions
     const robotState = Object.fromEntries(
         robotsEntries.map(([id, robot]) => {
-            let headingRadians = robot.headingRadians;
-            let position = new Position(robot.position.x, robot.position.y);
+            const headingRadians = robot.headingRadians;
+            const position = new Position(robot.position.x, robot.position.y);
 
-            const tunnel = robot.getTunnel();
-            if (tunnel instanceof VirtualBotTunnel) {
-                position = tunnel.position;
-                headingRadians = tunnel.headingRadians;
-            }
+            // const tunnel = robot.getTunnel();
+            // if (tunnel instanceof VirtualBotTunnel) {
+            //     position = tunnel.position;
+            //     headingRadians = tunnel.headingRadians;
+            // }
             return [id, { position, headingRadians: headingRadians }];
         }),
     );
