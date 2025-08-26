@@ -9,7 +9,6 @@
     "scripts": {
         "dev": "ts-node src/server/main.ts",
         "devup": "nodemon src/server/main.ts",
-        "debug": "nodemon --inspect src/server/main.ts",
         "start": "NODE_ENV=production ts-node ./src/server/main.ts",
         "build": "vite build",
         "docs:build": "typedoc",
