@@ -1,7 +1,7 @@
 import { FULL_ROTATION, RADIAN, clampHeading } from "../../common/units";
 import { Position } from "./position";
 import { type GridIndices } from "./grid-indices";
-import { tcpServer, type BotTunnel } from "../api/tcp-interface";
+import { type BotTunnel } from "../api/tcp-interface";
 import { PacketType } from "../utils/tcp-packet";
 
 /**
@@ -11,6 +11,7 @@ import { PacketType } from "../utils/tcp-packet";
 export class Robot {
     private _headingRadians: number;
     private _position: Position;
+    protected tunnel: BotTunnel | null;
 
     constructor(
         public readonly id: string,
@@ -33,6 +34,7 @@ export class Robot {
         }
         this._headingRadians = startHeadingRadians;
         this._position = position ?? Position.fromGridIndices(defaultIndices);
+        this.tunnel = null;
     }
 
     public get position(): Position {
@@ -96,10 +98,8 @@ export class Robot {
         return promise;
     }
 
-    protected getTunnel(): BotTunnel {
-        console.log(`Getting tunnel for robot ${this.id}`);
-        console.log(tcpServer?.getConnectedIds());
-        return tcpServer!.getTunnelFromId(this.id);
+    public setTunnel(tunnel: BotTunnel) {
+        this.tunnel = tunnel;
     }
 
     /**
@@ -109,11 +109,10 @@ export class Robot {
      * @param deltaHeadingRadians - A relative heading to turn by, in radians. May be positive or negative.
      */
     public async sendTurnPacket(deltaHeadingRadians: number): Promise<void> {
-        const tunnel = this.getTunnel();
         console.log(
             `Sending turn packet to robot ${this.id} with delta heading ${deltaHeadingRadians}`,
         );
-        await tunnel.send({
+        await this.tunnel!.send({
             type: PacketType.TURN_BY_ANGLE,
             deltaHeadingRadians: deltaHeadingRadians,
         });
@@ -126,10 +125,9 @@ export class Robot {
      * @param tileDistance - The distance to drive forward or backwards by. 1 is defined as the length of a tile.
      */
     public async sendDrivePacket(tileDistance: number): Promise<void> {
-        const tunnel = this.getTunnel();
         console.log(
             `Sending drive packet to robot ${this.id} with distance ${tileDistance}`,
         );
-        await tunnel.send({ type: PacketType.DRIVE_TILES, tileDistance });
+        await this.tunnel!.send({ type: PacketType.DRIVE_TILES, tileDistance });
     }
 }

@@ -65,6 +65,7 @@ export class RobotManager {
             config[robotId]?.startHeadingRadians * DEGREE,
         );
         this.addRobot(robot);
+        return robot;
     }
 
     /**

@@ -346,7 +346,7 @@ export class TCPServer {
                 tunnel.id = id;
                 tunnel.address = mac;
                 this.connections[id] = tunnel;
-                this.robotManager.createRobotFromId(id);
+                this.robotManager.createRobotFromId(id).setTunnel(tunnel);
             }).bind(this),
         );
 

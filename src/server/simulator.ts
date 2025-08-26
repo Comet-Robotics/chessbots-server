@@ -182,16 +182,12 @@ export class VirtualBotTunnel extends BotTunnel {
  * virtual robots that can be moved around
  */
 export class VirtualRobot extends Robot {
-    private tunnel: BotTunnel;
-
     constructor(id: string, homeIndices: GridIndices, defaultIndices: GridIndices, headingRadians: number) {
         super(id, homeIndices, defaultIndices, headingRadians);
         this.tunnel = new VirtualBotTunnel(id);
     }
 
-    public getTunnel(): BotTunnel {
-        return this.tunnel;
-    }
+    public setTunnel(_: BotTunnel): void { }
 }
 
 /**
