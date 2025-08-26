@@ -194,16 +194,16 @@ export class VirtualRobot extends Robot {
     }
 }
 
-const virtualBotIds = Array(32)
-    .fill(undefined)
-    .map((_, i) => `robot-${(i + 1).toString()}`);
-
 /**
  * a map of all the created virtual robots with ids, positions, and homes
  */
 export const virtualRobots = createVirtualRobots();
 
 function createVirtualRobots() {
+    const virtualBotIds = Array(32)
+        .fill(undefined)
+        .map((_, i) => `robot-${(i + 1).toString()}`);
+
     return new Map<string, VirtualRobot>(
         virtualBotIds.map((id, idx) => {
             const realRobotConfig = config[id];
