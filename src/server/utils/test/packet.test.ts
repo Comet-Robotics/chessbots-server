@@ -6,9 +6,9 @@ import {
     PacketType,
 } from "../tcp-packet";
 import { randomUUID } from "node:crypto";
+import { socketManager } from "../../api/managers";
 import { VirtualBotTunnel } from "../../simulator";
 import WebSocket from "ws";
-import { socketManager } from "../../api/managers";
 
 const mockSocket = vi.mocked(WebSocket.prototype);
 const TEST_ROBOT_ID = "robot-1";

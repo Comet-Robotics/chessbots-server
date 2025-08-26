@@ -2,6 +2,8 @@ import { DEGREE } from "../../common/units";
 import { GridIndices } from "./grid-indices";
 import { Robot } from "./robot";
 import config from "../api/bot-server-config.json";
+import { virtualRobots } from "../simulator";
+import { USE_VIRTUAL_ROBOTS } from "../utils/env";
 
 /**
  * Stores robots. Provides utilities for finding them by position.
@@ -97,3 +99,22 @@ export class RobotManager {
         indicesToIds.set(indices.toString(), robotId);
     }
 }
+
+export const robotManager = new RobotManager(
+    USE_VIRTUAL_ROBOTS ?
+        Array.from(virtualRobots.values())
+    :   [
+            new Robot(
+                "robot-12",
+                new GridIndices(0, 5),
+                new GridIndices(5, 3),
+                90 * DEGREE,
+            ),
+            new Robot(
+                "robot-4",
+                new GridIndices(5, 0),
+                new GridIndices(5, 2),
+                90 * DEGREE,
+            ),
+        ],
+);

@@ -1,7 +1,6 @@
 import { Dispatch, useEffect, useState } from "react";
 
-import { GameInterruptedMessage } from "../../common/message/game-message";
-import { MoveMessage } from "../../common/message/game-message";
+import { GameInterruptedMessage , MoveMessage } from "../../common/message/game-message";
 import {
     GameEndReason,
     GameInterruptedReason,

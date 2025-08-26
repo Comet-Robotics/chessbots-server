@@ -18,7 +18,7 @@ import {
 import { TCPServer } from "./tcp-interface";
 import { Difficulty } from "../../common/client-types";
 import { RegisterWebsocketMessage } from "../../common/message/message";
-import { clientManager, robotManager, socketManager } from "./managers";
+import { clientManager, socketManager } from "./managers";
 import {
     ComputerGameManager,
     GameManager,
@@ -39,6 +39,7 @@ import { GridIndices } from "../robot/grid-indices";
 import puzzles from "./puzzles";
 import { moveMainPiece } from "../robot/path-materializer";
 import { Square } from "chess.js";
+import { robotManager } from "../robot/robot-manager";
 
 export const tcpServer: TCPServer | null =
     USE_VIRTUAL_ROBOTS ? null : new TCPServer(robotManager);
