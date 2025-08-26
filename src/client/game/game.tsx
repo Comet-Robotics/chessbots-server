@@ -1,4 +1,5 @@
-import { Dispatch, useState } from "react";
+import type { Dispatch} from "react";
+import { useState } from "react";
 
 import {
     GameEndMessage,
@@ -8,20 +9,21 @@ import {
     SetChessMessage,
     MoveMessage,
 } from "../../common/message/game-message";
-import {
+import type {
     GameEndReason,
-    GameHoldReason,
-    GameInterruptedReason,
+    GameInterruptedReason} from "../../common/game-end-reasons";
+import {
+    GameHoldReason
 } from "../../common/game-end-reasons";
 
 import { ChessboardWrapper } from "../chessboard/chessboard-wrapper";
 import { NavbarMenu } from "./navbar-menu";
 import { get, useEffectQuery, useSocket } from "../api";
-import { MessageHandler } from "../../common/message/message";
+import type { MessageHandler } from "../../common/message/message";
 import { GameEndDialog } from "./game-end-dialog";
 import { Navigate, Outlet } from "react-router-dom";
 import { ChessEngine } from "../../common/chess-engine";
-import { Move } from "../../common/game-types";
+import type { Move } from "../../common/game-types";
 import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { AcceptDrawDialog, OfferDrawDialog } from "./draw-dialog";
 import { bgColor } from "../check-dark-mode";

@@ -2,12 +2,14 @@ import { EventEmitter } from "@posva/event-emitter";
 import { BotTunnel } from "./api/tcp-interface";
 import { Robot } from "./robot/robot";
 import config from "./api/bot-server-config.json";
-import { Packet, PacketType } from "./utils/tcp-packet";
+import type { Packet} from "./utils/tcp-packet";
+import { PacketType } from "./utils/tcp-packet";
 import { Position, ZERO_POSITION } from "./robot/position";
 import path from "path";
+import type {
+    StackFrame} from "../common/message/simulator-message";
 import {
-    SimulatorUpdateMessage,
-    StackFrame,
+    SimulatorUpdateMessage
 } from "../common/message/simulator-message";
 import { socketManager } from "./api/managers";
 import { randomUUID } from "node:crypto";

@@ -1,4 +1,5 @@
-import { Message, MessageType, RegisterWebsocketMessage } from "./message";
+import type { Message} from "./message";
+import { MessageType, RegisterWebsocketMessage } from "./message";
 import { DriveRobotMessage, SetRobotVariableMessage } from "./robot-message";
 import {
     PositionMessage,

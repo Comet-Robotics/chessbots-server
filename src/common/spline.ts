@@ -1,10 +1,11 @@
+import type {
+    Static} from "runtypes";
 import {
     Number as NumberType,
     Record,
     Union,
     Array,
-    Literal,
-    Static,
+    Literal
 } from "runtypes";
 
 export enum SplinePointType {

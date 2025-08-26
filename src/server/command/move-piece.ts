@@ -1,8 +1,9 @@
-import {
+import type {
     Command,
     RobotCommand,
+    Reversible} from "./command";
+import {
     SequentialCommandGroup,
-    Reversible,
     ParallelCommandGroup,
 } from "./command";
 

@@ -1,4 +1,4 @@
-import { Command } from "./command";
+import type { Command } from "./command";
 
 /**
  * Custom error class to indicate a conflict in requirements.

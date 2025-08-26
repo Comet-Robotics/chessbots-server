@@ -1,4 +1,4 @@
-import { Square } from "chess.js";
+import type { Square } from "chess.js";
 import { Pair } from "../utils/pair";
 import type { Position } from "./position";
 

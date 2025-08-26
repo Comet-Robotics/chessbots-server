@@ -1,4 +1,5 @@
-import express, { RequestHandler, Express } from "express";
+import type { RequestHandler, Express } from "express";
+import express from "express";
 import ViteExpress from "vite-express";
 import cookieParser from "cookie-parser";
 import { apiRouter, websocketHandler } from "./api/api";

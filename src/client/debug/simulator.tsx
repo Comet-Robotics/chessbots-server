@@ -10,10 +10,11 @@ import {
 import { useEffect, useReducer, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { get, useSocket } from "../api";
-import {
+import type {
     SimulatedRobotLocation,
-    SimulatorUpdateMessage,
-    StackFrame,
+    StackFrame} from "../../common/message/simulator-message";
+import {
+    SimulatorUpdateMessage
 } from "../../common/message/simulator-message";
 import "./simulator.scss";
 import { clampHeading } from "../../common/units";

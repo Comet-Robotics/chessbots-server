@@ -1,4 +1,5 @@
-import { RobotCommand, Reversible } from "./command";
+import type { Reversible } from "./command";
+import { RobotCommand } from "./command";
 import { Position } from "../robot/position";
 import { GridIndices } from "../robot/grid-indices";
 import { robotManager } from "../robot/robot-manager";

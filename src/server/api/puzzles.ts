@@ -1,4 +1,4 @@
-import { PuzzleComponents } from "./api";
+import type { PuzzleComponents } from "./api";
 
 const puzzles: Record<string, PuzzleComponents> = {
     "Puzzle 1": {

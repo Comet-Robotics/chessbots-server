@@ -1,4 +1,4 @@
-import { Square } from "chess.js";
+import type { Square } from "chess.js";
 import type { Robot } from "../server/robot/robot";
 import { DEGREE } from "./units";
 

@@ -1,6 +1,6 @@
 import { Message, MessageType } from "./message";
-import { Move } from "../game-types";
-import {
+import type { Move } from "../game-types";
+import type {
     GameInterruptedReason,
     GameHoldReason,
     GameFinishedReason,

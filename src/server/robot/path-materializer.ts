@@ -1,17 +1,20 @@
-import { Move } from "../../common/game-types";
+import type { Move } from "../../common/game-types";
 import { gameManager } from "../api/api";
+import type {
+    Command} from "../command/command";
 import {
-    Command,
     ParallelCommandGroup,
     SequentialCommandGroup,
 } from "../command/command";
+import type {
+    MoveCommand} from "../command/move-command";
 import {
     AbsoluteMoveCommand,
     DriveCommand,
-    MoveCommand,
     ReversibleAbsoluteRotateCommand,
 } from "../command/move-command";
-import { MovePiece, ReversibleRobotCommand } from "../command/move-piece";
+import type { ReversibleRobotCommand } from "../command/move-piece";
+import { MovePiece } from "../command/move-piece";
 import { Position } from "./position";
 import { GridIndices } from "./grid-indices";
 import { error } from "console";

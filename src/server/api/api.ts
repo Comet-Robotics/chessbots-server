@@ -1,4 +1,4 @@
-import { WebsocketRequestHandler } from "express-ws";
+import type { WebsocketRequestHandler } from "express-ws";
 import { Router } from "express";
 
 import { parseMessage } from "../../common/message/parse-message";
@@ -16,17 +16,19 @@ import {
 } from "../../common/message/robot-message";
 
 import { TCPServer } from "./tcp-interface";
-import { Difficulty } from "../../common/client-types";
+import type { Difficulty } from "../../common/client-types";
 import { RegisterWebsocketMessage } from "../../common/message/message";
 import { clientManager, socketManager } from "./managers";
+import type {
+    GameManager} from "./game-manager";
 import {
     ComputerGameManager,
-    GameManager,
     HumanGameManager,
     PuzzleGameManager,
 } from "./game-manager";
 import { ChessEngine } from "../../common/chess-engine";
-import { Move, Side } from "../../common/game-types";
+import type { Move} from "../../common/game-types";
+import { Side } from "../../common/game-types";
 import { USE_VIRTUAL_ROBOTS } from "../utils/env";
 import { SaveManager } from "./save-manager";
 
@@ -38,7 +40,7 @@ import { PacketType } from "../utils/tcp-packet";
 import { GridIndices } from "../robot/grid-indices";
 import puzzles from "./puzzles";
 import { moveMainPiece } from "../robot/path-materializer";
-import { Square } from "chess.js";
+import type { Square } from "chess.js";
 import { robotManager } from "../robot/robot-manager";
 
 export const tcpServer: TCPServer | null =

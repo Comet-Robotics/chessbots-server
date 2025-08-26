@@ -1,8 +1,10 @@
-import { Chess, Square } from "chess.js";
+import type { Square } from "chess.js";
+import { Chess } from "chess.js";
 import { aiMove } from "js-chess-engine";
 import { GameFinishedReason } from "./game-end-reasons";
-import { Difficulty } from "./client-types";
-import { Move, PieceType, Side } from "./game-types";
+import type { Difficulty } from "./client-types";
+import type { Move} from "./game-types";
+import { PieceType, Side } from "./game-types";
 import { GridIndices } from "../server/robot/grid-indices";
 import type { RobotManager } from "../server/robot/robot-manager";
 
