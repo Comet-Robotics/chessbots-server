@@ -109,16 +109,24 @@ function detectCollisions(gridMove: GridMove, collisionType: number): string[] {
         // Horizontal
         case 0: {
             if (to.i < from.i) {
-                addToCollisions(collisions, from.i, from.j + direction[1]);
                 for (let i = from.i - 1; i > to.i; i--) {
                     addToCollisions(collisions, i, from.j);
-                    addToCollisions(collisions, i, from.j + direction[1]);
+                }
+                if (collisions.length > 0) {
+                    addToCollisions(collisions, from.i, from.j + direction[1]);
+                    for (let i = from.i - 1; i > to.i; i--) {
+                        addToCollisions(collisions, i, from.j + direction[1]);
+                    }
                 }
             } else {
-                addToCollisions(collisions, from.i, from.j + direction[1]);
                 for (let i = from.i + 1; i < to.i; i++) {
                     addToCollisions(collisions, i, from.j);
-                    addToCollisions(collisions, i, from.j + direction[1]);
+                }
+                if (collisions.length > 0) {
+                    addToCollisions(collisions, from.i, from.j + direction[1]);
+                    for (let i = from.i + 1; i < to.i; i++) {
+                        addToCollisions(collisions, i, from.j + direction[1]);
+                    }
                 }
             }
             break;
@@ -126,16 +134,24 @@ function detectCollisions(gridMove: GridMove, collisionType: number): string[] {
         // Vertical
         case 1: {
             if (to.j < from.j) {
-                addToCollisions(collisions, from.i + direction[0], from.j);
                 for (let j = from.j - 1; j > to.j; j--) {
                     addToCollisions(collisions, from.i, j);
-                    addToCollisions(collisions, from.i + direction[0], j);
+                }
+                if (collisions.length > 0) {
+                    addToCollisions(collisions, from.i + direction[0], from.j);
+                    for (let j = from.j - 1; j > to.j; j--) {
+                        addToCollisions(collisions, from.i + direction[0], j);
+                    }
                 }
             } else {
-                addToCollisions(collisions, from.i + direction[0], from.j);
                 for (let j = from.j + 1; j < to.j; j++) {
                     addToCollisions(collisions, from.i, j);
-                    addToCollisions(collisions, from.i + direction[0], j);
+                }
+                if (collisions.length > 0) {
+                    addToCollisions(collisions, from.i + direction[0], from.j);
+                    for (let j = from.j + 1; j < to.j; j++) {
+                        addToCollisions(collisions, from.i + direction[0], j);
+                    }
                 }
             }
             break;
