@@ -78,7 +78,11 @@ export class VirtualBotTunnel extends BotTunnel {
         message: SimulatorUpdateMessage;
     }[] = [];
 
-    constructor(private robotId: string, private headingRadians: number, private position: Position) {
+    constructor(
+        private robotId: string,
+        private headingRadians: number,
+        private position: Position,
+    ) {
         super();
 
         // pulls initial heading and position from robot, then only depending on messages sent to the 'robot' to update the position and heading

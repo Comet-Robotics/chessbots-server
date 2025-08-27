@@ -12,10 +12,9 @@ import { useNavigate } from "react-router-dom";
 import { get, useSocket } from "../api";
 import type {
     SimulatedRobotLocation,
-    StackFrame} from "../../common/message/simulator-message";
-import {
-    SimulatorUpdateMessage
+    StackFrame,
 } from "../../common/message/simulator-message";
+import { SimulatorUpdateMessage } from "../../common/message/simulator-message";
 import "./simulator.scss";
 import { clampHeading } from "../../common/units";
 import {

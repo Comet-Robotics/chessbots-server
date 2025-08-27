@@ -1,5 +1,9 @@
 import { type EventEmitter } from "@posva/event-emitter";
-import { jsonToPacket, type Packet, type PacketWithId } from "../utils/tcp-packet";
+import {
+    jsonToPacket,
+    type Packet,
+    type PacketWithId,
+} from "../utils/tcp-packet";
 
 export abstract class BotTunnel {
     connected: boolean = false;

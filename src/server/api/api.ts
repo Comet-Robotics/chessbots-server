@@ -17,7 +17,12 @@ import {
 
 import type { Difficulty } from "../../common/client-types";
 import { RegisterWebsocketMessage } from "../../common/message/message";
-import { clientManager, gameManager, setGameManager, socketManager } from "./managers";
+import {
+    clientManager,
+    gameManager,
+    setGameManager,
+    socketManager,
+} from "./managers";
 import {
     ComputerGameManager,
     HumanGameManager,
@@ -91,27 +96,31 @@ apiRouter.get("/client-information", (req, res) => {
     if (oldSave) {
         // if the game was an ai game, create a computer game manager with the ai difficulty
         if (oldSave.aiDifficulty !== -1) {
-            setGameManager(new ComputerGameManager(
-                new ChessEngine(oldSave.game),
-                socketManager,
-                oldSave.host === req.cookies.id ?
-                    oldSave.hostWhite ?
-                        Side.WHITE
-                    :   Side.BLACK
-                : oldSave.hostWhite ? Side.BLACK
-                : Side.WHITE,
-                oldSave.aiDifficulty,
-                oldSave.host !== req.cookies.id,
-            ));
+            setGameManager(
+                new ComputerGameManager(
+                    new ChessEngine(oldSave.game),
+                    socketManager,
+                    oldSave.host === req.cookies.id ?
+                        oldSave.hostWhite ?
+                            Side.WHITE
+                        :   Side.BLACK
+                    : oldSave.hostWhite ? Side.BLACK
+                    : Side.WHITE,
+                    oldSave.aiDifficulty,
+                    oldSave.host !== req.cookies.id,
+                ),
+            );
             // create a new human game manger with appropriate clients
         } else {
-            setGameManager(new HumanGameManager(
-                new ChessEngine(oldSave.game),
-                socketManager,
-                oldSave.hostWhite ? Side.WHITE : Side.BLACK,
-                clientManager,
-                oldSave.host !== req.cookies.id,
-            ));
+            setGameManager(
+                new HumanGameManager(
+                    new ChessEngine(oldSave.game),
+                    socketManager,
+                    oldSave.hostWhite ? Side.WHITE : Side.BLACK,
+                    clientManager,
+                    oldSave.host !== req.cookies.id,
+                ),
+            );
         }
     }
     /**
@@ -150,13 +159,15 @@ apiRouter.post("/start-computer-game", (req, res) => {
     const side = req.query.side as Side;
     const difficulty = parseInt(req.query.difficulty as string) as Difficulty;
     // create a new computer game manager
-    setGameManager(new ComputerGameManager(
-        new ChessEngine(),
-        socketManager,
-        side,
-        difficulty,
-        false,
-    ));
+    setGameManager(
+        new ComputerGameManager(
+            new ChessEngine(),
+            socketManager,
+            side,
+            difficulty,
+            false,
+        ),
+    );
     return res.send({ message: "success" });
 });
 
@@ -170,13 +181,15 @@ apiRouter.post("/start-computer-game", (req, res) => {
 apiRouter.post("/start-human-game", (req, res) => {
     const side = req.query.side as Side;
     // create a new human game manager
-    setGameManager(new HumanGameManager(
-        new ChessEngine(),
-        socketManager,
-        side,
-        clientManager,
-        false,
-    ));
+    setGameManager(
+        new HumanGameManager(
+            new ChessEngine(),
+            socketManager,
+            side,
+            clientManager,
+            false,
+        ),
+    );
     return res.send({ message: "success" });
 });
 
@@ -218,13 +231,15 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
             }
         }
     }
-    setGameManager(new PuzzleGameManager(
-        new ChessEngine(),
-        socketManager,
-        fen,
-        moves,
-        difficulty,
-    ));
+    setGameManager(
+        new PuzzleGameManager(
+            new ChessEngine(),
+            socketManager,
+            fen,
+            moves,
+            difficulty,
+        ),
+    );
 
     return res.send({ message: "success" });
 });

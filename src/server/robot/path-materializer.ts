@@ -4,8 +4,7 @@ import {
     ParallelCommandGroup,
     SequentialCommandGroup,
 } from "../command/command";
-import type {
-    MoveCommand} from "../command/move-command";
+import type { MoveCommand } from "../command/move-command";
 import {
     AbsoluteMoveCommand,
     DriveCommand,

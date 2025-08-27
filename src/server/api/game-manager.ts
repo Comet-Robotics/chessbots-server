@@ -12,14 +12,15 @@ import {
 import type { SocketManager } from "./socket-manager";
 import type { ClientManager } from "./client-manager";
 import { ClientType } from "../../common/client-types";
-import type { Move} from "../../common/game-types";
+import type { Move } from "../../common/game-types";
 import { Side, oppositeSide } from "../../common/game-types";
 import type {
     GameEndReason,
-    GameEndReason as GameInterruptedReason} from "../../common/game-end-reasons";
+    GameEndReason as GameInterruptedReason,
+} from "../../common/game-end-reasons";
 import {
     GameFinishedReason,
-    GameHoldReason
+    GameHoldReason,
 } from "../../common/game-end-reasons";
 import { SaveManager } from "./save-manager";
 import { materializePath } from "../robot/path-materializer";

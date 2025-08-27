@@ -1,5 +1,4 @@
-import type {
-    Static} from "runtypes";
+import type { Static } from "runtypes";
 import {
     Number as NumberType,
     String,

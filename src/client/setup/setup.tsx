@@ -6,7 +6,7 @@ import {
     Spinner,
 } from "@blueprintjs/core";
 import { SetupBase } from "./setup-base";
-import type { Dispatch} from "react";
+import type { Dispatch } from "react";
 import { useState } from "react";
 import { SetupGame } from "./setup-game";
 import { Navigate, useNavigate } from "react-router-dom";
