@@ -3,7 +3,7 @@ import { Robot } from "./robot/robot";
 import config from "./api/bot-server-config.json";
 import type { Packet, PacketWithId } from "./utils/tcp-packet";
 import { PacketType } from "./utils/tcp-packet";
-import { Position, ZERO_POSITION } from "./robot/position";
+import { Position } from "./robot/position";
 import path from "path";
 import type { StackFrame } from "../common/message/simulator-message";
 import { SimulatorUpdateMessage } from "../common/message/simulator-message";
@@ -73,21 +73,15 @@ export class VirtualBotTunnel extends BotTunnel {
     connected = true;
     emitter: RobotEventEmitter;
 
-    headingRadians = 0;
-    position = ZERO_POSITION;
-
     static messages: {
         ts: Date;
         message: SimulatorUpdateMessage;
     }[] = [];
 
-    constructor(private robotId: string) {
+    constructor(private robotId: string, private headingRadians: number, private position: Position) {
         super();
 
-        // pulling initial heading and position from robot, then only depending on messages sent to the 'robot' to update the position and heading
-        const robot = virtualRobots.get(robotId)!;
-        this.headingRadians = robot.headingRadians;
-        this.position = robot.position;
+        // pulls initial heading and position from robot, then only depending on messages sent to the 'robot' to update the position and heading
 
         this.emitter = new EventEmitter();
     }
@@ -224,7 +218,7 @@ export class VirtualRobot extends Robot {
         headingRadians: number,
     ) {
         super(id, homeIndices, defaultIndices, headingRadians);
-        this.tunnel = new VirtualBotTunnel(id);
+        this.tunnel = new VirtualBotTunnel(id, headingRadians, this.position);
     }
 
     public setTunnel(_: BotTunnel): void {}
