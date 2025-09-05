@@ -72,7 +72,7 @@ export function SplineEditor({
                     pointerEvents: "none",
                 }}
             >
-                <path d={path} stroke="purple" strokeWidth={.03} fill="none" />
+                <path d={path} stroke="purple" strokeWidth={0.03} fill="none" />
             </svg>
             <SplinePoint
                 point={spline.start}

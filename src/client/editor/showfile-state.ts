@@ -149,7 +149,10 @@ export function useShowfile() {
                 const { startPoint, remainingEvents } = layer;
                 const newStartPointEvent: StartPointEvent = {
                     ...startPoint,
-                    target: { ...startPoint.target, point: {x:newCoords.x/60,y:newCoords.y/60} },
+                    target: {
+                        ...startPoint.target,
+                        point: { x: newCoords.x / 60, y: newCoords.y / 60 },
+                    },
                 };
                 newTimeline[layerIndex] = {
                     startPoint: newStartPointEvent,
@@ -178,7 +181,7 @@ export function useShowfile() {
                     ...eventToUpdate,
                     target: {
                         ...eventToUpdate.target,
-                        endPoint: {x:newCoords.x/60,y:newCoords.y/60},
+                        endPoint: { x: newCoords.x / 60, y: newCoords.y / 60 },
                     },
                 };
                 newTimeline[layerIndex] = {
@@ -205,7 +208,10 @@ export function useShowfile() {
                     ...eventToUpdate,
                     target: {
                         ...eventToUpdate.target,
-                        controlPoint: {x:newCoords.x/60,y:newCoords.y/60},
+                        controlPoint: {
+                            x: newCoords.x / 60,
+                            y: newCoords.y / 60,
+                        },
                     },
                 };
                 newTimeline[layerIndex] = {
@@ -234,7 +240,10 @@ export function useShowfile() {
                     ...eventToUpdate,
                     target: {
                         ...eventToUpdate.target,
-                        controlPoint2: {x:newCoords.x/60,y:newCoords.y/60},
+                        controlPoint2: {
+                            x: newCoords.x / 60,
+                            y: newCoords.y / 60,
+                        },
                     },
                 };
                 newTimeline[layerIndex] = {
@@ -336,12 +345,12 @@ export function useShowfile() {
                 newTarget = {
                     type: SplinePointType.CubicBezier,
                     controlPoint: {
-                        x: (eventToUpdate.target.endPoint.x - 20)/60,
-                        y: (eventToUpdate.target.endPoint.y - 20)/60,
+                        x: (eventToUpdate.target.endPoint.x - 20) / 60,
+                        y: (eventToUpdate.target.endPoint.y - 20) / 60,
                     },
                     controlPoint2: {
-                        x: (eventToUpdate.target.endPoint.x + 20)/60,
-                        y: (eventToUpdate.target.endPoint.y + 20)/60,
+                        x: (eventToUpdate.target.endPoint.x + 20) / 60,
+                        y: (eventToUpdate.target.endPoint.y + 20) / 60,
                     },
                     endPoint: eventToUpdate.target.endPoint,
                 };
@@ -353,8 +362,8 @@ export function useShowfile() {
                     type: SplinePointType.QuadraticBezier,
                     endPoint: eventToUpdate.target.endPoint,
                     controlPoint: {
-                        x: (eventToUpdate.target.endPoint.x + 20)/60,
-                        y: (eventToUpdate.target.endPoint.y + 20)/60,
+                        x: (eventToUpdate.target.endPoint.x + 20) / 60,
+                        y: (eventToUpdate.target.endPoint.y + 20) / 60,
                     },
                 };
             } else {
@@ -546,8 +555,11 @@ export function useShowfile() {
                         durationMs: defaultEventDurationMs,
                         target: {
                             type: SplinePointType.QuadraticBezier,
-                            controlPoint: { x: (x - 10)/60, y: (y - 10)/60 },
-                            endPoint: { x:x/60, y:y/60 },
+                            controlPoint: {
+                                x: (x - 10) / 60,
+                                y: (y - 10) / 60,
+                            },
+                            endPoint: { x: x / 60, y: y / 60 },
                         },
                         id: crypto.randomUUID(),
                     });
@@ -558,9 +570,15 @@ export function useShowfile() {
                         durationMs: defaultEventDurationMs,
                         target: {
                             type: SplinePointType.CubicBezier,
-                            endPoint: { x:x/60, y:y/60 },
-                            controlPoint: { x: (x + 10)/60, y: (y + 10)/60 },
-                            controlPoint2: { x: (x - 10)/60, y: (y - 10)/60 },
+                            endPoint: { x: x / 60, y: y / 60 },
+                            controlPoint: {
+                                x: (x + 10) / 60,
+                                y: (y + 10) / 60,
+                            },
+                            controlPoint2: {
+                                x: (x - 10) / 60,
+                                y: (y - 10) / 60,
+                            },
                         },
                         id: crypto.randomUUID(),
                     });

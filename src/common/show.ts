@@ -146,7 +146,7 @@ export function createNewShowfile(): Showfile {
                             type: SplinePointType.CubicBezier,
                             endPoint: { x: 3, y: 3 },
                             controlPoint: { x: 2.5, y: 1 },
-                            controlPoint2: { x: 2.5, y: 3},
+                            controlPoint2: { x: 2.5, y: 3 },
                         },
                         id: crypto.randomUUID(),
                     },

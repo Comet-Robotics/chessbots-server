@@ -29,8 +29,8 @@ export function SplinePoint({
         point.type === SplinePointType.StartPoint ? "blue" : "black";
     const mainCoords =
         point.type === SplinePointType.StartPoint ?
-            {x:point.point.x*60, y:point.point.y*60}
-        :   {x:point.endPoint.x*60, y:point.endPoint.y*60};
+            { x: point.point.x * 60, y: point.point.y * 60 }
+        :   { x: point.endPoint.x * 60, y: point.endPoint.y * 60 };
 
     return (
         <ContextMenu
@@ -100,8 +100,8 @@ export function SplineControlPoint({
                 backgroundColor: "red",
                 borderRadius: "50%",
                 position: "absolute",
-                left: (point.x*60 - robotSize / 4),
-                top: (point.y*60 - robotSize / 4),
+                left: point.x * 60 - robotSize / 4,
+                top: point.y * 60 - robotSize / 4,
                 cursor: "grab",
             }}
         />
