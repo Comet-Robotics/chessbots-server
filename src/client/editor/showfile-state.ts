@@ -35,6 +35,7 @@ import {
     usePreventExitWithUnsavedChanges,
     useStateWithTrackedHistory,
 } from "./hooks";
+import { GRID_CELL_PX } from "../../common/units";
 
 export function useShowfile() {
     // used to store the initial showfile state before any changes were made in the editor, so we have something to compare against to see if there are unsaved changes
@@ -149,7 +150,13 @@ export function useShowfile() {
                 const { startPoint, remainingEvents } = layer;
                 const newStartPointEvent: StartPointEvent = {
                     ...startPoint,
-                    target: { ...startPoint.target, point: newCoords },
+                    target: {
+                        ...startPoint.target,
+                        point: {
+                            x: newCoords.x / GRID_CELL_PX,
+                            y: newCoords.y / GRID_CELL_PX,
+                        },
+                    },
                 };
                 newTimeline[layerIndex] = {
                     startPoint: newStartPointEvent,
@@ -178,7 +185,10 @@ export function useShowfile() {
                     ...eventToUpdate,
                     target: {
                         ...eventToUpdate.target,
-                        endPoint: newCoords,
+                        endPoint: {
+                            x: newCoords.x / GRID_CELL_PX,
+                            y: newCoords.y / GRID_CELL_PX,
+                        },
                     },
                 };
                 newTimeline[layerIndex] = {
@@ -205,7 +215,10 @@ export function useShowfile() {
                     ...eventToUpdate,
                     target: {
                         ...eventToUpdate.target,
-                        controlPoint: newCoords,
+                        controlPoint: {
+                            x: newCoords.x / GRID_CELL_PX,
+                            y: newCoords.y / GRID_CELL_PX,
+                        },
                     },
                 };
                 newTimeline[layerIndex] = {
@@ -234,7 +247,10 @@ export function useShowfile() {
                     ...eventToUpdate,
                     target: {
                         ...eventToUpdate.target,
-                        controlPoint2: newCoords,
+                        controlPoint2: {
+                            x: newCoords.x / GRID_CELL_PX,
+                            y: newCoords.y / GRID_CELL_PX,
+                        },
                     },
                 };
                 newTimeline[layerIndex] = {
@@ -336,12 +352,20 @@ export function useShowfile() {
                 newTarget = {
                     type: SplinePointType.CubicBezier,
                     controlPoint: {
-                        x: eventToUpdate.target.endPoint.x - 20,
-                        y: eventToUpdate.target.endPoint.y - 20,
+                        x:
+                            (eventToUpdate.target.endPoint.x - 20) /
+                            GRID_CELL_PX,
+                        y:
+                            (eventToUpdate.target.endPoint.y - 20) /
+                            GRID_CELL_PX,
                     },
                     controlPoint2: {
-                        x: eventToUpdate.target.endPoint.x + 20,
-                        y: eventToUpdate.target.endPoint.y + 20,
+                        x:
+                            (eventToUpdate.target.endPoint.x + 20) /
+                            GRID_CELL_PX,
+                        y:
+                            (eventToUpdate.target.endPoint.y + 20) /
+                            GRID_CELL_PX,
                     },
                     endPoint: eventToUpdate.target.endPoint,
                 };
@@ -353,8 +377,12 @@ export function useShowfile() {
                     type: SplinePointType.QuadraticBezier,
                     endPoint: eventToUpdate.target.endPoint,
                     controlPoint: {
-                        x: eventToUpdate.target.endPoint.x + 20,
-                        y: eventToUpdate.target.endPoint.y + 20,
+                        x:
+                            (eventToUpdate.target.endPoint.x + 20) /
+                            GRID_CELL_PX,
+                        y:
+                            (eventToUpdate.target.endPoint.y + 20) /
+                            GRID_CELL_PX,
                     },
                 };
             } else {
@@ -386,7 +414,7 @@ export function useShowfile() {
                     type: SplinePointType.StartPoint,
                     point: {
                         x: 0,
-                        y: 70,
+                        y: 10,
                     },
                 },
                 durationMs: defaultEventDurationMs,
@@ -546,8 +574,14 @@ export function useShowfile() {
                         durationMs: defaultEventDurationMs,
                         target: {
                             type: SplinePointType.QuadraticBezier,
-                            controlPoint: { x: x - 10, y: y - 10 },
-                            endPoint: { x, y },
+                            controlPoint: {
+                                x: (x - 10) / GRID_CELL_PX,
+                                y: (y - 10) / GRID_CELL_PX,
+                            },
+                            endPoint: {
+                                x: x / GRID_CELL_PX,
+                                y: y / GRID_CELL_PX,
+                            },
                         },
                         id: crypto.randomUUID(),
                     });
@@ -558,9 +592,18 @@ export function useShowfile() {
                         durationMs: defaultEventDurationMs,
                         target: {
                             type: SplinePointType.CubicBezier,
-                            endPoint: { x, y },
-                            controlPoint: { x: x + 10, y: y + 10 },
-                            controlPoint2: { x: x - 10, y: y - 10 },
+                            endPoint: {
+                                x: x / GRID_CELL_PX,
+                                y: y / GRID_CELL_PX,
+                            },
+                            controlPoint: {
+                                x: (x + 10) / GRID_CELL_PX,
+                                y: (y + 10) / GRID_CELL_PX,
+                            },
+                            controlPoint2: {
+                                x: (x - 10) / GRID_CELL_PX,
+                                y: (y - 10) / GRID_CELL_PX,
+                            },
                         },
                         id: crypto.randomUUID(),
                     });

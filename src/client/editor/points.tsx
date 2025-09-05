@@ -2,6 +2,7 @@ import { ContextMenu, Menu, MenuItem, MenuDivider } from "@blueprintjs/core";
 import { useRef } from "react";
 import { type Point, SplinePointType, type Coords } from "../../common/spline";
 import { robotSize } from "../debug/simulator";
+import { GRID_CELL_PX } from "../../common/units";
 import { useDraggable } from "./hooks";
 
 export function SplinePoint({
@@ -29,8 +30,11 @@ export function SplinePoint({
         point.type === SplinePointType.StartPoint ? "blue" : "black";
     const mainCoords =
         point.type === SplinePointType.StartPoint ?
-            point.point
-        :   point.endPoint;
+            { x: point.point.x * GRID_CELL_PX, y: point.point.y * GRID_CELL_PX }
+        :   {
+                x: point.endPoint.x * GRID_CELL_PX,
+                y: point.endPoint.y * GRID_CELL_PX,
+            };
 
     return (
         <ContextMenu
@@ -100,8 +104,8 @@ export function SplineControlPoint({
                 backgroundColor: "red",
                 borderRadius: "50%",
                 position: "absolute",
-                left: point.x - robotSize / 4,
-                top: point.y - robotSize / 4,
+                left: point.x * GRID_CELL_PX - robotSize / 4,
+                top: point.y * GRID_CELL_PX - robotSize / 4,
                 cursor: "grab",
             }}
         />

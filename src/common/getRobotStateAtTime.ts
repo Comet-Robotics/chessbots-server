@@ -1,4 +1,5 @@
 import { type TimelineLayerType, TimelineEventTypes } from "./show";
+import { GRID_CELL_PX } from "./units";
 import {
     type Coords,
     SplinePointType,
@@ -26,7 +27,10 @@ export function getRobotStateAtTime(
     timestampMs: number,
 ): RobotState {
     let currentTimeMs = 0;
-    let previousPoint: Coords = layer.startPoint.target.point;
+    let previousPoint: Coords = {
+        x: layer.startPoint.target.point.x * GRID_CELL_PX,
+        y: layer.startPoint.target.point.y * GRID_CELL_PX,
+    };
     let previousHeadingRad = 0; // Default initial heading
     let previousMidpointType: SplinePointType | null = null; // Track type of previous segment
     let previousActualCP1: Coords | null = null;
@@ -66,7 +70,10 @@ export function getRobotStateAtTime(
             if (currentEvent.type === TimelineEventTypes.GoToPointEvent) {
                 const target = currentEvent.target;
                 const startPos = previousPoint;
-                const endPos = target.endPoint;
+                const endPos = {
+                    x: target.endPoint.x * GRID_CELL_PX,
+                    y: target.endPoint.y * GRID_CELL_PX,
+                };
                 let p1: Coords;
                 let derivativeFunc: (t: number) => Coords;
                 let evaluateFunc: (t: number) => Coords;
@@ -92,7 +99,10 @@ export function getRobotStateAtTime(
                         derivativeQuadraticBezier(startPos, p1, endPos, t);
                 } else {
                     // Cubic Bezier
-                    const controlPoint2 = target.controlPoint;
+                    const controlPoint2 = {
+                        x: target.controlPoint.x * GRID_CELL_PX,
+                        y: target.controlPoint.y * GRID_CELL_PX,
+                    };
                     if (
                         previousMidpointType === SplinePointType.CubicBezier &&
                         previousActualCP2
@@ -146,7 +156,10 @@ export function getRobotStateAtTime(
         // Update state for the next iteration
         currentTimeMs = eventEndTimeMs;
         if (currentEvent.type === TimelineEventTypes.GoToPointEvent) {
-            previousPoint = currentEvent.target.endPoint;
+            previousPoint = {
+                x: currentEvent.target.endPoint.x * GRID_CELL_PX,
+                y: currentEvent.target.endPoint.y * GRID_CELL_PX,
+            };
             previousMidpointType = currentEvent.target.type;
 
             let final_p1: Coords | null = null;
@@ -155,7 +168,10 @@ export function getRobotStateAtTime(
             const target = currentEvent.target;
 
             const _startPos_deriv = previousPoint;
-            const endPos = target.endPoint;
+            const endPos = {
+                x: target.endPoint.x * GRID_CELL_PX,
+                y: target.endPoint.y * GRID_CELL_PX,
+            };
 
             if (target.type === SplinePointType.QuadraticBezier) {
                 if (
@@ -181,7 +197,10 @@ export function getRobotStateAtTime(
                         t,
                     );
             } else {
-                const controlPoint2 = target.controlPoint;
+                const controlPoint2 = {
+                    x: target.controlPoint.x * GRID_CELL_PX,
+                    y: target.controlPoint.y * GRID_CELL_PX,
+                };
                 if (
                     previousMidpointType === SplinePointType.CubicBezier &&
                     previousActualCP2
@@ -211,7 +230,10 @@ export function getRobotStateAtTime(
                 isNaN(finalHeading) ? previousHeadingRad : finalHeading;
         } else {
             if (currentEvent.type === TimelineEventTypes.StartPointEvent) {
-                previousPoint = currentEvent.target.point;
+                previousPoint = {
+                    x: currentEvent.target.point.x,
+                    y: currentEvent.target.point.y,
+                };
             }
             previousMidpointType = null;
             previousActualCP1 = null;

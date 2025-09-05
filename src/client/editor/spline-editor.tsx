@@ -10,6 +10,7 @@ import {
     timelineLayerToSpline,
     TimelineEventTypes,
 } from "../../common/show";
+import { GRID_CELL_PX } from "../../common/units";
 
 interface SplineEditorProps {
     layer: TimelineLayerType;
@@ -62,16 +63,17 @@ export function SplineEditor({
     return (
         <>
             <svg
+                viewBox="0 0 12 12"
                 style={{
                     position: "absolute",
                     left: 0,
                     top: 0,
-                    width: "100%",
-                    height: "100%",
+                    width: GRID_CELL_PX * 12,
+                    height: GRID_CELL_PX * 12,
                     pointerEvents: "none",
                 }}
             >
-                <path d={path} stroke="purple" strokeWidth={3} fill="none" />
+                <path d={path} stroke="purple" strokeWidth={0.03} fill="none" />
             </svg>
             <SplinePoint
                 point={spline.start}
