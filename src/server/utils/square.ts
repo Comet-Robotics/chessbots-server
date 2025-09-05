@@ -13,13 +13,13 @@ export function positionToSquare(position: Position): Square {
     const letter = FILE_LOOKUP[Math.floor(position.x - 2)];
 
     if (letter === undefined) {
-        throw new Error("Position " + position + " is not on the chess board.");
+        throw new Error(`Position (${position.x}, ${position.y}) is not on the chess board.`);
     }
 
     const number = Math.floor(position.y - 1);
 
     if (number < 2 || number > 10) {
-        throw new Error("Position " + position + " is not on the chess board.");
+        throw new Error(`Position (${position.x}, ${position.y}) is not on the chess board.`);
     }
 
     return (letter + number) as Square;
