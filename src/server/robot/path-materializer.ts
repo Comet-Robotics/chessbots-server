@@ -106,7 +106,10 @@ function addToCollisions(collisions: string[], x: number, y: number) {
     }
 }
 
-function detectCollisions(gridMove: GridMove, collisionType: CollisionType): string[] {
+function detectCollisions(
+    gridMove: GridMove,
+    collisionType: CollisionType,
+): string[] {
     const from = gridMove.from;
     const to = gridMove.to;
     const collisions: string[] = [];
@@ -368,7 +371,10 @@ function constructFinalCommand(
                 ]);
             setupCommands.push(...rotateCommands, mainTurn1, ...driveCommands);
             return new MovePiece(setupCommands, mainDrive);
-        } else if (collisionType === CollisionType.VERTICAL && numCollisions > 1) {
+        } else if (
+            collisionType === CollisionType.VERTICAL &&
+            numCollisions > 1
+        ) {
             const x = dirToEdge[0] * 0.5;
             const pos1 = new Position(from.i + x + 0.5, from.j + 0.5);
             const pos2 = new Position(from.i + x + 0.5, to.j + 0.5);
