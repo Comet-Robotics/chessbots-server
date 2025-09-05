@@ -35,6 +35,7 @@ import {
     usePreventExitWithUnsavedChanges,
     useStateWithTrackedHistory,
 } from "./hooks";
+import { GRID_CELL_PX } from "../../common/units";
 
 export function useShowfile() {
     // used to store the initial showfile state before any changes were made in the editor, so we have something to compare against to see if there are unsaved changes
@@ -151,7 +152,10 @@ export function useShowfile() {
                     ...startPoint,
                     target: {
                         ...startPoint.target,
-                        point: { x: newCoords.x / 60, y: newCoords.y / 60 },
+                        point: {
+                            x: newCoords.x / GRID_CELL_PX,
+                            y: newCoords.y / GRID_CELL_PX,
+                        },
                     },
                 };
                 newTimeline[layerIndex] = {
@@ -181,7 +185,10 @@ export function useShowfile() {
                     ...eventToUpdate,
                     target: {
                         ...eventToUpdate.target,
-                        endPoint: { x: newCoords.x / 60, y: newCoords.y / 60 },
+                        endPoint: {
+                            x: newCoords.x / GRID_CELL_PX,
+                            y: newCoords.y / GRID_CELL_PX,
+                        },
                     },
                 };
                 newTimeline[layerIndex] = {
@@ -209,8 +216,8 @@ export function useShowfile() {
                     target: {
                         ...eventToUpdate.target,
                         controlPoint: {
-                            x: newCoords.x / 60,
-                            y: newCoords.y / 60,
+                            x: newCoords.x / GRID_CELL_PX,
+                            y: newCoords.y / GRID_CELL_PX,
                         },
                     },
                 };
@@ -241,8 +248,8 @@ export function useShowfile() {
                     target: {
                         ...eventToUpdate.target,
                         controlPoint2: {
-                            x: newCoords.x / 60,
-                            y: newCoords.y / 60,
+                            x: newCoords.x / GRID_CELL_PX,
+                            y: newCoords.y / GRID_CELL_PX,
                         },
                     },
                 };
@@ -345,12 +352,20 @@ export function useShowfile() {
                 newTarget = {
                     type: SplinePointType.CubicBezier,
                     controlPoint: {
-                        x: (eventToUpdate.target.endPoint.x - 20) / 60,
-                        y: (eventToUpdate.target.endPoint.y - 20) / 60,
+                        x:
+                            (eventToUpdate.target.endPoint.x - 20) /
+                            GRID_CELL_PX,
+                        y:
+                            (eventToUpdate.target.endPoint.y - 20) /
+                            GRID_CELL_PX,
                     },
                     controlPoint2: {
-                        x: (eventToUpdate.target.endPoint.x + 20) / 60,
-                        y: (eventToUpdate.target.endPoint.y + 20) / 60,
+                        x:
+                            (eventToUpdate.target.endPoint.x + 20) /
+                            GRID_CELL_PX,
+                        y:
+                            (eventToUpdate.target.endPoint.y + 20) /
+                            GRID_CELL_PX,
                     },
                     endPoint: eventToUpdate.target.endPoint,
                 };
@@ -362,8 +377,12 @@ export function useShowfile() {
                     type: SplinePointType.QuadraticBezier,
                     endPoint: eventToUpdate.target.endPoint,
                     controlPoint: {
-                        x: (eventToUpdate.target.endPoint.x + 20) / 60,
-                        y: (eventToUpdate.target.endPoint.y + 20) / 60,
+                        x:
+                            (eventToUpdate.target.endPoint.x + 20) /
+                            GRID_CELL_PX,
+                        y:
+                            (eventToUpdate.target.endPoint.y + 20) /
+                            GRID_CELL_PX,
                     },
                 };
             } else {
@@ -556,10 +575,13 @@ export function useShowfile() {
                         target: {
                             type: SplinePointType.QuadraticBezier,
                             controlPoint: {
-                                x: (x - 10) / 60,
-                                y: (y - 10) / 60,
+                                x: (x - 10) / GRID_CELL_PX,
+                                y: (y - 10) / GRID_CELL_PX,
                             },
-                            endPoint: { x: x / 60, y: y / 60 },
+                            endPoint: {
+                                x: x / GRID_CELL_PX,
+                                y: y / GRID_CELL_PX,
+                            },
                         },
                         id: crypto.randomUUID(),
                     });
@@ -570,14 +592,17 @@ export function useShowfile() {
                         durationMs: defaultEventDurationMs,
                         target: {
                             type: SplinePointType.CubicBezier,
-                            endPoint: { x: x / 60, y: y / 60 },
+                            endPoint: {
+                                x: x / GRID_CELL_PX,
+                                y: y / GRID_CELL_PX,
+                            },
                             controlPoint: {
-                                x: (x + 10) / 60,
-                                y: (y + 10) / 60,
+                                x: (x + 10) / GRID_CELL_PX,
+                                y: (y + 10) / GRID_CELL_PX,
                             },
                             controlPoint2: {
-                                x: (x - 10) / 60,
-                                y: (y - 10) / 60,
+                                x: (x - 10) / GRID_CELL_PX,
+                                y: (y - 10) / GRID_CELL_PX,
                             },
                         },
                         id: crypto.randomUUID(),

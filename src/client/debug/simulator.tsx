@@ -17,7 +17,7 @@ import {
 } from "../../common/message/simulator-message";
 import { Tag, CompoundTag } from "@blueprintjs/core";
 import "./simulator.scss";
-import { clampHeading } from "../../common/units";
+import { clampHeading, GRID_CELL_PX } from "../../common/units";
 import {
     bgColor,
     darkModeIcon,
@@ -29,7 +29,7 @@ import {
     toggleUserSetting,
 } from "../check-dark-mode";
 
-const tileSize = 60;
+const tileSize = GRID_CELL_PX;
 export const robotSize = tileSize / 2;
 const cellCount = 12;
 

@@ -19,3 +19,9 @@ export function clampHeading(radians: number): number {
     // Final mod results in [0, 360)
     return ((radians % FULL_ROTATION) + FULL_ROTATION) % FULL_ROTATION;
 }
+
+/**
+ * Size of one grid cell in pixels for UI/editor rendering.
+ * Used to convert between board grid coordinates and pixel coordinates.
+ */
+export const GRID_CELL_PX = 60;
