@@ -1,10 +1,5 @@
-import {
-    Command,
-    RobotCommand,
-    SequentialCommandGroup,
-    Reversible,
-    ParallelCommandGroup,
-} from "./command";
+import type { Command, RobotCommand, Reversible } from "./command";
+import { SequentialCommandGroup, ParallelCommandGroup } from "./command";
 
 export type ReversibleRobotCommand = RobotCommand &
     Reversible<ReversibleRobotCommand>;

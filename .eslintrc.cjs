@@ -5,10 +5,12 @@ module.exports = {
         "eslint:recommended",
         "plugin:@typescript-eslint/recommended",
         "plugin:react-hooks/recommended",
+        "plugin:import/recommended",
+        "plugin:import/typescript",
     ],
     ignorePatterns: ["dist", ".eslintrc.cjs"],
     parser: "@typescript-eslint/parser",
-    plugins: ["react-refresh", "eslint-plugin-tsdoc"],
+    plugins: ["react-refresh", "eslint-plugin-tsdoc", "eslint-plugin-import"],
     rules: {
         "@typescript-eslint/no-unused-vars": "error",
         "react-refresh/only-export-components": [
@@ -26,5 +28,17 @@ module.exports = {
         ],
         eqeqeq: "warn",
         "tsdoc/syntax": "warn",
+        "import/no-cycle": "error",
+        "@typescript-eslint/consistent-type-imports": "error"
+    },
+    settings: {
+        "import/parsers": {
+            "@typescript-eslint/parser": [".ts", ".tsx"],
+        },
+        "import/resolver": {
+            node: {
+                extensions: [".js", ".jsx", ".ts", ".tsx"],
+            },
+        },
     },
 };

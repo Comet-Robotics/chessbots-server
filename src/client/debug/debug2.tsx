@@ -1,8 +1,11 @@
-import { Dispatch, useEffect, useState } from "react";
+import type { Dispatch } from "react";
+import { useEffect, useState } from "react";
 
-import { GameInterruptedMessage } from "../../common/message/game-message";
-import { MoveMessage } from "../../common/message/game-message";
 import {
+    GameInterruptedMessage,
+    MoveMessage,
+} from "../../common/message/game-message";
+import type {
     GameEndReason,
     GameInterruptedReason,
 } from "../../common/game-end-reasons";
@@ -10,11 +13,12 @@ import {
 import { ChessboardWrapper } from "../chessboard/chessboard-wrapper";
 import { NavbarMenu } from "../game/navbar-menu";
 import { useSocket } from "../api";
-import { MessageHandler } from "../../common/message/message";
+import type { MessageHandler } from "../../common/message/message";
 //import { GameEndDialog } from "../game/game-end-dialog";
 import { Outlet } from "react-router-dom";
 import { ChessEngine } from "../../common/chess-engine";
-import { Move, PieceType, Side } from "../../common/game-types";
+import type { Move } from "../../common/game-types";
+import { PieceType, Side } from "../../common/game-types";
 //import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { GameEndDialog } from "../game/game-end-dialog";
 // import { debugPath } from "../../server/robot/path-materializer";

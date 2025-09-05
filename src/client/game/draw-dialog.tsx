@@ -6,7 +6,7 @@ import {
     DialogFooter,
 } from "@blueprintjs/core";
 import { useState } from "react";
-import { SendMessage } from "../../common/message/message";
+import type { SendMessage } from "../../common/message/message";
 import {
     GameHoldMessage,
     GameInterruptedMessage,

@@ -1,26 +1,35 @@
-import { robotManager } from "../api/managers";
-import { Move } from "../../common/game-types";
-import { gameManager } from "../api/api";
+import { type Move } from "../../common/game-types";
 import {
-    Command,
+    type Command,
     ParallelCommandGroup,
     SequentialCommandGroup,
 } from "../command/command";
+import type { MoveCommand } from "../command/move-command";
 import {
     AbsoluteMoveCommand,
     DriveCommand,
-    MoveCommand,
     ReversibleAbsoluteRotateCommand,
 } from "../command/move-command";
-import { MovePiece, ReversibleRobotCommand } from "../command/move-piece";
+import type { ReversibleRobotCommand } from "../command/move-piece";
+import { MovePiece } from "../command/move-piece";
 import { Position } from "./position";
 import { GridIndices } from "./grid-indices";
 import { error } from "console";
+import { robotManager } from "./robot-manager";
+import { gameManager } from "../api/managers";
 
 export interface GridMove {
     from: GridIndices;
     to: GridIndices;
 }
+
+enum CollisionType {
+    HORIZONTAL = 0,
+    VERTICAL = 1,
+    DIAGONAL = 2,
+    HORSE = 3,
+}
+
 const arrayOfCornersIndicies = [0, 9, 18, 27];
 
 const arrayOfDeadzone = [
@@ -69,23 +78,23 @@ function moveToGridMove(move: Move): GridMove {
     };
 }
 
-function calcCollisionType(gridMove: GridMove): number {
+function calcCollisionType(gridMove: GridMove): CollisionType {
     const from = gridMove.from;
     const to = gridMove.to;
 
     // Horizontal
     if (from.j === to.j) {
-        return 0;
+        return CollisionType.HORIZONTAL;
         // Vertical
     } else if (from.i === to.i) {
-        return 1;
+        return CollisionType.VERTICAL;
     } else {
         // Diagonal
         if (Math.abs(from.i - to.i) === Math.abs(from.j - to.j)) {
-            return 2;
+            return CollisionType.DIAGONAL;
             // Horse
         } else {
-            return 3;
+            return CollisionType.HORSE;
         }
     }
 }
@@ -97,48 +106,67 @@ function addToCollisions(collisions: string[], x: number, y: number) {
     }
 }
 
-function detectCollisions(gridMove: GridMove, collisionType: number): string[] {
+function detectCollisions(
+    gridMove: GridMove,
+    collisionType: CollisionType,
+): string[] {
     const from = gridMove.from;
     const to = gridMove.to;
     const collisions: string[] = [];
     const direction: [number, number] = directionToEdge(to);
     switch (collisionType) {
         // Horizontal
-        case 0: {
+        case CollisionType.HORIZONTAL: {
             if (to.i < from.i) {
-                addToCollisions(collisions, from.i, from.j + direction[1]);
                 for (let i = from.i - 1; i > to.i; i--) {
                     addToCollisions(collisions, i, from.j);
-                    addToCollisions(collisions, i, from.j + direction[1]);
+                }
+                if (collisions.length > 0) {
+                    addToCollisions(collisions, from.i, from.j + direction[1]);
+                    for (let i = from.i - 1; i > to.i; i--) {
+                        addToCollisions(collisions, i, from.j + direction[1]);
+                    }
                 }
             } else {
-                addToCollisions(collisions, from.i, from.j + direction[1]);
                 for (let i = from.i + 1; i < to.i; i++) {
                     addToCollisions(collisions, i, from.j);
-                    addToCollisions(collisions, i, from.j + direction[1]);
+                }
+                if (collisions.length > 0) {
+                    addToCollisions(collisions, from.i, from.j + direction[1]);
+                    for (let i = from.i + 1; i < to.i; i++) {
+                        addToCollisions(collisions, i, from.j + direction[1]);
+                    }
                 }
             }
             break;
         }
         // Vertical
-        case 1: {
+        case CollisionType.VERTICAL: {
             if (to.j < from.j) {
-                addToCollisions(collisions, from.i + direction[0], from.j);
                 for (let j = from.j - 1; j > to.j; j--) {
                     addToCollisions(collisions, from.i, j);
-                    addToCollisions(collisions, from.i + direction[0], j);
+                }
+                if (collisions.length > 0) {
+                    addToCollisions(collisions, from.i + direction[0], from.j);
+                    for (let j = from.j - 1; j > to.j; j--) {
+                        addToCollisions(collisions, from.i + direction[0], j);
+                    }
                 }
             } else {
-                addToCollisions(collisions, from.i + direction[0], from.j);
                 for (let j = from.j + 1; j < to.j; j++) {
                     addToCollisions(collisions, from.i, j);
-                    addToCollisions(collisions, from.i + direction[0], j);
+                }
+                if (collisions.length > 0) {
+                    addToCollisions(collisions, from.i + direction[0], from.j);
+                    for (let j = from.j + 1; j < to.j; j++) {
+                        addToCollisions(collisions, from.i + direction[0], j);
+                    }
                 }
             }
             break;
         }
         // Diagonal
-        case 2: {
+        case CollisionType.DIAGONAL: {
             // Will be either positive or negative depending on direction
             const dx = to.i - from.i;
             const dy = to.j - from.j;
@@ -174,7 +202,7 @@ function detectCollisions(gridMove: GridMove, collisionType: number): string[] {
             break;
         }
         // Horse
-        case 3: {
+        case CollisionType.HORSE: {
             // Will be either positive or negative depending on direction
             const dx = to.i - from.i;
             const dy = to.j - from.j;
@@ -210,13 +238,13 @@ function detectCollisions(gridMove: GridMove, collisionType: number): string[] {
 function findShimmyLocation(
     pieceId: string,
     move: GridMove,
-    collisionType: number,
+    collisionType: CollisionType,
 ): Position {
     const shimmyPos: Position = robotManager.getRobot(pieceId).position;
     const axisShimmyAmount: number = 1 / 3;
     switch (collisionType) {
         // Horizontal
-        case 0: {
+        case CollisionType.HORIZONTAL: {
             const direction: [number, number] = directionToEdge(move.to);
             const gridY: number = Math.floor(shimmyPos.y);
             if (gridY === move.to.j) {
@@ -230,9 +258,9 @@ function findShimmyLocation(
             }
         }
         // Vertical
-        case 1: {
+        case CollisionType.VERTICAL: {
             const direction: [number, number] = directionToEdge(move.to);
-            const gridX: number = move.from.i + direction[0];
+            const gridX: number = Math.floor(shimmyPos.y);
             if (gridX === move.to.i) {
                 const augmentX: number =
                     shimmyPos.x + direction[0] * -axisShimmyAmount;
@@ -243,8 +271,8 @@ function findShimmyLocation(
                 return new Position(augmentX, shimmyPos.y);
             }
         }
-        case 2:
-        case 3: {
+        case CollisionType.DIAGONAL:
+        case CollisionType.HORSE: {
             const moveDistance: number = 0.5;
             const signedDistX: number = move.to.i - move.from.i;
             const signedDistY: number = move.to.j - move.from.j;
@@ -254,10 +282,10 @@ function findShimmyLocation(
             const orth1: Position = new Position(-normalY, normalX);
             const orth2: Position = new Position(normalY, -normalX);
             const orthPos1: Position = orth1.add(
-                gridIndicesToPosition(move.to),
+                Position.fromGridIndices(move.to),
             );
             const orthPos2: Position = orth2.add(
-                gridIndicesToPosition(move.to),
+                Position.fromGridIndices(move.to),
             );
 
             // distance calculations :)
@@ -307,18 +335,19 @@ function constructFinalCommand(
     move: GridMove,
     driveCommands: DriveCommand[],
     rotateCommands: ReversibleRobotCommand[],
-    collisionType: number,
+    collisionType: CollisionType,
     numCollisions: number,
 ): MovePiece {
     const from = move.from;
-    console.log(from, robotManager.indicesToIds);
+    const indicesToIds = robotManager.getIndicesToIds();
+    console.log(from, indicesToIds);
     const mainPiece = robotManager.getRobotAtIndices(from).id;
     const dirToEdge = directionToEdge(from);
 
     if (mainPiece !== undefined) {
         console.log("main piece");
         const to = move.to;
-        if (collisionType === 0 && numCollisions > 1) {
+        if (collisionType === CollisionType.HORIZONTAL && numCollisions > 1) {
             const y = dirToEdge[1] * 0.5;
             const pos1 = new Position(from.i + 0.5, from.j + y + 0.5);
             const pos2 = new Position(to.i + 0.5, from.j + y + 0.5);
@@ -342,7 +371,10 @@ function constructFinalCommand(
                 ]);
             setupCommands.push(...rotateCommands, mainTurn1, ...driveCommands);
             return new MovePiece(setupCommands, mainDrive);
-        } else if (collisionType === 1 && numCollisions > 1) {
+        } else if (
+            collisionType === CollisionType.VERTICAL &&
+            numCollisions > 1
+        ) {
             const x = dirToEdge[0] * 0.5;
             const pos1 = new Position(from.i + x + 0.5, from.j + 0.5);
             const pos2 = new Position(from.i + x + 0.5, to.j + 0.5);
@@ -382,7 +414,7 @@ function constructFinalCommand(
 
 // Takes in a move, and generates the commands required to get the main piece to it's destination
 // If there are pieces in the way, it shimmy's them out, and move them back after main piece passes
-function moveMainPiece(move: GridMove): MovePiece {
+export function moveMainPiece(move: GridMove): MovePiece {
     const driveCommands: DriveCommand[] = [];
     const rotateCommands: ReversibleRobotCommand[] = [];
     const collisionType = calcCollisionType(move);
@@ -545,6 +577,7 @@ function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
         }
         i += botDirectionToHome;
         if (i < 0) i += 36;
+        if (i >= 36) i -= 36;
     }
     if (arrayOfDeadzone[endInArray]) {
         moveCommands.push(
@@ -570,10 +603,6 @@ function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
     return goHome;
 }
 
-function gridIndicesToPosition(indices: GridIndices): Position {
-    return new Position(indices.i + 0.5, indices.j + 0.5);
-}
-
 // Command structure
 // No Capture: Sequential[ Parallel[Turn[all]], MovePiece[shimmys, main], Parallel[TurnToStart[all]] ]
 
@@ -591,15 +620,8 @@ export function materializePath(move: Move): Command {
         );
         console.log("capture " + capturePiece);
         if (capturePiece !== undefined) {
-            const captureSquareX = Math.floor(
-                robotManager.getRobot(capturePiece).position.x,
-            );
-            const captureSquareY = Math.floor(
-                robotManager.getRobot(capturePiece).position.y,
-            );
-            const captureSquare = new GridIndices(
-                captureSquareX,
-                captureSquareY,
+            const captureSquare = GridIndices.fromPosition(
+                robotManager.getRobot(capturePiece).position,
             );
 
             const captureCommand = returnToHome(captureSquare, capturePiece);
@@ -625,37 +647,37 @@ export function materializePath(move: Move): Command {
             rookPiece = robotManager.getRobotAtIndices(new GridIndices(2, 2));
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
-                gridIndicesToPosition(new GridIndices(4, 2)),
+                Position.fromGridIndices(new GridIndices(4, 2)),
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(2, 1)),
+                Position.fromGridIndices(new GridIndices(2, 1)),
             );
             rookMove2 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(5, 1)),
+                Position.fromGridIndices(new GridIndices(5, 1)),
             );
             rookMove3 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(5, 2)),
+                Position.fromGridIndices(new GridIndices(5, 2)),
             );
         } else {
             rookPiece = robotManager.getRobotAtIndices(new GridIndices(2, 9));
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
-                gridIndicesToPosition(new GridIndices(4, 9)),
+                Position.fromGridIndices(new GridIndices(4, 9)),
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(2, 10)),
+                Position.fromGridIndices(new GridIndices(2, 10)),
             );
             rookMove2 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(5, 10)),
+                Position.fromGridIndices(new GridIndices(5, 10)),
             );
             rookMove3 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(5, 9)),
+                Position.fromGridIndices(new GridIndices(5, 9)),
             );
         }
         return new SequentialCommandGroup([
@@ -673,37 +695,37 @@ export function materializePath(move: Move): Command {
             rookPiece = robotManager.getRobotAtIndices(new GridIndices(9, 2));
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
-                gridIndicesToPosition(new GridIndices(8, 2)),
+                Position.fromGridIndices(new GridIndices(8, 2)),
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(9, 1)),
+                Position.fromGridIndices(new GridIndices(9, 1)),
             );
             rookMove2 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(7, 1)),
+                Position.fromGridIndices(new GridIndices(7, 1)),
             );
             rookMove3 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(7, 2)),
+                Position.fromGridIndices(new GridIndices(7, 2)),
             );
         } else {
             rookPiece = robotManager.getRobotAtIndices(new GridIndices(9, 9));
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
-                gridIndicesToPosition(new GridIndices(9, 8)),
+                Position.fromGridIndices(new GridIndices(9, 8)),
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(9, 10)),
+                Position.fromGridIndices(new GridIndices(9, 10)),
             );
             rookMove2 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(7, 10)),
+                Position.fromGridIndices(new GridIndices(7, 10)),
             );
             rookMove3 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(7, 9)),
+                Position.fromGridIndices(new GridIndices(7, 9)),
             );
         }
         return new SequentialCommandGroup([

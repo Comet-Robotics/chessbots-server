@@ -6,7 +6,8 @@ import {
     Spinner,
 } from "@blueprintjs/core";
 import { SetupBase } from "./setup-base";
-import { Dispatch, useState } from "react";
+import type { Dispatch } from "react";
+import { useState } from "react";
 import { SetupGame } from "./setup-game";
 import { Navigate, useNavigate } from "react-router-dom";
 import { ClientType, GameType } from "../../common/client-types";
@@ -135,6 +136,7 @@ function SetupMain(props: SetupMainProps) {
             <ButtonGroup variant="outlined">
                 {allSettings.map((item, idx) => (
                     <Button
+                        key={item[0]}
                         textClassName={textColor()}
                         //changed for better visibility
                         icon={item[1]}

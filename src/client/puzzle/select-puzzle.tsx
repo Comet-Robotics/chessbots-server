@@ -1,8 +1,9 @@
 import { Button, MenuItem } from "@blueprintjs/core";
-import { ItemRenderer, Select } from "@blueprintjs/select";
+import type { ItemRenderer } from "@blueprintjs/select";
+import { Select } from "@blueprintjs/select";
 import { post } from "../api";
 import { useNavigate } from "react-router-dom";
-import { PuzzleComponents } from "../../server/api/api";
+import type { PuzzleComponents } from "../../server/api/puzzles";
 
 const renderPuzzleOptions: ItemRenderer<string> = (
     puzzleNumber,
@@ -21,7 +22,7 @@ const renderPuzzleOptions: ItemRenderer<string> = (
 };
 
 interface SelectPuzzleProps {
-    puzzles: Map<string, PuzzleComponents>;
+    puzzles: Record<string, PuzzleComponents>;
     selectedPuzzle: string | undefined;
     onPuzzleSelected: (puzzle: string) => void;
 }
@@ -38,7 +39,10 @@ export function SelectPuzzle(props: SelectPuzzleProps) {
             onClick={async () => {
                 if (props.selectedPuzzle && props.puzzles) {
                     //convert puzzle to map and send to start puzzles
-                    const puzzle = props.puzzles as Map<string, object>;
+                    const puzzle = props.puzzles as Record<
+                        string,
+                        PuzzleComponents
+                    >;
                     const promise = post("/start-puzzle-game", {
                         puzzle: JSON.stringify(puzzle[props.selectedPuzzle]),
                     });
@@ -64,7 +68,7 @@ export function SelectPuzzle(props: SelectPuzzleProps) {
                             props.selectedPuzzle
                         :   "Select a puzzle..."
                     }
-                    rightIcon="double-caret-vertical"
+                    endIcon="double-caret-vertical"
                 />
             </Select>
             {submit}

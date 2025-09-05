@@ -1,4 +1,4 @@
-import { Square } from "chess.js";
+import type { Square } from "chess.js";
 import { Position } from "../robot/position";
 
 const FILE_LOOKUP = "abcdefgh";
@@ -10,8 +10,18 @@ const FILE_LOOKUP = "abcdefgh";
  * @returns - pgn square
  */
 export function positionToSquare(position: Position): Square {
-    const letter = FILE_LOOKUP[Math.floor(position.x)];
-    const number = Math.floor(position.y) + 1;
+    const letter = FILE_LOOKUP[Math.floor(position.x - 2)];
+
+    if (letter === undefined) {
+        throw new Error("Position " + position + " is not on the chess board.");
+    }
+
+    const number = Math.floor(position.y - 1);
+
+    if (number < 2 || number > 10) {
+        throw new Error("Position " + position + " is not on the chess board.");
+    }
+
     return (letter + number) as Square;
 }
 
@@ -23,6 +33,6 @@ export function positionToSquare(position: Position): Square {
  */
 export function squareToPosition(square: Square): Position {
     const i = FILE_LOOKUP.indexOf(square.charAt(0));
-    const j = parseInt(square.charAt(1)) - 1;
-    return new Position(i + 0.5, j + 0.5);
+    const j = parseInt(square.charAt(1));
+    return new Position(i + 0.5 + 2, j + 0.5 + 1);
 }
