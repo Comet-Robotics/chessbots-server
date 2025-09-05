@@ -1,5 +1,5 @@
 import type { CustomSquareProps } from "react-chessboard/dist/chessboard/types";
-import type { ReactElement} from "react";
+import type { ReactElement } from "react";
 import { forwardRef, useContext } from "react";
 import {
     OutsideCorners,

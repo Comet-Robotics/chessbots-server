@@ -1,8 +1,8 @@
-import type { ResizeEntry} from "@blueprintjs/core";
+import type { ResizeEntry } from "@blueprintjs/core";
 import { ResizeSensor } from "@blueprintjs/core";
-import type { PropsWithChildren} from "react";
+import type { PropsWithChildren } from "react";
 import { useState } from "react";
-import type { Transform} from "./board-transform";
+import type { Transform } from "./board-transform";
 import { computeChessboardTransform } from "./board-transform";
 import { Side } from "../../common/game-types";
 import { bgColor } from "../check-dark-mode";

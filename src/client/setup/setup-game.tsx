@@ -1,5 +1,5 @@
 import { Button, H3, H6, Slider } from "@blueprintjs/core";
-import type { Dispatch} from "react";
+import type { Dispatch } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Difficulty, GameType } from "../../common/client-types";

@@ -1,4 +1,4 @@
-import type { Dispatch} from "react";
+import type { Dispatch } from "react";
 import { useState } from "react";
 
 import {
@@ -11,10 +11,9 @@ import {
 } from "../../common/message/game-message";
 import type {
     GameEndReason,
-    GameInterruptedReason} from "../../common/game-end-reasons";
-import {
-    GameHoldReason
+    GameInterruptedReason,
 } from "../../common/game-end-reasons";
+import { GameHoldReason } from "../../common/game-end-reasons";
 
 import { ChessboardWrapper } from "../chessboard/chessboard-wrapper";
 import { NavbarMenu } from "./navbar-menu";

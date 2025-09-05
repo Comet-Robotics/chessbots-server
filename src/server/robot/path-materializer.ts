@@ -257,7 +257,7 @@ function findShimmyLocation(
         // Vertical
         case CollisionType.VERTICAL: {
             const direction: [number, number] = directionToEdge(move.to);
-            const gridX: number = move.from.i + direction[0];
+            const gridX: number = Math.floor(shimmyPos.y);
             if (gridX === move.to.i) {
                 const augmentX: number =
                     shimmyPos.x + direction[0] * -axisShimmyAmount;

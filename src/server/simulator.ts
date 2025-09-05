@@ -1,20 +1,17 @@
 import { EventEmitter } from "@posva/event-emitter";
-import { BotTunnel } from "./api/tcp-interface";
 import { Robot } from "./robot/robot";
 import config from "./api/bot-server-config.json";
-import type { Packet} from "./utils/tcp-packet";
+import type { Packet, PacketWithId } from "./utils/tcp-packet";
 import { PacketType } from "./utils/tcp-packet";
-import { Position, ZERO_POSITION } from "./robot/position";
+import { Position } from "./robot/position";
 import path from "path";
-import type {
-    StackFrame} from "../common/message/simulator-message";
-import {
-    SimulatorUpdateMessage
-} from "../common/message/simulator-message";
+import type { StackFrame } from "../common/message/simulator-message";
+import { SimulatorUpdateMessage } from "../common/message/simulator-message";
 import { socketManager } from "./api/managers";
 import { randomUUID } from "node:crypto";
 import { GridIndices } from "./robot/grid-indices";
 import { getStartHeading, Side } from "../common/game-types";
+import { BotTunnel, type RobotEventEmitter } from "./api/bot-tunnel";
 
 const srcDir = path.resolve(__dirname, "../");
 
@@ -74,22 +71,21 @@ const parseErrorStack = (stack: string): StackFrame[] => {
  */
 export class VirtualBotTunnel extends BotTunnel {
     connected = true;
-
-    headingRadians = 0;
-    position = ZERO_POSITION;
+    emitter: RobotEventEmitter;
 
     static messages: {
         ts: Date;
         message: SimulatorUpdateMessage;
     }[] = [];
 
-    constructor(private robotId: string) {
-        super(null, (_) => {});
+    constructor(
+        private robotId: string,
+        private headingRadians: number,
+        private position: Position,
+    ) {
+        super();
 
-        // pulling initial heading and position from robot, then only depending on messages sent to the 'robot' to update the position and heading
-        const robot = virtualRobots.get(robotId)!;
-        this.headingRadians = robot.headingRadians;
-        this.position = robot.position;
+        // pulls initial heading and position from robot, then only depending on messages sent to the 'robot' to update the position and heading
 
         this.emitter = new EventEmitter();
     }
@@ -111,6 +107,43 @@ export class VirtualBotTunnel extends BotTunnel {
                 }),
             750,
         ); // needs to match simulator.scss animation timeout
+    }
+
+    async processPacket(packet: PacketWithId) {
+        const { packetId } = packet;
+        console.log("Received Packet");
+
+        // Parse packet based on type
+        switch (packet.type) {
+            // register new robot
+            case "CLIENT_HELLO": {
+                // await this.send(this.makeHello(packet.macAddress));
+                this.connected = true;
+                break;
+            }
+            // respond to pings
+            case "PING_SEND": {
+                await this.send({ type: PacketType.PING_RESPONSE });
+                break;
+            }
+            // emit a action complete for further processing
+            case PacketType.ACTION_SUCCESS: {
+                this.emitter.emit("actionComplete", {
+                    success: true,
+                    packetId,
+                });
+                break;
+            }
+            // emit a action fail for further processing
+            case PacketType.ACTION_FAIL: {
+                this.emitter.emit("actionComplete", {
+                    success: false,
+                    reason: packet.reason,
+                    packetId,
+                });
+                break;
+            }
+        }
     }
 
     async send(packet: Packet): Promise<string> {
@@ -182,12 +215,17 @@ export class VirtualBotTunnel extends BotTunnel {
  * virtual robots that can be moved around
  */
 export class VirtualRobot extends Robot {
-    constructor(id: string, homeIndices: GridIndices, defaultIndices: GridIndices, headingRadians: number) {
+    constructor(
+        id: string,
+        homeIndices: GridIndices,
+        defaultIndices: GridIndices,
+        headingRadians: number,
+    ) {
         super(id, homeIndices, defaultIndices, headingRadians);
-        this.tunnel = new VirtualBotTunnel(id);
+        this.tunnel = new VirtualBotTunnel(id, headingRadians, this.position);
     }
 
-    public setTunnel(_: BotTunnel): void { }
+    public setTunnel(_: BotTunnel): void {}
 }
 
 /**
@@ -221,4 +259,3 @@ function createVirtualRobots() {
         }),
     );
 }
-
