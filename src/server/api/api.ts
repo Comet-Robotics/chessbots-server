@@ -214,9 +214,9 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
                 });
                 console.log(
                     " command is made " +
-                        GridIndices.fromPosition(robot.position) +
+                        JSON.stringify(GridIndices.fromPosition(robot.position)) +
                         " to " +
-                        GridIndices.squareToGrid(startSquare),
+                        JSON.stringify(GridIndices.squareToGrid(startSquare)),
                 );
                 console.log(`Moving robot ${robotId} to square ${startSquare}`);
                 await executor.execute(command);
