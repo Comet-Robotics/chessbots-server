@@ -27,15 +27,6 @@ export class RobotManager {
         this.indicesToIds.set(JSON.stringify(robot.defaultIndices), robot.id);
     }
 
-    createRobotFromId(robotId: string) {
-        const robot = new Robot(
-            robotId,
-            config[robotId].homePosition,
-            config[robotId].defaultPosition,
-            config[robotId].startHeading * DEGREE,
-        );
-        this.addRobot(robot);
-    }
     /**
      * Retrieves a robot by id.
      * Throws if no robot is found.
