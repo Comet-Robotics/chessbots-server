@@ -33,7 +33,7 @@ export class Robot {
             throw new Error("startHeadingRadians must be a number");
         }
         this._headingRadians = startHeadingRadians;
-        this._position = position ?? Position.fromGridIndices(defaultIndices);
+        this._position = position ?? Position.fromGridIndices(homeIndices);
         this.tunnel = null;
     }
 

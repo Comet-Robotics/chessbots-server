@@ -14,6 +14,7 @@ import type { ReversibleRobotCommand } from "../command/move-piece";
 import { MovePiece } from "../command/move-piece";
 import { Position } from "./position";
 import { GridIndices } from "./grid-indices";
+import { Robot } from "./robot";
 import { error } from "console";
 import { robotManager } from "./robot-manager";
 import { gameManager } from "../api/managers";
@@ -609,6 +610,210 @@ function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
 // Home with shimmy: Sequential[ No_Capture[capture piece], Turn[capture piece], Move[capture piece], ... ]
 // Home without shimmy: Sequential[ Turn[capture piece], Move[capture piece], ... ]
 // Capture: Sequential[ Home with/without shimmy[capture piece], No_Capture[main piece] ]
+/**
+ * Moves all robots from their home positions to their specified default positions using a collision-free algorithm.
+ * Robots are sorted by column (leftmost first) and row (downmost first), then move sequentially:
+ * 1. From home to deadzone
+ * 2. Travel along deadzone to top of their column
+ * 3. Drop down to their correct position on the board
+ *
+ * @param defaultPositions - Map of robot IDs to their target default positions
+ * @returns A SequentialCommandGroup containing all robot movements
+ */
+export function moveAllRobotsToDefaultPositions(
+    defaultPositions: Map<string, GridIndices>,
+): SequentialCommandGroup {
+    // Get only the robots specified in the defaultPositions map
+    const robotsToMove: Robot[] = [];
+    for (const robotId of defaultPositions.keys()) {
+        try {
+            const robot = robotManager.getRobot(robotId);
+            robotsToMove.push(robot);
+        } catch (error) {
+            throw new Error(`Robot ${robotId} not found in robot manager`);
+        }
+    }
+
+    // Sort robots: column by column (left to right, no skipping), then bottom to top within each column
+    // This prevents collisions by ensuring robots in the same column don't interfere with each other
+    // Note: (0,0) is bottom-left, so j increases upward
+    const sortedRobots = robotsToMove.sort((a, b) => {
+        const aPos = GridIndices.fromPosition(a.position);
+        const bPos = GridIndices.fromPosition(b.position);
+
+        return aPos.j - bPos.j;
+    });
+
+    const allCommands: Command[] = [];
+
+    for (const robot of sortedRobots) {
+        const robotCommands = generateRobotPathToDefault(
+            robot,
+            defaultPositions,
+        );
+        allCommands.push(...robotCommands);
+    }
+
+    return new SequentialCommandGroup(allCommands);
+}
+
+/**
+ * Convenience function for regular games that uses the robot's default indices from config
+ * @returns A SequentialCommandGroup containing all robot movements to their config default positions
+ */
+export function moveAllRobotsToConfigDefaultPositions(): SequentialCommandGroup {
+    const defaultPositions = new Map<string, GridIndices>();
+
+    // Build the map from robot config default positions
+    for (const robot of robotManager.idsToRobots.values()) {
+        defaultPositions.set(robot.id, robot.defaultIndices);
+    }
+
+    return moveAllRobotsToDefaultPositions(defaultPositions);
+}
+
+/**
+ * Generates the path commands for a single robot to move from home to default position
+ */
+function generateRobotPathToDefault(
+    robot: Robot,
+    defaultPositions: Map<string, GridIndices>,
+): Command[] {
+    const commands: Command[] = [];
+    const currentPos = GridIndices.fromPosition(robot.position);
+    const defaultPos = defaultPositions.get(robot.id);
+
+    if (!defaultPos) {
+        throw new Error(`No default position specified for robot ${robot.id}`);
+    }
+
+    // Step 1: Move from home to deadzone
+    const deadzonePos = moveToDeadzoneFromHome(currentPos);
+    commands.push(
+        new AbsoluteMoveCommand(
+            robot.id,
+            Position.fromGridIndices(deadzonePos),
+        ),
+    );
+
+    // Step 2: Travel clockwise along deadzone to top of the target column
+    const topOfColumnPos = new GridIndices(defaultPos.i, 10); // Top of column in deadzone
+    if (!deadzonePos.equals(topOfColumnPos)) {
+        const deadzoneCommands = generateDeadzonePath(
+            robot.id,
+            deadzonePos,
+            topOfColumnPos,
+        );
+        commands.push(...deadzoneCommands);
+    }
+
+    // Step 3: Drop down to the correct position on the board
+    commands.push(
+        new AbsoluteMoveCommand(robot.id, Position.fromGridIndices(defaultPos)),
+    );
+
+    return commands;
+}
+
+/**
+ * Generates commands to move along the deadzone in a clockwise manner
+ * Optimized to group consecutive straight moves into single commands
+ */
+function generateDeadzonePath(
+    robotId: string,
+    startPos: GridIndices,
+    endPos: GridIndices,
+): Command[] {
+    const commands: Command[] = [];
+
+    // Find the indices in the deadzone array
+    const startInArray = findGridIndicesInArray(arrayOfDeadzone, startPos);
+    const endInArray = findGridIndicesInArray(arrayOfDeadzone, endPos);
+
+    if (startInArray === -1 || endInArray === -1) {
+        throw new Error(
+            `Invalid deadzone positions: start=${startPos}, end=${endPos}`,
+        );
+    }
+
+    // Always go clockwise (positive direction)
+    const direction = 1;
+    let i = startInArray;
+
+    while (i !== endInArray) {
+        // Find the next corner or the end position
+        let nextCorner = findNextCornerOrEnd(i, endInArray, direction);
+
+        // Move directly to the corner/end position
+        const targetPos = arrayOfDeadzone[nextCorner];
+        commands.push(
+            new AbsoluteMoveCommand(
+                robotId,
+                new Position(targetPos.i + 0.5, targetPos.j + 0.5),
+            ),
+        );
+
+        i = nextCorner;
+    }
+
+    return commands;
+}
+
+/**
+ * Finds the next corner position or the end position in the deadzone
+ */
+function findNextCornerOrEnd(
+    currentIndex: number,
+    endIndex: number,
+    direction: number,
+): number {
+    // Corner indices in the deadzone array
+    const corners = [0, 9, 18, 27]; // Bottom-left, top-left, top-right, bottom-right
+
+    let i = currentIndex;
+    while (i !== endIndex) {
+        i += direction;
+        if (i >= 36) i -= 36; // Wrap around
+
+        // If we hit a corner or the end, return it
+        if (corners.includes(i) || i === endIndex) {
+            return i;
+        }
+    }
+
+    return endIndex;
+}
+
+/**
+ * Determines the deadzone position to move to from a home position
+ */
+function moveToDeadzoneFromHome(homePos: GridIndices): GridIndices {
+    // Home positions are on the outside ring (0, 11), deadzone is the second ring (1, 10)
+
+    // If on the left edge (i = 0), move to deadzone on the left (i = 1)
+    if (homePos.i === 0) {
+        return new GridIndices(1, homePos.j);
+    }
+
+    // If on the right edge (i = 11), move to deadzone on the right (i = 10)
+    if (homePos.i === 11) {
+        return new GridIndices(10, homePos.j);
+    }
+
+    // If on the bottom edge (j = 0), move to deadzone on the bottom (j = 1)
+    if (homePos.j === 0) {
+        return new GridIndices(homePos.i, 1);
+    }
+
+    // If on the top edge (j = 11), move to deadzone on the top (j = 10)
+    if (homePos.j === 11) {
+        return new GridIndices(homePos.i, 10);
+    }
+
+    // This shouldn't happen if called correctly, but fallback to a safe deadzone position
+    return new GridIndices(1, 1);
+}
+
 export function materializePath(move: Move): Command {
     if (
         gameManager?.chess.isRegularCapture(move) ||

@@ -39,10 +39,37 @@ import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
 import { GridIndices } from "../robot/grid-indices";
 import puzzles, { type PuzzleComponents } from "./puzzles";
-import { moveMainPiece } from "../robot/path-materializer";
+import {
+    moveAllRobotsToDefaultPositions,
+    moveAllRobotsToConfigDefaultPositions,
+} from "../robot/path-materializer";
 import { robotManager } from "../robot/robot-manager";
 import { tcpServer } from "./tcp-interface";
 import { executor } from "../command/executor";
+
+/**
+ * Helper function to move all robots from their home positions to their default positions
+ * for regular chess games
+ */
+async function setupDefaultRobotPositions(): Promise<void> {
+    const robotsEntries = Array.from(robotManager.idsToRobots);
+
+    for (const [robotId, robot] of robotsEntries) {
+        const currentPosition = GridIndices.fromPosition(robot.position);
+        const defaultPosition = robot.defaultIndices;
+
+        if (!currentPosition.equals(defaultPosition)) {
+            console.log(
+                `Moving robot ${robotId} from home to default position`,
+            );
+            const command = moveAllRobotsToConfigDefaultPositions();
+            await executor.execute(command);
+            console.log(`Moved robot ${robotId} to default position`);
+        } else {
+            console.log(`Robot ${robotId} is already at default position`);
+        }
+    }
+}
 
 /**
  * An endpoint used to establish a websocket connection with the server.
@@ -155,9 +182,20 @@ apiRouter.get("/game-state", (req, res) => {
  * creates a new computer game manager based on the requests's side and difficulty
  * returns a success message
  */
-apiRouter.post("/start-computer-game", (req, res) => {
+apiRouter.post("/start-computer-game", async (req, res) => {
     const side = req.query.side as Side;
     const difficulty = parseInt(req.query.difficulty as string) as Difficulty;
+
+    // Position robots from home to default positions before starting the game
+    try {
+        await setupDefaultRobotPositions();
+    } catch (error) {
+        console.error("Error positioning robots for computer game:", error);
+        return res.status(500).send({
+            message: "Failed to position robots for game start",
+        });
+    }
+
     // create a new computer game manager
     setGameManager(
         new ComputerGameManager(
@@ -178,8 +216,19 @@ apiRouter.post("/start-computer-game", (req, res) => {
  *
  * returns a success message
  */
-apiRouter.post("/start-human-game", (req, res) => {
+apiRouter.post("/start-human-game", async (req, res) => {
     const side = req.query.side as Side;
+
+    // Position robots from home to default positions before starting the game
+    try {
+        await setupDefaultRobotPositions();
+    } catch (error) {
+        console.error("Error positioning robots for human game:", error);
+        return res.status(500).send({
+            message: "Failed to position robots for game start",
+        });
+    }
+
     // create a new human game manager
     setGameManager(
         new HumanGameManager(
@@ -201,28 +250,19 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
     const difficulty = puzzle.rating;
 
     if (puzzle.robotDefaultPositions) {
+        // Convert puzzle.robotDefaultPositions from Record<string, string> to Map<string, GridIndices>
+        const defaultPositionsMap = new Map<string, GridIndices>();
         for (const [robotId, startSquare] of Object.entries(
             puzzle.robotDefaultPositions,
         )) {
-            console.log(robotManager.idsToRobots);
             const robot = robotManager.getRobot(robotId);
             if (robot) {
-                console.log("before command is made");
-                const command = moveMainPiece({
-                    from: GridIndices.fromPosition(robot.position),
-                    to: GridIndices.squareToGrid(startSquare),
-                });
+                // Convert square string to GridIndices using squareToGrid
+                const gridIndices = GridIndices.squareToGrid(startSquare);
+                defaultPositionsMap.set(robotId, gridIndices);
                 console.log(
-                    " command is made " +
-                        JSON.stringify(
-                            GridIndices.fromPosition(robot.position),
-                        ) +
-                        " to " +
-                        JSON.stringify(GridIndices.squareToGrid(startSquare)),
+                    `Robot ${robotId} will move to square ${startSquare} (${gridIndices.toString()})`,
                 );
-                console.log(`Moving robot ${robotId} to square ${startSquare}`);
-                await executor.execute(command);
-                console.log(`Moved robot ${robotId} to square ${startSquare}`);
             } else {
                 return res.status(400).send({
                     message:
@@ -232,6 +272,13 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
                 });
             }
         }
+
+        // Execute the movement command with the converted positions
+        console.log("before command is made");
+        const command = moveAllRobotsToDefaultPositions(defaultPositionsMap);
+        console.log("command is made");
+        await executor.execute(command);
+        console.log("All robots moved to their puzzle default positions");
     }
     setGameManager(
         new PuzzleGameManager(
