@@ -1,5 +1,5 @@
-import { Message, SendMessage } from "../../common/message/message";
-import { ChessEngine } from "../../common/chess-engine";
+import type { Message, SendMessage } from "../../common/message/message";
+import type { ChessEngine } from "../../common/chess-engine";
 import {
     MoveMessage,
     GameInterruptedMessage,
@@ -9,20 +9,23 @@ import {
     GameEndMessage,
     SetChessMessage,
 } from "../../common/message/game-message";
-import { SocketManager } from "./socket-manager";
-import { ClientManager } from "./client-manager";
+import type { SocketManager } from "./socket-manager";
+import type { ClientManager } from "./client-manager";
 import { ClientType } from "../../common/client-types";
-import { Move, Side, oppositeSide } from "../../common/game-types";
-import {
+import type { Move } from "../../common/game-types";
+import { Side, oppositeSide } from "../../common/game-types";
+import type {
     GameEndReason,
+    GameEndReason as GameInterruptedReason,
+} from "../../common/game-end-reasons";
+import {
     GameFinishedReason,
     GameHoldReason,
-    GameEndReason as GameInterruptedReason,
 } from "../../common/game-end-reasons";
 import { SaveManager } from "./save-manager";
 import { materializePath } from "../robot/path-materializer";
-import { executor } from "./api";
 import { DO_SAVES } from "../utils/env";
+import { executor } from "../command/executor";
 
 type GameState = {
     side: Side;

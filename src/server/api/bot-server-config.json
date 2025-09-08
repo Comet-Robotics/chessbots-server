@@ -4,362 +4,398 @@
         "80:65:99:4d:f3:f0": "robot-15",
         "c0:4e:30:4b:68:76": "robot-11",
         "80:65:99:4d:f3:9a": "robot-3",
-        "80:65:99:4d:f4:2a": "robot-4"
+        "80:65:99:4e:07:b0": "robot-4",
+        "80:65:99:4e:07:9c": "robot-5",
+        "80:65:99:4e:07:70": "robot-12",
+        "80:65:99:4e:70:4a": "robot-8",
+        "80:65:99:4e:70:2c": "robot-7"
     },
     "robot-1": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 2,
             "y": 0
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 2,
             "y": 2
-        }
+        },
+        "startHeadingRadians": 1.5707963268
     },
     "robot-2": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 3,
             "y": 0
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 3,
             "y": 2
-        }
+        },
+        "startHeadingRadians": 1.5707963268
     },
     "robot-3": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 4,
             "y": 0
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 4,
             "y": 2
-        }
+        },
+        "startHeadingRadians": 1.5707963268
     },
     "robot-4": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 5,
             "y": 0
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 5,
             "y": 2
-        }
+        },
+        "startHeadingRadians": 1.5707963268
     },
     "robot-5": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 6,
             "y": 0
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 6,
             "y": 2
-        }
+        },
+        "startHeadingRadians": 1.5707963268
     },
     "robot-6": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 7,
             "y": 0
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 7,
             "y": 2
-        }
+        },
+        "startHeadingRadians": 1.5707963268
     },
     "robot-7": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 8,
             "y": 0
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 8,
             "y": 2
-        }
+        },
+        "startHeadingRadians": 1.5707963268
     },
     "robot-8": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 9,
             "y": 0
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 9,
             "y": 2
-        }
+        },
+        "startHeadingRadians": 1.5707963268
     },
     "robot-9": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 0,
             "y": 2
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 2,
             "y": 3
-        }
+        },
+        "startHeadingRadians": 1.5707963268
     },
     "robot-10": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 0,
             "y": 3
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 3,
             "y": 3
-        }
+        },
+        "startHeadingRadians": 1.5707963268
     },
     "robot-11": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 0,
             "y": 4
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 4,
             "y": 3
-        }
+        },
+        "startHeadingRadians": 1.5707963268
     },
     "robot-12": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 0,
             "y": 5
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 5,
             "y": 3
-        }
+        },
+        "startHeadingRadians": 1.5707963268
     },
     "robot-13": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 11,
             "y": 5
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 6,
             "y": 3
-        }
+        },
+        "startHeadingRadians": 1.5707963268
     },
     "robot-14": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 11,
             "y": 4
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 7,
             "y": 3
-        }
+        },
+        "startHeadingRadians": 1.5707963268
     },
     "robot-15": {
         "attributes": {
             "MOTOR_A_DRIVE_MULTIPLIER": 1.3,
             "MOTOR_B_DRIVE_MULTIPLIER": 2
         },
-        "homePosition": {
+        "homeIndices": {
             "x": 11,
             "y": 3
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 8,
             "y": 3
-        }
+        },
+        "startHeadingRadians": 1.5707963268
     },
     "robot-16": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 11,
             "y": 2
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 9,
             "y": 3
-        }
+        },
+        "startHeadingRadians": 1.5707963268
     },
     "robot-17": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 0,
             "y": 9
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 2,
             "y": 8
-        }
+        },
+        "startHeadingRadians": 4.7123889804
     },
     "robot-18": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 0,
             "y": 8
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 3,
             "y": 8
-        }
+        },
+        "startHeadingRadians": 4.7123889804
     },
     "robot-19": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 0,
             "y": 7
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 4,
             "y": 8
-        }
+        },
+        "startHeadingRadians": 4.7123889804
     },
     "robot-20": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 0,
             "y": 6
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 5,
             "y": 8
-        }
+        },
+        "startHeadingRadians": 4.7123889804
     },
     "robot-21": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 11,
             "y": 6
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 6,
             "y": 8
-        }
+        },
+        "startHeadingRadians": 4.7123889804
     },
     "robot-22": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 11,
             "y": 7
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 7,
             "y": 8
-        }
+        },
+        "startHeadingRadians": 4.7123889804
     },
     "robot-23": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 11,
             "y": 8
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 8,
             "y": 8
-        }
+        },
+        "startHeadingRadians": 4.7123889804
     },
     "robot-24": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 11,
             "y": 9
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 9,
             "y": 8
-        }
+        },
+        "startHeadingRadians": 4.7123889804
     },
     "robot-25": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 2,
             "y": 11
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 2,
             "y": 9
-        }
+        },
+        "startHeadingRadians": 4.7123889804
     },
     "robot-26": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 3,
             "y": 11
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 3,
             "y": 9
-        }
+        },
+        "startHeadingRadians": 4.7123889804
     },
     "robot-27": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 4,
             "y": 11
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 4,
             "y": 9
-        }
+        },
+        "startHeadingRadians": 4.7123889804
     },
     "robot-28": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 5,
             "y": 11
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 5,
             "y": 9
-        }
+        },
+        "startHeadingRadians": 4.7123889804
     },
     "robot-29": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 6,
             "y": 11
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 6,
             "y": 9
-        }
+        },
+        "startHeadingRadians": 4.7123889804
     },
     "robot-30": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 7,
             "y": 11
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 7,
             "y": 9
-        }
+        },
+        "startHeadingRadians": 4.7123889804
     },
     "robot-31": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 8,
             "y": 11
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 8,
             "y": 9
-        }
+        },
+        "startHeadingRadians": 4.7123889804
     },
     "robot-32": {
         "attributes": {},
-        "homePosition": {
+        "homeIndices": {
             "x": 9,
             "y": 11
         },
-        "defaultPosition": {
+        "defaultIndices": {
             "x": 9,
             "y": 9
-        }
+        },
+        "startHeadingRadians": 4.7123889804
     },
     "botConfigSchema": [
         {

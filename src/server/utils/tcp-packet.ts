@@ -1,9 +1,9 @@
+import type { Static } from "runtypes";
 import {
     Number as NumberType,
     String,
     Record,
     Union,
-    Static,
     Literal,
     Dictionary,
 } from "runtypes";

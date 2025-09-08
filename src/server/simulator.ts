@@ -1,24 +1,23 @@
 import { EventEmitter } from "@posva/event-emitter";
-import { BotTunnel } from "./api/tcp-interface";
 import { Robot } from "./robot/robot";
 import config from "./api/bot-server-config.json";
-import { Packet, PacketType } from "./utils/tcp-packet";
-import { Position, ZERO_POSITION } from "./robot/position";
+import type { Packet, PacketWithId } from "./utils/tcp-packet";
+import { PacketType } from "./utils/tcp-packet";
+import { Position } from "./robot/position";
 import path from "path";
-import {
-    SimulatorUpdateMessage,
-    StackFrame,
-} from "../common/message/simulator-message";
+import type { StackFrame } from "../common/message/simulator-message";
+import { SimulatorUpdateMessage } from "../common/message/simulator-message";
 import { socketManager } from "./api/managers";
 import { randomUUID } from "node:crypto";
 import { GridIndices } from "./robot/grid-indices";
 import { getStartHeading, Side } from "../common/game-types";
+import { BotTunnel, type RobotEventEmitter } from "./api/bot-tunnel";
 
 const srcDir = path.resolve(__dirname, "../");
 
 /**
  * get the current error stack
- * @param justMyCode - restricts the scope of the stack to just the code in the chessBot project. ex: if there is an error thrown in a file in the node_modules folder, this will not be included in the stack.
+ * @param justMyCode - restricts the scope of the stack to just the code in the chessbots-server project. Example: if there is an error thrown in a file in the node_modules folder, this will not be included in the stack.
  * @returns - the stack of the error
  */
 function getStack(justMyCode = true) {
@@ -31,11 +30,11 @@ function getStack(justMyCode = true) {
     const cleanedStack = parseErrorStack(stack);
 
     if (justMyCode) {
-        const chessBotCodeEndFrame = cleanedStack.findIndex(
+        const chessBotsCodeEndFrame = cleanedStack.findIndex(
             (frame) => !frame.fileName.startsWith(srcDir),
         );
-        if (chessBotCodeEndFrame !== -1) {
-            cleanedStack.splice(chessBotCodeEndFrame);
+        if (chessBotsCodeEndFrame !== -1) {
+            cleanedStack.splice(chessBotsCodeEndFrame);
         }
     }
 
@@ -52,19 +51,15 @@ const parseErrorStack = (stack: string): StackFrame[] => {
     const frames = lines.slice(1).reduce<StackFrame[]>((result, line) => {
         const match = line.match(/^\s+at (?:(.+) \()?(.+):(\d+):(\d+)\)?$/);
         if (!match) {
-            console.warn(`Invalid stack frame: ${line}`);
+            // stack frame not in the format we expect
             return result;
         }
         const [, functionName, fileName, lineNumber, columnNumber] = match;
-        if (!fileName || !lineNumber || !columnNumber) {
-            console.warn(`Invalid stack frame: ${line}`);
-            return result;
-        }
         result.push({
             fileName,
             functionName,
-            lineNumber: parseInt(lineNumber),
-            columnNumber: parseInt(columnNumber),
+            lineNumber: lineNumber ? parseInt(lineNumber) : undefined,
+            columnNumber: columnNumber ? parseInt(columnNumber) : undefined,
         });
         return result;
     }, []);
@@ -76,22 +71,21 @@ const parseErrorStack = (stack: string): StackFrame[] => {
  */
 export class VirtualBotTunnel extends BotTunnel {
     connected = true;
-
-    headingRadians = 0;
-    position = ZERO_POSITION;
+    emitter: RobotEventEmitter;
 
     static messages: {
         ts: Date;
         message: SimulatorUpdateMessage;
     }[] = [];
 
-    constructor(private robotId: string) {
-        super(null, (_) => {});
+    constructor(
+        private robotId: string,
+        private headingRadians: number,
+        private position: Position,
+    ) {
+        super();
 
-        // pulling initial heading and position from robot, then only depending on messages sent to the 'robot' to update the position and heading
-        const robot = virtualRobots.get(robotId)!;
-        this.headingRadians = robot.headingRadians;
-        this.position = robot.position;
+        // pulls initial heading and position from robot, then only depending on messages sent to the 'robot' to update the position and heading
 
         this.emitter = new EventEmitter();
     }
@@ -113,6 +107,43 @@ export class VirtualBotTunnel extends BotTunnel {
                 }),
             750,
         ); // needs to match simulator.scss animation timeout
+    }
+
+    async processPacket(packet: PacketWithId) {
+        const { packetId } = packet;
+        console.log("Received Packet");
+
+        // Parse packet based on type
+        switch (packet.type) {
+            // register new robot
+            case "CLIENT_HELLO": {
+                // await this.send(this.makeHello(packet.macAddress));
+                this.connected = true;
+                break;
+            }
+            // respond to pings
+            case "PING_SEND": {
+                await this.send({ type: PacketType.PING_RESPONSE });
+                break;
+            }
+            // emit a action complete for further processing
+            case PacketType.ACTION_SUCCESS: {
+                this.emitter.emit("actionComplete", {
+                    success: true,
+                    packetId,
+                });
+                break;
+            }
+            // emit a action fail for further processing
+            case PacketType.ACTION_FAIL: {
+                this.emitter.emit("actionComplete", {
+                    success: false,
+                    reason: packet.reason,
+                    packetId,
+                });
+                break;
+            }
+        }
     }
 
     async send(packet: Packet): Promise<string> {
@@ -184,44 +215,47 @@ export class VirtualBotTunnel extends BotTunnel {
  * virtual robots that can be moved around
  */
 export class VirtualRobot extends Robot {
-    public getTunnel(): BotTunnel {
-        return virtualBotTunnels.get(this.id)!;
+    constructor(
+        id: string,
+        homeIndices: GridIndices,
+        defaultIndices: GridIndices,
+        headingRadians: number,
+    ) {
+        super(id, homeIndices, defaultIndices, headingRadians);
+        this.tunnel = new VirtualBotTunnel(id, headingRadians, this.position);
     }
-}
 
-const virtualBotIds = Array(32)
-    .fill(undefined)
-    .map((_, i) => `virtual-robot-${(i + 1).toString()}`);
+    public setTunnel(_: BotTunnel): void {}
+}
 
 /**
  * a map of all the created virtual robots with ids, positions, and homes
  */
-export const virtualRobots = new Map<string, VirtualRobot>(
-    virtualBotIds.map((id, idx) => {
-        const realRobotConfig = config[id.replace("virtual-", "")];
-        return [
-            id,
-            new VirtualRobot(
-                id,
-                new GridIndices(
-                    realRobotConfig.homePosition.x,
-                    realRobotConfig.homePosition.y,
-                ),
-                new GridIndices(
-                    realRobotConfig.defaultPosition.x,
-                    realRobotConfig.defaultPosition.y,
-                ),
-                getStartHeading(idx < 16 ? Side.WHITE : Side.BLACK),
-                new Position(
-                    realRobotConfig.defaultPosition.x + 0.5,
-                    realRobotConfig.defaultPosition.y + 0.5,
-                ),
-            ),
-        ] as const;
-    }),
-);
+export const virtualRobots = createVirtualRobots();
 
-/** a map of all the current virtual robot tunnels */
-const virtualBotTunnels = new Map<string, BotTunnel>(
-    virtualBotIds.map((id) => [id, new VirtualBotTunnel(id)]),
-);
+function createVirtualRobots() {
+    const virtualBotIds = Array(32)
+        .fill(undefined)
+        .map((_, i) => `robot-${(i + 1).toString()}`);
+
+    return new Map<string, VirtualRobot>(
+        virtualBotIds.map((id, idx) => {
+            const realRobotConfig = config[id];
+            return [
+                id,
+                new VirtualRobot(
+                    id,
+                    new GridIndices(
+                        realRobotConfig.homeIndices.x,
+                        realRobotConfig.homeIndices.y,
+                    ),
+                    new GridIndices(
+                        realRobotConfig.defaultIndices.x,
+                        realRobotConfig.defaultIndices.y,
+                    ),
+                    getStartHeading(idx < 16 ? Side.WHITE : Side.BLACK),
+                ),
+            ] as const;
+        }),
+    );
+}

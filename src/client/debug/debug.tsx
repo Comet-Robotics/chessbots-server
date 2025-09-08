@@ -1,5 +1,6 @@
 import { Button, Card, Code, H1, H2, Spinner } from "@blueprintjs/core";
-import { ReactNode, useEffect, useState } from "react";
+import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { get, useSocket } from "../api";
 import { SelectRobot } from "./select-robot";

@@ -1,4 +1,4 @@
-import { WebsocketRequestHandler } from "express-ws";
+import type { WebsocketRequestHandler } from "express-ws";
 import { Router } from "express";
 
 import { parseMessage } from "../../common/message/parse-message";
@@ -15,33 +15,46 @@ import {
     SetRobotVariableMessage,
 } from "../../common/message/robot-message";
 
-import { TCPServer } from "./tcp-interface";
-import { Difficulty } from "../../common/client-types";
+import type { Difficulty } from "../../common/client-types";
 import { RegisterWebsocketMessage } from "../../common/message/message";
-import { clientManager, robotManager, socketManager } from "./managers";
+import {
+    clientManager,
+    gameManager,
+    setGameManager,
+    socketManager,
+} from "./managers";
 import {
     ComputerGameManager,
-    GameManager,
     HumanGameManager,
     PuzzleGameManager,
 } from "./game-manager";
 import { ChessEngine } from "../../common/chess-engine";
-import { Move, Side } from "../../common/game-types";
+import { Side } from "../../common/game-types";
 import { USE_VIRTUAL_ROBOTS } from "../utils/env";
 import { SaveManager } from "./save-manager";
-import { readFileSync } from "fs";
 
-import { CommandExecutor } from "../command/executor";
-import { VirtualBotTunnel, virtualRobots } from "../simulator";
+import { VirtualBotTunnel } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
+import { GridIndices } from "../robot/grid-indices";
+import puzzles, { type PuzzleComponents } from "./puzzles";
+import {
+    moveAllRobotsToDefaultPositions,
+    moveAllRobotsHomeToDefaultOptimized,
+} from "../robot/path-materializer";
+import { robotManager } from "../robot/robot-manager";
+import { tcpServer } from "./tcp-interface";
+import { executor } from "../command/executor";
 
-export const tcpServer: TCPServer | null =
-    USE_VIRTUAL_ROBOTS ? null : new TCPServer();
-export const executor = new CommandExecutor();
-
-export let gameManager: GameManager | null = null;
+/**
+ * Helper function to move all robots from their home positions to their default positions
+ * for regular chess games
+ */
+async function setupDefaultRobotPositions(): Promise<void> {
+    const command = moveAllRobotsHomeToDefaultOptimized();
+    await executor.execute(command);
+}
 
 /**
  * An endpoint used to establish a websocket connection with the server.
@@ -95,26 +108,30 @@ apiRouter.get("/client-information", (req, res) => {
     if (oldSave) {
         // if the game was an ai game, create a computer game manager with the ai difficulty
         if (oldSave.aiDifficulty !== -1) {
-            gameManager = new ComputerGameManager(
-                new ChessEngine(oldSave.game),
-                socketManager,
-                oldSave.host === req.cookies.id ?
-                    oldSave.hostWhite ?
-                        Side.WHITE
-                    :   Side.BLACK
-                : oldSave.hostWhite ? Side.BLACK
-                : Side.WHITE,
-                oldSave.aiDifficulty,
-                oldSave.host !== req.cookies.id,
+            setGameManager(
+                new ComputerGameManager(
+                    new ChessEngine(oldSave.game),
+                    socketManager,
+                    oldSave.host === req.cookies.id ?
+                        oldSave.hostWhite ?
+                            Side.WHITE
+                        :   Side.BLACK
+                    : oldSave.hostWhite ? Side.BLACK
+                    : Side.WHITE,
+                    oldSave.aiDifficulty,
+                    oldSave.host !== req.cookies.id,
+                ),
             );
             // create a new human game manger with appropriate clients
         } else {
-            gameManager = new HumanGameManager(
-                new ChessEngine(oldSave.game),
-                socketManager,
-                oldSave.hostWhite ? Side.WHITE : Side.BLACK,
-                clientManager,
-                oldSave.host !== req.cookies.id,
+            setGameManager(
+                new HumanGameManager(
+                    new ChessEngine(oldSave.game),
+                    socketManager,
+                    oldSave.hostWhite ? Side.WHITE : Side.BLACK,
+                    clientManager,
+                    oldSave.host !== req.cookies.id,
+                ),
             );
         }
     }
@@ -150,16 +167,29 @@ apiRouter.get("/game-state", (req, res) => {
  * creates a new computer game manager based on the requests's side and difficulty
  * returns a success message
  */
-apiRouter.post("/start-computer-game", (req, res) => {
+apiRouter.post("/start-computer-game", async (req, res) => {
     const side = req.query.side as Side;
     const difficulty = parseInt(req.query.difficulty as string) as Difficulty;
+
+    // Position robots from home to default positions before starting the game
+    try {
+        await setupDefaultRobotPositions();
+    } catch (error) {
+        console.error("Error positioning robots for computer game:", error);
+        return res.status(500).send({
+            message: "Failed to position robots for game start",
+        });
+    }
+
     // create a new computer game manager
-    gameManager = new ComputerGameManager(
-        new ChessEngine(),
-        socketManager,
-        side,
-        difficulty,
-        false,
+    setGameManager(
+        new ComputerGameManager(
+            new ChessEngine(),
+            socketManager,
+            side,
+            difficulty,
+            false,
+        ),
     );
     return res.send({ message: "success" });
 });
@@ -171,33 +201,80 @@ apiRouter.post("/start-computer-game", (req, res) => {
  *
  * returns a success message
  */
-apiRouter.post("/start-human-game", (req, res) => {
+apiRouter.post("/start-human-game", async (req, res) => {
     const side = req.query.side as Side;
+
+    // Position robots from home to default positions before starting the game
+    try {
+        await setupDefaultRobotPositions();
+    } catch (error) {
+        console.error("Error positioning robots for human game:", error);
+        return res.status(500).send({
+            message: "Failed to position robots for game start",
+        });
+    }
+
     // create a new human game manager
-    gameManager = new HumanGameManager(
-        new ChessEngine(),
-        socketManager,
-        side,
-        clientManager,
-        false,
+    setGameManager(
+        new HumanGameManager(
+            new ChessEngine(),
+            socketManager,
+            side,
+            clientManager,
+            false,
+        ),
     );
     return res.send({ message: "success" });
 });
 
-apiRouter.post("/start-puzzle-game", (req, res) => {
+apiRouter.post("/start-puzzle-game", async (req, res) => {
     //get puzzle components
     const puzzle = JSON.parse(req.query.puzzle as string) as PuzzleComponents;
     const fen = puzzle.fen;
     const moves = puzzle.moves;
     const difficulty = puzzle.rating;
-    //create game manager
-    gameManager = new PuzzleGameManager(
-        new ChessEngine(),
-        socketManager,
-        fen,
-        moves,
-        difficulty,
+
+    if (puzzle.robotDefaultPositions) {
+        // Convert puzzle.robotDefaultPositions from Record<string, string> to Map<string, GridIndices>
+        const defaultPositionsMap = new Map<string, GridIndices>();
+        for (const [robotId, startSquare] of Object.entries(
+            puzzle.robotDefaultPositions,
+        )) {
+            const robot = robotManager.getRobot(robotId);
+            if (robot) {
+                // Convert square string to GridIndices using squareToGrid
+                const gridIndices = GridIndices.squareToGrid(startSquare);
+                defaultPositionsMap.set(robotId, gridIndices);
+                console.log(
+                    `Robot ${robotId} will move to square ${startSquare} (${gridIndices.toString()})`,
+                );
+            } else {
+                return res.status(400).send({
+                    message:
+                        "Missing robot " +
+                        robotId +
+                        " which is required to start the puzzle, because it is included in the puzzle's robotDefaultPositions map.",
+                });
+            }
+        }
+
+        // Execute the movement command with the converted positions
+        console.log("before command is made");
+        const command = moveAllRobotsToDefaultPositions(defaultPositionsMap);
+        console.log("command is made");
+        await executor.execute(command);
+        console.log("All robots moved to their puzzle default positions");
+    }
+    setGameManager(
+        new PuzzleGameManager(
+            new ChessEngine(),
+            socketManager,
+            fen,
+            moves,
+            difficulty,
+        ),
     );
+
     return res.send({ message: "success" });
 });
 
@@ -220,7 +297,7 @@ apiRouter.get("/get-ids", (_, res) => {
  * move a random robot forward and turn 45 degrees
  */
 apiRouter.get("/do-smth", async (_, res) => {
-    const robotsEntries = Array.from(virtualRobots.entries());
+    const robotsEntries = Array.from(robotManager.idsToRobots);
     const randomRobotIndex = Math.floor(Math.random() * robotsEntries.length);
     const [, robot] = robotsEntries[randomRobotIndex];
     await robot.sendDrivePacket(1);
@@ -236,19 +313,19 @@ apiRouter.get("/get-simulator-robot-state", (_, res) => {
     if (!USE_VIRTUAL_ROBOTS) {
         return res.status(400).send({ message: "Simulator is not enabled." });
     }
-    const robotsEntries = Array.from(virtualRobots.entries());
+    const robotsEntries = Array.from(robotManager.idsToRobots);
 
     // get all of the robots and their positions
     const robotState = Object.fromEntries(
         robotsEntries.map(([id, robot]) => {
-            let headingRadians = robot.headingRadians;
-            let position = new Position(robot.position.x, robot.position.y);
+            const headingRadians = robot.headingRadians;
+            const position = new Position(robot.position.x, robot.position.y);
 
-            const tunnel = robot.getTunnel();
-            if (tunnel instanceof VirtualBotTunnel) {
-                position = tunnel.position;
-                headingRadians = tunnel.headingRadians;
-            }
+            // const tunnel = robot.getTunnel();
+            // if (tunnel instanceof VirtualBotTunnel) {
+            //     position = tunnel.position;
+            //     headingRadians = tunnel.headingRadians;
+            // }
             return [id, { position, headingRadians: headingRadians }];
         }),
     );
@@ -260,19 +337,10 @@ apiRouter.get("/get-simulator-robot-state", (_, res) => {
     });
 });
 
-export interface PuzzleComponents {
-    fen: string;
-    moves: Move[];
-    rating: number;
-}
-
 /**
- * Returns a list of available puzzles to play from puzzles.json.
+ * Returns a list of available puzzles.
  */
 apiRouter.get("/get-puzzles", (_, res) => {
-    const puzzles: Record<string, PuzzleComponents> = JSON.parse(
-        readFileSync("./src/server/api/puzzles.json", "utf-8"),
-    );
     const out: string = JSON.stringify(puzzles);
     return res.send(out);
 });
