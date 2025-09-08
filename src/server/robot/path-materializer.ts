@@ -14,7 +14,7 @@ import type { ReversibleRobotCommand } from "../command/move-piece";
 import { MovePiece } from "../command/move-piece";
 import { Position } from "./position";
 import { GridIndices } from "./grid-indices";
-import { Robot } from "./robot";
+import type { Robot } from "./robot";
 import { error } from "console";
 import { robotManager } from "./robot-manager";
 import { gameManager } from "../api/managers";
@@ -885,7 +885,7 @@ function generateDeadzonePath(
 
     while (i !== endInArray) {
         // Find the next corner or the end position
-        let nextCorner = findNextCornerOrEnd(i, endInArray, direction);
+        const nextCorner = findNextCornerOrEnd(i, endInArray, direction);
 
         // Move directly to the corner/end position
         const targetPos = arrayOfDeadzone[nextCorner];
