@@ -719,7 +719,3 @@ export function materializePath(move: Move): Command {
         return moveMainPiece(moveToGridMove(move));
     }
 }
-
-export function debugPath(move: Move) {
-    return moveMainPiece(moveToGridMove(move));
-}

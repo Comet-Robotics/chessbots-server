@@ -9,10 +9,9 @@ import { useQuery } from "@tanstack/react-query";
 /**
  * A wrapper around `useQuery` which causes the wrapped query to be trigged once each time the page renders.
  */
-export function useEffectQuery(
+export function useEffectQuery<T>(
     queryKey: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    queryFn: () => Promise<any>,
+    queryFn: () => Promise<T>,
     retry?: boolean | number,
 ) {
     // id guarantees query is the same every time

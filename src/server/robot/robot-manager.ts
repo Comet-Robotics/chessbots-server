@@ -1,7 +1,8 @@
+import { DEGREE } from "../../common/units";
 import { GridIndices } from "./grid-indices";
+import { Position } from "./position";
 import { Robot } from "./robot";
 import config from "../api/bot-server-config.json";
-import { DEGREE } from "../../common/units";
 
 /**
  * Stores robots. Provides utilities for finding them by position.
@@ -45,6 +46,26 @@ export class RobotManager {
             throw new Error("Failed to find robot with id " + robotId);
         }
         return robot;
+    }
+
+    createRobotFromId(robotId: string) {
+        const robot = new Robot(
+            robotId,
+            new GridIndices(
+                config[robotId].homePosition.x,
+                config[robotId].homePosition.y,
+            ),
+            new GridIndices(
+                config[robotId].defaultPosition.x,
+                config[robotId].defaultPosition.y,
+            ),
+            config[robotId].startHeading * DEGREE,
+            new Position(
+                config[robotId].defaultPosition.x,
+                config[robotId].defaultPosition.y,
+            ),
+        );
+        this.addRobot(robot);
     }
 
     /**

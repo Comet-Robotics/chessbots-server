@@ -6,13 +6,16 @@ import {
     GameStartedMessage,
     GameHoldMessage,
     GameFinishedMessage,
+    GameEndMessage,
+    SetChessMessage,
 } from "../../common/message/game-message";
 import { SocketManager } from "./socket-manager";
 import { ClientManager } from "./client-manager";
 import { ClientType } from "../../common/client-types";
-import { Side, oppositeSide } from "../../common/game-types";
+import { Move, Side, oppositeSide } from "../../common/game-types";
 import {
     GameEndReason,
+    GameFinishedReason,
     GameHoldReason,
     GameEndReason as GameInterruptedReason,
 } from "../../common/game-end-reasons";
@@ -20,6 +23,14 @@ import { SaveManager } from "./save-manager";
 import { materializePath } from "../robot/path-materializer";
 import { executor } from "./api";
 import { DO_SAVES } from "../utils/env";
+
+type GameState = {
+    side: Side;
+    position: string;
+    gameEndReason: GameEndReason | undefined;
+    aiDifficulty?: number;
+    difficulty?: number;
+};
 
 /**
  * The manager for game communication
@@ -37,7 +48,9 @@ export abstract class GameManager {
         protected hostSide: Side,
         // true if host and client get reversed
         protected reverse: boolean,
-    ) {}
+    ) {
+        socketManager.sendToAll(new GameStartedMessage());
+    }
 
     /** check if game ended */
     public isGameEnded(): boolean {
@@ -56,7 +69,7 @@ export abstract class GameManager {
      * A method which is invoked whenever a game first connects.
      * Should respond with the game's side, position, and whether the game is finished.
      */
-    public getGameState(clientType: ClientType): object {
+    public getGameState(clientType: ClientType): GameState {
         let side: Side;
         if (clientType === ClientType.HOST) {
             side = this.reverse ? oppositeSide(this.hostSide) : this.hostSide;
@@ -87,9 +100,6 @@ export class HumanGameManager extends GameManager {
         protected reverse: boolean,
     ) {
         super(chess, socketManager, hostSide, reverse);
-        // Notify other client the game has started
-        clientManager.sendToClient(new GameStartedMessage());
-        clientManager.sendToSpectators(new GameStartedMessage());
     }
 
     /**
@@ -176,8 +186,6 @@ export class HumanGameManager extends GameManager {
             }
         } else if (message instanceof GameFinishedMessage) {
             // propagate back to both sockets
-            //sendToPlayer(message);
-            //sendToOpponent(message);
             if (ids) {
                 if (currentSave?.host === ids[0])
                     SaveManager.endGame(ids[0], ids[1]);
@@ -208,7 +216,7 @@ export class HumanGameManager extends GameManager {
  */
 export class ComputerGameManager extends GameManager {
     // The minimum amount of time to wait responding with a move.
-    MINIMUM_DELAY = 500;
+    MINIMUM_DELAY = 600;
 
     // Create the game manager
     // if the player is black have the computer make the first move
@@ -235,6 +243,7 @@ export class ComputerGameManager extends GameManager {
      */
     public async handleMessage(message: Message, id: string): Promise<void> {
         if (message instanceof MoveMessage) {
+            this.socketManager.sendToAll(new MoveMessage(message.move));
             this.chess.makeMove(message.move);
             if (DO_SAVES) {
                 SaveManager.saveGame(
@@ -258,7 +267,7 @@ export class ComputerGameManager extends GameManager {
             const elapsedTime = Date.now() - startTime;
             // If elapsed time is less than minimum delay, timeout is set to 1ms
             setTimeout(() => {
-                this.socketManager.sendToSocket(id, new MoveMessage(move));
+                this.socketManager.sendToAll(new MoveMessage(move));
             }, this.MINIMUM_DELAY - elapsedTime);
             if (this.isGameEnded()) {
                 SaveManager.endGame(id, "ai");
@@ -267,7 +276,120 @@ export class ComputerGameManager extends GameManager {
             this.gameInterruptedReason = message.reason;
             SaveManager.endGame(id, "ai");
             // Reflect end game reason back to client
-            this.socketManager.sendToSocket(id, message);
+            this.socketManager.sendToAll(message);
         }
+    }
+
+    public getGameState(clientType: ClientType): GameState {
+        return {
+            ...super.getGameState(clientType),
+            aiDifficulty: this.difficulty,
+        };
+    }
+}
+
+export class PuzzleGameManager extends GameManager {
+    private moveNumber: number = 0;
+    MINIMUM_DELAY = 600;
+
+    constructor(
+        chess: ChessEngine,
+        socketManager: SocketManager,
+        fen: string,
+        private moves: Move[],
+        protected difficulty: number,
+    ) {
+        super(
+            chess,
+            socketManager,
+            fen.split(" ")[1] === "w" ? Side.WHITE : Side.BLACK,
+            false,
+        );
+        chess.loadFen(fen);
+    }
+
+    public getDifficulty(): number {
+        return this.difficulty;
+    }
+
+    public async handleMessage(message: Message, id: string): Promise<void> {
+        id;
+        if (message instanceof MoveMessage) {
+            //if the move is correct
+            if (
+                this.moves[this.moveNumber].from === message.move.from &&
+                this.moves[this.moveNumber].to === message.move.to
+            ) {
+                const command = materializePath(message.move);
+
+                this.socketManager.sendToAll(new MoveMessage(message.move));
+                this.chess.makeMove(message.move);
+                this.moveNumber++;
+
+                console.log("running executor");
+                console.dir(command, { depth: null });
+                await executor.execute(command);
+                console.log("executor done");
+
+                //if there is another move, make it
+                if (this.moves[this.moveNumber]) {
+                    const command = materializePath(message.move);
+
+                    this.chess.makeMove(this.moves[this.moveNumber]);
+
+                    console.log("running executor");
+                    console.dir(command, { depth: null });
+                    await executor.execute(command);
+                    console.log("executor done");
+                    setTimeout(() => {
+                        this.socketManager.sendToAll(
+                            new MoveMessage(this.moves[this.moveNumber]),
+                        );
+                        this.moveNumber++;
+                    }, this.MINIMUM_DELAY);
+                } else {
+                    this.moveNumber++;
+                }
+            }
+
+            //send an undo message
+            else {
+                this.socketManager.sendToAll(
+                    new SetChessMessage(this.chess.fen),
+                );
+            }
+
+            //send a finished message
+            if (this.isGameEnded()) {
+                const gameEnd = this.getGameEndReason();
+                if (gameEnd) {
+                    this.socketManager.sendToAll(new GameEndMessage(gameEnd));
+                }
+            }
+        } else if (
+            message instanceof (GameInterruptedMessage || GameEndMessage)
+        ) {
+            this.gameInterruptedReason = message.reason;
+            // Reflect end game reason back to client
+            this.socketManager.sendToAll(message);
+        }
+    }
+
+    public isGameEnded(): boolean {
+        return this.moveNumber >= this.moves.length || super.isGameEnded();
+    }
+
+    public getGameEndReason(): GameEndReason | undefined {
+        if (this.moveNumber >= this.moves.length) {
+            return GameFinishedReason.PUZZLE_SOLVED;
+        }
+        return super.getGameEndReason();
+    }
+
+    public getGameState(clientType: ClientType): GameState {
+        return {
+            ...super.getGameState(clientType),
+            difficulty: this.difficulty,
+        };
     }
 }
