@@ -728,7 +728,7 @@ export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
 
     // Sort each group center-out by file to funnel from middle outward
     const centerOutSort = (a: PawnInfo, b: PawnInfo) => {
-        const center = 5.5; 
+        const center = 5.5;
         const da = Math.abs(a.def.i - center);
         const db = Math.abs(b.def.i - center);
         if (da !== db) return da - db;
@@ -931,7 +931,6 @@ function findNextCornerOrEnd(
  * Determines the deadzone position to move to from a home position
  */
 function moveToDeadzoneFromHome(homePos: GridIndices): GridIndices {
-
     // If on the left edge (i = 0), move to deadzone on the left (i = 1)
     if (homePos.i === 0) {
         return new GridIndices(1, homePos.j);
