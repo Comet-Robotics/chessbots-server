@@ -41,7 +41,7 @@ import { GridIndices } from "../robot/grid-indices";
 import puzzles, { type PuzzleComponents } from "./puzzles";
 import {
     moveAllRobotsToDefaultPositions,
-    moveAllRobotsToConfigDefaultPositions,
+    moveAllRobotsHomeToDefaultOptimized,
 } from "../robot/path-materializer";
 import { robotManager } from "../robot/robot-manager";
 import { tcpServer } from "./tcp-interface";
@@ -52,23 +52,8 @@ import { executor } from "../command/executor";
  * for regular chess games
  */
 async function setupDefaultRobotPositions(): Promise<void> {
-    const robotsEntries = Array.from(robotManager.idsToRobots);
-
-    for (const [robotId, robot] of robotsEntries) {
-        const currentPosition = GridIndices.fromPosition(robot.position);
-        const defaultPosition = robot.defaultIndices;
-
-        if (!currentPosition.equals(defaultPosition)) {
-            console.log(
-                `Moving robot ${robotId} from home to default position`,
-            );
-            const command = moveAllRobotsToConfigDefaultPositions();
-            await executor.execute(command);
-            console.log(`Moved robot ${robotId} to default position`);
-        } else {
-            console.log(`Robot ${robotId} is already at default position`);
-        }
-    }
+    const command = moveAllRobotsHomeToDefaultOptimized();
+    await executor.execute(command);
 }
 
 /**

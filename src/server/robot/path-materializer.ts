@@ -636,7 +636,6 @@ export function moveAllRobotsToDefaultPositions(
 
     // Sort robots: column by column (left to right, no skipping), then bottom to top within each column
     // This prevents collisions by ensuring robots in the same column don't interfere with each other
-    // Note: (0,0) is bottom-left, so j increases upward
     const sortedRobots = robotsToMove.sort((a, b) => {
         const aPos = GridIndices.fromPosition(a.position);
         const bPos = GridIndices.fromPosition(b.position);
@@ -673,6 +672,150 @@ export function moveAllRobotsToConfigDefaultPositions(): SequentialCommandGroup 
 }
 
 /**
+ * Optimized setup to move all robots from home to their default board positions.
+ *
+ * Behavior:
+ * - Main pieces (default rows j = 2 for white, j = 9 for black) move straight onto the board in parallel.
+ * - Pawns (default rows j = 3 for white, j = 8 for black) first move into the deadzone in parallel,
+ *   then travel along the deadzone to align with their file, and finally move onto the board to
+ *   their default squares in parallel.
+ */
+export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
+    const mainPieceTargets = new Map<string, GridIndices>();
+    const pawnTargets = new Map<string, GridIndices>();
+
+    for (const robot of robotManager.idsToRobots.values()) {
+        const def = robot.defaultIndices;
+        if (def.j === 2 || def.j === 9) {
+            mainPieceTargets.set(robot.id, def);
+        } else if (def.j === 3 || def.j === 8) {
+            pawnTargets.set(robot.id, def);
+        }
+    }
+
+    // main pieces go straight to default in parallel
+    const mainMoves: Command[] = [];
+    for (const [robotId, target] of mainPieceTargets) {
+        mainMoves.push(
+            new AbsoluteMoveCommand(
+                robotId,
+                new Position(target.i + 0.5, target.j + 0.5),
+            ),
+        );
+    }
+
+    // pawns snake in batches of four: from each side (left/right),
+    // move one white and one black simultaneously (total four per batch). For each pawn in a batch:
+    // Home -> Deadzone entry on its side, Along deadzone to file aligned with its row,
+    // Into its pawn row square. Repeat until all pawns are placed.
+    type PawnInfo = { id: string; def: GridIndices; start: GridIndices };
+    const leftWhite: PawnInfo[] = [];
+    const leftBlack: PawnInfo[] = [];
+    const rightWhite: PawnInfo[] = [];
+    const rightBlack: PawnInfo[] = [];
+
+    for (const [robotId, def] of pawnTargets) {
+        const start = robotManager.getRobot(robotId).homeIndices;
+        const isWhite = def.j === 3;
+        const sideIsLeft = start.i === 0;
+        const info: PawnInfo = { id: robotId, def, start };
+        if (sideIsLeft) {
+            (isWhite ? leftWhite : leftBlack).push(info);
+        } else {
+            (isWhite ? rightWhite : rightBlack).push(info);
+        }
+    }
+
+    // Sort each group center-out by file to funnel from middle outward
+    const centerOutSort = (a: PawnInfo, b: PawnInfo) => {
+        const center = 5.5; 
+        const da = Math.abs(a.def.i - center);
+        const db = Math.abs(b.def.i - center);
+        if (da !== db) return da - db;
+        return a.def.i - b.def.i;
+    };
+    leftWhite.sort(centerOutSort);
+    leftBlack.sort(centerOutSort);
+    rightWhite.sort(centerOutSort);
+    rightBlack.sort(centerOutSort);
+
+    const pawnBatches: ParallelCommandGroup[] = [];
+    while (
+        leftWhite.length > 0 ||
+        leftBlack.length > 0 ||
+        rightWhite.length > 0 ||
+        rightBlack.length > 0
+    ) {
+        const batchSeqs: SequentialCommandGroup[] = [];
+        const pick = (arr: PawnInfo[] | undefined) => {
+            if (!arr || arr.length === 0) return;
+            const pawn = arr.shift()!;
+            const dzStart = moveToDeadzoneFromHome(pawn.start);
+            // Align on the same edge of the deadzone we entered (row-side), using the pawn's row
+            const ringAlign = new GridIndices(dzStart.i, pawn.def.j);
+            const seq: Command[] = [];
+            // 1) Home -> Deadzone entry
+            seq.push(
+                new AbsoluteMoveCommand(
+                    pawn.id,
+                    new Position(dzStart.i + 0.5, dzStart.j + 0.5),
+                ),
+            );
+            // 2) Travel along the same edge in the deadzone to align with target row (no corner traversal)
+            if (!dzStart.equals(ringAlign)) {
+                seq.push(
+                    new AbsoluteMoveCommand(
+                        pawn.id,
+                        new Position(ringAlign.i + 0.5, ringAlign.j + 0.5),
+                    ),
+                );
+            }
+            // 3) Drop into default pawn square (funnel is handled by center-out selection order)
+            seq.push(
+                new AbsoluteMoveCommand(
+                    pawn.id,
+                    new Position(pawn.def.i + 0.5, pawn.def.j + 0.5),
+                ),
+            );
+            batchSeqs.push(new SequentialCommandGroup(seq));
+        };
+
+        pick(leftWhite);
+        pick(leftBlack);
+        pick(rightWhite);
+        pick(rightBlack);
+
+        if (batchSeqs.length > 0) {
+            pawnBatches.push(new ParallelCommandGroup(batchSeqs));
+        } else {
+            break;
+        }
+    }
+
+    //rotate all robots on default squares to face the center of the board
+    const finalRotations: ReversibleRobotCommand[] = [];
+    const addFacingCenterRotation = (id: string, def: GridIndices) => {
+        const angle = def.j <= 5 ? Math.PI / 2 : -Math.PI / 2;
+        finalRotations.push(
+            new ReversibleAbsoluteRotateCommand(id, () => angle),
+        );
+    };
+
+    for (const [robotId, def] of mainPieceTargets) {
+        addFacingCenterRotation(robotId, def);
+    }
+    for (const [robotId, def] of pawnTargets) {
+        addFacingCenterRotation(robotId, def);
+    }
+
+    return new SequentialCommandGroup([
+        new ParallelCommandGroup(mainMoves),
+        ...pawnBatches,
+        new ParallelCommandGroup(finalRotations),
+    ]);
+}
+
+/**
  * Generates the path commands for a single robot to move from home to default position
  */
 function generateRobotPathToDefault(
@@ -687,7 +830,7 @@ function generateRobotPathToDefault(
         throw new Error(`No default position specified for robot ${robot.id}`);
     }
 
-    // Step 1: Move from home to deadzone
+    // Move from home to deadzone
     const deadzonePos = moveToDeadzoneFromHome(currentPos);
     commands.push(
         new AbsoluteMoveCommand(
@@ -696,7 +839,7 @@ function generateRobotPathToDefault(
         ),
     );
 
-    // Step 2: Travel clockwise along deadzone to top of the target column
+    // Travel clockwise along deadzone to top of the target column
     const topOfColumnPos = new GridIndices(defaultPos.i, 10); // Top of column in deadzone
     if (!deadzonePos.equals(topOfColumnPos)) {
         const deadzoneCommands = generateDeadzonePath(
@@ -707,7 +850,7 @@ function generateRobotPathToDefault(
         commands.push(...deadzoneCommands);
     }
 
-    // Step 3: Drop down to the correct position on the board
+    // Drop down to the correct position on the board
     commands.push(
         new AbsoluteMoveCommand(robot.id, Position.fromGridIndices(defaultPos)),
     );
@@ -736,7 +879,7 @@ function generateDeadzonePath(
         );
     }
 
-    // Always go clockwise (positive direction)
+    // Always go clockwise
     const direction = 1;
     let i = startInArray;
 
@@ -788,7 +931,6 @@ function findNextCornerOrEnd(
  * Determines the deadzone position to move to from a home position
  */
 function moveToDeadzoneFromHome(homePos: GridIndices): GridIndices {
-    // Home positions are on the outside ring (0, 11), deadzone is the second ring (1, 10)
 
     // If on the left edge (i = 0), move to deadzone on the left (i = 1)
     if (homePos.i === 0) {
