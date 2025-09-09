@@ -257,7 +257,8 @@ export class ComputerGameManager extends GameManager {
                     "ai",
                     this.hostSide,
                     this.difficulty,
-                    this.chess.pgn,
+                    this.chess.fen,
+                    robotManager.getIndicesToIds(),
                 );
             }
 

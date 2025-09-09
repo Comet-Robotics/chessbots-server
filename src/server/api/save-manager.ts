@@ -10,8 +10,7 @@
  * Modified: 9/20/24
  */
 
-import { Side } from "../../common/game-types";
-import { Robot } from "../robot/robot";
+import { Side } from "../../common/game-types";2
 
 // Save files contain a date in ms and pgn string
 export interface iSave {
@@ -20,9 +19,9 @@ export interface iSave {
     hostWhite: boolean;
     aiDifficulty: number;
     game: string;
-    robotPos: Map<string, string>;
+    robotPos: Array<[string,string]>;
     oldGame: string;
-    oldRobotPos: Map<string, string>;
+    oldRobotPos: Array<[string,string]>;
 }
 
 export class SaveManager {
@@ -46,20 +45,21 @@ export class SaveManager {
     ) {
         const day = new Date().getTime();
         const side = hostSide === Side.WHITE;
+        console.log(JSON.stringify(robots));
         const saveContents = {
             host: hostId,
             date: day,
             hostWhite: side,
             aiDifficulty: aiDiff,
             game: fen,
-            robotPos: robots,
+            robotPos: Array.from(robots),
             oldGame: "",
-            oldRobotPos: new Map<string, string>(),
+            oldRobotPos: Array<[string,string]>(),
         };
         const oldGame = SaveManager.loadGame(hostId + "+" + clientID);
-        if (oldGame !== null) {
-            saveContents.oldGame = oldGame!.game;
-            saveContents.oldRobotPos = oldGame!.robotPos;
+        if (oldGame && oldGame.game !== null) {
+            saveContents.oldGame = oldGame.game;
+            saveContents.oldRobotPos = oldGame.robotPos;
         }
         return FileManager.writeFile(hostId + "+" + clientID, saveContents);
     }
