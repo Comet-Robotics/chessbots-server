@@ -30,7 +30,7 @@ import {
 } from "./game-manager";
 import { ChessEngine } from "../../common/chess-engine";
 import { Side } from "../../common/game-types";
-import { USE_VIRTUAL_ROBOTS } from "../utils/env";
+import { USE_VIRTUAL_ROBOTS, START_ROBOTS_AT_DEFAULT } from "../utils/env";
 import { SaveManager } from "./save-manager";
 
 import { VirtualBotTunnel } from "../simulator";
@@ -51,9 +51,44 @@ import { executor } from "../command/executor";
  * Helper function to move all robots from their home positions to their default positions
  * for regular chess games
  */
-async function setupDefaultRobotPositions(): Promise<void> {
-    const command = moveAllRobotsHomeToDefaultOptimized();
-    await executor.execute(command);
+async function setupDefaultRobotPositions(
+    isMoving: boolean = true,
+    defaultPositionsMap?: Map<string, GridIndices>,
+): Promise<void> {
+    if (defaultPositionsMap) {
+        if (isMoving) {
+            const command =
+                moveAllRobotsToDefaultPositions(defaultPositionsMap);
+            await executor.execute(command);
+        } else {
+            setAllRobotsToDefaultPositions(defaultPositionsMap);
+        }
+    } else {
+        if (isMoving) {
+            const command = moveAllRobotsHomeToDefaultOptimized();
+            await executor.execute(command);
+        } else {
+            setAllRobotsToDefaultPositions();
+        }
+    }
+}
+
+function setAllRobotsToDefaultPositions(
+    defaultPositionsMap?: Map<string, GridIndices>,
+): void {
+    if (defaultPositionsMap) {
+        for (const [robotId, indices] of defaultPositionsMap.entries()) {
+            const robot = robotManager.getRobot(robotId);
+            robot.position = Position.fromGridIndices(indices);
+            robot.updateTunnelPosition(robot.position);
+        }
+    } else {
+        for (const robot of robotManager.idsToRobots.values()) {
+            robot.position = Position.fromGridIndices(robot.defaultIndices);
+            robot.updateTunnelPosition(robot.position);
+            robotManager.updateRobot(robot.id, robot.defaultIndices);
+        }
+    }
 }
 
 /**
@@ -173,7 +208,7 @@ apiRouter.post("/start-computer-game", async (req, res) => {
 
     // Position robots from home to default positions before starting the game
     try {
-        await setupDefaultRobotPositions();
+        await setupDefaultRobotPositions(!START_ROBOTS_AT_DEFAULT);
     } catch (error) {
         console.error("Error positioning robots for computer game:", error);
         return res.status(500).send({
@@ -206,7 +241,7 @@ apiRouter.post("/start-human-game", async (req, res) => {
 
     // Position robots from home to default positions before starting the game
     try {
-        await setupDefaultRobotPositions();
+        await setupDefaultRobotPositions(!START_ROBOTS_AT_DEFAULT);
     } catch (error) {
         console.error("Error positioning robots for human game:", error);
         return res.status(500).send({
@@ -259,11 +294,10 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
         }
 
         // Execute the movement command with the converted positions
-        console.log("before command is made");
-        const command = moveAllRobotsToDefaultPositions(defaultPositionsMap);
-        console.log("command is made");
-        await executor.execute(command);
-        console.log("All robots moved to their puzzle default positions");
+        await setupDefaultRobotPositions(
+            !START_ROBOTS_AT_DEFAULT,
+            defaultPositionsMap,
+        );
     }
     setGameManager(
         new PuzzleGameManager(

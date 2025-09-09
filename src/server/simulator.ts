@@ -90,6 +90,10 @@ export class VirtualBotTunnel extends BotTunnel {
         this.emitter = new EventEmitter();
     }
 
+    public updatePosition(newPosition: Position): void {
+        this.position = newPosition;
+    }
+
     isActive(): boolean {
         return true;
     }
@@ -111,7 +115,6 @@ export class VirtualBotTunnel extends BotTunnel {
 
     async processPacket(packet: PacketWithId) {
         const { packetId } = packet;
-        console.log("Received Packet");
 
         // Parse packet based on type
         switch (packet.type) {

@@ -45,6 +45,12 @@ export class Robot {
         this._position = coords;
     }
 
+    public updateTunnelPosition(newPosition: Position): void {
+        if (this.tunnel && "updatePosition" in this.tunnel) {
+            (this.tunnel as any).updatePosition(newPosition);
+        }
+    }
+
     public get headingRadians(): number {
         return this._headingRadians;
     }
