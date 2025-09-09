@@ -229,6 +229,12 @@ export class VirtualRobot extends Robot {
     }
 
     public setTunnel(_: BotTunnel): void {}
+
+    public updateTunnelPosition(newPosition: Position): void {
+        if (this.tunnel instanceof VirtualBotTunnel) {
+            this.tunnel.updatePosition(newPosition);
+        }
+    }
 }
 
 /**

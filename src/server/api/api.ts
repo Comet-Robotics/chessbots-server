@@ -33,7 +33,7 @@ import { Side } from "../../common/game-types";
 import { USE_VIRTUAL_ROBOTS, START_ROBOTS_AT_DEFAULT } from "../utils/env";
 import { SaveManager } from "./save-manager";
 
-import { VirtualBotTunnel } from "../simulator";
+import { VirtualBotTunnel, VirtualRobot } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
@@ -80,12 +80,14 @@ function setAllRobotsToDefaultPositions(
         for (const [robotId, indices] of defaultPositionsMap.entries()) {
             const robot = robotManager.getRobot(robotId);
             robot.position = Position.fromGridIndices(indices);
-            robot.updateTunnelPosition(robot.position);
+            if (robot instanceof VirtualRobot)
+                robot.updateTunnelPosition(robot.position);
         }
     } else {
         for (const robot of robotManager.idsToRobots.values()) {
             robot.position = Position.fromGridIndices(robot.defaultIndices);
-            robot.updateTunnelPosition(robot.position);
+            if (robot instanceof VirtualRobot)
+                robot.updateTunnelPosition(robot.position);
             robotManager.updateRobot(robot.id, robot.defaultIndices);
         }
     }
