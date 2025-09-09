@@ -26,6 +26,7 @@ import { SaveManager } from "./save-manager";
 import { materializePath } from "../robot/path-materializer";
 import { DO_SAVES } from "../utils/env";
 import { executor } from "../command/executor";
+import { gamePaused } from "./managers";
 
 type GameState = {
     side: Side;
@@ -139,8 +140,8 @@ export class HumanGameManager extends GameManager {
         );
         const ids = this.clientManager.getIds();
         const currentSave = SaveManager.loadGame(id);
-        // update the internal chess object if it is a move massage
-        if (message instanceof MoveMessage) {
+        // update the internal chess object if it is a move massage and game not paused
+        if (message instanceof MoveMessage && !gamePaused.flag) {
             // Call path materializer and send to bots
             const command = materializePath(message.move);
 
@@ -210,7 +211,7 @@ export class HumanGameManager extends GameManager {
                     SaveManager.endGame(ids[0], ids[1]);
                 else SaveManager.endGame(ids[1], ids[0]);
             }
-        }
+        } 
     }
 }
 
@@ -245,7 +246,7 @@ export class ComputerGameManager extends GameManager {
      * @returns when the game ends
      */
     public async handleMessage(message: Message, id: string): Promise<void> {
-        if (message instanceof MoveMessage) {
+        if (message instanceof MoveMessage && !gamePaused.flag) {
             this.socketManager.sendToAll(new MoveMessage(message.move));
             this.chess.makeMove(message.move);
             if (DO_SAVES) {
@@ -321,7 +322,8 @@ export class PuzzleGameManager extends GameManager {
             //if the move is correct
             if (
                 this.moves[this.moveNumber].from === message.move.from &&
-                this.moves[this.moveNumber].to === message.move.to
+                this.moves[this.moveNumber].to === message.move.to &&
+                !gamePaused.flag
             ) {
                 const command = materializePath(message.move);
 
