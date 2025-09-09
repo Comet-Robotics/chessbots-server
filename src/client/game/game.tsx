@@ -27,7 +27,7 @@ import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { AcceptDrawDialog, OfferDrawDialog } from "./draw-dialog";
 import { bgColor } from "../check-dark-mode";
 import "../colors.css";
-import { PauseDialog } from "./admin-dialogs";
+import { NotificationDialog, PauseDialog } from "./admin-dialogs";
 
 /**
  * Creates a MessageHandler function to handle move messages and game interruptions.
@@ -163,7 +163,14 @@ export function Game(): JSX.Element {
     const gamePauseDialog = 
         gameHoldReason !== undefined ?
             gameHoldReason === GameHoldReason.GAME_PAUSED ?
-                <PauseDialog dialogText={""}/>
+                <PauseDialog />
+            : null
+        : null;
+
+    const gameUnpauseDialog = 
+        gameHoldReason !== undefined ?
+            gameHoldReason === GameHoldReason.GAME_UNPAUSED ?
+                <NotificationDialog dialogText="Game Unpaused"/>
             : null
         : null;
 
@@ -196,6 +203,7 @@ export function Game(): JSX.Element {
                 {gameOfferDialog}
                 {gameAcceptDialog}
                 {gamePauseDialog}
+                {gameUnpauseDialog}
                 <Outlet />
             </div>
         </>
