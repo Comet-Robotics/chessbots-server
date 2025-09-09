@@ -1087,3 +1087,10 @@ export function materializePath(move: Move): Command {
         return moveMainPiece(moveToGridMove(move));
     }
 }
+
+export const pathmatTesting = {
+    moveToGridMove,
+    CollisionType,
+    calcCollisionType,
+    addToCollisions,
+}
