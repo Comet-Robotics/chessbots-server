@@ -11,6 +11,7 @@
  */
 
 import { Side } from "../../common/game-types";
+import { Robot } from "../robot/robot";
 
 // Save files contain a date in ms and pgn string
 export interface iSave {
@@ -19,6 +20,9 @@ export interface iSave {
     hostWhite: boolean;
     aiDifficulty: number;
     game: string;
+    robotPos: Map<string, string>;
+    oldGame: string;
+    oldRobotPos: Map<string, string>;
 }
 
 export class SaveManager {
@@ -27,9 +31,9 @@ export class SaveManager {
      *
      * Finds or creates a save file
      * Save name is host id + client id
-     * Saves include the game start time and save pgn as json
-     *
-     * Input: host id, client id, game pgn
+     * Saves include the game start time and save fen as json
+     * Robots are saved as a map of indices to robots
+     * Input: host id, client id, game fen, robots
      * Output: boolean competed
      */
     public static saveGame(
@@ -37,7 +41,8 @@ export class SaveManager {
         clientID: string,
         hostSide: Side,
         aiDiff: number,
-        pgn: string,
+        fen: string,
+        robots: Map<string, string>,
     ) {
         const day = new Date().getTime();
         const side = hostSide === Side.WHITE;
@@ -46,8 +51,16 @@ export class SaveManager {
             date: day,
             hostWhite: side,
             aiDifficulty: aiDiff,
-            game: pgn,
+            game: fen,
+            robotPos: robots,
+            oldGame: "",
+            oldRobotPos: new Map<string, string>(),
         };
+        const oldGame = SaveManager.loadGame(hostId + "+" + clientID);
+        if (oldGame !== null) {
+            saveContents.oldGame = oldGame!.game;
+            saveContents.oldRobotPos = oldGame!.robotPos;
+        }
         return FileManager.writeFile(hostId + "+" + clientID, saveContents);
     }
 

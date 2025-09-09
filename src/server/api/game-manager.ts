@@ -26,6 +26,7 @@ import { SaveManager } from "./save-manager";
 import { materializePath } from "../robot/path-materializer";
 import { DO_SAVES } from "../utils/env";
 import { executor } from "../command/executor";
+import { robotManager } from "../robot/robot-manager";
 
 type GameState = {
     side: Side;
@@ -158,7 +159,8 @@ export class HumanGameManager extends GameManager {
                         ids[1],
                         this.hostSide,
                         -1,
-                        this.chess.pgn,
+                        this.chess.fen,
+                        robotManager.getIndicesToIds(),
                     );
                 } else {
                     SaveManager.saveGame(
@@ -166,7 +168,8 @@ export class HumanGameManager extends GameManager {
                         ids[0],
                         oppositeSide(this.hostSide),
                         -1,
-                        this.chess.pgn,
+                        this.chess.fen,
+                        robotManager.getIndicesToIds(),
                     );
                 }
             }
