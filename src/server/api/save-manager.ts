@@ -1,4 +1,4 @@
-/*
+/**
  * Save Manager
  *
  * Manages server side game saves
@@ -22,7 +22,7 @@ export interface iSave {
 }
 
 export class SaveManager {
-    /*
+    /**
      * saveGame
      *
      * Finds or creates a save file
@@ -51,7 +51,7 @@ export class SaveManager {
         return FileManager.writeFile(hostId + "+" + clientID, saveContents);
     }
 
-    /*
+    /**
      * Find Game
      *
      * takes a single id and searches for the save file
@@ -71,7 +71,7 @@ export class SaveManager {
         return entryFound;
     }
 
-    /*
+    /**
      * loadGame
      *
      * Locates and returns save based on id
@@ -95,7 +95,7 @@ export class SaveManager {
         return;
     }
 
-    /*
+    /**
      * endGame
      *
      * removes game when finished
@@ -108,7 +108,7 @@ export class SaveManager {
         return FileManager.deleteFile(hostId + "+" + clientId);
     }
 
-    /*
+    /**
      * removeOld
      *
      * Searches through saves, removing ones older than 3 hours
@@ -129,7 +129,7 @@ export class SaveManager {
     }
 }
 
-/*
+/**
  * File Manager
  *
  * Manages files
@@ -140,7 +140,7 @@ export class FileManager {
     private static FilePath = "saves";
     private static fs = require("fs");
 
-    /*
+    /**
      * writeFile
      *
      * Writes save to file
@@ -167,7 +167,7 @@ export class FileManager {
         }
     }
     "";
-    /*
+    /**
      * loadFile
      *
      * loads save data from file name
@@ -182,7 +182,7 @@ export class FileManager {
         return {} as iSave;
     }
 
-    /*
+    /**
      * getFileNames
      *
      * returns the names of all stored files
@@ -201,7 +201,7 @@ export class FileManager {
         return fileNames;
     }
 
-    /*
+    /**
      * deleteFile
      *
      * deletes inputted filename

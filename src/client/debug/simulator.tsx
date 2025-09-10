@@ -1,4 +1,5 @@
-import { Card, Button, H1, Tooltip, Collapse } from "@blueprintjs/core";
+import { Card, Button, H1, Tooltip, Collapse, Tag,
+    CompoundTag, } from "@blueprintjs/core";
 import {
     CSSProperties,
     forwardRef,
@@ -10,12 +11,11 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { get, useSocket } from "../api";
-import {
+import type {
     SimulatedRobotLocation,
-    SimulatorUpdateMessage,
     StackFrame,
 } from "../../common/message/simulator-message";
-import { Tag, CompoundTag } from "@blueprintjs/core";
+import { SimulatorUpdateMessage } from "../../common/message/simulator-message";
 import "./simulator.scss";
 import { clampHeading, GRID_CELL_PX } from "../../common/units";
 import {
@@ -199,6 +199,10 @@ export function Simulator() {
 const openInEditor = async (frame: StackFrame) => {
     if (!frame) {
         console.warn("No stack frame provided for opening in editor");
+        return;
+    }
+    if (!frame.lineNumber || !frame.columnNumber) {
+        console.warn("No line or column number provided for opening in editor");
         return;
     }
     const params = new URLSearchParams({

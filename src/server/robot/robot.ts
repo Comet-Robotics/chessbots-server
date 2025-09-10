@@ -4,13 +4,16 @@ import { GridIndices } from "./grid-indices";
 import { tcpServer } from "../api/managers";
 import type { BotTunnel } from "../api/tcp-interface";
 import { PacketType } from "../utils/tcp-packet";
+import { type BotTunnel } from "../api/bot-tunnel";
 
 /**
- * Represents a robot.
+ * Represents a physical robot.
  * Includes information about the current location as well as tooling for communication.
  */
 export class Robot {
     private _headingRadians: number;
+    private _position: Position;
+    protected tunnel: BotTunnel | null;
 
     constructor(
         public readonly id: string,
@@ -18,11 +21,22 @@ export class Robot {
          * The location the robot lives in when its not in use.
          */
         public readonly homeIndices: GridIndices,
+        /**
+         * The location the robot should be in at the beginning of a regular chess.
+         */
         public readonly defaultIndices: GridIndices,
         public readonly startHeadingRadians: number = 0,
-        private _position: Position = ZERO_POSITION,
+        position?: Position,
     ) {
+        if (
+            startHeadingRadians === undefined ||
+            Number.isNaN(startHeadingRadians)
+        ) {
+            throw new Error("startHeadingRadians must be a number");
+        }
         this._headingRadians = startHeadingRadians;
+        this._position = position ?? Position.fromGridIndices(homeIndices);
+        this.tunnel = null;
     }
 
     public get position(): Position {
@@ -86,8 +100,8 @@ export class Robot {
         return promise;
     }
 
-    protected getTunnel(): BotTunnel {
-        return tcpServer!.getTunnelFromId(this.id);
+    public setTunnel(tunnel: BotTunnel) {
+        this.tunnel = tunnel;
     }
 
     /**
@@ -97,8 +111,10 @@ export class Robot {
      * @param deltaHeadingRadians - A relative heading to turn by, in radians. May be positive or negative.
      */
     public async sendTurnPacket(deltaHeadingRadians: number): Promise<void> {
-        const tunnel = this.getTunnel();
-        await tunnel.send({
+        console.log(
+            `Sending turn packet to robot ${this.id} with delta heading ${deltaHeadingRadians}`,
+        );
+        await this.tunnel!.send({
             type: PacketType.TURN_BY_ANGLE,
             deltaHeadingRadians: deltaHeadingRadians,
         });

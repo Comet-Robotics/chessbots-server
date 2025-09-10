@@ -1,26 +1,36 @@
-import { robotManager } from "../api/managers";
-import { Move } from "../../common/game-types";
-import { gameManager } from "../api/api";
+import { type Move } from "../../common/game-types";
 import {
-    Command,
+    type Command,
     ParallelCommandGroup,
     SequentialCommandGroup,
 } from "../command/command";
+import type { MoveCommand } from "../command/move-command";
 import {
     AbsoluteMoveCommand,
     DriveCommand,
-    MoveCommand,
     ReversibleAbsoluteRotateCommand,
 } from "../command/move-command";
-import { MovePiece, ReversibleRobotCommand } from "../command/move-piece";
+import type { ReversibleRobotCommand } from "../command/move-piece";
+import { MovePiece } from "../command/move-piece";
 import { Position } from "./position";
 import { GridIndices } from "./grid-indices";
+import type { Robot } from "./robot";
 import { error } from "console";
+import { robotManager } from "./robot-manager";
+import { gameManager } from "../api/managers";
 
 export interface GridMove {
     from: GridIndices;
     to: GridIndices;
 }
+
+enum CollisionType {
+    HORIZONTAL = 0,
+    VERTICAL = 1,
+    DIAGONAL = 2,
+    HORSE = 3,
+}
+
 const arrayOfCornersIndicies = [0, 9, 18, 27];
 
 const arrayOfDeadzone = [
@@ -69,23 +79,23 @@ function moveToGridMove(move: Move): GridMove {
     };
 }
 
-function calcCollisionType(gridMove: GridMove): number {
+function calcCollisionType(gridMove: GridMove): CollisionType {
     const from = gridMove.from;
     const to = gridMove.to;
 
     // Horizontal
     if (from.j === to.j) {
-        return 0;
+        return CollisionType.HORIZONTAL;
         // Vertical
     } else if (from.i === to.i) {
-        return 1;
+        return CollisionType.VERTICAL;
     } else {
         // Diagonal
         if (Math.abs(from.i - to.i) === Math.abs(from.j - to.j)) {
-            return 2;
+            return CollisionType.DIAGONAL;
             // Horse
         } else {
-            return 3;
+            return CollisionType.HORSE;
         }
     }
 }
@@ -97,48 +107,67 @@ function addToCollisions(collisions: string[], x: number, y: number) {
     }
 }
 
-function detectCollisions(gridMove: GridMove, collisionType: number): string[] {
+function detectCollisions(
+    gridMove: GridMove,
+    collisionType: CollisionType,
+): string[] {
     const from = gridMove.from;
     const to = gridMove.to;
     const collisions: string[] = [];
     const direction: [number, number] = directionToEdge(to);
     switch (collisionType) {
         // Horizontal
-        case 0: {
+        case CollisionType.HORIZONTAL: {
             if (to.i < from.i) {
-                addToCollisions(collisions, from.i, from.j + direction[1]);
                 for (let i = from.i - 1; i > to.i; i--) {
                     addToCollisions(collisions, i, from.j);
-                    addToCollisions(collisions, i, from.j + direction[1]);
+                }
+                if (collisions.length > 0) {
+                    addToCollisions(collisions, from.i, from.j + direction[1]);
+                    for (let i = from.i - 1; i > to.i; i--) {
+                        addToCollisions(collisions, i, from.j + direction[1]);
+                    }
                 }
             } else {
-                addToCollisions(collisions, from.i, from.j + direction[1]);
                 for (let i = from.i + 1; i < to.i; i++) {
                     addToCollisions(collisions, i, from.j);
-                    addToCollisions(collisions, i, from.j + direction[1]);
+                }
+                if (collisions.length > 0) {
+                    addToCollisions(collisions, from.i, from.j + direction[1]);
+                    for (let i = from.i + 1; i < to.i; i++) {
+                        addToCollisions(collisions, i, from.j + direction[1]);
+                    }
                 }
             }
             break;
         }
         // Vertical
-        case 1: {
+        case CollisionType.VERTICAL: {
             if (to.j < from.j) {
-                addToCollisions(collisions, from.i + direction[0], from.j);
                 for (let j = from.j - 1; j > to.j; j--) {
                     addToCollisions(collisions, from.i, j);
-                    addToCollisions(collisions, from.i + direction[0], j);
+                }
+                if (collisions.length > 0) {
+                    addToCollisions(collisions, from.i + direction[0], from.j);
+                    for (let j = from.j - 1; j > to.j; j--) {
+                        addToCollisions(collisions, from.i + direction[0], j);
+                    }
                 }
             } else {
-                addToCollisions(collisions, from.i + direction[0], from.j);
                 for (let j = from.j + 1; j < to.j; j++) {
                     addToCollisions(collisions, from.i, j);
-                    addToCollisions(collisions, from.i + direction[0], j);
+                }
+                if (collisions.length > 0) {
+                    addToCollisions(collisions, from.i + direction[0], from.j);
+                    for (let j = from.j + 1; j < to.j; j++) {
+                        addToCollisions(collisions, from.i + direction[0], j);
+                    }
                 }
             }
             break;
         }
         // Diagonal
-        case 2: {
+        case CollisionType.DIAGONAL: {
             // Will be either positive or negative depending on direction
             const dx = to.i - from.i;
             const dy = to.j - from.j;
@@ -174,7 +203,7 @@ function detectCollisions(gridMove: GridMove, collisionType: number): string[] {
             break;
         }
         // Horse
-        case 3: {
+        case CollisionType.HORSE: {
             // Will be either positive or negative depending on direction
             const dx = to.i - from.i;
             const dy = to.j - from.j;
@@ -210,13 +239,13 @@ function detectCollisions(gridMove: GridMove, collisionType: number): string[] {
 function findShimmyLocation(
     pieceId: string,
     move: GridMove,
-    collisionType: number,
+    collisionType: CollisionType,
 ): Position {
     const shimmyPos: Position = robotManager.getRobot(pieceId).position;
     const axisShimmyAmount: number = 1 / 3;
     switch (collisionType) {
         // Horizontal
-        case 0: {
+        case CollisionType.HORIZONTAL: {
             const direction: [number, number] = directionToEdge(move.to);
             const gridY: number = Math.floor(shimmyPos.y);
             if (gridY === move.to.j) {
@@ -230,9 +259,9 @@ function findShimmyLocation(
             }
         }
         // Vertical
-        case 1: {
+        case CollisionType.VERTICAL: {
             const direction: [number, number] = directionToEdge(move.to);
-            const gridX: number = move.from.i + direction[0];
+            const gridX: number = Math.floor(shimmyPos.y);
             if (gridX === move.to.i) {
                 const augmentX: number =
                     shimmyPos.x + direction[0] * -axisShimmyAmount;
@@ -243,8 +272,8 @@ function findShimmyLocation(
                 return new Position(augmentX, shimmyPos.y);
             }
         }
-        case 2:
-        case 3: {
+        case CollisionType.DIAGONAL:
+        case CollisionType.HORSE: {
             const moveDistance: number = 0.5;
             const signedDistX: number = move.to.i - move.from.i;
             const signedDistY: number = move.to.j - move.from.j;
@@ -254,10 +283,10 @@ function findShimmyLocation(
             const orth1: Position = new Position(-normalY, normalX);
             const orth2: Position = new Position(normalY, -normalX);
             const orthPos1: Position = orth1.add(
-                gridIndicesToPosition(move.to),
+                Position.fromGridIndices(move.to),
             );
             const orthPos2: Position = orth2.add(
-                gridIndicesToPosition(move.to),
+                Position.fromGridIndices(move.to),
             );
 
             // distance calculations :)
@@ -307,18 +336,19 @@ function constructFinalCommand(
     move: GridMove,
     driveCommands: DriveCommand[],
     rotateCommands: ReversibleRobotCommand[],
-    collisionType: number,
+    collisionType: CollisionType,
     numCollisions: number,
 ): MovePiece {
     const from = move.from;
-    console.log(from, robotManager.indicesToIds);
+    const indicesToIds = robotManager.getIndicesToIds();
+    console.log(from, indicesToIds);
     const mainPiece = robotManager.getRobotAtIndices(from).id;
     const dirToEdge = directionToEdge(from);
 
     if (mainPiece !== undefined) {
         console.log("main piece");
         const to = move.to;
-        if (collisionType === 0 && numCollisions > 1) {
+        if (collisionType === CollisionType.HORIZONTAL && numCollisions > 1) {
             const y = dirToEdge[1] * 0.5;
             const pos1 = new Position(from.i + 0.5, from.j + y + 0.5);
             const pos2 = new Position(to.i + 0.5, from.j + y + 0.5);
@@ -342,7 +372,10 @@ function constructFinalCommand(
                 ]);
             setupCommands.push(...rotateCommands, mainTurn1, ...driveCommands);
             return new MovePiece(setupCommands, mainDrive);
-        } else if (collisionType === 1 && numCollisions > 1) {
+        } else if (
+            collisionType === CollisionType.VERTICAL &&
+            numCollisions > 1
+        ) {
             const x = dirToEdge[0] * 0.5;
             const pos1 = new Position(from.i + x + 0.5, from.j + 0.5);
             const pos2 = new Position(from.i + x + 0.5, to.j + 0.5);
@@ -382,7 +415,7 @@ function constructFinalCommand(
 
 // Takes in a move, and generates the commands required to get the main piece to it's destination
 // If there are pieces in the way, it shimmy's them out, and move them back after main piece passes
-function moveMainPiece(move: GridMove): MovePiece {
+export function moveMainPiece(move: GridMove): MovePiece {
     const driveCommands: DriveCommand[] = [];
     const rotateCommands: ReversibleRobotCommand[] = [];
     const collisionType = calcCollisionType(move);
@@ -545,6 +578,7 @@ function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
         }
         i += botDirectionToHome;
         if (i < 0) i += 36;
+        if (i >= 36) i -= 36;
     }
     if (arrayOfDeadzone[endInArray]) {
         moveCommands.push(
@@ -570,16 +604,357 @@ function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
     return goHome;
 }
 
-function gridIndicesToPosition(indices: GridIndices): Position {
-    return new Position(indices.i + 0.5, indices.j + 0.5);
-}
-
 // Command structure
 // No Capture: Sequential[ Parallel[Turn[all]], MovePiece[shimmys, main], Parallel[TurnToStart[all]] ]
 
 // Home with shimmy: Sequential[ No_Capture[capture piece], Turn[capture piece], Move[capture piece], ... ]
 // Home without shimmy: Sequential[ Turn[capture piece], Move[capture piece], ... ]
 // Capture: Sequential[ Home with/without shimmy[capture piece], No_Capture[main piece] ]
+/**
+ * Moves all robots from their home positions to their specified default positions using a collision-free algorithm.
+ * Robots are sorted by column (leftmost first) and row (downmost first), then move sequentially:
+ * 1. From home to deadzone
+ * 2. Travel along deadzone to top of their column
+ * 3. Drop down to their correct position on the board
+ *
+ * @param defaultPositions - Map of robot IDs to their target default positions
+ * @returns A SequentialCommandGroup containing all robot movements
+ */
+export function moveAllRobotsToDefaultPositions(
+    defaultPositions: Map<string, GridIndices>,
+): SequentialCommandGroup {
+    // Get only the robots specified in the defaultPositions map
+    const robotsToMove: Robot[] = [];
+    for (const robotId of defaultPositions.keys()) {
+        try {
+            const robot = robotManager.getRobot(robotId);
+            robotsToMove.push(robot);
+        } catch (error) {
+            throw new Error(`Robot ${robotId} not found in robot manager`);
+        }
+    }
+
+    // Sort robots: column by column (left to right, no skipping), then bottom to top within each column
+    // This prevents collisions by ensuring robots in the same column don't interfere with each other
+    const sortedRobots = robotsToMove.sort((a, b) => {
+        const aPos = GridIndices.fromPosition(a.position);
+        const bPos = GridIndices.fromPosition(b.position);
+
+        return aPos.j - bPos.j;
+    });
+
+    const allCommands: Command[] = [];
+
+    for (const robot of sortedRobots) {
+        const robotCommands = generateRobotPathToDefault(
+            robot,
+            defaultPositions,
+        );
+        allCommands.push(...robotCommands);
+    }
+
+    return new SequentialCommandGroup(allCommands);
+}
+
+/**
+ * Convenience function for regular games that uses the robot's default indices from config
+ * @returns A SequentialCommandGroup containing all robot movements to their config default positions
+ */
+export function moveAllRobotsToConfigDefaultPositions(): SequentialCommandGroup {
+    const defaultPositions = new Map<string, GridIndices>();
+
+    // Build the map from robot config default positions
+    for (const robot of robotManager.idsToRobots.values()) {
+        defaultPositions.set(robot.id, robot.defaultIndices);
+    }
+
+    return moveAllRobotsToDefaultPositions(defaultPositions);
+}
+
+/**
+ * Optimized setup to move all robots from home to their default board positions.
+ *
+ * Behavior:
+ * - Main pieces (default rows j = 2 for white, j = 9 for black) move straight onto the board in parallel.
+ * - Pawns (default rows j = 3 for white, j = 8 for black) first move into the deadzone in parallel,
+ *   then travel along the deadzone to align with their file, and finally move onto the board to
+ *   their default squares in parallel.
+ */
+export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
+    const mainPieceTargets = new Map<string, GridIndices>();
+    const pawnTargets = new Map<string, GridIndices>();
+
+    for (const robot of robotManager.idsToRobots.values()) {
+        const def = robot.defaultIndices;
+        if (def.j === 2 || def.j === 9) {
+            mainPieceTargets.set(robot.id, def);
+        } else if (def.j === 3 || def.j === 8) {
+            pawnTargets.set(robot.id, def);
+        }
+    }
+
+    // main pieces go straight to default in parallel
+    const mainMoves: Command[] = [];
+    for (const [robotId, target] of mainPieceTargets) {
+        mainMoves.push(
+            new AbsoluteMoveCommand(
+                robotId,
+                new Position(target.i + 0.5, target.j + 0.5),
+            ),
+        );
+    }
+
+    // pawns snake in batches of four: from each side (left/right),
+    // move one white and one black simultaneously (total four per batch). For each pawn in a batch:
+    // Home -> Deadzone entry on its side, Along deadzone to file aligned with its row,
+    // Into its pawn row square. Repeat until all pawns are placed.
+    type PawnInfo = { id: string; def: GridIndices; start: GridIndices };
+    const leftWhite: PawnInfo[] = [];
+    const leftBlack: PawnInfo[] = [];
+    const rightWhite: PawnInfo[] = [];
+    const rightBlack: PawnInfo[] = [];
+
+    for (const [robotId, def] of pawnTargets) {
+        const start = robotManager.getRobot(robotId).homeIndices;
+        const isWhite = def.j === 3;
+        const sideIsLeft = start.i === 0;
+        const info: PawnInfo = { id: robotId, def, start };
+        if (sideIsLeft) {
+            (isWhite ? leftWhite : leftBlack).push(info);
+        } else {
+            (isWhite ? rightWhite : rightBlack).push(info);
+        }
+    }
+
+    // Sort each group center-out by file to funnel from middle outward
+    const centerOutSort = (a: PawnInfo, b: PawnInfo) => {
+        const center = 5.5;
+        const da = Math.abs(a.def.i - center);
+        const db = Math.abs(b.def.i - center);
+        if (da !== db) return da - db;
+        return a.def.i - b.def.i;
+    };
+    leftWhite.sort(centerOutSort);
+    leftBlack.sort(centerOutSort);
+    rightWhite.sort(centerOutSort);
+    rightBlack.sort(centerOutSort);
+
+    const pawnBatches: ParallelCommandGroup[] = [];
+    while (
+        leftWhite.length > 0 ||
+        leftBlack.length > 0 ||
+        rightWhite.length > 0 ||
+        rightBlack.length > 0
+    ) {
+        const batchSeqs: SequentialCommandGroup[] = [];
+        const pick = (arr: PawnInfo[] | undefined) => {
+            if (!arr || arr.length === 0) return;
+            const pawn = arr.shift()!;
+            const dzStart = moveToDeadzoneFromHome(pawn.start);
+            // Align on the same edge of the deadzone we entered (row-side), using the pawn's row
+            const ringAlign = new GridIndices(dzStart.i, pawn.def.j);
+            const seq: Command[] = [];
+            // 1) Home -> Deadzone entry
+            seq.push(
+                new AbsoluteMoveCommand(
+                    pawn.id,
+                    new Position(dzStart.i + 0.5, dzStart.j + 0.5),
+                ),
+            );
+            // 2) Travel along the same edge in the deadzone to align with target row (no corner traversal)
+            if (!dzStart.equals(ringAlign)) {
+                seq.push(
+                    new AbsoluteMoveCommand(
+                        pawn.id,
+                        new Position(ringAlign.i + 0.5, ringAlign.j + 0.5),
+                    ),
+                );
+            }
+            // 3) Drop into default pawn square (funnel is handled by center-out selection order)
+            seq.push(
+                new AbsoluteMoveCommand(
+                    pawn.id,
+                    new Position(pawn.def.i + 0.5, pawn.def.j + 0.5),
+                ),
+            );
+            batchSeqs.push(new SequentialCommandGroup(seq));
+        };
+
+        pick(leftWhite);
+        pick(leftBlack);
+        pick(rightWhite);
+        pick(rightBlack);
+
+        if (batchSeqs.length > 0) {
+            pawnBatches.push(new ParallelCommandGroup(batchSeqs));
+        } else {
+            break;
+        }
+    }
+
+    //rotate all robots on default squares to face the center of the board
+    const finalRotations: ReversibleRobotCommand[] = [];
+    const addFacingCenterRotation = (id: string, def: GridIndices) => {
+        const angle = def.j <= 5 ? Math.PI / 2 : -Math.PI / 2;
+        finalRotations.push(
+            new ReversibleAbsoluteRotateCommand(id, () => angle),
+        );
+    };
+
+    for (const [robotId, def] of mainPieceTargets) {
+        addFacingCenterRotation(robotId, def);
+    }
+    for (const [robotId, def] of pawnTargets) {
+        addFacingCenterRotation(robotId, def);
+    }
+
+    return new SequentialCommandGroup([
+        new ParallelCommandGroup(mainMoves),
+        ...pawnBatches,
+        new ParallelCommandGroup(finalRotations),
+    ]);
+}
+
+/**
+ * Generates the path commands for a single robot to move from home to default position
+ */
+function generateRobotPathToDefault(
+    robot: Robot,
+    defaultPositions: Map<string, GridIndices>,
+): Command[] {
+    const commands: Command[] = [];
+    const currentPos = GridIndices.fromPosition(robot.position);
+    const defaultPos = defaultPositions.get(robot.id);
+
+    if (!defaultPos) {
+        throw new Error(`No default position specified for robot ${robot.id}`);
+    }
+
+    // Move from home to deadzone
+    const deadzonePos = moveToDeadzoneFromHome(currentPos);
+    commands.push(
+        new AbsoluteMoveCommand(
+            robot.id,
+            Position.fromGridIndices(deadzonePos),
+        ),
+    );
+
+    // Travel clockwise along deadzone to top of the target column
+    const topOfColumnPos = new GridIndices(defaultPos.i, 10); // Top of column in deadzone
+    if (!deadzonePos.equals(topOfColumnPos)) {
+        const deadzoneCommands = generateDeadzonePath(
+            robot.id,
+            deadzonePos,
+            topOfColumnPos,
+        );
+        commands.push(...deadzoneCommands);
+    }
+
+    // Drop down to the correct position on the board
+    commands.push(
+        new AbsoluteMoveCommand(robot.id, Position.fromGridIndices(defaultPos)),
+    );
+
+    return commands;
+}
+
+/**
+ * Generates commands to move along the deadzone in a clockwise manner
+ * Optimized to group consecutive straight moves into single commands
+ */
+function generateDeadzonePath(
+    robotId: string,
+    startPos: GridIndices,
+    endPos: GridIndices,
+): Command[] {
+    const commands: Command[] = [];
+
+    // Find the indices in the deadzone array
+    const startInArray = findGridIndicesInArray(arrayOfDeadzone, startPos);
+    const endInArray = findGridIndicesInArray(arrayOfDeadzone, endPos);
+
+    if (startInArray === -1 || endInArray === -1) {
+        throw new Error(
+            `Invalid deadzone positions: start=${startPos}, end=${endPos}`,
+        );
+    }
+
+    // Always go clockwise
+    const direction = 1;
+    let i = startInArray;
+
+    while (i !== endInArray) {
+        // Find the next corner or the end position
+        const nextCorner = findNextCornerOrEnd(i, endInArray, direction);
+
+        // Move directly to the corner/end position
+        const targetPos = arrayOfDeadzone[nextCorner];
+        commands.push(
+            new AbsoluteMoveCommand(
+                robotId,
+                new Position(targetPos.i + 0.5, targetPos.j + 0.5),
+            ),
+        );
+
+        i = nextCorner;
+    }
+
+    return commands;
+}
+
+/**
+ * Finds the next corner position or the end position in the deadzone
+ */
+function findNextCornerOrEnd(
+    currentIndex: number,
+    endIndex: number,
+    direction: number,
+): number {
+    // Corner indices in the deadzone array
+    const corners = [0, 9, 18, 27]; // Bottom-left, top-left, top-right, bottom-right
+
+    let i = currentIndex;
+    while (i !== endIndex) {
+        i += direction;
+        if (i >= 36) i -= 36; // Wrap around
+
+        // If we hit a corner or the end, return it
+        if (corners.includes(i) || i === endIndex) {
+            return i;
+        }
+    }
+
+    return endIndex;
+}
+
+/**
+ * Determines the deadzone position to move to from a home position
+ */
+function moveToDeadzoneFromHome(homePos: GridIndices): GridIndices {
+    // If on the left edge (i = 0), move to deadzone on the left (i = 1)
+    if (homePos.i === 0) {
+        return new GridIndices(1, homePos.j);
+    }
+
+    // If on the right edge (i = 11), move to deadzone on the right (i = 10)
+    if (homePos.i === 11) {
+        return new GridIndices(10, homePos.j);
+    }
+
+    // If on the bottom edge (j = 0), move to deadzone on the bottom (j = 1)
+    if (homePos.j === 0) {
+        return new GridIndices(homePos.i, 1);
+    }
+
+    // If on the top edge (j = 11), move to deadzone on the top (j = 10)
+    if (homePos.j === 11) {
+        return new GridIndices(homePos.i, 10);
+    }
+
+    // This shouldn't happen if called correctly, but fallback to a safe deadzone position
+    return new GridIndices(1, 1);
+}
+
 export function materializePath(move: Move): Command {
     if (
         gameManager?.chess.isRegularCapture(move) ||
@@ -591,15 +966,8 @@ export function materializePath(move: Move): Command {
         );
         console.log("capture " + capturePiece);
         if (capturePiece !== undefined) {
-            const captureSquareX = Math.floor(
-                robotManager.getRobot(capturePiece).position.x,
-            );
-            const captureSquareY = Math.floor(
-                robotManager.getRobot(capturePiece).position.y,
-            );
-            const captureSquare = new GridIndices(
-                captureSquareX,
-                captureSquareY,
+            const captureSquare = GridIndices.fromPosition(
+                robotManager.getRobot(capturePiece).position,
             );
 
             const captureCommand = returnToHome(captureSquare, capturePiece);
@@ -625,37 +993,37 @@ export function materializePath(move: Move): Command {
             rookPiece = robotManager.getRobotAtIndices(new GridIndices(2, 2));
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
-                gridIndicesToPosition(new GridIndices(4, 2)),
+                Position.fromGridIndices(new GridIndices(4, 2)),
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(2, 1)),
+                Position.fromGridIndices(new GridIndices(2, 1)),
             );
             rookMove2 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(5, 1)),
+                Position.fromGridIndices(new GridIndices(5, 1)),
             );
             rookMove3 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(5, 2)),
+                Position.fromGridIndices(new GridIndices(5, 2)),
             );
         } else {
             rookPiece = robotManager.getRobotAtIndices(new GridIndices(2, 9));
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
-                gridIndicesToPosition(new GridIndices(4, 9)),
+                Position.fromGridIndices(new GridIndices(4, 9)),
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(2, 10)),
+                Position.fromGridIndices(new GridIndices(2, 10)),
             );
             rookMove2 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(5, 10)),
+                Position.fromGridIndices(new GridIndices(5, 10)),
             );
             rookMove3 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(5, 9)),
+                Position.fromGridIndices(new GridIndices(5, 9)),
             );
         }
         return new SequentialCommandGroup([
@@ -673,37 +1041,37 @@ export function materializePath(move: Move): Command {
             rookPiece = robotManager.getRobotAtIndices(new GridIndices(9, 2));
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
-                gridIndicesToPosition(new GridIndices(8, 2)),
+                Position.fromGridIndices(new GridIndices(8, 2)),
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(9, 1)),
+                Position.fromGridIndices(new GridIndices(9, 1)),
             );
             rookMove2 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(7, 1)),
+                Position.fromGridIndices(new GridIndices(7, 1)),
             );
             rookMove3 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(7, 2)),
+                Position.fromGridIndices(new GridIndices(7, 2)),
             );
         } else {
             rookPiece = robotManager.getRobotAtIndices(new GridIndices(9, 9));
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
-                gridIndicesToPosition(new GridIndices(9, 8)),
+                Position.fromGridIndices(new GridIndices(9, 8)),
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(9, 10)),
+                Position.fromGridIndices(new GridIndices(9, 10)),
             );
             rookMove2 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(7, 10)),
+                Position.fromGridIndices(new GridIndices(7, 10)),
             );
             rookMove3 = new AbsoluteMoveCommand(
                 rookPiece.id,
-                gridIndicesToPosition(new GridIndices(7, 9)),
+                Position.fromGridIndices(new GridIndices(7, 9)),
             );
         }
         return new SequentialCommandGroup([
@@ -718,8 +1086,4 @@ export function materializePath(move: Move): Command {
 
         return moveMainPiece(moveToGridMove(move));
     }
-}
-
-export function debugPath(move: Move) {
-    return moveMainPiece(moveToGridMove(move));
 }

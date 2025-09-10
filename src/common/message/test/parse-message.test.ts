@@ -11,7 +11,7 @@ import {
     GameInterruptedMessage,
     GameStartedMessage,
 } from "../game-message";
-import { Message } from "../message";
+import type { Message } from "../message";
 import { parseMessage } from "../parse-message";
 import { expect, test } from "vitest";
 

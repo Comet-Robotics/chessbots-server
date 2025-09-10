@@ -19,6 +19,10 @@ export enum MessageType {
      */
     MOVE = "move",
     /**
+     * Sets the client chess engine
+     */
+    SET_CHESS = "set-chess",
+    /**
      * A server-client message used to tell player two a game has started.
      */
     GAME_STARTED = "game-started",
@@ -36,6 +40,10 @@ export enum MessageType {
      * Indicates the game is finished and should be restarted
      */
     GAME_FINISHED = "game-finished",
+    /**
+     * Indicates the game has ended
+     */
+    GAME_ENDED = "game-ended",
     /**
      * A client-server message containing instructions for manually driving a robot.
      */

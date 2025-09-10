@@ -1,8 +1,8 @@
-import WebSocket from "ws";
-import { Message } from "../../common/message/message";
+import type WebSocket from "ws";
+import type { Message } from "../../common/message/message";
 
 /**
- * A class which maps client ids to their corresponding sockets (if any).
+ * A class which maps player client ids to their corresponding websocket (if any).
  */
 export class SocketManager {
     constructor(private sockets: Record<string, WebSocket>) {}

@@ -1,11 +1,5 @@
-import {
-    Number as NumberType,
-    Record,
-    Union,
-    Array,
-    Literal,
-    Static,
-} from "runtypes";
+import type { Static } from "runtypes";
+import { Number as NumberType, Record, Union, Array, Literal } from "runtypes";
 
 export enum SplinePointType {
     StartPoint = "start",
