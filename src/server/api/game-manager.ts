@@ -220,6 +220,7 @@ export class HumanGameManager extends GameManager {
 export class ComputerGameManager extends GameManager {
     // The minimum amount of time to wait responding with a move.
     MINIMUM_DELAY = 600;
+    aiFirstMove = false;
 
     // Create the game manager
     // if the player is black have the computer make the first move
@@ -231,16 +232,16 @@ export class ComputerGameManager extends GameManager {
         protected reverse: boolean,
     ) {
         super(chess, socketManager, hostSide, reverse);
-        if (this.hostSide === Side.BLACK) {
+        if (this.hostSide === Side.BLACK || chess.pgn !== "") {
+            this.aiFirstMove = true;
+        }
+    }
+
+    public async makeFirstMove() {
+        if (this.aiFirstMove) {
             const move = this.chess.calculateAiMove(this.difficulty);
             this.socketManager.sendToAll(new MoveMessage(move));
-            this.chess.makeMove(move);
-            this.executeRobotMovement(move);
-        } else if (chess.pgn !== "") {
-            const move = this.chess.calculateAiMove(this.difficulty);
-            this.socketManager.sendToAll(new MoveMessage(move));
-            this.chess.makeMove(move);
-            this.executeRobotMovement(move);
+            await this.executeRobotMovement(move);
         }
     }
 

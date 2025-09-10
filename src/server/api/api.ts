@@ -138,29 +138,29 @@ export const apiRouter = Router();
  * used when a client connects to the server
  */
 
-apiRouter.get("/client-information", (req, res) => {
+apiRouter.get("/client-information", async (req, res) => {
     const clientType = clientManager.getClientType(req.cookies.id);
     // loading saves from file if found
     const oldSave = SaveManager.loadGame(req.cookies.id);
     if (oldSave) {
         // if the game was an ai game, create a computer game manager with the ai difficulty
         if (oldSave.aiDifficulty !== -1) {
-            setGameManager(
-                new ComputerGameManager(
-                    new ChessEngine(oldSave.game),
-                    socketManager,
-                    oldSave.host === req.cookies.id ?
-                        oldSave.hostWhite ?
-                            Side.WHITE
-                        :   Side.BLACK
-                    : oldSave.hostWhite ? Side.BLACK
-                    : Side.WHITE,
-                    oldSave.aiDifficulty,
-                    oldSave.host !== req.cookies.id,
-                ),
+            const cgm = new ComputerGameManager(
+                new ChessEngine(oldSave.game),
+                socketManager,
+                oldSave.host === req.cookies.id ?
+                    oldSave.hostWhite ?
+                        Side.WHITE
+                    :   Side.BLACK
+                : oldSave.hostWhite ? Side.BLACK
+                : Side.WHITE,
+                oldSave.aiDifficulty,
+                oldSave.host !== req.cookies.id,
             );
-            // create a new human game manger with appropriate clients
+            setGameManager(cgm);
+            await cgm.makeFirstMove();
         } else {
+            // create a new human game manger with appropriate clients
             setGameManager(
                 new HumanGameManager(
                     new ChessEngine(oldSave.game),
@@ -219,15 +219,15 @@ apiRouter.post("/start-computer-game", async (req, res) => {
     }
 
     // create a new computer game manager
-    setGameManager(
-        new ComputerGameManager(
-            new ChessEngine(),
-            socketManager,
-            side,
-            difficulty,
-            false,
-        ),
+    const cgm = new ComputerGameManager(
+        new ChessEngine(),
+        socketManager,
+        side,
+        difficulty,
+        false,
     );
+    setGameManager(cgm);
+    await cgm.makeFirstMove();
     return res.send({ message: "success" });
 });
 
