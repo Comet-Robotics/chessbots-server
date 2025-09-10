@@ -30,10 +30,10 @@ import {
 } from "./game-manager";
 import { ChessEngine } from "../../common/chess-engine";
 import { Side } from "../../common/game-types";
-import { USE_VIRTUAL_ROBOTS } from "../utils/env";
+import { USE_VIRTUAL_ROBOTS, START_ROBOTS_AT_DEFAULT } from "../utils/env";
 import { SaveManager } from "./save-manager";
 
-import { VirtualBotTunnel } from "../simulator";
+import { VirtualBotTunnel, VirtualRobot } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
@@ -48,6 +48,51 @@ import { tcpServer } from "./tcp-interface";
 import { robotManager } from "../robot/robot-manager";
 import { executor } from "../command/executor";
 
+/**
+ * Helper function to move all robots from their home positions to their default positions
+ * for regular chess games
+ */
+async function setupDefaultRobotPositions(
+    isMoving: boolean = true,
+    defaultPositionsMap?: Map<string, GridIndices>,
+): Promise<void> {
+    if (defaultPositionsMap) {
+        if (isMoving) {
+            const command =
+                moveAllRobotsToDefaultPositions(defaultPositionsMap);
+            await executor.execute(command);
+        } else {
+            setAllRobotsToDefaultPositions(defaultPositionsMap);
+        }
+    } else {
+        if (isMoving) {
+            const command = moveAllRobotsHomeToDefaultOptimized();
+            await executor.execute(command);
+        } else {
+            setAllRobotsToDefaultPositions();
+        }
+    }
+}
+
+function setAllRobotsToDefaultPositions(
+    defaultPositionsMap?: Map<string, GridIndices>,
+): void {
+    if (defaultPositionsMap) {
+        for (const [robotId, indices] of defaultPositionsMap.entries()) {
+            const robot = robotManager.getRobot(robotId);
+            robot.position = Position.fromGridIndices(indices);
+            if (robot instanceof VirtualRobot)
+                robot.updateTunnelPosition(robot.position);
+        }
+    } else {
+        for (const robot of robotManager.idsToRobots.values()) {
+            robot.position = Position.fromGridIndices(robot.defaultIndices);
+            if (robot instanceof VirtualRobot)
+                robot.updateTunnelPosition(robot.position);
+            robotManager.updateRobot(robot.id, robot.defaultIndices);
+        }
+    }
+}
 
 /**
  * An endpoint used to establish a websocket connection with the server.
@@ -94,29 +139,29 @@ export const apiRouter = Router();
  * used when a client connects to the server
  */
 
-apiRouter.get("/client-information", (req, res) => {
+apiRouter.get("/client-information", async (req, res) => {
     const clientType = clientManager.getClientType(req.cookies.id);
     // loading saves from file if found
     const oldSave = SaveManager.loadGame(req.cookies.id);
     if (oldSave) {
         // if the game was an ai game, create a computer game manager with the ai difficulty
         if (oldSave.aiDifficulty !== -1) {
-            setGameManager(
-                new ComputerGameManager(
-                    new ChessEngine(oldSave.game),
-                    socketManager,
-                    oldSave.host === req.cookies.id ?
-                        oldSave.hostWhite ?
-                            Side.WHITE
-                        :   Side.BLACK
-                    : oldSave.hostWhite ? Side.BLACK
-                    : Side.WHITE,
-                    oldSave.aiDifficulty,
-                    oldSave.host !== req.cookies.id,
-                ),
+            const cgm = new ComputerGameManager(
+                new ChessEngine(oldSave.game),
+                socketManager,
+                oldSave.host === req.cookies.id ?
+                    oldSave.hostWhite ?
+                        Side.WHITE
+                    :   Side.BLACK
+                : oldSave.hostWhite ? Side.BLACK
+                : Side.WHITE,
+                oldSave.aiDifficulty,
+                oldSave.host !== req.cookies.id,
             );
-            // create a new human game manger with appropriate clients
+            setGameManager(cgm);
+            await cgm.makeFirstMove();
         } else {
+            // create a new human game manger with appropriate clients
             setGameManager(
                 new HumanGameManager(
                     new ChessEngine(oldSave.game),
@@ -166,7 +211,7 @@ apiRouter.post("/start-computer-game", async (req, res) => {
 
     // Position robots from home to default positions before starting the game
     try {
-        await setupDefaultRobotPositions();
+        await setupDefaultRobotPositions(!START_ROBOTS_AT_DEFAULT);
     } catch (error) {
         console.error("Error positioning robots for computer game:", error);
         return res.status(500).send({
@@ -175,15 +220,15 @@ apiRouter.post("/start-computer-game", async (req, res) => {
     }
 
     // create a new computer game manager
-    setGameManager(
-        new ComputerGameManager(
-            new ChessEngine(),
-            socketManager,
-            side,
-            difficulty,
-            false,
-        ),
+    const cgm = new ComputerGameManager(
+        new ChessEngine(),
+        socketManager,
+        side,
+        difficulty,
+        false,
     );
+    setGameManager(cgm);
+    await cgm.makeFirstMove();
     return res.send({ message: "success" });
 });
 
@@ -199,7 +244,7 @@ apiRouter.post("/start-human-game", async (req, res) => {
 
     // Position robots from home to default positions before starting the game
     try {
-        await setupDefaultRobotPositions();
+        await setupDefaultRobotPositions(!START_ROBOTS_AT_DEFAULT);
     } catch (error) {
         console.error("Error positioning robots for human game:", error);
         return res.status(500).send({
@@ -252,11 +297,10 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
         }
 
         // Execute the movement command with the converted positions
-        console.log("before command is made");
-        const command = moveAllRobotsToDefaultPositions(defaultPositionsMap);
-        console.log("command is made");
-        await executor.execute(command);
-        console.log("All robots moved to their puzzle default positions");
+        await setupDefaultRobotPositions(
+            !START_ROBOTS_AT_DEFAULT,
+            defaultPositionsMap,
+        );
     }
     setGameManager(
         new PuzzleGameManager(
