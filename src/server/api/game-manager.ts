@@ -232,9 +232,9 @@ export class ComputerGameManager extends GameManager {
         protected reverse: boolean,
     ) {
         super(chess, socketManager, hostSide, reverse);
-        if (this.hostSide === Side.BLACK || chess.pgn !== "") {
-            this.aiFirstMove = true;
-        }
+        this.aiFirstMove =
+            (chess.pgn === "" && this.hostSide === Side.BLACK) ||
+            (chess.pgn !== "" && this.hostSide === chess.getLastMove()?.color);
     }
 
     public async makeFirstMove() {
