@@ -232,9 +232,36 @@ export class ComputerGameManager extends GameManager {
     ) {
         super(chess, socketManager, hostSide, reverse);
         if (this.hostSide === Side.BLACK) {
-            this.chess.makeAiMove(this.difficulty);
+            const move = this.chess.calculateAiMove(this.difficulty);
+            this.socketManager.sendToAll(new MoveMessage(move));
+            this.chess.makeMove(move);
+            this.executeRobotMovement(move).catch((error: unknown) => {
+                console.error("Error in constructor AI move execution:", error);
+            });
         } else if (chess.pgn !== "") {
-            this.chess.makeAiMove(this.difficulty);
+            const move = this.chess.calculateAiMove(this.difficulty);
+            this.socketManager.sendToAll(new MoveMessage(move));
+            this.chess.makeMove(move);
+            this.executeRobotMovement(move).catch((error: unknown) => {
+                console.error(
+                    "Error in constructor AI move execution (existing game):",
+                    error,
+                );
+            });
+        }
+    }
+
+    /**
+     * Helper method to execute robot movement for a given move
+     */
+    private async executeRobotMovement(move: Move): Promise<void> {
+        try {
+            const command = materializePath(move);
+            this.chess.makeMove(move);
+            await executor.execute(command);
+        } catch (error: unknown) {
+            console.error("Error executing robot movement:", error);
+            throw error; // Re-throw to maintain error handling
         }
     }
 
@@ -246,8 +273,14 @@ export class ComputerGameManager extends GameManager {
      */
     public async handleMessage(message: Message, id: string): Promise<void> {
         if (message instanceof MoveMessage) {
+            // Call path materializer and send to bots for human move
+            const command = materializePath(message.move);
+
             this.socketManager.sendToAll(new MoveMessage(message.move));
             this.chess.makeMove(message.move);
+
+            await executor.execute(command);
+
             if (DO_SAVES) {
                 SaveManager.saveGame(
                     id,
@@ -259,19 +292,23 @@ export class ComputerGameManager extends GameManager {
             }
 
             if (this.chess.isGameFinished()) {
-                // Game is naturally finished; we're done
                 SaveManager.endGame(id, "ai");
                 return;
             }
 
             // Ensure MINIMUM_DELAY before responding
             const startTime = Date.now();
-            const move = this.chess.makeAiMove(this.difficulty);
+            const move = this.chess.calculateAiMove(this.difficulty);
             const elapsedTime = Date.now() - startTime;
+
             // If elapsed time is less than minimum delay, timeout is set to 1ms
-            setTimeout(() => {
+            const delay = Math.max(1, this.MINIMUM_DELAY - elapsedTime);
+
+            setTimeout(async () => {
                 this.socketManager.sendToAll(new MoveMessage(move));
-            }, this.MINIMUM_DELAY - elapsedTime);
+                await this.executeRobotMovement(move);
+            }, delay);
+
             if (this.isGameEnded()) {
                 SaveManager.endGame(id, "ai");
             }
@@ -336,7 +373,9 @@ export class PuzzleGameManager extends GameManager {
 
                 //if there is another move, make it
                 if (this.moves[this.moveNumber]) {
-                    const command = materializePath(message.move);
+                    const command = materializePath(
+                        this.moves[this.moveNumber],
+                    );
 
                     this.chess.makeMove(this.moves[this.moveNumber]);
 
