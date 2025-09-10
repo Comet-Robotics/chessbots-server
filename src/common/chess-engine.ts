@@ -143,19 +143,16 @@ export class ChessEngine {
     ): string | undefined {
         if (this.isEnPassant(move)) {
             return robotManager.getRobotAtIndices(
-                    new GridIndices(
-                        GridIndices.squareToGrid(move.to).i,
-                        GridIndices.squareToGrid(move.from).j
-                    ),
-                ).id;
+                new GridIndices(
+                    GridIndices.squareToGrid(move.to).i,
+                    GridIndices.squareToGrid(move.from).j,
+                ),
+            ).id;
         } else if (this.isRegularCapture(move)) {
             const to: GridIndices = GridIndices.squareToGrid(move.to);
-            console.log("herererfdsfa");
-            console.log(to);
-            console.log(robotManager.getIndicesToIds());
-            console.log(robotManager.isRobotAtIndices(to));
             return robotManager.getRobotAtIndices(to).id;
         }
+        return undefined;
     }
 
     /**
@@ -252,7 +249,7 @@ export class ChessEngine {
      * @param difficulty - a value from 0 to 4 for the ai
      * @returns - the move made
      */
-    makeAiMove(difficulty: Difficulty): Move {
+    calculateAiMove(difficulty: Difficulty): Move {
         // result is an object e.g. { "A1": "A2" }
         const result = aiMove(this.fen, difficulty);
         // val is an array e.g. ["A1", "A2"]
@@ -262,13 +259,13 @@ export class ChessEngine {
 
         if (this.checkPromotion(from, to)) {
             // ai always promotes to queen
-            return this.makeMove({
+            return {
                 from,
                 to,
                 promotion: PieceType.QUEEN,
-            });
+            };
         }
-        return this.makeMove({ from, to });
+        return { from, to };
     }
 
     /**

@@ -963,7 +963,6 @@ export function materializePath(move: Move): Command {
             move,
             robotManager,
         );
-        console.log("capture " + capturePiece);
         if (capturePiece !== undefined) {
             const captureSquare = GridIndices.fromPosition(
                 robotManager.getRobot(capturePiece).position,
@@ -975,10 +974,6 @@ export function materializePath(move: Move): Command {
                 captureCommand,
                 mainCommand,
             ]);
-            // const mainPiece = robotManager.getRobotAtIndices(
-            //     GridIndices.squareToGrid(move.from),
-            // );
-
             return command;
         }
         return new SequentialCommandGroup([]);
@@ -1079,10 +1074,8 @@ export function materializePath(move: Move): Command {
             rookMove3,
         ]);
     } else {
-        // const mainPiece = robotManager.getRobotAtIndices(
-        //     GridIndices.squareToGrid(move.from),
-        // );
-
-        return moveMainPiece(moveToGridMove(move));
+        const gridMove = moveToGridMove(move);
+        const command = moveMainPiece(gridMove);
+        return command;
     }
 }
