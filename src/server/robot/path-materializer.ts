@@ -9,6 +9,7 @@ import {
     AbsoluteMoveCommand,
     DriveCommand,
     ReversibleAbsoluteRotateCommand,
+    RotateToStartCommand,
 } from "../command/move-command";
 import type { ReversibleRobotCommand } from "../command/move-piece";
 import { MovePiece } from "../command/move-piece";
@@ -792,19 +793,13 @@ export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
     }
 
     //rotate all robots on default squares to face the center of the board
-    const finalRotations: ReversibleRobotCommand[] = [];
-    const addFacingCenterRotation = (id: string, def: GridIndices) => {
-        const angle = def.j <= 5 ? Math.PI / 2 : -Math.PI / 2;
-        finalRotations.push(
-            new ReversibleAbsoluteRotateCommand(id, () => angle),
-        );
-    };
+    const finalRotations: Command[] = [];
 
-    for (const [robotId, def] of mainPieceTargets) {
-        addFacingCenterRotation(robotId, def);
+    for (const [robotId, _def] of mainPieceTargets) {
+        finalRotations.push(new RotateToStartCommand(robotId));
     }
-    for (const [robotId, def] of pawnTargets) {
-        addFacingCenterRotation(robotId, def);
+    for (const [robotId, _def] of pawnTargets) {
+        finalRotations.push(new RotateToStartCommand(robotId));
     }
 
     return new SequentialCommandGroup([
