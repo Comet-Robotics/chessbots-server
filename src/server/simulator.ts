@@ -102,14 +102,17 @@ export class VirtualBotTunnel extends BotTunnel {
         return "Virtual Bot ID: " + this.robotId;
     }
 
-    private emitActionComplete(packetId: string) {
+    private emitActionComplete(
+        packetId: string,
+        actionCompleteDelay: number = 750,
+    ) {
         setTimeout(
             () =>
                 this.emitter.emit("actionComplete", {
                     success: true,
                     packetId,
                 }),
-            750,
+            actionCompleteDelay,
         ); // needs to match simulator.scss animation timeout
     }
 
