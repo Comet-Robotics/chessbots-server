@@ -125,8 +125,10 @@ export class Robot {
      * @param tileDistance - The distance to drive forward or backwards by. 1 is defined as the length of a tile.
      */
     public async sendDrivePacket(tileDistance: number): Promise<void> {
-        console.log(tileDistance);
-        await this.tunnel!.send({ type: PacketType.DRIVE_TANK, left: 1, right: 1 });
+        console.log(
+            `Sending drive packet to robot ${this.id} with distance ${tileDistance}`,
+        );
+        await this.tunnel!.send({ type: PacketType.DRIVE_TILES, tileDistance });
     }
 
     /**

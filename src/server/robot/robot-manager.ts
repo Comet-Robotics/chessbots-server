@@ -33,7 +33,6 @@ export class RobotManager {
 
     addRobot(robot: Robot) {
         this.idsToRobots.set(robot.id, robot);
-        this.getIndicesToIds().set(JSON.stringify(robot.defaultIndices), robot.id);
     }
 
     /**
