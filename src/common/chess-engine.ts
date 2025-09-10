@@ -143,11 +143,11 @@ export class ChessEngine {
     ): string | undefined {
         if (this.isEnPassant(move)) {
             return robotManager.getRobotAtIndices(
-                    new GridIndices(
-                        GridIndices.squareToGrid(move.to).i,
-                        GridIndices.squareToGrid(move.from).j
-                    ),
-                ).id;
+                new GridIndices(
+                    GridIndices.squareToGrid(move.to).i,
+                    GridIndices.squareToGrid(move.from).j,
+                ),
+            ).id;
         } else if (this.isRegularCapture(move)) {
             const to: GridIndices = GridIndices.squareToGrid(move.to);
             return robotManager.getRobotAtIndices(to).id;
