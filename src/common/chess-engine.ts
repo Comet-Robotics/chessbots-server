@@ -142,22 +142,12 @@ export class ChessEngine {
         robotManager: RobotManager,
     ): string | undefined {
         if (this.isEnPassant(move)) {
-            const y = GridIndices.squareToGrid(move.from).j;
-            if (y > 6) {
-                return robotManager.getRobotAtIndices(
+            return robotManager.getRobotAtIndices(
                     new GridIndices(
-                        GridIndices.squareToGrid(move.from).i,
-                        y + 1,
+                        GridIndices.squareToGrid(move.to).i,
+                        GridIndices.squareToGrid(move.from).j
                     ),
                 ).id;
-            } else {
-                return robotManager.getRobotAtIndices(
-                    new GridIndices(
-                        GridIndices.squareToGrid(move.from).i,
-                        y - 1,
-                    ),
-                ).id;
-            }
         } else if (this.isRegularCapture(move)) {
             const to: GridIndices = GridIndices.squareToGrid(move.to);
             console.log("herererfdsfa");
