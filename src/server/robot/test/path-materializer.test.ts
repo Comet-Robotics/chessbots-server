@@ -1,9 +1,11 @@
-import { afterEach, expect, test, vi } from "vitest";
+import { afterEach, expect, it, test, vi } from "vitest";
 import { PieceType, type Move } from "../../../common/game-types";
 import type { GridMove } from "../path-materializer";
 import { pathmatTesting } from "../path-materializer";
 import { GridIndices } from "../grid-indices";
-const { moveToGridMove, calcCollisionType, CollisionType } = pathmatTesting;
+const { moveToGridMove, calcCollisionType, CollisionType, addToCollisions } = pathmatTesting;
+import { robotManager } from "../robot-manager";
+import { Robot } from "../robot";
 
 
 afterEach(()=>{
@@ -50,4 +52,32 @@ test.each([
         expected = CollisionType.HORSE;
     }
     expect(calcCollisionType(move)).equals(expected);
+});
+
+const nullRobot = new Robot("null",{i:0,j:0} as GridIndices,{i:0,j:0} as GridIndices);
+
+/**
+ * Test adding a robot to the collision list
+ */
+it("Test collision adding",() =>{
+    //true case mock
+    const isSpy = vi.spyOn(robotManager, "isRobotAtIndices").mockReturnValue(true);
+    const getSpy = vi.spyOn(robotManager, "getRobotAtIndices").mockImplementation((grid:GridIndices)=>{
+        if(grid.i === 1 && grid.j === 1)
+            return new Robot("asdf",{i:2,j:2} as GridIndices,{i:0,j:0} as GridIndices)
+        return nullRobot;
+    });
+    const collisions = []
+    addToCollisions(collisions,1,1)
+    expect(isSpy).toHaveBeenCalledOnce();
+    expect(getSpy).toHaveBeenCalledOnce();
+    expect(collisions).contain("asdf");
+    collisions.pop();
+
+    //false case mock
+    isSpy.mockReturnValue(false);
+    addToCollisions(collisions,1,1)
+    expect(isSpy).toHaveBeenCalledTimes(2);
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(collisions).toHaveLength(0);
 });
