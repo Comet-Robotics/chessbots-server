@@ -235,19 +235,12 @@ export class ComputerGameManager extends GameManager {
             const move = this.chess.calculateAiMove(this.difficulty);
             this.socketManager.sendToAll(new MoveMessage(move));
             this.chess.makeMove(move);
-            this.executeRobotMovement(move).catch((error: unknown) => {
-                console.error("Error in constructor AI move execution:", error);
-            });
+            this.executeRobotMovement(move);
         } else if (chess.pgn !== "") {
             const move = this.chess.calculateAiMove(this.difficulty);
             this.socketManager.sendToAll(new MoveMessage(move));
             this.chess.makeMove(move);
-            this.executeRobotMovement(move).catch((error: unknown) => {
-                console.error(
-                    "Error in constructor AI move execution (existing game):",
-                    error,
-                );
-            });
+            this.executeRobotMovement(move);
         }
     }
 
@@ -255,14 +248,9 @@ export class ComputerGameManager extends GameManager {
      * Helper method to execute robot movement for a given move
      */
     private async executeRobotMovement(move: Move): Promise<void> {
-        try {
-            const command = materializePath(move);
-            this.chess.makeMove(move);
-            await executor.execute(command);
-        } catch (error: unknown) {
-            console.error("Error executing robot movement:", error);
-            throw error; // Re-throw to maintain error handling
-        }
+        const command = materializePath(move);
+        this.chess.makeMove(move);
+        await executor.execute(command);
     }
 
     /**
