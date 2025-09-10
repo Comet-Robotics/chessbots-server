@@ -21,7 +21,8 @@
     },
     "dependencies": {
         "chess.js": "^1.0.0-beta.6",
-        "typescript": "^4.9.3",
+        "eslint-plugin-tsdoc": "^0.2.17",
+        "typescript": "5.5.4",
         "vite-express": "^0.11.1"
     },
     "devDependencies": {

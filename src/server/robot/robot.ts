@@ -1,8 +1,6 @@
 import { FULL_ROTATION, RADIAN, clampHeading } from "../../common/units";
-import { Position, ZERO_POSITION } from "./position";
+import { Position } from "./position";
 import { GridIndices } from "./grid-indices";
-import { tcpServer } from "../api/managers";
-import type { BotTunnel } from "../api/tcp-interface";
 import { PacketType } from "../utils/tcp-packet";
 import { type BotTunnel } from "../api/bot-tunnel";
 
@@ -127,9 +125,8 @@ export class Robot {
      * @param tileDistance - The distance to drive forward or backwards by. 1 is defined as the length of a tile.
      */
     public async sendDrivePacket(tileDistance: number): Promise<void> {
-        const tunnel = this.getTunnel();
         console.log(tileDistance);
-        await tunnel.send({ type: PacketType.DRIVE_TANK, left: 1, right: 1 });
+        await this.tunnel!.send({ type: PacketType.DRIVE_TANK, left: 1, right: 1 });
     }
 
     /**
@@ -139,8 +136,7 @@ export class Robot {
      * @param distanceTicks - The distance to drive forward or backwards by, in ticks.
      */
     public async sendDriveTicksPacket(distanceTicks: number): Promise<void> {
-        const tunnel = this.getTunnel();
-        await tunnel.send({
+        await this.tunnel!.send({
             type: PacketType.DRIVE_TICKS,
             tickDistance: distanceTicks,
         });
@@ -153,8 +149,7 @@ export class Robot {
         controlPositionB: { x: number; y: number },
         timeDeltaMs: number,
     ): Promise<void> {
-        const tunnel = this.getTunnel();
-        await tunnel.send({
+        await this.tunnel!.send({
             type: PacketType.DRIVE_CUBIC_SPLINE,
             startPosition: startPosition,
             endPosition: endPosition,
@@ -170,8 +165,7 @@ export class Robot {
         controlPosition: { x: number; y: number },
         timeDeltaMs: number,
     ): Promise<void> {
-        const tunnel = this.getTunnel();
-        await tunnel.send({
+        await this.tunnel!.send({
             type: PacketType.DRIVE_QUADRATIC_SPLINE,
             startPosition: startPosition,
             controlPosition: controlPosition,
@@ -184,8 +178,7 @@ export class Robot {
         radians: number,
         timeDeltaMs: number,
     ): Promise<void> {
-        const tunnel = this.getTunnel();
-        await tunnel.send({
+        await this.tunnel!.send({
             type: PacketType.SPIN_RADIANS,
             radians: radians,
             timeDeltaMs: timeDeltaMs,

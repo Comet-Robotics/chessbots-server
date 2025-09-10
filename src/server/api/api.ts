@@ -44,6 +44,9 @@ import { DriveQuadraticSplineCommand, DriveCubicSplineCommand, SpinRadiansComman
 import { GridIndices } from "../robot/grid-indices";
 import { moveAllRobotsToDefaultPositions } from "../robot/path-materializer";
 import puzzles, { PuzzleComponents } from "./puzzles";
+import { tcpServer } from "./tcp-interface";
+import { robotManager } from "../robot/robot-manager";
+import { executor } from "../command/executor";
 
 
 /**
