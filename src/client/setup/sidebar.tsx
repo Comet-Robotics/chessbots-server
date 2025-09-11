@@ -1,6 +1,7 @@
 import { Button, NonIdealState } from "@blueprintjs/core";
-import { Dispatch, useState } from "react";
-import { MessageHandler } from "../../common/message/message";
+import type { Dispatch } from "react";
+import { useState } from "react";
+import type { MessageHandler } from "../../common/message/message";
 import { JoinQueue, UpdateQueue } from "../../common/message/game-message";
 import { get, useEffectQuery, useSocket } from "../api";
 import {

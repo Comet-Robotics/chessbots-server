@@ -199,7 +199,7 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
                         else SaveManager.endGame(ids[1], ids[0]);
                     }
 
-                    gameManager = null;
+                    setGameManager(null);
 
                     //remove the old host/client
                     clientType === ClientType.HOST ?
