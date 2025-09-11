@@ -50,7 +50,10 @@ import {
     SpinRadiansCommand,
 } from "../command/move-command";
 import { GridIndices } from "../robot/grid-indices";
-import { moveAllRobotsToDefaultPositions } from "../robot/path-materializer";
+import {
+    moveAllRobotsHomeToDefaultOptimized,
+    moveAllRobotsToDefaultPositions,
+} from "../robot/path-materializer";
 import type { PuzzleComponents } from "./puzzles";
 import puzzles from "./puzzles";
 import { tcpServer } from "./tcp-interface";

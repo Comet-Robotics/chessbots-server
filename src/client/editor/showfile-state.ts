@@ -25,12 +25,12 @@ import {
     TimelineDurationUpdateMode,
     GridCursorMode,
 } from "../../common/show-interface-utils";
+import { SplinePointType } from "../../common/spline";
 import type {
     CubicBezier,
     QuadraticBezier,
-    SplinePointType,
-    type Coords,
-    type Midpoint,
+    Coords,
+    Midpoint,
 } from "../../common/spline";
 import {
     usePlayHead,
@@ -290,10 +290,10 @@ export function useShowfile() {
                         point: firstGoToPointEvent.target.endPoint,
                     },
                 };
-                const newRemainingEvents = remainingEvents.toSpliced(
-                    firstGoToPointIndex,
-                    1,
-                );
+                const newRemainingEvents = [
+                    ...remainingEvents.slice(0, firstGoToPointIndex),
+                    ...remainingEvents.slice(firstGoToPointIndex + 1),
+                ];
                 newTimeline[layerIndex] = {
                     startPoint: newStartPointEvent,
                     remainingEvents: newRemainingEvents,
@@ -316,7 +316,10 @@ export function useShowfile() {
                 return;
             }
             const { startPoint, remainingEvents } = layer;
-            const events = remainingEvents.toSpliced(pointIndex, 1); // Remove the event
+            const events = [
+                ...remainingEvents.slice(0, pointIndex),
+                ...remainingEvents.slice(pointIndex + 1),
+            ]; // Remove the event
             newTimeline[layerIndex] = { startPoint, remainingEvents: events };
             setShow({ ...show, timeline: newTimeline });
         },
@@ -495,7 +498,10 @@ export function useShowfile() {
         (i: number) =>
             setShow({
                 ...show,
-                timeline: show.timeline.toSpliced(i, 1),
+                timeline: [
+                    ...show.timeline.slice(0, i),
+                    ...show.timeline.slice(i + 1),
+                ],
             }),
         [show, setShow],
     );
@@ -648,7 +654,10 @@ export function useShowfile() {
             const eventIndex = remainingEvents.findIndex(
                 (event) => event.id === eventId,
             );
-            const events = remainingEvents.toSpliced(eventIndex, 1); // Remove the event
+            const events = [
+                ...remainingEvents.slice(0, eventIndex),
+                ...remainingEvents.slice(eventIndex + 1),
+            ]; // Remove the event
             newTimeline[layerIndex] = { startPoint, remainingEvents: events };
             setShow({ ...show, timeline: newTimeline });
         },

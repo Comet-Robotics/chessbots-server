@@ -8,7 +8,7 @@ import {
     CompoundTag,
 } from "@blueprintjs/core";
 import type { CSSProperties, PropsWithChildren } from "react";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { forwardRef, useEffect, useReducer, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { get, useSocket } from "../api";
 import type {

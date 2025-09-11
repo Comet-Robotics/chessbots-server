@@ -1,4 +1,4 @@
-# Welcome to chessBots!
+# Welcome to ChessBots!
 
 ## Setup
 
