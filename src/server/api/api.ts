@@ -15,7 +15,7 @@ import {
     SetRobotVariableMessage,
 } from "../../common/message/robot-message";
 
-import { Difficulty } from "../../common/client-types";
+import type { Difficulty } from "../../common/client-types";
 import { RegisterWebsocketMessage } from "../../common/message/message";
 import {
     clientManager,
@@ -39,11 +39,20 @@ import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
 import { ShowfileSchema, TimelineEventTypes } from "../../common/show";
 import { SplinePointType } from "../../common/spline";
-import { Command, SequentialCommandGroup, ParallelCommandGroup } from "../command/command";
-import { DriveQuadraticSplineCommand, DriveCubicSplineCommand, SpinRadiansCommand } from "../command/move-command";
+import type { Command } from "../command/command";
+import {
+    SequentialCommandGroup,
+    ParallelCommandGroup,
+} from "../command/command";
+import {
+    DriveQuadraticSplineCommand,
+    DriveCubicSplineCommand,
+    SpinRadiansCommand,
+} from "../command/move-command";
 import { GridIndices } from "../robot/grid-indices";
 import { moveAllRobotsToDefaultPositions } from "../robot/path-materializer";
-import puzzles, { PuzzleComponents } from "./puzzles";
+import type { PuzzleComponents } from "./puzzles";
+import puzzles from "./puzzles";
 import { tcpServer } from "./tcp-interface";
 import { robotManager } from "../robot/robot-manager";
 import { executor } from "../command/executor";

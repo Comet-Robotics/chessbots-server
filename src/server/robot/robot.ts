@@ -1,6 +1,6 @@
 import { FULL_ROTATION, RADIAN, clampHeading } from "../../common/units";
 import { Position } from "./position";
-import { GridIndices } from "./grid-indices";
+import type { GridIndices } from "./grid-indices";
 import { PacketType } from "../utils/tcp-packet";
 import { type BotTunnel } from "../api/bot-tunnel";
 

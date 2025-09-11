@@ -17,10 +17,8 @@ import {
     SectionCard,
 } from "@blueprintjs/core";
 import { RobotGrid, robotSize } from "../debug/simulator";
-import {
-    NonStartPointEvent,
-    NonStartPointEventSchema,
-} from "../../common/show";
+import type { NonStartPointEvent, TimelineLayerType } from "../../common/show";
+import { NonStartPointEventSchema } from "../../common/show";
 import {
     GridCursorMode,
     millisToPixels,
@@ -34,19 +32,19 @@ import {
     TimelineEvent,
     ReorderableTimelineEvent,
 } from "./timeline";
-import { Midpoint, SplinePointType } from "../../common/spline";
+import type { Midpoint } from "../../common/spline";
+import { SplinePointType } from "../../common/spline";
+import type { MotionValue } from "motion/react";
 import {
     motion,
-    MotionValue,
     useTransform,
     useAnimate,
     useMotionValueEvent,
+    Reorder,
 } from "motion/react";
 import { useShowfile } from "./showfile-state";
-import { Reorder } from "motion/react";
 import { getRobotStateAtTime } from "../../common/getRobotStateAtTime";
 import { MotionRobot } from "./motion-robot";
-import { TimelineLayerType } from "../../common/show";
 import { SplineEditor } from "./spline-editor";
 import interact from "interactjs";
 import { Array as RArray } from "runtypes";

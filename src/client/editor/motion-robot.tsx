@@ -1,9 +1,10 @@
-import { CSSProperties, forwardRef } from "react";
+import type { CSSProperties } from "react";
+import { forwardRef } from "react";
 import { motion } from "framer-motion";
 import { Tooltip } from "@blueprintjs/core";
 import { robotSize } from "../debug/simulator"; // Reuse size
 import { robotColor, innerRobotColor } from "../check-dark-mode";
-import { Coords } from "../../common/spline";
+import type { Coords } from "../../common/spline";
 
 // Simple representation for display, doesn't need full simulation data
 interface MotionRobotProps {

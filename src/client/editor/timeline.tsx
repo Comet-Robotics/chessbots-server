@@ -9,8 +9,9 @@ import {
 } from "@blueprintjs/core";
 import interact from "interactjs";
 import { useDragControls, Reorder } from "motion/react";
-import { forwardRef, PropsWithChildren, useEffect, useRef } from "react";
-import { TimelineEvents } from "../../common/show";
+import type { PropsWithChildren } from "react";
+import { forwardRef, useEffect, useRef } from "react";
+import type { TimelineEvents } from "../../common/show";
 import {
     EVENT_TYPE_TO_COLOR,
     millisToPixels,

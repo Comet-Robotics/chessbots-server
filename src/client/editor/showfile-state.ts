@@ -6,27 +6,29 @@ import { fileOpen, fileSave } from "browser-fs-access";
 
 import { diff } from "deep-object-diff";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import {
-    createNewShowfile,
-    loadShowfileFromBinary,
+import type {
     StartPointEvent,
-    TimelineEventTypes,
     GoToPointEvent,
     TimelineLayerType,
     NonStartPointEvent,
-    CHESSBOTS_SHOWFILE_MIME_TYPE,
-    CHESSBOTS_SHOWFILE_EXTENSION,
     WaitEvent,
     TurnEvent,
+} from "../../common/show";
+import {
+    createNewShowfile,
+    loadShowfileFromBinary,
+    TimelineEventTypes,
+    CHESSBOTS_SHOWFILE_MIME_TYPE,
+    CHESSBOTS_SHOWFILE_EXTENSION,
 } from "../../common/show";
 import {
     TimelineDurationUpdateMode,
     GridCursorMode,
 } from "../../common/show-interface-utils";
-import {
-    SplinePointType,
+import type {
     CubicBezier,
     QuadraticBezier,
+    SplinePointType,
     type Coords,
     type Midpoint,
 } from "../../common/spline";
