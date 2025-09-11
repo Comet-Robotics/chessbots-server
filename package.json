@@ -9,7 +9,6 @@
     "scripts": {
         "dev": "ts-node src/server/main.ts",
         "devup": "nodemon src/server/main.ts",
-        "debug": "nodemon --inspect src/server/main.ts",
         "start": "NODE_ENV=production ts-node ./src/server/main.ts",
         "build": "vite build",
         "docs:build": "typedoc",
@@ -22,7 +21,6 @@
     },
     "dependencies": {
         "chess.js": "^1.0.0-beta.6",
-        "eslint-plugin-tsdoc": "^0.2.17",
         "typescript": "^4.9.3",
         "vite-express": "^0.11.1"
     },
@@ -33,8 +31,10 @@
         "@typescript-eslint/parser": "^7.18.0",
         "@vitejs/plugin-react": "^3.1.0",
         "eslint": "^8.56.0",
+        "eslint-plugin-import": "^2.32.0",
         "eslint-plugin-react-hooks": "^4.6.0",
         "eslint-plugin-react-refresh": "^0.4.5",
+        "eslint-plugin-tsdoc": "^0.2.17",
         "lunr": "^2.3.0",
         "nodemon": "^3.0.3",
         "prettier": "^3.2.4",

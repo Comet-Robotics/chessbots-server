@@ -8,8 +8,8 @@ import {
     NonIdealStateIconSize,
 } from "@blueprintjs/core";
 import { useNavigate } from "react-router-dom";
+import type { GameEndReason } from "../../common/game-end-reasons";
 import {
-    GameEndReason,
     GameFinishedReason,
     GameInterruptedReason,
 } from "../../common/game-end-reasons";
@@ -81,10 +81,12 @@ function gameOverIcon(reason: GameEndReason, side: Side) {
     // check which side won
     const whiteWon =
         reason === GameFinishedReason.BLACK_CHECKMATED ||
-        reason === GameInterruptedReason.BLACK_RESIGNED;
+        reason === GameInterruptedReason.BLACK_RESIGNED ||
+        reason === GameFinishedReason.PUZZLE_SOLVED;
     const blackWon =
         reason === GameFinishedReason.WHITE_CHECKMATED ||
-        reason === GameInterruptedReason.WHITE_RESIGNED;
+        reason === GameInterruptedReason.WHITE_RESIGNED ||
+        reason === GameFinishedReason.PUZZLE_SOLVED;
 
     // checks which side is asking and assigns win/lost accordingly
     const won = side === Side.WHITE ? whiteWon : blackWon;
@@ -133,6 +135,8 @@ function gameOverMessage(reason: GameEndReason) {
             return "Checkmate - White Wins";
         case GameFinishedReason.STALEMATE:
             return "Draw - Stalemate";
+        case GameFinishedReason.PUZZLE_SOLVED:
+            return "Puzzle Solved";
         case GameFinishedReason.THREEFOLD_REPETITION:
             return "Draw - Threefold Repetition";
         case GameFinishedReason.INSUFFICIENT_MATERIAL:

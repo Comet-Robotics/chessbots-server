@@ -1,7 +1,7 @@
 import { Dialog, DialogBody, DialogFooter } from "@blueprintjs/core";
 import { Outlet } from "react-router-dom";
 import { ChessboardWrapper } from "../chessboard/chessboard-wrapper";
-import { PropsWithChildren, ReactNode } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 import { ChessEngine } from "../../common/chess-engine";
 import { Side } from "../../common/game-types";
 import { Sidebar } from "./sidebar";

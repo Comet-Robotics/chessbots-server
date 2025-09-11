@@ -1,7 +1,8 @@
-import { RobotCommand, Reversible } from "./command";
+import type { Reversible } from "./command";
+import { RobotCommand } from "./command";
 import { Position } from "../robot/position";
-import { robotManager } from "../api/managers";
 import { GridIndices } from "../robot/grid-indices";
+import { robotManager } from "../robot/robot-manager";
 
 /**
  * Represents a rotation.
@@ -83,6 +84,72 @@ export class RotateToStartCommand extends RobotCommand {
     }
 }
 
+export class DriveCubicSplineCommand extends RobotCommand {
+    constructor(
+        robotId: string,
+        public startPosition: { x: number; y: number },
+        public endPosition: { x: number; y: number },
+        public controlPositionA: { x: number; y: number },
+        public controlPositionB: { x: number; y: number },
+        public timeDeltaMs: number,
+    ) {
+        super(robotId);
+    }
+
+    public async execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+        return robot.sendDriveCubicPacket(
+            this.startPosition,
+            this.endPosition,
+            this.controlPositionA,
+            this.controlPositionB,
+            this.timeDeltaMs,
+        );
+    }
+}
+
+export class SpinRadiansCommand extends RobotCommand {
+    constructor(
+        robotId: string,
+        public radians: number,
+        public timeDeltaMs: number,
+    ) {
+        super(robotId);
+    }
+    public async execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+        return robot.sendSpinPacket(this.radians, this.timeDeltaMs);
+    }
+}
+
+export class DriveQuadraticSplineCommand extends RobotCommand {
+    constructor(
+        robotId: string,
+        public startPosition: { x: number; y: number },
+        public endPosition: { x: number; y: number },
+        public controlPosition: { x: number; y: number },
+        public timeDeltaMs: number,
+    ) {
+        super(robotId);
+    }
+    public async execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+        return robot.sendDriveQuadraticPacket(
+            this.startPosition,
+            this.endPosition,
+            this.controlPosition,
+            this.timeDeltaMs,
+        );
+    }
+}
+
+export class StopCommand extends RobotCommand {
+    public async execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+        return robot.sendDrivePacket(0);
+    }
+}
+
 /**
  * Drives a robot for a distance equal to a number of tiles. Distance
  * may be negative, indicating the robot drives backwards.
@@ -112,10 +179,7 @@ export class DriveCommand
         );
         robotManager.updateRobot(
             this.robotId,
-            new GridIndices(
-                Math.floor(robot.position.x),
-                Math.floor(robot.position.y),
-            ),
+            GridIndices.fromPosition(robot.position),
         );
         return robot.sendDrivePacket(this.tileDistance);
     }
@@ -152,10 +216,7 @@ export class RelativeMoveCommand
         const robot = robotManager.getRobot(this.robotId);
         robotManager.updateRobot(
             this.robotId,
-            new GridIndices(
-                Math.floor(robot.position.x + this.position.x),
-                Math.floor(robot.position.y + this.position.y),
-            ),
+            GridIndices.fromPosition(robot.position.add(this.position)),
         );
         return robot.relativeMove(this.position);
     }
@@ -173,12 +234,30 @@ export class AbsoluteMoveCommand extends MoveCommand {
         const robot = robotManager.getRobot(this.robotId);
         robotManager.updateRobot(
             this.robotId,
-            new GridIndices(
-                Math.floor(this.position.x),
-                Math.floor(this.position.y),
-            ),
+            GridIndices.fromPosition(this.position),
         );
         return robot.relativeMove(this.position.sub(robot.position));
+    }
+}
+
+export class DriveTicksCommand
+    extends RobotCommand
+    implements Reversible<DriveTicksCommand>
+{
+    constructor(
+        robotId: string,
+        public ticksDistance: number,
+    ) {
+        super(robotId);
+    }
+
+    public async execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+        return robot.sendDriveTicksPacket(this.ticksDistance);
+    }
+
+    public reverse(): DriveTicksCommand {
+        return new DriveTicksCommand(this.robotId, -this.ticksDistance);
     }
 }
 

@@ -1,16 +1,17 @@
 import { FULL_ROTATION, RADIAN, clampHeading } from "../../common/units";
-import { Position, ZERO_POSITION } from "./position";
-import { GridIndices } from "./grid-indices";
-import { tcpServer } from "../api/api";
-import type { BotTunnel } from "../api/tcp-interface";
+import { Position } from "./position";
+import type { GridIndices } from "./grid-indices";
 import { PacketType } from "../utils/tcp-packet";
+import { type BotTunnel } from "../api/bot-tunnel";
 
 /**
- * Represents a robot.
+ * Represents a physical robot.
  * Includes information about the current location as well as tooling for communication.
  */
 export class Robot {
     private _headingRadians: number;
+    private _position: Position;
+    protected tunnel: BotTunnel | null;
 
     constructor(
         public readonly id: string,
@@ -18,11 +19,22 @@ export class Robot {
          * The location the robot lives in when its not in use.
          */
         public readonly homeIndices: GridIndices,
+        /**
+         * The location the robot should be in at the beginning of a regular chess.
+         */
         public readonly defaultIndices: GridIndices,
         public readonly startHeadingRadians: number = 0,
-        private _position: Position = ZERO_POSITION,
+        position?: Position,
     ) {
+        if (
+            startHeadingRadians === undefined ||
+            Number.isNaN(startHeadingRadians)
+        ) {
+            throw new Error("startHeadingRadians must be a number");
+        }
         this._headingRadians = startHeadingRadians;
+        this._position = position ?? Position.fromGridIndices(homeIndices);
+        this.tunnel = null;
     }
 
     public get position(): Position {
@@ -86,8 +98,8 @@ export class Robot {
         return promise;
     }
 
-    protected getTunnel(): BotTunnel {
-        return tcpServer!.getTunnelFromId(this.id);
+    public setTunnel(tunnel: BotTunnel) {
+        this.tunnel = tunnel;
     }
 
     /**
@@ -97,8 +109,10 @@ export class Robot {
      * @param deltaHeadingRadians - A relative heading to turn by, in radians. May be positive or negative.
      */
     public async sendTurnPacket(deltaHeadingRadians: number): Promise<void> {
-        const tunnel = this.getTunnel();
-        await tunnel.send({
+        console.log(
+            `Sending turn packet to robot ${this.id} with delta heading ${deltaHeadingRadians}`,
+        );
+        await this.tunnel!.send({
             type: PacketType.TURN_BY_ANGLE,
             deltaHeadingRadians: deltaHeadingRadians,
         });
@@ -111,7 +125,65 @@ export class Robot {
      * @param tileDistance - The distance to drive forward or backwards by. 1 is defined as the length of a tile.
      */
     public async sendDrivePacket(tileDistance: number): Promise<void> {
-        const tunnel = this.getTunnel();
-        await tunnel.send({ type: PacketType.DRIVE_TILES, tileDistance });
+        console.log(
+            `Sending drive packet to robot ${this.id} with distance ${tileDistance}`,
+        );
+        await this.tunnel!.send({ type: PacketType.DRIVE_TILES, tileDistance });
+    }
+
+    /**
+     * Send a packet to the robot indicating distance to drive, in ticks. Returns a promise that finishes when the
+     * robot finishes the action.
+     *
+     * @param distanceTicks - The distance to drive forward or backwards by, in ticks.
+     */
+    public async sendDriveTicksPacket(distanceTicks: number): Promise<void> {
+        await this.tunnel!.send({
+            type: PacketType.DRIVE_TICKS,
+            tickDistance: distanceTicks,
+        });
+    }
+
+    public async sendDriveCubicPacket(
+        startPosition: { x: number; y: number },
+        endPosition: { x: number; y: number },
+        controlPositionA: { x: number; y: number },
+        controlPositionB: { x: number; y: number },
+        timeDeltaMs: number,
+    ): Promise<void> {
+        await this.tunnel!.send({
+            type: PacketType.DRIVE_CUBIC_SPLINE,
+            startPosition: startPosition,
+            endPosition: endPosition,
+            controlPositionA: controlPositionA,
+            controlPositionB: controlPositionB,
+            timeDeltaMs: timeDeltaMs,
+        });
+    }
+
+    public async sendDriveQuadraticPacket(
+        startPosition: { x: number; y: number },
+        endPosition: { x: number; y: number },
+        controlPosition: { x: number; y: number },
+        timeDeltaMs: number,
+    ): Promise<void> {
+        await this.tunnel!.send({
+            type: PacketType.DRIVE_QUADRATIC_SPLINE,
+            startPosition: startPosition,
+            controlPosition: controlPosition,
+            endPosition: endPosition,
+            timeDeltaMs: timeDeltaMs,
+        });
+    }
+
+    public async sendSpinPacket(
+        radians: number,
+        timeDeltaMs: number,
+    ): Promise<void> {
+        await this.tunnel!.send({
+            type: PacketType.SPIN_RADIANS,
+            radians: radians,
+            timeDeltaMs: timeDeltaMs,
+        });
     }
 }

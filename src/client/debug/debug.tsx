@@ -1,5 +1,6 @@
 import { Button, Card, Code, H1, H2, Spinner } from "@blueprintjs/core";
-import { ReactNode, useEffect, useState } from "react";
+import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { get, useSocket } from "../api";
 import { SelectRobot } from "./select-robot";
@@ -36,6 +37,12 @@ export function Debug() {
         fetchIds();
     }, [setRobotIds]);
 
+    const danceConfigLoad = async () => {
+        const response = await get("/do-parallel");
+        if (!response.ok) {
+            console.warn("Failed to load dance config");
+        }
+    };
     // create the select and move buttons
     let body: ReactNode;
     if (robotIds === undefined) {
@@ -49,6 +56,9 @@ export function Debug() {
                     selectedRobotId={selectedRobotId}
                     onRobotIdSelected={setSelectedRobotId}
                 />
+                <div className="debug-section">
+                    <Button icon="play" minimal onClick={danceConfigLoad} />
+                </div>
                 {selectedRobotId === undefined ? null : (
                     <>
                         <div className="debug-section">

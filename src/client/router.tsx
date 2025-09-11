@@ -2,11 +2,11 @@ import { createBrowserRouter } from "react-router-dom";
 import { Setup } from "./setup/setup";
 import { Debug } from "./debug/debug";
 import { Game } from "./game/game";
-import { Puzzle } from "./puzzle/puzzle";
 import { Lobby } from "./setup/lobby";
 import { Home } from "./home";
 import { Debug2 } from "./debug/debug2";
 import { Simulator } from "./debug/simulator";
+import { Editor } from "./editor/editor";
 
 export const router = createBrowserRouter([
     {
@@ -34,11 +34,11 @@ export const router = createBrowserRouter([
         element: <Lobby />,
     },
     {
-        path: "/puzzle",
-        element: <Puzzle />,
-    },
-    {
         path: "/game",
         element: <Game />,
+    },
+    {
+        path: "/editor",
+        element: <Editor />,
     },
 ]);

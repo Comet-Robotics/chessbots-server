@@ -1,9 +1,9 @@
+import type { Static } from "runtypes";
 import {
     Number as NumberType,
     String,
     Record,
     Union,
-    Static,
     Literal,
     Dictionary,
 } from "runtypes";
@@ -18,10 +18,14 @@ export enum PacketType {
     SET_VAR = "SET_VAR",
     TURN_BY_ANGLE = "TURN_BY_ANGLE",
     DRIVE_TILES = "DRIVE_TILES",
+    DRIVE_TICKS = "DRIVE_TICKS",
     ACTION_SUCCESS = "ACTION_SUCCESS",
     ACTION_FAIL = "ACTION_FAIL",
     DRIVE_TANK = "DRIVE_TANK",
     ESTOP = "ESTOP",
+    DRIVE_CUBIC_SPLINE = "DRIVE_CUBIC_SPLINE",
+    DRIVE_QUADRATIC_SPLINE = "DRIVE_QUADRATIC_SPLINE",
+    SPIN_RADIANS = "SPIN_RADIANS",
 }
 
 const Float = NumberType.withConstraint((n) => Number.isFinite(n), {
@@ -30,10 +34,15 @@ const Float = NumberType.withConstraint((n) => Number.isFinite(n), {
 const Int32 = Float.withConstraint((n) => Number.isSafeInteger(n), {
     name: "int32",
 });
-const Uint32 = Int32.withConstraint((n) => n >= 0, { name: "uint32" });
+export const Uint32 = Int32.withConstraint((n) => n >= 0, { name: "uint32" });
 const VarId = Uint32;
 const MotorPower = Float.withConstraint((n) => -1 <= n && n <= 1, {
     name: "motor_power",
+});
+
+const Position = Record({
+    x: Float,
+    y: Float,
 });
 
 // MUST be kept in sync with chessBotArduino/include/packet.h PacketType
@@ -126,6 +135,12 @@ export const DRIVE_TILES_SCHEMA = Record({
     type: Literal(PacketType.DRIVE_TILES),
     tileDistance: Float,
 });
+
+export const DRIVE_TICKS_SCHEMA = Record({
+    type: Literal(PacketType.DRIVE_TICKS),
+    tickDistance: Int32,
+});
+
 /** success message */
 export const ACTION_SUCCESS_SCHEMA = Record({
     type: Literal(PacketType.ACTION_SUCCESS),
@@ -145,6 +160,30 @@ export const DRIVE_TANK_SCHEMA = Record({
     left: MotorPower,
     right: MotorPower,
 });
+
+export const DRIVE_CUBIC_SPLINE_SCHEMA = Record({
+    type: Literal(PacketType.DRIVE_CUBIC_SPLINE),
+    startPosition: Position,
+    endPosition: Position,
+    controlPositionA: Position,
+    controlPositionB: Position,
+    timeDeltaMs: Uint32,
+});
+
+export const DRIVE_QUADRATIC_SPLINE_SCHEMA = Record({
+    type: Literal(PacketType.DRIVE_QUADRATIC_SPLINE),
+    startPosition: Position,
+    endPosition: Position,
+    controlPosition: Position,
+    timeDeltaMs: Uint32,
+});
+
+export const SPIN_RADIANS_SCHEMA = Record({
+    type: Literal(PacketType.SPIN_RADIANS),
+    radians: Float,
+    timeDeltaMs: Uint32,
+});
+
 export const ESTOP_SCHEMA = Record({ type: Literal(PacketType.ESTOP) });
 
 export const Packet = Union(
@@ -157,10 +196,14 @@ export const Packet = Union(
     SET_VAR_SCHEMA,
     TURN_BY_ANGLE_SCHEMA,
     DRIVE_TILES_SCHEMA,
+    DRIVE_TICKS_SCHEMA,
     ACTION_SUCCESS_SCHEMA,
     ACTION_FAIL_SCHEMA,
     DRIVE_TANK_SCHEMA,
     ESTOP_SCHEMA,
+    DRIVE_CUBIC_SPLINE_SCHEMA,
+    DRIVE_QUADRATIC_SPLINE_SCHEMA,
+    SPIN_RADIANS_SCHEMA,
 );
 export type Packet = Static<typeof Packet>;
 

@@ -1,7 +1,7 @@
 import { Button, useHotkeys } from "@blueprintjs/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DriveRobotMessage } from "../../common/message/robot-message";
-import { SendMessage } from "../../common/message/message";
+import type { SendMessage } from "../../common/message/message";
 import { Joystick } from "react-joystick-component";
 import type { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
 import { DriveSlider } from "./drive-slider";

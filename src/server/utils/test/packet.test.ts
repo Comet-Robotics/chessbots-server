@@ -6,15 +6,16 @@ import {
     PacketType,
 } from "../tcp-packet";
 import { randomUUID } from "node:crypto";
+import { socketManager } from "../../api/managers";
 import { VirtualBotTunnel } from "../../simulator";
 import WebSocket from "ws";
-import { socketManager } from "../../api/managers";
+import { ZERO_POSITION } from "../../robot/position";
 
 const mockSocket = vi.mocked(WebSocket.prototype);
-const TEST_ROBOT_ID = "virtual-robot-1";
+const TEST_ROBOT_ID = "robot-1";
 socketManager.registerSocket(TEST_ROBOT_ID, mockSocket);
 
-const mockBotTunnel = new VirtualBotTunnel(TEST_ROBOT_ID);
+const mockBotTunnel = new VirtualBotTunnel(TEST_ROBOT_ID, 0, ZERO_POSITION);
 
 afterEach(() => {
     vi.clearAllMocks();

@@ -6,10 +6,12 @@ import {
     Spinner,
 } from "@blueprintjs/core";
 import { SetupBase } from "./setup-base";
-import { Dispatch, useState } from "react";
+import type { Dispatch } from "react";
+import { useState } from "react";
 import { SetupGame } from "./setup-game";
 import { Navigate, useNavigate } from "react-router-dom";
 import { ClientType, GameType } from "../../common/client-types";
+import { SetupPuzzle } from "../puzzle/setup-puzzle";
 import { get, useEffectQuery } from "../api";
 import {
     allSettings,
@@ -67,6 +69,9 @@ export function Setup(): JSX.Element {
                             :   GameType.HUMAN
                         }
                     />
+                :   null}
+                {setupType === SetupType.PUZZLE ?
+                    <SetupPuzzle />
                 :   null}
             </SetupBase>
         );
@@ -160,6 +165,7 @@ export function ThemeButtons(props): JSX.Element {
             <ButtonGroup variant="outlined">
                 {allSettings.map((item, idx) => (
                     <Button
+                        key={item[0]}
                         textClassName={textColor()}
                         //changed for better visibility
                         icon={item[1]}

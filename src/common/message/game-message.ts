@@ -1,9 +1,10 @@
 import { Message, MessageType } from "./message";
-import { Move } from "../game-types";
-import {
+import type { Move } from "../game-types";
+import type {
     GameInterruptedReason,
     GameHoldReason,
     GameFinishedReason,
+    GameEndReason,
 } from "../game-end-reasons";
 
 /**
@@ -35,6 +36,26 @@ export class MoveMessage extends Message {
         return {
             ...super.toObj(),
             move: this.move,
+        };
+    }
+}
+
+/**
+ * A message used to broadcast the state of the virtual chessboard
+ * to other connected clients. `chess` is a Forsyth-Edwards
+ * Notation (FEN) string used to represent the state of the chessboard.
+ */
+export class SetChessMessage extends Message {
+    constructor(public readonly chess: string) {
+        super();
+    }
+
+    protected type = MessageType.SET_CHESS;
+
+    protected toObj(): object {
+        return {
+            ...super.toObj(),
+            chess: this.chess,
         };
     }
 }
@@ -95,6 +116,21 @@ export class GameHoldMessage extends Message {
     }
 
     protected type = MessageType.GAME_HELD;
+
+    protected toObj(): object {
+        return {
+            ...super.toObj(),
+            reason: this.reason,
+        };
+    }
+}
+
+export class GameEndMessage extends Message {
+    constructor(public readonly reason: GameEndReason) {
+        super();
+    }
+
+    protected type = MessageType.GAME_ENDED;
 
     protected toObj(): object {
         return {

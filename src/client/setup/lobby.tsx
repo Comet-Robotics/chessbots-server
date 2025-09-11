@@ -1,10 +1,9 @@
 import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { SetupBase } from "./setup-base";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { GameStartedMessage } from "../../common/message/game-message";
 import { useSocket, useEffectQuery, get } from "../api";
 import { ClientType } from "../../common/client-types";
-import { Navigate } from "react-router-dom";
 import { ThemeButtons } from "./setup";
 
 /**
