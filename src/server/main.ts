@@ -1,4 +1,6 @@
-import express, { RequestHandler, Express } from "express";
+import type { RequestHandler, Express } from "express";
+import express from "express";
+// eslint-disable-next-line import/default
 import ViteExpress from "vite-express";
 import cookieParser from "cookie-parser";
 import { apiRouter, websocketHandler } from "./api/api";

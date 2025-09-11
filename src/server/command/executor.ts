@@ -1,4 +1,4 @@
-import { Command } from "./command";
+import type { Command } from "./command";
 
 /**
  * Custom error class to indicate a conflict in requirements.
@@ -22,6 +22,9 @@ export class CommandExecutor {
     private checkRequirements(command: Command) {
         for (const req of command.requirements) {
             for (const runningCmd of this.runningCommands) {
+                console.log(
+                    `Checking requirement ${req} against running command ${runningCmd}`,
+                );
                 if (runningCmd.requirements.has(req)) {
                     throw new RequirementError(
                         `Command already requires ${req}!`,
@@ -50,3 +53,5 @@ export class CommandExecutor {
         return this.runningCommands;
     }
 }
+
+export const executor = new CommandExecutor();

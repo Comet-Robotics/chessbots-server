@@ -1,8 +1,9 @@
 import { DEGREE } from "../../common/units";
 import { GridIndices } from "./grid-indices";
-import { Position } from "./position";
 import { Robot } from "./robot";
 import config from "../api/bot-server-config.json";
+import { virtualRobots } from "../simulator";
+import { USE_VIRTUAL_ROBOTS } from "../utils/env";
 
 /**
  * Stores robots. Provides utilities for finding them by position.
@@ -16,7 +17,15 @@ export class RobotManager {
     /**
      * Maps robot locations to their ids.
      */
-    indicesToIds: Map<string, string> = new Map();
+    getIndicesToIds(): Map<string, string> {
+        return Array.from(this.idsToRobots.values()).reduce((acc, robot) => {
+            const positionAsGridIndices = GridIndices.fromPosition(
+                robot.position,
+            );
+            acc.set(positionAsGridIndices.toString(), robot.id);
+            return acc;
+        }, new Map<string, string>());
+    }
 
     constructor(robots: Robot[]) {
         robots.forEach((robot) => this.addRobot(robot));
@@ -24,7 +33,6 @@ export class RobotManager {
 
     addRobot(robot: Robot) {
         this.idsToRobots.set(robot.id, robot);
-        this.indicesToIds.set(JSON.stringify(robot.defaultIndices), robot.id);
     }
 
     /**
@@ -40,30 +48,32 @@ export class RobotManager {
     }
 
     createRobotFromId(robotId: string) {
+        const robotConfig = config[robotId];
+        if (!robotConfig) {
+            throw new Error("Failed to find robot config for id " + robotId);
+        }
         const robot = new Robot(
             robotId,
             new GridIndices(
-                config[robotId].homePosition.x,
-                config[robotId].homePosition.y,
+                config[robotId]?.homeIndices.x,
+                config[robotId]?.homeIndices.y,
             ),
             new GridIndices(
-                config[robotId].defaultPosition.x,
-                config[robotId].defaultPosition.y,
+                config[robotId]?.defaultIndices.x,
+                config[robotId]?.defaultIndices.y,
             ),
-            config[robotId].startHeading * DEGREE,
-            new Position(
-                config[robotId].defaultPosition.x,
-                config[robotId].defaultPosition.y,
-            ),
+            config[robotId]?.startHeadingRadians * DEGREE,
         );
         this.addRobot(robot);
+        return robot;
     }
 
     /**
      * Returns `true` if a Robot is at the specified position, and `false` otherwise.
      */
     isRobotAtIndices(indices: GridIndices): boolean {
-        return this.indicesToIds.has(JSON.stringify(indices));
+        const indicesToIds = this.getIndicesToIds();
+        return indicesToIds.has(indices.toString());
     }
 
     /**
@@ -71,7 +81,8 @@ export class RobotManager {
      * Throws if no robot is found.
      */
     getRobotAtIndices(indices: GridIndices): Robot {
-        const robotId = this.indicesToIds.get(JSON.stringify(indices));
+        const indicesToIds = this.getIndicesToIds();
+        const robotId = indicesToIds.get(indices.toString());
         if (robotId === undefined) {
             throw new Error("Failed to find robot at indices " + indices);
         }
@@ -79,12 +90,32 @@ export class RobotManager {
     }
 
     updateRobot(robotId: string, indices: GridIndices) {
-        // if (this.indicesToIds.has(JSON.stringify(indices))) {
-        //     this.indicesToIds.delete(JSON.stringify(indices));
+        const indicesToIds = this.getIndicesToIds();
+        // if (indicesToIds.has(indices.toString())) {
+        //     indicesToIds.delete(indices.toString());
         // }
-        for (const [i, r] of this.indicesToIds.entries()) {
-            if (robotId === r) this.indicesToIds.delete(i);
+        for (const [i, r] of indicesToIds.entries()) {
+            if (robotId === r) indicesToIds.delete(i);
         }
-        this.indicesToIds.set(JSON.stringify(indices), robotId);
+        indicesToIds.set(indices.toString(), robotId);
     }
 }
+
+export const robotManager = new RobotManager(
+    USE_VIRTUAL_ROBOTS ?
+        Array.from(virtualRobots.values())
+    :   [
+            new Robot(
+                "robot-12",
+                new GridIndices(0, 5),
+                new GridIndices(5, 3),
+                90 * DEGREE,
+            ),
+            new Robot(
+                "robot-4",
+                new GridIndices(5, 0),
+                new GridIndices(5, 2),
+                90 * DEGREE,
+            ),
+        ],
+);

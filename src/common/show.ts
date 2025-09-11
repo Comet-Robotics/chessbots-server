@@ -1,3 +1,6 @@
+// @ts-expect-error: chessbots client is a CommonJS module, but this library is a ES Module, so we need to tell TypeScript that it's okay
+import { decode as cborDecode } from "cbor-x";
+
 import {
     Number,
     String,
@@ -15,16 +18,17 @@ import {
     SplinePointType,
     StartPointSchema,
 } from "./spline";
-import { Colors } from "@blueprintjs/core";
+import { Uint32 } from "../server/utils/tcp-packet";
 
 export const TimelineEventTypes = {
     GoToPointEvent: "goto_point",
     WaitEvent: "wait",
     StartPointEvent: "start_point",
+    TurnEvent: "turn",
 } as const;
 
 export const GoToPointEventSchema = RuntypesRecord({
-    durationMs: Number,
+    durationMs: Uint32,
     target: MidpointSchema,
     type: Literal(TimelineEventTypes.GoToPointEvent),
     id: String,
@@ -32,7 +36,7 @@ export const GoToPointEventSchema = RuntypesRecord({
 export type GoToPointEvent = Static<typeof GoToPointEventSchema>;
 
 const WaitEventSchema = RuntypesRecord({
-    durationMs: Number,
+    durationMs: Uint32,
     type: Literal(TimelineEventTypes.WaitEvent),
     id: String,
 });
@@ -41,20 +45,36 @@ export type WaitEvent = Static<typeof WaitEventSchema>;
 const StartPointEventSchema = RuntypesRecord({
     type: Literal(TimelineEventTypes.StartPointEvent),
     target: StartPointSchema,
-    durationMs: Number,
+    durationMs: Uint32,
     id: String,
 });
 export type StartPointEvent = Static<typeof StartPointEventSchema>;
 
-const NonStartPointEventSchema = Union(GoToPointEventSchema, WaitEventSchema);
+const TurnEventSchema = RuntypesRecord({
+    type: Literal(TimelineEventTypes.TurnEvent),
+    radians: Number,
+    durationMs: Uint32,
+    id: String,
+});
+export type TurnEvent = Static<typeof TurnEventSchema>;
+
+export const NonStartPointEventSchema = Union(
+    GoToPointEventSchema,
+    WaitEventSchema,
+    TurnEventSchema,
+);
 export type NonStartPointEvent = Static<typeof NonStartPointEventSchema>;
 
 const TimelineLayerSchema = RuntypesRecord({
     startPoint: StartPointEventSchema,
     remainingEvents: Array(NonStartPointEventSchema),
 });
-export type TimelineLayer = Static<typeof TimelineLayerSchema>;
-export type TimelineEvents = GoToPointEvent | WaitEvent | StartPointEvent;
+export type TimelineLayerType = Static<typeof TimelineLayerSchema>;
+export type TimelineEvents =
+    | GoToPointEvent
+    | WaitEvent
+    | StartPointEvent
+    | TurnEvent;
 
 /**
  * The showfile schema.
@@ -66,7 +86,7 @@ export type TimelineEvents = GoToPointEvent | WaitEvent | StartPointEvent;
  */
 export const ShowfileSchema = RuntypesRecord({
     // Be sure to increment the schema version number when making breaking changes to the showfile schema.
-    $chessbots_show_schema_version: Literal(3),
+    $chessbots_show_schema_version: Literal(4),
     // The timeline is an array of timeline 'layers'. A layer consists of an array that includes all the events for one robot.
     timeline: Array(TimelineLayerSchema),
     audio: Optional(
@@ -84,7 +104,7 @@ export type Showfile = Static<typeof ShowfileSchema>;
  * @param layer - the timeline layer to convert.
  * @returns - the spline representation of the timeline layer.
  */
-export function timelineLayerToSpline(layer: TimelineLayer): Spline {
+export function timelineLayerToSpline(layer: TimelineLayerType): Spline {
     const { startPoint, remainingEvents } = layer;
     return {
         start: startPoint.target,
@@ -103,7 +123,7 @@ export function timelineLayerToSpline(layer: TimelineLayer): Spline {
  */
 export function createNewShowfile(): Showfile {
     return {
-        $chessbots_show_schema_version: 3,
+        $chessbots_show_schema_version: 4,
         timeline: [
             {
                 startPoint: {
@@ -111,49 +131,24 @@ export function createNewShowfile(): Showfile {
                     target: {
                         type: SplinePointType.StartPoint,
                         point: {
-                            x: 0,
-                            y: 70,
+                            x: 2,
+                            y: 2,
                         },
                     },
-                    durationMs: 7500,
-                    id: "4f21401d-07cf-434f-a73c-6482ab82f210",
+                    durationMs: 3000,
+                    id: crypto.randomUUID(),
                 },
                 remainingEvents: [
                     {
                         type: TimelineEventTypes.GoToPointEvent,
                         durationMs: 1000,
                         target: {
-                            type: SplinePointType.QuadraticBezier,
-                            endPoint: { x: 100, y: 100 },
-                        },
-                        id: "4f21401d-07cf-434f-a73c-6482ab82f211",
-                    },
-                    {
-                        type: TimelineEventTypes.WaitEvent,
-                        durationMs: 5000,
-                        id: "4f21401d-07cf-434f-a73c-6482ab82f212",
-                    },
-                    {
-                        type: TimelineEventTypes.GoToPointEvent,
-                        durationMs: 1000,
-                        target: {
                             type: SplinePointType.CubicBezier,
-                            endPoint: { x: 315, y: 50 },
-                            controlPoint: {
-                                x: 300,
-                                y: 40,
-                            },
+                            endPoint: { x: 3, y: 3 },
+                            controlPoint: { x: 2.5, y: 1 },
+                            controlPoint2: { x: 2.5, y: 3 },
                         },
-                        id: "4f21401d-07cf-434f-a73c-6482ab82f213",
-                    },
-                    {
-                        type: TimelineEventTypes.GoToPointEvent,
-                        durationMs: 1000,
-                        target: {
-                            type: SplinePointType.QuadraticBezier,
-                            endPoint: { x: 70, y: 70 },
-                        },
-                        id: "4f21401d-07cf-434f-a73c-6482ab82f214",
+                        id: crypto.randomUUID(),
                     },
                 ],
             },
@@ -162,30 +157,23 @@ export function createNewShowfile(): Showfile {
     };
 }
 
-export const EVENT_TYPE_TO_COLOR: Record<
-    (typeof TimelineEventTypes)[keyof typeof TimelineEventTypes],
-    (typeof Colors)[keyof typeof Colors]
-> = {
-    [TimelineEventTypes.GoToPointEvent]: Colors.BLUE2,
-    [TimelineEventTypes.WaitEvent]: Colors.GRAY2,
-    [TimelineEventTypes.StartPointEvent]: Colors.GREEN2,
-};
+export const CHESSBOTS_SHOWFILE_MIME_TYPE = "application/chessbots-showfile";
+export const CHESSBOTS_SHOWFILE_EXTENSION = ".cbor";
 
-/*
- * The timeline duration update mode determines how the duration of timeline events
- * is updated when the user edits a timeline event's duration.
- *
- * Being in ripple edit mode means that editing the duration of an event has a
- * ripple effect on ALL the other events in the same layer, shifting
- * all the subsequent event start times by the same amount (so only
- * one event's duration is actually changing).
- *
- * Being in rolling edit mode mean that editing the duration of an event also affects the
- * duration of the event that immediately follows it in the same layer, such
- * that adjusting the duration of this event doesn't shift the start timestamp
- * of the subsequent events in the same layer.
- */
-export const TimelineDurationUpdateMode = {
-    Rolling: "rolling",
-    Ripple: "ripple",
-} as const;
+export const loadShowfileFromBinary = (binary: Buffer | Uint8Array) => {
+    let decodedCborData: unknown | null = null;
+
+    try {
+        decodedCborData = cborDecode(binary);
+    } catch (e) {
+        return null;
+    }
+
+    const result = ShowfileSchema.validate(decodedCborData);
+
+    if (result.success) {
+        return result.value;
+    }
+
+    return null;
+};

@@ -1,6 +1,6 @@
 //Checks if the user prefers light or dark mode from their window.
 
-import { BlueprintIcons_16Id } from "@blueprintjs/icons/lib/esm/generated/16px/blueprint-icons-16";
+import type { BlueprintIcons_16Id } from "@blueprintjs/icons/lib/esm/generated/16px/blueprint-icons-16";
 
 // Dark mode settings. Format for each entry is [mode-name, icon-name]
 const allSettings: [string, BlueprintIcons_16Id][] = [

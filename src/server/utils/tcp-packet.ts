@@ -1,9 +1,9 @@
+import type { Static } from "runtypes";
 import {
     Number as NumberType,
     String,
     Record,
     Union,
-    Static,
     Literal,
     Dictionary,
 } from "runtypes";
@@ -34,7 +34,7 @@ const Float = NumberType.withConstraint((n) => Number.isFinite(n), {
 const Int32 = Float.withConstraint((n) => Number.isSafeInteger(n), {
     name: "int32",
 });
-const Uint32 = Int32.withConstraint((n) => n >= 0, { name: "uint32" });
+export const Uint32 = Int32.withConstraint((n) => n >= 0, { name: "uint32" });
 const VarId = Uint32;
 const MotorPower = Float.withConstraint((n) => -1 <= n && n <= 1, {
     name: "motor_power",
@@ -167,7 +167,7 @@ export const DRIVE_CUBIC_SPLINE_SCHEMA = Record({
     endPosition: Position,
     controlPositionA: Position,
     controlPositionB: Position,
-    timeDeltaMs: Int32,
+    timeDeltaMs: Uint32,
 });
 
 export const DRIVE_QUADRATIC_SPLINE_SCHEMA = Record({
@@ -175,13 +175,13 @@ export const DRIVE_QUADRATIC_SPLINE_SCHEMA = Record({
     startPosition: Position,
     endPosition: Position,
     controlPosition: Position,
-    timeDeltaMs: Int32,
+    timeDeltaMs: Uint32,
 });
 
 export const SPIN_RADIANS_SCHEMA = Record({
     type: Literal(PacketType.SPIN_RADIANS),
     radians: Float,
-    timeDeltaMs: Int32,
+    timeDeltaMs: Uint32,
 });
 
 export const ESTOP_SCHEMA = Record({ type: Literal(PacketType.ESTOP) });
