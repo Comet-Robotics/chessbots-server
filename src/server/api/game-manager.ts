@@ -28,6 +28,7 @@ import { DO_SAVES } from "../utils/env";
 import { executor } from "../command/executor";
 
 type GameState = {
+    type?: "puzzle" | "human" | "computer";
     side: Side;
     position: string;
     gameEndReason: GameEndReason | undefined;
@@ -285,6 +286,7 @@ export class ComputerGameManager extends GameManager {
 
     public getGameState(clientType: ClientType): GameState {
         return {
+            type: "computer",
             ...super.getGameState(clientType),
             aiDifficulty: this.difficulty,
         };
@@ -299,6 +301,7 @@ export class PuzzleGameManager extends GameManager {
         chess: ChessEngine,
         socketManager: SocketManager,
         fen: string,
+        private tooltip: string,
         private moves: Move[],
         protected difficulty: number,
     ) {
@@ -309,6 +312,9 @@ export class PuzzleGameManager extends GameManager {
             false,
         );
         chess.loadFen(fen);
+    }
+    public getTooltip(): string {
+        return this.tooltip;
     }
 
     public getDifficulty(): number {
@@ -391,6 +397,7 @@ export class PuzzleGameManager extends GameManager {
 
     public getGameState(clientType: ClientType): GameState {
         return {
+            type: "puzzle",
             ...super.getGameState(clientType),
             difficulty: this.difficulty,
         };

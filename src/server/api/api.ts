@@ -38,7 +38,8 @@ import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
 import { GridIndices } from "../robot/grid-indices";
-import puzzles, { type PuzzleComponents } from "./puzzles";
+import { puzzles, type PuzzleComponents } from "./puzzles";
+
 import {
     moveAllRobotsToDefaultPositions,
     moveAllRobotsHomeToDefaultOptimized,
@@ -233,6 +234,7 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
     const fen = puzzle.fen;
     const moves = puzzle.moves;
     const difficulty = puzzle.rating;
+    const tooltip = puzzle.tooltip;
 
     if (puzzle.robotDefaultPositions) {
         // Convert puzzle.robotDefaultPositions from Record<string, string> to Map<string, GridIndices>
@@ -270,8 +272,10 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
             new ChessEngine(),
             socketManager,
             fen,
+            tooltip,
             moves,
             difficulty,
+            // tooltip,
         ),
     );
 
