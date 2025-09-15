@@ -282,5 +282,59 @@ describe("Test shimmy location",()=>{
         output = PathMaterializer.findShimmyLocation("asdf",starting,CollisionType.VERTICAL)
         expect(output.x).toBeCloseTo(5+1/3);
         expect(output.y).toBeCloseTo(5);
+    });
+
+    it("horse tests",()=>{
+        vi.spyOn(robotManager, "getRobot").mockReturnValue(startingRobot);
+
+        //shimmy robot left then up
+        let starting = {from:{i:5,j:4} as GridIndices, to:{i:6,j:6} as GridIndices} as GridMove;
+        let output = PathMaterializer.findShimmyLocation("asdf",starting,CollisionType.HORSE)
+        expect(output.x).toBeCloseTo(5-0.5*(2/Math.hypot(2,1)));
+        expect(output.y).toBeCloseTo(5+0.5*(1/Math.hypot(2,1)));
+
+        //shimmy robot left then down
+        starting = {from:{i:5,j:6} as GridIndices, to:{i:6,j:4} as GridIndices} as GridMove;
+        output = PathMaterializer.findShimmyLocation("asdf",starting,CollisionType.HORSE)
+        expect(output.x).toBeCloseTo(5-0.5*(2/Math.hypot(2,1)));
+        expect(output.y).toBeCloseTo(5-0.5*(1/Math.hypot(2,1)));
+
+        //shimmy robot right then up
+        starting = {from:{i:4,j:5} as GridIndices, to:{i:5,j:3} as GridIndices} as GridMove;
+        output = PathMaterializer.findShimmyLocation("asdf",starting,CollisionType.HORSE)
+        expect(output.x).toBeCloseTo(5+0.5*(2/Math.hypot(2,1)));
+        expect(output.y).toBeCloseTo(5+0.5*(1/Math.hypot(2,1)));
+
+        //shimmy robot right then down
+        starting = {from:{i:5,j:6} as GridIndices, to:{i:4,j:4} as GridIndices} as GridMove;
+        output = PathMaterializer.findShimmyLocation("asdf",starting,CollisionType.HORSE)
+        expect(output.x).toBeCloseTo(5+0.5*(2/Math.hypot(2,1)));
+        expect(output.y).toBeCloseTo(5-0.5*(1/Math.hypot(2,1)));
+
+
+        //shimmy robot up then left
+        starting = {from:{i:4,j:4} as GridIndices, to:{i:6,j:5} as GridIndices} as GridMove;
+        output = PathMaterializer.findShimmyLocation("asdf",starting,CollisionType.HORSE)
+        expect(output.x).toBeCloseTo(5-0.5*(1/Math.hypot(2,1)));
+        expect(output.y).toBeCloseTo(5+0.5*(2/Math.hypot(2,1)));
+
+        //shimmy robot up then right
+        starting = {from:{i:5,j:4} as GridIndices, to:{i:3,j:5} as GridIndices} as GridMove;
+        output = PathMaterializer.findShimmyLocation("asdf",starting,CollisionType.HORSE)
+        expect(output.x).toBeCloseTo(5+0.5*(1/Math.hypot(2,1)));
+        expect(output.y).toBeCloseTo(5+0.5*(2/Math.hypot(2,1)));
+
+        //shimmy robot down then left
+        starting = {from:{i:4,j:6} as GridIndices, to:{i:6,j:5} as GridIndices} as GridMove;
+        output = PathMaterializer.findShimmyLocation("asdf",starting,CollisionType.HORSE)
+        expect(output.x).toBeCloseTo(5-0.5*(1/Math.hypot(2,1)));
+        expect(output.y).toBeCloseTo(5-0.5*(2/Math.hypot(2,1)));
+
+        //shimmy robot down then right
+        starting = {from:{i:6,j:6} as GridIndices, to:{i:4,j:5} as GridIndices} as GridMove;
+        output = PathMaterializer.findShimmyLocation("asdf",starting,CollisionType.HORSE)
+        expect(output.x).toBeCloseTo(5+0.5*(1/Math.hypot(2,1)));
+        expect(output.y).toBeCloseTo(5-0.5*(2/Math.hypot(2,1)));
+
     })
 });
