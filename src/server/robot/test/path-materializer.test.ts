@@ -81,3 +81,130 @@ it("Test collision adding",() =>{
     expect(collisions).toHaveLength(0);
 });
 
+describe("Test collision detection",()=>{
+    const getMock = (grid:GridIndices)=>{
+        if(grid.i === 6 && grid.j === 5){
+            return new Robot("right",{i:6,j:5} as GridIndices,{i:0,j:0} as GridIndices);
+        } else if (grid.i === 4 && grid.j === 5){
+            return new Robot("left",{i:4,j:5} as GridIndices,{i:0,j:0} as GridIndices);
+        } else if(grid.i === 5 && grid.j === 6){
+            return new Robot("up",{i:4,j:6} as GridIndices,{i:0,j:0} as GridIndices);
+        } else if (grid.i === 5 && grid.j === 4){
+            return new Robot("down",{i:5,j:4} as GridIndices,{i:0,j:0} as GridIndices);
+        } else if (grid.i === 4 && grid.j === 6){
+            return new Robot("topleft",{i:5,j:4} as GridIndices,{i:0,j:0} as GridIndices);
+        } else if (grid.i === 6 && grid.j === 6){
+            return new Robot("topright",{i:5,j:4} as GridIndices,{i:0,j:0} as GridIndices);
+        } else if (grid.i === 4 && grid.j === 4){
+            return new Robot("bottomleft",{i:5,j:4} as GridIndices,{i:0,j:0} as GridIndices);
+        } else if (grid.i === 6 && grid.j === 4){
+            return new Robot("bottomright",{i:5,j:4} as GridIndices,{i:0,j:0} as GridIndices);
+        } else{
+            return nullRobot;
+        }
+    }
+
+    //assuming the robot starts at 5,5
+    const addMock = (collisions, x, y)=>{
+        if(x === 6 && y === 5){
+            collisions.push("right");
+        } else if (x === 4 && y === 5){
+            collisions.push("left");
+        } else if(x === 5 && y === 6){
+            collisions.push("up");
+        } else if (x === 5 && y === 4){
+            collisions.push("down");
+        } else {
+            collisions.push("null");
+        }
+    }
+
+    it("horizontal test",()=>{
+        
+        const addSpy = vi.spyOn(PathMaterializer,"addToCollisions").mockImplementation(addMock);
+
+        let starting = {from:{i:5,j:5} as GridIndices, to:{i:7,j:5} as GridIndices} as GridMove;
+        expect(PathMaterializer.detectCollisions(starting, CollisionType.HORIZONTAL)).toContain("right");
+
+        starting = {from:{i:5,j:5} as GridIndices, to:{i:3,j:5} as GridIndices} as GridMove;
+        expect(PathMaterializer.detectCollisions(starting, CollisionType.HORIZONTAL)).toContain("left");
+
+        expect(addSpy).toHaveBeenCalled();
+
+    });
+    
+
+    it("vertical test",()=>{
+        const addSpy = vi.spyOn(PathMaterializer,"addToCollisions").mockImplementation(addMock);
+        
+        let starting = {from:{i:5,j:5} as GridIndices, to:{i:5,j:7} as GridIndices} as GridMove;
+        expect(PathMaterializer.detectCollisions(starting, CollisionType.VERTICAL)).toContain("up");
+
+        starting = {from:{i:5,j:5} as GridIndices, to:{i:5,j:3} as GridIndices} as GridMove;
+        expect(PathMaterializer.detectCollisions(starting, CollisionType.VERTICAL)).toContain("down");
+
+        expect(addSpy).toHaveBeenCalled();
+    })
+
+    //for both horizontal and vertical tests
+    //expect(addSpy).toHaveBeenCalled();
+    //expect(isSpy).not.toHaveBeenCalled();
+    //expect(getSpy).not.toHaveBeenCalled();
+
+    it("diagonal tests",()=>{
+
+        const isSpy = vi.spyOn(robotManager, "isRobotAtIndices").mockReturnValue(true);
+        const getSpy = vi.spyOn(robotManager, "getRobotAtIndices").mockImplementation(getMock);
+
+        //top left
+        let starting = {from:{i:5,j:5} as GridIndices, to:{i:3,j:7} as GridIndices} as GridMove;
+        expect(PathMaterializer.detectCollisions(starting, CollisionType.DIAGONAL)).containSubset(["up","left"]);
+        //top right
+        starting = {from:{i:5,j:5} as GridIndices, to:{i:7,j:7} as GridIndices} as GridMove;
+        expect(PathMaterializer.detectCollisions(starting, CollisionType.DIAGONAL)).containSubset(["up","right"]);
+        //bottom left
+        starting = {from:{i:5,j:5} as GridIndices, to:{i:3,j:3} as GridIndices} as GridMove;
+        expect(PathMaterializer.detectCollisions(starting, CollisionType.DIAGONAL)).containSubset(["down","left"]);
+        //bottom right
+        starting = {from:{i:5,j:5} as GridIndices, to:{i:7,j:3} as GridIndices} as GridMove;
+        expect(PathMaterializer.detectCollisions(starting, CollisionType.DIAGONAL)).containSubset(["down","right"]);
+
+        expect(isSpy).toHaveBeenCalled();
+        expect(getSpy).toHaveBeenCalled();
+    });
+    //horse tests
+
+    it("horse tests",()=>{
+        const isSpy = vi.spyOn(robotManager, "isRobotAtIndices").mockReturnValue(true);
+        const getSpy = vi.spyOn(robotManager, "getRobotAtIndices").mockImplementation(getMock);
+        
+        //left up
+        let starting = {from:{i:5,j:5} as GridIndices, to:{i:3,j:6} as GridIndices} as GridMove;
+        expect(PathMaterializer.detectCollisions(starting, CollisionType.HORSE)).containSubset(["left","topleft"]);
+        //left down
+        starting = {from:{i:5,j:5} as GridIndices, to:{i:3,j:4} as GridIndices} as GridMove;
+        expect(PathMaterializer.detectCollisions(starting, CollisionType.HORSE)).containSubset(["left","bottomleft"]);
+        //right up
+        starting = {from:{i:5,j:5} as GridIndices, to:{i:7,j:6} as GridIndices} as GridMove;
+        expect(PathMaterializer.detectCollisions(starting, CollisionType.HORSE)).containSubset(["right","topright"]);
+        //right down
+        starting = {from:{i:5,j:5} as GridIndices, to:{i:7,j:4} as GridIndices} as GridMove;
+        expect(PathMaterializer.detectCollisions(starting, CollisionType.HORSE)).containSubset(["right","bottomright"]);
+
+        //up left
+        starting = {from:{i:5,j:5} as GridIndices, to:{i:4,j:7} as GridIndices} as GridMove;
+        expect(PathMaterializer.detectCollisions(starting, CollisionType.HORSE)).containSubset(["up","topleft"]);
+        //up right
+        starting = {from:{i:5,j:5} as GridIndices, to:{i:6,j:7} as GridIndices} as GridMove;
+        expect(PathMaterializer.detectCollisions(starting, CollisionType.HORSE)).containSubset(["up","topright"]);
+        //down left
+        starting = {from:{i:5,j:5} as GridIndices, to:{i:4,j:3} as GridIndices} as GridMove;
+        expect(PathMaterializer.detectCollisions(starting, CollisionType.HORSE)).containSubset(["down","bottomleft"]);
+        //down right
+        starting = {from:{i:5,j:5} as GridIndices, to:{i:6,j:3} as GridIndices} as GridMove;
+        expect(PathMaterializer.detectCollisions(starting, CollisionType.HORSE)).containSubset(["down","bottomright"]);
+
+        expect(isSpy).toHaveBeenCalled();
+        expect(getSpy).toHaveBeenCalled();
+    });
+});
