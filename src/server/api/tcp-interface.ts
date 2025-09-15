@@ -96,9 +96,7 @@ export class RealBotTunnel extends BotTunnel {
                         this.connected = false;
                     }
                 }
-            } 
-            else 
-            {
+            } else {
                 break;
             }
         }
