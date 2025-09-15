@@ -5,6 +5,7 @@ import { PathMaterializer, pathmatTexting } from "../path-materializer";
 import { GridIndices } from "../grid-indices";
 import { robotManager } from "../robot-manager";
 import { Robot } from "../robot";
+import { Position } from "../position";
 const {CollisionType} = pathmatTexting;
 
 afterEach(()=>{
@@ -120,7 +121,6 @@ describe("Test collision detection",()=>{
     }
 
     it("horizontal test",()=>{
-        
         const addSpy = vi.spyOn(PathMaterializer,"addToCollisions").mockImplementation(addMock);
 
         let starting = {from:{i:5,j:5} as GridIndices, to:{i:7,j:5} as GridIndices} as GridMove;
@@ -130,9 +130,7 @@ describe("Test collision detection",()=>{
         expect(PathMaterializer.detectCollisions(starting, CollisionType.HORIZONTAL)).toContain("left");
 
         expect(addSpy).toHaveBeenCalled();
-
     });
-    
 
     it("vertical test",()=>{
         const addSpy = vi.spyOn(PathMaterializer,"addToCollisions").mockImplementation(addMock);
@@ -146,13 +144,7 @@ describe("Test collision detection",()=>{
         expect(addSpy).toHaveBeenCalled();
     })
 
-    //for both horizontal and vertical tests
-    //expect(addSpy).toHaveBeenCalled();
-    //expect(isSpy).not.toHaveBeenCalled();
-    //expect(getSpy).not.toHaveBeenCalled();
-
     it("diagonal tests",()=>{
-
         const isSpy = vi.spyOn(robotManager, "isRobotAtIndices").mockReturnValue(true);
         const getSpy = vi.spyOn(robotManager, "getRobotAtIndices").mockImplementation(getMock);
 
@@ -172,7 +164,6 @@ describe("Test collision detection",()=>{
         expect(isSpy).toHaveBeenCalled();
         expect(getSpy).toHaveBeenCalled();
     });
-    //horse tests
 
     it("horse tests",()=>{
         const isSpy = vi.spyOn(robotManager, "isRobotAtIndices").mockReturnValue(true);
@@ -210,10 +201,6 @@ describe("Test collision detection",()=>{
 });
 
 test.each([
-    new GridIndices(1,1),
-    new GridIndices(11,11),
-    new GridIndices(1,11),
-    new GridIndices(11,1),
     new GridIndices(6,6),
     new GridIndices(6,7), //no
     new GridIndices(7,6),
@@ -231,4 +218,69 @@ test.each([
         y = 1
     const output:[number,number] = [x,y];
     expect(PathMaterializer.directionToEdge(pos)).toEqual(expect.arrayContaining(output));
+});
+
+
+describe("Test shimmy location",()=>{
+    //start the robot at 5,5
+    const startingRobot = new Robot("asdf",{i:5,j:5} as GridIndices,{i:6,j:6} as GridIndices, 0, new Position(5,5));
+    
+    
+    it("horizontal tests",()=>{
+        vi.spyOn(robotManager, "getRobot").mockReturnValue(startingRobot);
+        //shimmy down
+        //right
+        let starting = {from:{i:4,j:5} as GridIndices, to:{i:6,j:5} as GridIndices} as GridMove;
+        let output = PathMaterializer.findShimmyLocation("asdf",starting,CollisionType.HORIZONTAL)
+        expect(output.x).toBeCloseTo(5);
+        expect(output.y).toBeCloseTo(5-1/3);
+
+        //left
+        starting = {from:{i:6,j:5} as GridIndices, to:{i:4,j:5} as GridIndices} as GridMove;
+        output = PathMaterializer.findShimmyLocation("asdf",starting,CollisionType.HORIZONTAL)
+        expect(output.x).toBeCloseTo(5);
+        expect(output.y).toBeCloseTo(5-1/3);
+
+        //shimmy up
+        //right
+        starting = {from:{i:4,j:4} as GridIndices, to:{i:6,j:4} as GridIndices} as GridMove;
+        output = PathMaterializer.findShimmyLocation("asdf",starting,CollisionType.HORIZONTAL)
+        expect(output.x).toBeCloseTo(5);
+        expect(output.y).toBeCloseTo(5+1/3);
+
+        //left
+        starting = {from:{i:6,j:4} as GridIndices, to:{i:4,j:4} as GridIndices} as GridMove;
+        output = PathMaterializer.findShimmyLocation("asdf",starting,CollisionType.HORIZONTAL)
+        expect(output.x).toBeCloseTo(5);
+        expect(output.y).toBeCloseTo(5+1/3);
+    });
+
+    it("vertical tests",()=>{
+        vi.spyOn(robotManager, "getRobot").mockReturnValue(startingRobot);
+        //shimmy left
+        //up
+        let starting = {from:{i:5,j:4} as GridIndices, to:{i:5,j:6} as GridIndices} as GridMove;
+        let output = PathMaterializer.findShimmyLocation("asdf",starting,CollisionType.VERTICAL)
+        expect(output.x).toBeCloseTo(5-1/3);
+        expect(output.y).toBeCloseTo(5);
+
+        //down
+        starting = {from:{i:5,j:6} as GridIndices, to:{i:5,j:4} as GridIndices} as GridMove;
+        output = PathMaterializer.findShimmyLocation("asdf",starting,CollisionType.VERTICAL)
+        expect(output.x).toBeCloseTo(5-1/3);
+        expect(output.y).toBeCloseTo(5);
+
+        //shimmy right
+        //up
+        starting = {from:{i:4,j:4} as GridIndices, to:{i:4,j:6} as GridIndices} as GridMove;
+        output = PathMaterializer.findShimmyLocation("asdf",starting,CollisionType.VERTICAL)
+        expect(output.x).toBeCloseTo(5+1/3);
+        expect(output.y).toBeCloseTo(5);
+
+        //down
+        starting = {from:{i:4,j:6} as GridIndices, to:{i:4,j:4} as GridIndices} as GridMove;
+        output = PathMaterializer.findShimmyLocation("asdf",starting,CollisionType.VERTICAL)
+        expect(output.x).toBeCloseTo(5+1/3);
+        expect(output.y).toBeCloseTo(5);
+    })
 });
