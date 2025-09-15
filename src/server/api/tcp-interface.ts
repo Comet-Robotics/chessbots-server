@@ -89,11 +89,13 @@ export class RealBotTunnel extends BotTunnel {
                     {
                         console.log("AAA A BOT DISCONNECTED! ABORT! ABORT!")
 
-                        this.emitter.emit("actionComplete", {
-                            success: true,
-                            packetId,
-                        });
-                        
+                        //how am i gonna send this?
+                    
+                        // this.emitter.emit("actionComplete", {
+                        //     success: true,
+                        //     packetId,
+                        // });
+
                         this.connected = false;
                     }
                 }
