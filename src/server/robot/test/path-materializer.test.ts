@@ -208,3 +208,27 @@ describe("Test collision detection",()=>{
         expect(getSpy).toHaveBeenCalled();
     });
 });
+
+test.each([
+    new GridIndices(1,1),
+    new GridIndices(11,11),
+    new GridIndices(1,11),
+    new GridIndices(11,1),
+    new GridIndices(6,6),
+    new GridIndices(6,7), //no
+    new GridIndices(7,6),
+    new GridIndices(7,7),
+])("Test direction to edge",(pos:GridIndices)=>{
+    let x = 0;
+    let y = 0;
+    if (pos.i >= 6)
+        x = -1
+    else   
+        x = 1
+    if (pos.j >=6)
+        y = -1
+    else
+        y = 1
+    const output:[number,number] = [x,y];
+    expect(PathMaterializer.directionToEdge(pos)).toEqual(expect.arrayContaining(output));
+});
