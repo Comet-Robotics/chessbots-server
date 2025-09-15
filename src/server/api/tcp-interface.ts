@@ -249,7 +249,7 @@ export class TCPServer {
     ) {
         this.server = net.createServer();
         this.server.on("connection", this.handleConnection.bind(this));
-        this.server.listen(config["tcpServerPort"], () => {
+        this.server.listen(config["tcpServerPort"], "0.0.0.0", () => {
             console.log(
                 "TCP bot server listening to %j",
                 this.server.address(),
@@ -267,7 +267,6 @@ export class TCPServer {
     private handleConnection(socket: net.Socket) {
         const remoteAddress = socket.remoteAddress + ":" + socket.remotePort;
         console.log("New client connection from %s", remoteAddress);
-
         socket.setNoDelay(true);
 
         // create a new bot tunnel for the connection
@@ -286,6 +285,9 @@ export class TCPServer {
                     config["bots"][mac] = id;
                 } else {
                     id = config["bots"][mac];
+                    if (!(id in this.robotManager.idsToRobots)) {
+                        this.robotManager.createRobotFromId(id);
+                    }
                     console.log("Found address ID: " + id);
                 }
                 tunnel.id = id;

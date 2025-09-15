@@ -5,9 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug ChessBots Client",
+            "request": "launch",
+            "type": "chrome",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
             "type": "node",
             "request": "launch",
-            "name": "Debug ChessBot Server",
+            "name": "Debug ChessBots Server",
             "runtimeExecutable": "ts-node",
             "program": "${workspaceFolder}/src/server/main.ts",
             "restart": true,
