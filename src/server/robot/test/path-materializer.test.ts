@@ -6,6 +6,7 @@ import { GridIndices } from "../grid-indices";
 import { robotManager } from "../robot-manager";
 import { Robot } from "../robot";
 import { Position } from "../position";
+import { DriveCommand, ReversibleAbsoluteRotateCommand } from "../../command/move-command";
 const { CollisionType } = pathmatTexting;
 
 afterEach(() => {
@@ -593,4 +594,138 @@ describe("Test shimmy location", () => {
         expect(output.x).toBeCloseTo(5 + 0.5 * (1 / Math.hypot(2, 1)));
         expect(output.y).toBeCloseTo(5 - 0.5 * (2 / Math.hypot(2, 1)));
     });
+});
+
+describe("Test construct drive command",()=>{
+    const startingRobot = new Robot(
+        "asdf",
+        { i: 5, j: 5 } as GridIndices,
+        { i: 5, j: 5 } as GridIndices,
+        0,
+        new Position(5, 5),
+    );
+
+    it("with starting position",()=>{
+        vi.spyOn(robotManager, "getRobot").mockReturnValue(startingRobot);
+        const start = new Position(1,1);
+        const end = new Position(4,5);
+        expect(PathMaterializer.constructDriveCommand("asdf",end,start)).toStrictEqual(new DriveCommand("asdf",5))
+    });
+
+    it("without starting position",()=>{
+        vi.spyOn(robotManager, "getRobot").mockReturnValue(startingRobot);
+        const end = new Position(1,2);
+        expect(PathMaterializer.constructDriveCommand("asdf",end,null)).toStrictEqual(new DriveCommand("asdf",5))
+    })
+
+});
+
+describe("Test construct rotate command",()=>{
+    const startingRobot = new Robot(
+        "asdf",
+        { i: 5, j: 5 } as GridIndices,
+        { i: 5, j: 5 } as GridIndices,
+        0,
+        new Position(5, 5),
+    );
+
+    it("with starting position",()=>{
+        vi.spyOn(robotManager, "getRobot").mockReturnValue(startingRobot);
+        const rads = vi.spyOn(startingRobot,"absoluteRotate").mockReturnValue(new Promise(()=>{}));
+
+        //right
+        let start = new Position(5,5);
+        let end = new Position(6,5);
+        PathMaterializer.constructRotateCommand("asdf",end,start).execute();
+        expect(rads).toHaveBeenCalledWith(Math.atan2(0,1));
+
+        //up right
+        start = new Position(5,5);
+        end = new Position(6,6);
+        PathMaterializer.constructRotateCommand("asdf",end,start).execute();
+        expect(rads).toHaveBeenCalledWith(Math.atan2(1,1));
+
+        //up
+        start = new Position(5,5);
+        end = new Position(5,6);
+        PathMaterializer.constructRotateCommand("asdf",end,start).execute();
+        expect(rads).toHaveBeenCalledWith(Math.atan2(1,0));
+
+        //up left
+        start = new Position(5,5);
+        end = new Position(4,6);
+        PathMaterializer.constructRotateCommand("asdf",end,start).execute();
+        expect(rads).toHaveBeenCalledWith(Math.atan2(1,-1));
+
+        //left
+        start = new Position(5,5);
+        end = new Position(4,5);
+        PathMaterializer.constructRotateCommand("asdf",end,start).execute();
+        expect(rads).toHaveBeenCalledWith(Math.atan2(0,-1));
+
+        //down left
+        start = new Position(5,5);
+        end = new Position(4,4);
+        PathMaterializer.constructRotateCommand("asdf",end,start).execute();
+        expect(rads).toHaveBeenCalledWith(Math.atan2(-1,-1));
+
+        //down
+        start = new Position(5,5);
+        end = new Position(5,4);
+        PathMaterializer.constructRotateCommand("asdf",end,start).execute();
+        expect(rads).toHaveBeenCalledWith(Math.atan2(-1,0));
+
+        //down right
+        start = new Position(5,5);
+        end = new Position(6,4);
+        PathMaterializer.constructRotateCommand("asdf",end,start).execute();
+        expect(rads).toHaveBeenCalledWith(Math.atan2(-1,1));
+
+        
+    });
+
+    it("without starting position",()=>{
+        vi.spyOn(robotManager, "getRobot").mockReturnValue(startingRobot);
+        const rads = vi.spyOn(startingRobot,"absoluteRotate").mockReturnValue(new Promise(()=>{}));
+
+        //right
+        let end = new Position(6,5);
+        PathMaterializer.constructRotateCommand("asdf",end,null).execute();
+        expect(rads).toHaveBeenCalledWith(Math.atan2(0,1));
+
+        //up right
+        end = new Position(6,6);
+        PathMaterializer.constructRotateCommand("asdf",end,null).execute();
+        expect(rads).toHaveBeenCalledWith(Math.atan2(1,1));
+
+        //up
+        end = new Position(5,6);
+        PathMaterializer.constructRotateCommand("asdf",end,null).execute();
+        expect(rads).toHaveBeenCalledWith(Math.atan2(1,0));
+
+        //up left
+        end = new Position(4,6);
+        PathMaterializer.constructRotateCommand("asdf",end,null).execute();
+        expect(rads).toHaveBeenCalledWith(Math.atan2(1,-1));
+
+        //left
+        end = new Position(4,5);
+        PathMaterializer.constructRotateCommand("asdf",end,null).execute();
+        expect(rads).toHaveBeenCalledWith(Math.atan2(0,-1));
+
+        //down left
+        end = new Position(4,4);
+        PathMaterializer.constructRotateCommand("asdf",end,null).execute();
+        expect(rads).toHaveBeenCalledWith(Math.atan2(-1,-1));
+
+        //down
+        end = new Position(5,4);
+        PathMaterializer.constructRotateCommand("asdf",end,null).execute();
+        expect(rads).toHaveBeenCalledWith(Math.atan2(-1,0));
+
+        //down right
+        end = new Position(6,4);
+        PathMaterializer.constructRotateCommand("asdf",end,null).execute();
+        expect(rads).toHaveBeenCalledWith(Math.atan2(-1,1));
+    })
 });
