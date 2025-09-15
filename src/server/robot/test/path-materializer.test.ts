@@ -1,12 +1,11 @@
-import { afterEach, expect, it, test, vi } from "vitest";
+import { afterEach, describe, expect, it, test, vi } from "vitest";
 import { PieceType, type Move } from "../../../common/game-types";
 import type { GridMove } from "../path-materializer";
-import { pathmatTesting } from "../path-materializer";
+import { PathMaterializer, pathmatTexting } from "../path-materializer";
 import { GridIndices } from "../grid-indices";
-const { moveToGridMove, calcCollisionType, CollisionType, addToCollisions } = pathmatTesting;
 import { robotManager } from "../robot-manager";
 import { Robot } from "../robot";
-
+const {CollisionType} = pathmatTexting;
 
 afterEach(()=>{
     vi.resetAllMocks();
@@ -29,7 +28,7 @@ test.each([
     i = FILE_LOOKUP.indexOf(move.from.charAt(0)) + 2;
     j = parseInt(move.from.charAt(1)) - 1 + 2;
     expected.from = new GridIndices(i,j);
-    expect(moveToGridMove(move)).toEqual(expected);
+    expect(PathMaterializer.moveToGridMove(move)).toEqual(expected);
 });
 
 /**
@@ -51,7 +50,7 @@ test.each([
     } else{
         expected = CollisionType.HORSE;
     }
-    expect(calcCollisionType(move)).equals(expected);
+    expect(PathMaterializer.calcCollisionType(move)).equals(expected);
 });
 
 const nullRobot = new Robot("null",{i:0,j:0} as GridIndices,{i:0,j:0} as GridIndices);
@@ -68,7 +67,7 @@ it("Test collision adding",() =>{
         return nullRobot;
     });
     const collisions = []
-    addToCollisions(collisions,1,1)
+    PathMaterializer.addToCollisions(collisions,1,1)
     expect(isSpy).toHaveBeenCalledOnce();
     expect(getSpy).toHaveBeenCalledOnce();
     expect(collisions).contain("asdf");
@@ -76,8 +75,9 @@ it("Test collision adding",() =>{
 
     //false case mock
     isSpy.mockReturnValue(false);
-    addToCollisions(collisions,1,1)
+    PathMaterializer.addToCollisions(collisions,1,1)
     expect(isSpy).toHaveBeenCalledTimes(2);
     expect(getSpy).toHaveBeenCalledTimes(1);
     expect(collisions).toHaveLength(0);
 });
+

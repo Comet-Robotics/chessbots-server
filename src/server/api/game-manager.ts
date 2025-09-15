@@ -23,9 +23,10 @@ import {
     GameHoldReason,
 } from "../../common/game-end-reasons";
 import { SaveManager } from "./save-manager";
-import { materializePath } from "../robot/path-materializer";
+import { PathMaterializer } from "../robot/path-materializer";
 import { DO_SAVES } from "../utils/env";
 import { executor } from "../command/executor";
+const materializePath = PathMaterializer.materializePath;
 
 type GameState = {
     side: Side;

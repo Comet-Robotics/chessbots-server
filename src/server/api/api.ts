@@ -39,13 +39,12 @@ import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
 import { GridIndices } from "../robot/grid-indices";
 import puzzles, { type PuzzleComponents } from "./puzzles";
-import {
-    moveAllRobotsToDefaultPositions,
-    moveAllRobotsHomeToDefaultOptimized,
-} from "../robot/path-materializer";
+import { PathMaterializer } from "../robot/path-materializer";
 import { robotManager } from "../robot/robot-manager";
 import { tcpServer } from "./tcp-interface";
 import { executor } from "../command/executor";
+const moveAllRobotsToDefaultPositions = PathMaterializer.moveAllRobotsToDefaultPositions;
+const moveAllRobotsHomeToDefaultOptimized = PathMaterializer.moveAllRobotsHomeToDefaultOptimized;
 
 /**
  * Helper function to move all robots from their home positions to their default positions
