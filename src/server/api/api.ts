@@ -43,8 +43,10 @@ import { PathMaterializer } from "../robot/path-materializer";
 import { robotManager } from "../robot/robot-manager";
 import { tcpServer } from "./tcp-interface";
 import { executor } from "../command/executor";
-const moveAllRobotsToDefaultPositions = PathMaterializer.moveAllRobotsToDefaultPositions;
-const moveAllRobotsHomeToDefaultOptimized = PathMaterializer.moveAllRobotsHomeToDefaultOptimized;
+const moveAllRobotsToDefaultPositions =
+    PathMaterializer.moveAllRobotsToDefaultPositions;
+const moveAllRobotsHomeToDefaultOptimized =
+    PathMaterializer.moveAllRobotsHomeToDefaultOptimized;
 
 /**
  * Helper function to move all robots from their home positions to their default positions

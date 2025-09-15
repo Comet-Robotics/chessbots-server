@@ -1246,5 +1246,5 @@ export class PathMaterializer {
 
 export const pathmatTexting = {
     CollisionType,
-    arrayOfCornersIndicies
+    arrayOfCornersIndicies,
 };
