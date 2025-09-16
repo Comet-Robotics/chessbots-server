@@ -105,5 +105,3 @@ export const puzzles: Record<string, PuzzleComponents> = {
         },
     },
 };
-
-// export puzzles;

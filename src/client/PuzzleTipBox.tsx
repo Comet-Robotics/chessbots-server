@@ -24,7 +24,7 @@ export function PuzzleTipBox() {
             <Callout title="Puzzle Tip" icon="lightbulb" intent="primary">
                 {!isPending && !isError && data ?
                     <div>{data.tooltip}</div>
-                :   <div></div>}
+                :   <div>No tip available</div>}
             </Callout>
         </div>
     );
