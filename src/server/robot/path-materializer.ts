@@ -16,7 +16,7 @@ import { MovePiece } from "../command/move-piece";
 import { Position } from "./position";
 import { GridIndices } from "./grid-indices";
 import type { Robot } from "./robot";
-import { error } from "console";
+//import { error } from "console"; replaced with Error
 import { robotManager } from "./robot-manager";
 import { gameManager } from "../api/managers";
 
@@ -538,7 +538,7 @@ function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
         }
     }
     if (!finalDestination) {
-        throw new error("WHERE THE HELL ARE YOU GOING");
+        throw new Error("WHERE THE HELL ARE YOU GOING"); // real
     }
     const startInArray = findGridIndicesInArray(
         arrayOfDeadzone,
