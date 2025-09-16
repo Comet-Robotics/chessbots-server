@@ -834,13 +834,9 @@ export function moveAllRobotsFromBoardToHome(): SequentialCommandGroup {
 
     // Sort rows from bottom to top (j=2, j=3, j=4, ..., j=9)
     const sortedRows = Array.from(robotsByRow.keys()).sort((a, b) => a - b);
-    console.log("Processing rows in order:", sortedRows);
 
     // Process each row, one robot at a time
     for (const row of sortedRows) {
-        console.log(
-            `Processing row ${row} with ${robotsByRow.get(row)!.length} robots`,
-        );
         const robotsInRow = robotsByRow.get(row)!;
 
         // Sort robots within each row from right to left (i=9, i=8, i=7, ..., i=2)
@@ -853,9 +849,6 @@ export function moveAllRobotsFromBoardToHome(): SequentialCommandGroup {
         // Move each robot in this row
         for (const robot of robotsInRow) {
             const currentPos = GridIndices.fromPosition(robot.position);
-            console.log(
-                `Moving robot ${robot.id} from position (${currentPos.i}, ${currentPos.j})`,
-            );
 
             // 1. Move from current position to deadzone
             const deadzonePos = moveFromBoardToDeadzone(currentPos);

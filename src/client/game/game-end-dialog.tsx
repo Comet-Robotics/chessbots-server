@@ -45,12 +45,10 @@ export function GameEndDialog(props: GameEndDialogProps) {
             onClick={() => {
                 if (!isProcessing) {
                     setIsProcessing(true);
-                    post("/return-home")
-                        .catch(() => undefined)
-                        .finally(() => {
-                            setIsProcessing(false);
-                            navigate("/home");
-                        });
+                    post("/return-home").finally(() => {
+                        setIsProcessing(false);
+                        navigate("/home");
+                    });
                 }
             }}
         />
