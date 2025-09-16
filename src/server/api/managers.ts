@@ -10,6 +10,6 @@ export const socketManager = new SocketManager({});
 export const clientManager = new ClientManager(socketManager);
 export let gameManager: GameManager | null = null;
 
-export function setGameManager(manager: GameManager) {
+export function setGameManager(manager: GameManager | null) {
     gameManager = manager;
 }

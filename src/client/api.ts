@@ -64,6 +64,7 @@ export function useSocket(
                 onMessage(message);
             }
         },
+        share: true,
     });
 
     // handle how a message is sent

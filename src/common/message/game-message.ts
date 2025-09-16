@@ -139,3 +139,33 @@ export class GameEndMessage extends Message {
         };
     }
 }
+
+export class JoinQueue extends Message {
+    constructor(public readonly queue: string) {
+        super();
+    }
+
+    protected type = MessageType.JOIN_QUEUE;
+
+    protected toObj(): object {
+        return {
+            ...super.toObj(),
+            queue: this.queue,
+        };
+    }
+}
+
+export class UpdateQueue extends Message {
+    constructor(public readonly queue: string[]) {
+        super();
+    }
+
+    protected type = MessageType.UPDATE_QUEUE;
+
+    protected toObj(): object {
+        return {
+            ...super.toObj(),
+            queue: this.queue,
+        };
+    }
+}
