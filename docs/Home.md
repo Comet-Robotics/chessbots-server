@@ -1,4 +1,4 @@
-Welcome to the ChessBot wiki!
+Welcome to the ChessBots wiki!
 
 If you want to learn more about the project or get involved, this is the place to be!
 
@@ -10,17 +10,17 @@ Please have a look at the [Server Structure](Server-Structure) if you want a hig
 If you want to want to start developing the server side, first check out our [Server Setup Guide](Server-Setup).  
 You can then read through the [Server Development Guide](Server-Development).
 
-## ChessBot Software
+## ChessBots Software
 
-The ChessBot software handles receiving movement commands from the server, and figuring out how to move the motors and read the sensors to comply with the command. The ChessBot uses an ESP32-S2 Mini as the microcontroller and transmitter/receiver. The onboard logic uses C++ for ESP-IDF.
+ChessBots software handles receiving movement commands from the server, and figuring out how to move the motors and read the sensors to comply with the command. The ChessBot uses an ESP32-S2 Mini as the microcontroller and transmitter/receiver. The onboard logic uses C++ for ESP-IDF.
 
 Please have a look at the [ESP Structure](ESP-Structure) if you want a high level overview of its various aspects.  
 If you want to want to start developing the bot side, first check out our [ESP Setup Guide](ESP-Setup).  
 You can then read through the [ESP Development Guide](ESP-Development).
 
-## ChessBot Hardware
+## ChessBots Hardware
 
-A new PCB is being made for the ChessBots that will allow them to work easily with an ESP32-S2 Mini microcontroller.
+A PCB is being made for the ChessBots that will allow them to work easily with an ESP32-S2 Mini microcontroller.
 
 ## Resource Library
 
