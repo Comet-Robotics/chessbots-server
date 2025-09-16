@@ -32,6 +32,7 @@ type GameState = {
     side: Side;
     position: string;
     gameEndReason: GameEndReason | undefined;
+    tooltip?: string;
     aiDifficulty?: number;
     difficulty?: number;
 };
@@ -52,6 +53,7 @@ export abstract class GameManager {
         protected hostSide: Side,
         // true if host and client get reversed
         protected reverse: boolean,
+        protected tooltip?: string,
     ) {
         socketManager.sendToAll(new GameStartedMessage());
     }
@@ -86,6 +88,7 @@ export abstract class GameManager {
             side,
             position: this.chess.pgn,
             gameEndReason: this.getGameEndReason(),
+            tooltip: this.tooltip,
         };
     }
 
@@ -103,7 +106,7 @@ export class HumanGameManager extends GameManager {
         protected clientManager: ClientManager,
         protected reverse: boolean,
     ) {
-        super(chess, socketManager, hostSide, reverse);
+        super(chess, socketManager, hostSide, reverse, undefined);
     }
 
     /**
@@ -231,7 +234,7 @@ export class ComputerGameManager extends GameManager {
         protected difficulty: number,
         protected reverse: boolean,
     ) {
-        super(chess, socketManager, hostSide, reverse);
+        super(chess, socketManager, hostSide, reverse, undefined);
         if (this.hostSide === Side.BLACK) {
             this.chess.makeAiMove(this.difficulty);
         } else if (chess.pgn !== "") {
@@ -301,7 +304,7 @@ export class PuzzleGameManager extends GameManager {
         chess: ChessEngine,
         socketManager: SocketManager,
         fen: string,
-        private tooltip: string,
+        protected tooltip: string,
         private moves: Move[],
         protected difficulty: number,
     ) {
@@ -310,6 +313,7 @@ export class PuzzleGameManager extends GameManager {
             socketManager,
             fen.split(" ")[1] === "w" ? Side.WHITE : Side.BLACK,
             false,
+            tooltip,
         );
         chess.loadFen(fen);
     }

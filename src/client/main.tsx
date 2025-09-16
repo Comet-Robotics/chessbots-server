@@ -10,7 +10,7 @@ import { StrictMode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { bgColor } from "./check-dark-mode";
 import { BeginCheckRefresh } from "./begin-check-refresh";
-import { PuzzleTipBox } from "./PuzzleTipBox";
+// import { PuzzleTipBox } from "./PuzzleTipBox";
 export const queryClient = new QueryClient();
 
 FocusStyleManager.onlyShowFocusOnTabs();
@@ -23,8 +23,8 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
             <BeginCheckRefresh />
             <div id="app-container" className={bgColor()}>
                 <BlueprintProvider>
-                    <PuzzleTipBox/>
                     <QueryClientProvider client={queryClient}>
+                    
                         <RouterProvider router={router} />
                     </QueryClientProvider>
                 </BlueprintProvider>

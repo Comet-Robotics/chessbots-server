@@ -1,27 +1,31 @@
 import { Callout } from "@blueprintjs/core";
-// import { puzzles } from "../server/api/puzzles";
-import { get } from "./api";
-
-let puzzleTooltip = null 
-
-get("/game-state").then((puzzles) => {
-  puzzleTooltip = puzzles["Puzzle 1"].tooltip;
-});
+import { get, useEffectQuery } from "./api";
 
 export function PuzzleTipBox() {
-  return (
-    <div
-      style={{
-        position: "fixed",
-        right: 16,
-        top: 16,
-        zIndex: 1000,
-        maxWidth: 360,
-      }}
-    >
-      <Callout title="Puzzle Tip" icon="lightbulb" intent="primary">
-        {puzzleTooltip}
-      </Callout>
-    </div>
-  );
+    const { isPending, data, isError } = useEffectQuery(
+        "game-state",
+        async () => {
+            return get("/game-state");
+        },
+        false,
+    );
+    return (
+        <div
+            style={{
+                position: "sticky",
+                top: "16px",
+                right: 0,
+                marginRight: "2px",
+                maxWidth: 400,
+                overflowWrap: "break-word",
+                zIndex: 1,
+            }}
+        >
+            <Callout title="Puzzle Tip" icon="lightbulb" intent="primary">
+                {!isPending && !isError && data ?
+                    <div>{data.tooltip}</div>
+                :   <div></div>}
+            </Callout>
+        </div>
+    );
 }
