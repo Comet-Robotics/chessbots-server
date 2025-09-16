@@ -28,9 +28,11 @@ import { DO_SAVES } from "../utils/env";
 import { executor } from "../command/executor";
 
 type GameState = {
+    type?: "puzzle" | "human" | "computer";
     side: Side;
     position: string;
     gameEndReason: GameEndReason | undefined;
+    tooltip?: string;
     aiDifficulty?: number;
     difficulty?: number;
 };
@@ -51,6 +53,7 @@ export abstract class GameManager {
         protected hostSide: Side,
         // true if host and client get reversed
         protected reverse: boolean,
+        protected tooltip?: string,
     ) {
         socketManager.sendToAll(new GameStartedMessage());
     }
@@ -85,6 +88,7 @@ export abstract class GameManager {
             side,
             position: this.chess.pgn,
             gameEndReason: this.getGameEndReason(),
+            tooltip: this.tooltip,
         };
     }
 
@@ -102,7 +106,7 @@ export class HumanGameManager extends GameManager {
         protected clientManager: ClientManager,
         protected reverse: boolean,
     ) {
-        super(chess, socketManager, hostSide, reverse);
+        super(chess, socketManager, hostSide, reverse, undefined);
     }
 
     /**
@@ -231,7 +235,7 @@ export class ComputerGameManager extends GameManager {
         protected difficulty: number,
         protected reverse: boolean,
     ) {
-        super(chess, socketManager, hostSide, reverse);
+        super(chess, socketManager, hostSide, reverse, undefined);
         this.aiFirstMove =
             (chess.pgn === "" && this.hostSide === Side.BLACK) ||
             (chess.pgn !== "" && this.hostSide === chess.getLastMove()?.color);
@@ -311,6 +315,7 @@ export class ComputerGameManager extends GameManager {
 
     public getGameState(clientType: ClientType): GameState {
         return {
+            type: "computer",
             ...super.getGameState(clientType),
             aiDifficulty: this.difficulty,
         };
@@ -325,6 +330,7 @@ export class PuzzleGameManager extends GameManager {
         chess: ChessEngine,
         socketManager: SocketManager,
         fen: string,
+        protected tooltip: string,
         private moves: Move[],
         protected difficulty: number,
     ) {
@@ -333,8 +339,12 @@ export class PuzzleGameManager extends GameManager {
             socketManager,
             fen.split(" ")[1] === "w" ? Side.WHITE : Side.BLACK,
             false,
+            tooltip,
         );
         chess.loadFen(fen);
+    }
+    public getTooltip(): string {
+        return this.tooltip;
     }
 
     public getDifficulty(): number {
@@ -419,6 +429,7 @@ export class PuzzleGameManager extends GameManager {
 
     public getGameState(clientType: ClientType): GameState {
         return {
+            type: "puzzle",
             ...super.getGameState(clientType),
             difficulty: this.difficulty,
         };
