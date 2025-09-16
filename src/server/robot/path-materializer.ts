@@ -9,6 +9,7 @@ import {
     AbsoluteMoveCommand,
     DriveCommand,
     ReversibleAbsoluteRotateCommand,
+    RotateToStartCommand,
 } from "../command/move-command";
 import type { ReversibleRobotCommand } from "../command/move-piece";
 import { MovePiece } from "../command/move-piece";
@@ -340,9 +341,8 @@ function constructFinalCommand(
     numCollisions: number,
 ): MovePiece {
     const from = move.from;
-    const indicesToIds = robotManager.getIndicesToIds();
-    console.log(from, indicesToIds);
-    const mainPiece = robotManager.getRobotAtIndices(from).id;
+    const robotAtFrom = robotManager.getRobotAtIndices(from);
+    const mainPiece = robotAtFrom.id;
     const dirToEdge = directionToEdge(from);
 
     if (mainPiece !== undefined) {
@@ -793,19 +793,13 @@ export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
     }
 
     //rotate all robots on default squares to face the center of the board
-    const finalRotations: ReversibleRobotCommand[] = [];
-    const addFacingCenterRotation = (id: string, def: GridIndices) => {
-        const angle = def.j <= 5 ? Math.PI / 2 : -Math.PI / 2;
-        finalRotations.push(
-            new ReversibleAbsoluteRotateCommand(id, () => angle),
-        );
-    };
+    const finalRotations: Command[] = [];
 
-    for (const [robotId, def] of mainPieceTargets) {
-        addFacingCenterRotation(robotId, def);
+    for (const [robotId, _def] of mainPieceTargets) {
+        finalRotations.push(new RotateToStartCommand(robotId));
     }
-    for (const [robotId, def] of pawnTargets) {
-        addFacingCenterRotation(robotId, def);
+    for (const [robotId, _def] of pawnTargets) {
+        finalRotations.push(new RotateToStartCommand(robotId));
     }
 
     return new SequentialCommandGroup([
@@ -964,7 +958,6 @@ export function materializePath(move: Move): Command {
             move,
             robotManager,
         );
-        console.log("capture " + capturePiece);
         if (capturePiece !== undefined) {
             const captureSquare = GridIndices.fromPosition(
                 robotManager.getRobot(capturePiece).position,
@@ -976,10 +969,6 @@ export function materializePath(move: Move): Command {
                 captureCommand,
                 mainCommand,
             ]);
-            // const mainPiece = robotManager.getRobotAtIndices(
-            //     GridIndices.squareToGrid(move.from),
-            // );
-
             return command;
         }
         return new SequentialCommandGroup([]);
@@ -1080,10 +1069,8 @@ export function materializePath(move: Move): Command {
             rookMove3,
         ]);
     } else {
-        // const mainPiece = robotManager.getRobotAtIndices(
-        //     GridIndices.squareToGrid(move.from),
-        // );
-
-        return moveMainPiece(moveToGridMove(move));
+        const gridMove = moveToGridMove(move);
+        const command = moveMainPiece(gridMove);
+        return command;
     }
 }

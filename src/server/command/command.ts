@@ -20,6 +20,13 @@ export interface Command {
      * @param next - The command which is run next.
      */
     then(next: Command): SequentialCommandGroup;
+
+    /**
+     * Decorates the command with a "time point" - if the command finishes in less than the
+     * given duration, it will wait until this number of seconds has elapsed before continuing.
+     * @param seconds - The number of seconds that the command will execute for, at minimum.
+     */
+    withTimePoint(seconds: number): Command;
 }
 
 /**
@@ -41,6 +48,10 @@ export abstract class CommandBase implements Command {
 
     public then(next: Command): SequentialCommandGroup {
         return new SequentialCommandGroup([this, next]);
+    }
+
+    public withTimePoint(seconds: number): Command {
+        return new ParallelCommandGroup([this, new WaitCommand(seconds)]);
     }
 
     public get requirements(): Set<object> {
@@ -65,6 +76,20 @@ export abstract class RobotCommand extends CommandBase {
         // TO DISCUSS: idk if its possible for a robot object to change between adding it as a requrement and executing the command but if it is, adding the robot object as a requirement semi defeats the purpose of using robot ids everywhere
         const robot = robotManager.getRobot(robotId);
         this.addRequirements([robot]);
+    }
+}
+
+/**
+ * A command that waits for a given number of seconds.
+ */
+export class WaitCommand extends CommandBase {
+    constructor(public readonly durationSec: number) {
+        super();
+    }
+    public async execute(): Promise<void> {
+        return new Promise((resolve) =>
+            setTimeout(resolve, this.durationSec * 1000),
+        );
     }
 }
 

@@ -1,7 +1,7 @@
 {
     "tcpServerPort": 3001,
     "bots": {
-        "80:65:99:4d:f3:f0": "robot-15",
+        "80:65:99:4d:f3:e8": "robot-15",
         "c0:4e:30:4b:68:76": "robot-11",
         "80:65:99:4d:f3:9a": "robot-3",
         "80:65:99:4e:07:b0": "robot-4",
@@ -471,21 +471,6 @@
             "name": "WHEEL_DIAMETER_INCHES",
             "type": "float",
             "default_value": 4.375
-        },
-        {
-            "name": "MOTOR_A_DRIVE_MULTIPLIER",
-            "type": "float",
-            "default_value": -1.0
-        },
-        {
-            "name": "MOTOR_B_DRIVE_MULTIPLIER",
-            "type": "float",
-            "default_value": 1.0
-        },
-        {
-            "name": "ENCODER_MULTIPLIER",
-            "type": "float",
-            "default_value": -12000.0
         }
     ]
 }

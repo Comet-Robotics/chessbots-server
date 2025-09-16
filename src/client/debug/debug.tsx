@@ -37,6 +37,12 @@ export function Debug() {
         fetchIds();
     }, [setRobotIds]);
 
+    const danceConfigLoad = async () => {
+        const response = await get("/do-parallel");
+        if (!response.ok) {
+            console.warn("Failed to load dance config");
+        }
+    };
     // create the select and move buttons
     let body: ReactNode;
     if (robotIds === undefined) {
@@ -50,6 +56,9 @@ export function Debug() {
                     selectedRobotId={selectedRobotId}
                     onRobotIdSelected={setSelectedRobotId}
                 />
+                <div className="debug-section">
+                    <Button icon="play" minimal onClick={danceConfigLoad} />
+                </div>
                 {selectedRobotId === undefined ? null : (
                     <>
                         <div className="debug-section">

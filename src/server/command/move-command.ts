@@ -84,6 +84,72 @@ export class RotateToStartCommand extends RobotCommand {
     }
 }
 
+export class DriveCubicSplineCommand extends RobotCommand {
+    constructor(
+        robotId: string,
+        public startPosition: { x: number; y: number },
+        public endPosition: { x: number; y: number },
+        public controlPositionA: { x: number; y: number },
+        public controlPositionB: { x: number; y: number },
+        public timeDeltaMs: number,
+    ) {
+        super(robotId);
+    }
+
+    public async execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+        return robot.sendDriveCubicPacket(
+            this.startPosition,
+            this.endPosition,
+            this.controlPositionA,
+            this.controlPositionB,
+            this.timeDeltaMs,
+        );
+    }
+}
+
+export class SpinRadiansCommand extends RobotCommand {
+    constructor(
+        robotId: string,
+        public radians: number,
+        public timeDeltaMs: number,
+    ) {
+        super(robotId);
+    }
+    public async execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+        return robot.sendSpinPacket(this.radians, this.timeDeltaMs);
+    }
+}
+
+export class DriveQuadraticSplineCommand extends RobotCommand {
+    constructor(
+        robotId: string,
+        public startPosition: { x: number; y: number },
+        public endPosition: { x: number; y: number },
+        public controlPosition: { x: number; y: number },
+        public timeDeltaMs: number,
+    ) {
+        super(robotId);
+    }
+    public async execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+        return robot.sendDriveQuadraticPacket(
+            this.startPosition,
+            this.endPosition,
+            this.controlPosition,
+            this.timeDeltaMs,
+        );
+    }
+}
+
+export class StopCommand extends RobotCommand {
+    public async execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+        return robot.sendDrivePacket(0);
+    }
+}
+
 /**
  * Drives a robot for a distance equal to a number of tiles. Distance
  * may be negative, indicating the robot drives backwards.
@@ -171,6 +237,27 @@ export class AbsoluteMoveCommand extends MoveCommand {
             GridIndices.fromPosition(this.position),
         );
         return robot.relativeMove(this.position.sub(robot.position));
+    }
+}
+
+export class DriveTicksCommand
+    extends RobotCommand
+    implements Reversible<DriveTicksCommand>
+{
+    constructor(
+        robotId: string,
+        public ticksDistance: number,
+    ) {
+        super(robotId);
+    }
+
+    public async execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+        return robot.sendDriveTicksPacket(this.ticksDistance);
+    }
+
+    public reverse(): DriveTicksCommand {
+        return new DriveTicksCommand(this.robotId, -this.ticksDistance);
     }
 }
 
