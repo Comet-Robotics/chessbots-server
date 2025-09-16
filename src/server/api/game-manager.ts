@@ -286,19 +286,10 @@ export class ComputerGameManager extends GameManager {
             }
 
             // Ensure MINIMUM_DELAY before responding
-            //const startTime = Date.now();
+            // previous code didn't wait for robots and caused issues where you could move and make robots collide
             const move = this.chess.calculateAiMove(this.difficulty);
-            //const elapsedTime = Date.now() - startTime;
-
-            // If elapsed time is less than minimum delay, timeout is set to 1ms
-            //const delay = Math.max(1, this.MINIMUM_DELAY - elapsedTime);
-            //setTimeout(async () => {
-                await this.executeRobotMovement(move);
-            //}, this.MINIMUM_DELAY);
-            //setTimeout(() => {
-                this.socketManager.sendToAll(new MoveMessage(move));
-            //}, delay);
-
+            await this.executeRobotMovement(move); // wait for robots to finish moving
+            this.socketManager.sendToAll(new MoveMessage(move)); // send move to clients after robots finish moving
             if (this.isGameEnded()) {
                 SaveManager.endGame(id, "ai");
             }
