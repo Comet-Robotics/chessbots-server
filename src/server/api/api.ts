@@ -56,8 +56,6 @@ import {
     moveAllRobotsToDefaultPositions,
     moveAllRobotsFromBoardToHome,
 } from "../robot/path-materializer";
-import type { PuzzleComponents } from "./puzzles";
-import puzzles from "./puzzles";
 import { tcpServer } from "./tcp-interface";
 import { robotManager } from "../robot/robot-manager";
 import { executor } from "../command/executor";
