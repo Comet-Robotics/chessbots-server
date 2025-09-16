@@ -323,7 +323,6 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
             tooltip,
             moves,
             difficulty,
-            // tooltip,
         ),
     );
 
