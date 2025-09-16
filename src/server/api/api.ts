@@ -20,6 +20,7 @@ import { RegisterWebsocketMessage } from "../../common/message/message";
 import {
     clientManager,
     gameManager,
+    gamePaused,
     setGameManager,
     socketManager,
 } from "./managers";
@@ -59,6 +60,7 @@ import puzzles from "./puzzles";
 import { tcpServer } from "./tcp-interface";
 import { robotManager } from "../robot/robot-manager";
 import { executor } from "../command/executor";
+import { GameHoldReason } from "../../common/game-end-reasons";
 
 /**
  * Helper function to move all robots from their home positions to their default positions
@@ -543,6 +545,28 @@ apiRouter.get("/get-simulator-robot-state", (_, res) => {
 apiRouter.get("/get-puzzles", (_, res) => {
     const out: string = JSON.stringify(puzzles);
     return res.send(out);
+});
+
+/**
+ * Pause the game
+ * Todo: add authentication instead of an exposed pause call
+ */
+apiRouter.get("/pause-game", (_, res) => {
+    gamePaused.flag = true;
+    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_PAUSED));
+    return res.send({ message: "success" });
+});
+
+/**
+ * Unpause the game
+ * Resumes any leftover commands queued in the command executor
+ * Todo: add authentication instead of an exposed unpause call
+ */
+apiRouter.get("/unpause-game", async (_, res) => {
+    gamePaused.flag = false;
+    await executor.finishExecution();
+    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_UNPAUSED));
+    return res.send({ message: "success" });
 });
 
 /**

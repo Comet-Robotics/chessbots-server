@@ -1,3 +1,4 @@
+import { gamePaused } from "../api/managers";
 import type { Command } from "./command";
 
 /**
@@ -18,6 +19,7 @@ export class CommandExecutor {
     constructor() {}
 
     private runningCommands: Command[] = [];
+    private oldCommands: Command[] = [];
 
     private checkRequirements(command: Command) {
         for (const req of command.requirements) {
@@ -41,16 +43,48 @@ export class CommandExecutor {
     public async execute(command: Command): Promise<void> {
         this.checkRequirements(command);
         this.runningCommands.push(command);
-        return command.execute().finally(() => {
-            const index = this.runningCommands.indexOf(command);
-            if (index >= 0) {
-                this.runningCommands.splice(index, 1);
-            }
-        });
+        if(!gamePaused.flag){ 
+            return command.execute().finally(() => {
+                this.oldCommands.unshift(command);
+                const index = this.runningCommands.indexOf(command);
+                if (index >= 0) {
+                    this.runningCommands.splice(index, 1);
+                }
+            })
+        }
+    }
+
+    /**
+     * run through the running command list
+     * mainly used to finish the backlog from a paused game
+     * @returns - The command to execute.
+     */
+    public async finishExecution() : Promise<void> {
+        return this.runningCommands.forEach((command) =>{
+            command.execute().finally(()=>{
+                this.oldCommands.unshift(command);
+                const index = this.runningCommands.indexOf(command);
+                if (index >= 0) {
+                    this.runningCommands.splice(index, 1);
+                }
+            })
+        })
+    }
+
+    public clearExecution(){
+        this.runningCommands = [];
     }
 
     public getRunningCommands(): ReadonlyArray<Command> {
         return this.runningCommands;
+    }
+
+    public getOldCommands(): ReadonlyArray<Command> {
+        return this.oldCommands;
+    }
+
+    public clearOldCommands(){
+        this.oldCommands = [];
     }
 }
 
