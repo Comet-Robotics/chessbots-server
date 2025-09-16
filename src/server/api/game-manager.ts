@@ -159,6 +159,7 @@ export class HumanGameManager extends GameManager {
                         ids[1],
                         this.hostSide,
                         -1,
+                        this.chess.pgn,
                         this.chess.fen,
                         robotManager.getIndicesToIds(),
                     );
@@ -168,6 +169,7 @@ export class HumanGameManager extends GameManager {
                         ids[0],
                         oppositeSide(this.hostSide),
                         -1,
+                        this.chess.pgn,
                         this.chess.fen,
                         robotManager.getIndicesToIds(),
                     );
@@ -257,6 +259,7 @@ export class ComputerGameManager extends GameManager {
                     "ai",
                     this.hostSide,
                     this.difficulty,
+                    this.chess.pgn,
                     this.chess.fen,
                     robotManager.getIndicesToIds(),
                 );

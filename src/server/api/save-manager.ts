@@ -19,8 +19,9 @@ export interface iSave {
     hostWhite: boolean;
     aiDifficulty: number;
     game: string;
+    pos:string;
     robotPos: Array<[string,string]>;
-    oldGame: string;
+    oldPos: string;
     oldRobotPos: Array<[string,string]>;
 }
 
@@ -40,6 +41,7 @@ export class SaveManager {
         clientID: string,
         hostSide: Side,
         aiDiff: number,
+        pgn: string,
         fen: string,
         robots: Map<string, string>,
     ) {
@@ -51,14 +53,15 @@ export class SaveManager {
             date: day,
             hostWhite: side,
             aiDifficulty: aiDiff,
-            game: fen,
+            game: pgn,
+            pos: fen,
             robotPos: Array.from(robots),
-            oldGame: "",
+            oldPos: "",
             oldRobotPos: Array<[string,string]>(),
         };
         const oldGame = SaveManager.loadGame(hostId + "+" + clientID);
-        if (oldGame && oldGame.game !== null) {
-            saveContents.oldGame = oldGame.game;
+        if (oldGame && oldGame.pos !== null) {
+            saveContents.oldPos = oldGame.game;
             saveContents.oldRobotPos = oldGame.robotPos;
         }
         return FileManager.writeFile(hostId + "+" + clientID, saveContents);
