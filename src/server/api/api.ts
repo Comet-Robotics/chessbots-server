@@ -53,6 +53,7 @@ import { GridIndices } from "../robot/grid-indices";
 import {
     moveAllRobotsHomeToDefaultOptimized,
     moveAllRobotsToDefaultPositions,
+    moveAllRobotsFromBoardToHome,
 } from "../robot/path-materializer";
 import type { PuzzleComponents } from "./puzzles";
 import puzzles from "./puzzles";
@@ -324,6 +325,15 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
         ),
     );
 
+    return res.send({ message: "success" });
+});
+
+/**
+ * Returns robots to home after a game ends.
+ */
+apiRouter.post("/return-home", async (_req, res) => {
+    const command = moveAllRobotsFromBoardToHome();
+    await executor.execute(command);
     return res.send({ message: "success" });
 });
 

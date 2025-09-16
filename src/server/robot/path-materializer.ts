@@ -810,6 +810,119 @@ export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
 }
 
 /**
+ * Moves all robots from board to home row by row, starting with bottom row.
+ * Each robot goes: current position → deadzone → clockwise around deadzone to home.
+ * Processed one at a time to avoid collisions.
+ */
+export function moveAllRobotsFromBoardToHome(): SequentialCommandGroup {
+    const commands: Command[] = [];
+
+    // Get all robots on the board, grouped by row
+    const robotsByRow = new Map<number, Robot[]>();
+
+    for (const robot of robotManager.idsToRobots.values()) {
+        const currentPos = GridIndices.fromPosition(robot.position);
+        // Skip if already at home
+        if (currentPos.equals(robot.homeIndices)) continue;
+
+        const row = currentPos.j;
+        if (!robotsByRow.has(row)) {
+            robotsByRow.set(row, []);
+        }
+        robotsByRow.get(row)!.push(robot);
+    }
+
+    // Sort rows from bottom to top (j=2, j=3, j=4, ..., j=9)
+    const sortedRows = Array.from(robotsByRow.keys()).sort((a, b) => a - b);
+    console.log("Processing rows in order:", sortedRows);
+
+    // Process each row, one robot at a time
+    for (const row of sortedRows) {
+        console.log(
+            `Processing row ${row} with ${robotsByRow.get(row)!.length} robots`,
+        );
+        const robotsInRow = robotsByRow.get(row)!;
+
+        // Sort robots within each row from right to left (i=9, i=8, i=7, ..., i=2)
+        robotsInRow.sort((a, b) => {
+            const aPos = GridIndices.fromPosition(a.position);
+            const bPos = GridIndices.fromPosition(b.position);
+            return bPos.i - aPos.i;
+        });
+
+        // Move each robot in this row
+        for (const robot of robotsInRow) {
+            const currentPos = GridIndices.fromPosition(robot.position);
+            console.log(
+                `Moving robot ${robot.id} from position (${currentPos.i}, ${currentPos.j})`,
+            );
+
+            // 1. Move from current position to deadzone
+            const deadzonePos = moveFromBoardToDeadzone(currentPos);
+            commands.push(
+                new AbsoluteMoveCommand(
+                    robot.id,
+                    new Position(deadzonePos.i + 0.5, deadzonePos.j + 0.5),
+                ),
+            );
+
+            // 2. Travel clockwise around deadzone to home
+            const homeAdjacent = findDeadzonePositionAdjacentToHome(
+                robot.homeIndices,
+            );
+            if (!deadzonePos.equals(homeAdjacent)) {
+                const deadzoneCommands = generateDeadzonePath(
+                    robot.id,
+                    deadzonePos,
+                    homeAdjacent,
+                );
+                commands.push(...deadzoneCommands);
+            }
+
+            // 3. Move from deadzone to home
+            commands.push(
+                new AbsoluteMoveCommand(
+                    robot.id,
+                    new Position(
+                        robot.homeIndices.i + 0.5,
+                        robot.homeIndices.j + 0.5,
+                    ),
+                ),
+            );
+        }
+    }
+
+    return new SequentialCommandGroup(commands);
+}
+
+/**
+ * Finds the deadzone position adjacent to a home position
+ */
+function findDeadzonePositionAdjacentToHome(homePos: GridIndices): GridIndices {
+    const checkDirections: [number, number][] = [
+        [0, 1], // up
+        [1, 0], // right
+        [-1, 0], // left
+        [0, -1], // down
+    ];
+
+    for (const direction of checkDirections) {
+        try {
+            const adjacent = homePos.addTuple(direction);
+            if (arrayOfDeadzone.find((dz) => dz.equals(adjacent))) {
+                return adjacent;
+            }
+        } catch (e) {
+            // adjacent is out of bounds, skip
+            continue;
+        }
+    }
+
+    // Fallback - shouldn't happen if home positions are correct
+    return new GridIndices(1, 1);
+}
+
+/**
  * Generates the path commands for a single robot to move from home to default position
  */
 function generateRobotPathToDefault(
@@ -919,6 +1032,15 @@ function findNextCornerOrEnd(
     }
 
     return endIndex;
+}
+
+/**
+ * Determines the deadzone position to move to from a board position
+ * All robots should go down to the bottom deadzone (j = 1) to avoid phasing through others
+ */
+function moveFromBoardToDeadzone(boardPos: GridIndices): GridIndices {
+    // All robots go down to the bottom deadzone (j = 1) to avoid collisions
+    return new GridIndices(boardPos.i, 1);
 }
 
 /**

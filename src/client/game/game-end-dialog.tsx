@@ -17,6 +17,7 @@ import { useState } from "react";
 import { Side } from "../../common/game-types";
 import { bgColor, buttonColor, textColor } from "../check-dark-mode";
 import "../colors.css";
+import { post } from "../api";
 
 interface GameEndDialogProps {
     reason: GameEndReason;
@@ -30,6 +31,7 @@ interface GameEndDialogProps {
  */
 export function GameEndDialog(props: GameEndDialogProps) {
     const [isOpen, setIsOpen] = useState(true);
+    const [isProcessing, setIsProcessing] = useState(false);
     const navigate = useNavigate();
 
     /** continue button */
@@ -39,8 +41,17 @@ export function GameEndDialog(props: GameEndDialogProps) {
             rightIcon="arrow-right"
             className={buttonColor()}
             intent="primary"
+            disabled={isProcessing}
             onClick={() => {
-                navigate("/home");
+                if (!isProcessing) {
+                    setIsProcessing(true);
+                    post("/return-home")
+                        .catch(() => undefined)
+                        .finally(() => {
+                            setIsProcessing(false);
+                            navigate("/home");
+                        });
+                }
             }}
         />
     );
