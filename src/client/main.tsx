@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import "./index.scss";
 // import "server/api/puzzles.ts"; //importing this file registers the api endpoint src\server\api\puzzles.ts
 
-import { FocusStyleManager, BlueprintProvider} from "@blueprintjs/core";
+import { FocusStyleManager, BlueprintProvider } from "@blueprintjs/core";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
 import { StrictMode } from "react";
@@ -24,7 +24,6 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
             <div id="app-container" className={bgColor()}>
                 <BlueprintProvider>
                     <QueryClientProvider client={queryClient}>
-                    
                         <RouterProvider router={router} />
                     </QueryClientProvider>
                 </BlueprintProvider>
