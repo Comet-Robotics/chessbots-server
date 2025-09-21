@@ -7,6 +7,7 @@ import {
     Literal,
     Record,
 } from "runtypes";
+import { Float, Int32, Uint32 } from "../../common/runtypes-typing";
 
 export enum PacketType {
     CLIENT_HELLO = "CLIENT_HELLO",
@@ -28,9 +29,6 @@ export enum PacketType {
     SPIN_RADIANS = "SPIN_RADIANS",
 }
 
-const Float = NumberType.withConstraint((n) => Number.isFinite(n)); //.withBrand("float");
-const Int32 = Float.withConstraint((n) => Number.isSafeInteger(n)); //.withBrand("int32");
-export const Uint32 = Int32.withConstraint((n) => n >= 0); //.withBrand("uint32");
 const VarId = Uint32;
 const MotorPower = Float.withConstraint((n) => -1 <= n && n <= 1).withBrand(
     "motorPower",
@@ -58,7 +56,7 @@ export const CLIENT_HELLO_SCHEMA = Object({
 export const SERVER_HELLO_SCHEMA = Object({
     type: Literal(PacketType.SERVER_HELLO),
     protocol: Uint32,
-    config: Record(NumberType, String),
+    config: Record(String, NumberType),
 });
 
 /**

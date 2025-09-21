@@ -38,6 +38,7 @@ import {
     useStateWithTrackedHistory,
 } from "./hooks";
 import { GRID_CELL_PX } from "../../common/units";
+import { Uint32 } from "../../common/runtypes-typing";
 
 export function useShowfile() {
     // used to store the initial showfile state before any changes were made in the editor, so we have something to compare against to see if there are unsaved changes
@@ -57,7 +58,8 @@ export function useShowfile() {
         SplinePointType.QuadraticBezier,
     );
 
-    const [defaultEventDurationMs, setDefaultEventDurationMs] = useState(3750);
+    const [defaultEventDurationMs, setDefaultEventDurationMs] =
+        useState<Uint32>(Uint32.check(3750));
 
     const [selectedLayerIndex, setSelectedLayerIndex] = useState(0);
     const [selectedTimelineEventIndex, setSelectedTimelineEventIndex] =
@@ -545,7 +547,7 @@ export function useShowfile() {
 
             const eventToUpdate = updatedEventList[eventToUpdateIndex];
             const newDurationMs = eventToUpdate.durationMs + deltaMs;
-            eventToUpdate.durationMs = newDurationMs;
+            eventToUpdate.durationMs = Uint32.check(newDurationMs);
             updatedEventList[eventToUpdateIndex] = eventToUpdate;
 
             if (shouldUpdateSubsequentEventDuration) {
@@ -553,7 +555,9 @@ export function useShowfile() {
                 const subsequentEvent = updatedEventList[subsequentEventIndex];
                 const newSubsequentEventDurationMs =
                     subsequentEvent.durationMs - deltaMs;
-                subsequentEvent.durationMs = newSubsequentEventDurationMs;
+                subsequentEvent.durationMs = Uint32.check(
+                    newSubsequentEventDurationMs,
+                );
                 updatedEventList[subsequentEventIndex] = subsequentEvent;
             }
 

@@ -49,6 +49,7 @@ import { SplineEditor } from "./spline-editor";
 import interact from "interactjs";
 import { Array as RArray } from "runtypes";
 import { post } from "../api";
+import { Uint32 } from "../../common/runtypes-typing";
 
 // Helper component to manage animation for a single robot
 function AnimatedRobotRenderer({
@@ -612,7 +613,9 @@ export function Editor() {
                                     value={defaultEventDurationMs}
                                     style={{ width: "5rem" }}
                                     onValueChange={(value) =>
-                                        setDefaultEventDurationMs(value)
+                                        setDefaultEventDurationMs(
+                                            Uint32.check(value),
+                                        )
                                     }
                                 />
                             </>

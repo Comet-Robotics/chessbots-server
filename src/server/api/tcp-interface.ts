@@ -6,6 +6,7 @@ import {
     SERVER_PROTOCOL_VERSION,
     packetToJson,
     PacketType,
+    SERVER_HELLO_SCHEMA,
 } from "../utils/tcp-packet";
 import { EventEmitter } from "@posva/event-emitter";
 import { randomUUID } from "node:crypto";
@@ -218,11 +219,11 @@ export class RealBotTunnel extends BotTunnel {
             }
         }
 
-        const ret: Packet = {
+        const ret: Packet = SERVER_HELLO_SCHEMA.check({
             type: PacketType.SERVER_HELLO,
             protocol: SERVER_PROTOCOL_VERSION,
             config: configEntries,
-        };
+        });
 
         console.error(JSON.stringify(ret));
 

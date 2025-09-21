@@ -1,7 +1,15 @@
 import { FULL_ROTATION, RADIAN, clampHeading } from "../../common/units";
 import { Position } from "./position";
 import type { GridIndices } from "./grid-indices";
-import { PacketType } from "../utils/tcp-packet";
+import {
+    DRIVE_CUBIC_SPLINE_SCHEMA,
+    DRIVE_QUADRATIC_SPLINE_SCHEMA,
+    DRIVE_TICKS_SCHEMA,
+    DRIVE_TILES_SCHEMA,
+    PacketType,
+    SPIN_RADIANS_SCHEMA,
+    TURN_BY_ANGLE_SCHEMA,
+} from "../utils/tcp-packet";
 import { type BotTunnel } from "../api/bot-tunnel";
 
 /**
@@ -112,10 +120,12 @@ export class Robot {
         console.log(
             `Sending turn packet to robot ${this.id} with delta heading ${deltaHeadingRadians}`,
         );
-        await this.tunnel!.send({
-            type: PacketType.TURN_BY_ANGLE,
-            deltaHeadingRadians: deltaHeadingRadians,
-        });
+        await this.tunnel!.send(
+            TURN_BY_ANGLE_SCHEMA.check({
+                type: PacketType.TURN_BY_ANGLE,
+                deltaHeadingRadians: deltaHeadingRadians,
+            }),
+        );
     }
 
     /**
@@ -128,7 +138,12 @@ export class Robot {
         console.log(
             `Sending drive packet to robot ${this.id} with distance ${tileDistance}`,
         );
-        await this.tunnel!.send({ type: PacketType.DRIVE_TILES, tileDistance });
+        await this.tunnel!.send(
+            DRIVE_TILES_SCHEMA.check({
+                type: PacketType.DRIVE_TILES,
+                tileDistance,
+            }),
+        );
     }
 
     /**
@@ -138,10 +153,12 @@ export class Robot {
      * @param distanceTicks - The distance to drive forward or backwards by, in ticks.
      */
     public async sendDriveTicksPacket(distanceTicks: number): Promise<void> {
-        await this.tunnel!.send({
-            type: PacketType.DRIVE_TICKS,
-            tickDistance: distanceTicks,
-        });
+        await this.tunnel!.send(
+            DRIVE_TICKS_SCHEMA.check({
+                type: PacketType.DRIVE_TICKS,
+                tickDistance: distanceTicks,
+            }),
+        );
     }
 
     public async sendDriveCubicPacket(
@@ -151,14 +168,16 @@ export class Robot {
         controlPositionB: { x: number; y: number },
         timeDeltaMs: number,
     ): Promise<void> {
-        await this.tunnel!.send({
-            type: PacketType.DRIVE_CUBIC_SPLINE,
-            startPosition: startPosition,
-            endPosition: endPosition,
-            controlPositionA: controlPositionA,
-            controlPositionB: controlPositionB,
-            timeDeltaMs: timeDeltaMs,
-        });
+        await this.tunnel!.send(
+            DRIVE_CUBIC_SPLINE_SCHEMA.check({
+                type: PacketType.DRIVE_CUBIC_SPLINE,
+                startPosition: startPosition,
+                endPosition: endPosition,
+                controlPositionA: controlPositionA,
+                controlPositionB: controlPositionB,
+                timeDeltaMs: timeDeltaMs,
+            }),
+        );
     }
 
     public async sendDriveQuadraticPacket(
@@ -167,23 +186,27 @@ export class Robot {
         controlPosition: { x: number; y: number },
         timeDeltaMs: number,
     ): Promise<void> {
-        await this.tunnel!.send({
-            type: PacketType.DRIVE_QUADRATIC_SPLINE,
-            startPosition: startPosition,
-            controlPosition: controlPosition,
-            endPosition: endPosition,
-            timeDeltaMs: timeDeltaMs,
-        });
+        await this.tunnel!.send(
+            DRIVE_QUADRATIC_SPLINE_SCHEMA.check({
+                type: PacketType.DRIVE_QUADRATIC_SPLINE,
+                startPosition: startPosition,
+                controlPosition: controlPosition,
+                endPosition: endPosition,
+                timeDeltaMs: timeDeltaMs,
+            }),
+        );
     }
 
     public async sendSpinPacket(
         radians: number,
         timeDeltaMs: number,
     ): Promise<void> {
-        await this.tunnel!.send({
-            type: PacketType.SPIN_RADIANS,
-            radians: radians,
-            timeDeltaMs: timeDeltaMs,
-        });
+        await this.tunnel!.send(
+            SPIN_RADIANS_SCHEMA.check({
+                type: PacketType.SPIN_RADIANS,
+                radians: radians,
+                timeDeltaMs: timeDeltaMs,
+            }),
+        );
     }
 }

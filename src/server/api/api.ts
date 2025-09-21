@@ -36,7 +36,11 @@ import { SaveManager } from "./save-manager";
 import { VirtualBotTunnel, VirtualRobot } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
-import { PacketType } from "../utils/tcp-packet";
+import {
+    DRIVE_TANK_SCHEMA,
+    PacketType,
+    SET_VAR_SCHEMA,
+} from "../utils/tcp-packet";
 import { ShowfileSchema, TimelineEventTypes } from "../../common/show";
 import { SplinePointType } from "../../common/spline";
 import type { Command } from "../command/command";
@@ -405,7 +409,7 @@ apiRouter.get("/do-parallel", async (_, res) => {
 apiRouter.post("/do-big", async (req, res) => {
     console.log("Parsing show");
 
-    const validateResult = ShowfileSchema.validate(
+    const validateResult = ShowfileSchema.inspect(
         JSON.parse(req.query.show as string),
     );
 
@@ -585,11 +589,13 @@ async function doDriveRobot(message: DriveRobotMessage): Promise<boolean> {
 
             // send the robot message
         } else {
-            await tunnel.send({
-                type: PacketType.DRIVE_TANK,
-                left: message.leftPower,
-                right: message.rightPower,
-            });
+            await tunnel.send(
+                DRIVE_TANK_SCHEMA.check({
+                    type: PacketType.DRIVE_TANK,
+                    left: message.leftPower,
+                    right: message.rightPower,
+                }),
+            );
         }
     }
     return true;
@@ -621,12 +627,14 @@ async function doSetRobotVariable(
             );
             return false;
         } else {
-            await tunnel.send({
-                type: PacketType.SET_VAR,
-                var_id: parseInt(message.variableName),
-                var_type: "float",
-                var_val: message.variableValue,
-            });
+            await tunnel.send(
+                SET_VAR_SCHEMA.check({
+                    type: PacketType.SET_VAR,
+                    var_id: parseInt(message.variableName),
+                    var_type: "float",
+                    var_val: message.variableValue,
+                }),
+            );
         }
     }
     return true;

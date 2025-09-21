@@ -1,10 +1,5 @@
 import { vi, test, expect, afterEach } from "vitest";
-import {
-    type Packet,
-    jsonToPacket,
-    packetToJson,
-    PacketType,
-} from "../tcp-packet";
+import { Packet, jsonToPacket, packetToJson, PacketType } from "../tcp-packet";
 import { randomUUID } from "node:crypto";
 import { socketManager } from "../../api/managers";
 import { VirtualBotTunnel } from "../../simulator";
@@ -22,9 +17,14 @@ afterEach(() => {
 });
 
 const validMessages: Packet[] = [
-    { type: PacketType.CLIENT_HELLO, macAddress: "HELLO3" },
-    { type: PacketType.DRIVE_TANK, left: 0.3, right: -0.4 },
-    { type: PacketType.SET_VAR, var_id: 3, var_type: "uint32", var_val: 10 },
+    Packet.check({ type: PacketType.CLIENT_HELLO, macAddress: "HELLO3" }),
+    Packet.check({ type: PacketType.DRIVE_TANK, left: 0.3, right: -0.4 }),
+    Packet.check({
+        type: PacketType.SET_VAR,
+        var_id: 3,
+        var_type: "uint32",
+        var_val: 10,
+    }),
 ];
 
 const invalidMessages = [

@@ -18,7 +18,7 @@ import {
     SplinePointType,
     StartPointSchema,
 } from "./spline";
-import { Uint32 } from "../server/utils/tcp-packet";
+import { Uint32 } from "./runtypes-typing";
 
 export const TimelineEventTypes = {
     GoToPointEvent: "goto_point",
@@ -122,7 +122,7 @@ export function timelineLayerToSpline(layer: TimelineLayerType): Spline {
  * @returns The new example showfile.
  */
 export function createNewShowfile(): Showfile {
-    return {
+    return ShowfileSchema.check({
         $chessbots_show_schema_version: 4,
         timeline: [
             {
@@ -154,7 +154,7 @@ export function createNewShowfile(): Showfile {
             },
         ],
         name: `Show ${new Date().toDateString()} ${new Date().toLocaleTimeString()}`,
-    };
+    });
 }
 
 export const CHESSBOTS_SHOWFILE_MIME_TYPE = "application/chessbots-showfile";
