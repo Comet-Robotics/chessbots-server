@@ -1,4 +1,8 @@
-# Setting up your ChessBot Environment!
+---
+title: Server Setup
+---
+
+# Setting up your ChessBots Environment
 
 By following this guide, you should be able to have all of the necessary software required for working on chessBots!
 
@@ -8,10 +12,10 @@ By following this guide, you should be able to have all of the necessary softwar
 
 ## Software Required
 
--   Git
--   Text Editor (vsCode)
--   NodeJS
--   Python
+- Git
+- Text Editor (vsCode)
+- NodeJS
+- Python
 
 ## Software Installation
 
@@ -22,7 +26,7 @@ Git is the software that allows users to collaborate with their code! Having thi
 1. Create an account at Github.com
     > [!TIP]
     > If you already have an account, you can use your existing one
-2. Download GitHub Desktop for your system ([Download Here!](https://desktop.github.com/))
+2. Download [GitHub Desktop](https://desktop.github.com/) for your system
 3. Open the installer and proceed with the install process.
 4. When prompted, log in with your GitHub account.
 5. Choose to allow GitHub to configure Git. Do not configure manually.
@@ -33,7 +37,7 @@ Git is the software that allows users to collaborate with their code! Having thi
 
 VSCode is simply a text editor with a lot of great features for software development, such as powerful extensions, syntax hinting, and Git integration. This is what we recommend for all chessBot development for its ease of use. If you want to use another text editor, you may have a more difficult time moving forward since some of our extensions may not be compatible.
 
-1. Download VSCode ([Download Here!](https://code.visualstudio.com/download))
+1. Download [VSCode](https://code.visualstudio.com/download)
 2. Proceed with install process
     > [!NOTE]
     > If you are using MacOS, make sure to move to the application folder! It is not automatic for VSCode!
@@ -43,7 +47,7 @@ VSCode is simply a text editor with a lot of great features for software develop
 
 Node is the software package that the chessBot web engine is built upon. Installing it is crucial for the install NPM packages and compiling the software.
 
-1. Download NodeJS ([Download Here!](https://nodejs.org/en/download))
+1. Download [NodeJS](https://nodejs.org/en/download)
     > [!IMPORTANT]  
     > Select the LTS version, not current version
 2. Proceed with installer setup.
@@ -54,11 +58,11 @@ Node is the software package that the chessBot web engine is built upon. Install
 
 Python is required for PlatformIO, the software that allows us to upload code to the chessBot MicroControllers.
 
-1. Download Python Installer ([Download Here!](https://www.python.org/downloads/))
+1. Download [Python Installer](https://www.python.org/downloads/)
 2. Proceed with install process
 3. Done!
 
-## Environment Setup!
+## Environment Setup
 
 Now that all the software is installed, we can setup our environment for chessBots! The way I describe is my personal preference, so you can make some changes along the way if preferred. For simplicity, feel free to follow my steps exactly.
 
@@ -89,17 +93,17 @@ Setting up a dev folder on MacOS is simple!
 
 ### Pulling chessBot
 
-Now, we need to pull the latest version of the chessBot project to our computer. For this, we will use Github Desktop. If you prefer to use the command line, feel free, we will not be explaining that in this guide.
+Now, we need to pull the latest version of the chessbots-server project to our computer. For this, we will use Github Desktop. If you prefer to use the command line, feel free, we will not be explaining that in this guide.
 
 1. Open GitHub Desktop
-2. In your web browser, navigate to ChessBot Repo ([Click Here!](https://github.com/Comet-Robotics/chessBot))
+2. In your web browser, navigate to the [ChessBots Repo](https://github.com/Comet-Robotics/chessbots-server)
 3. Click the green "Code" button
 4. Click "Open with GitHub Desktop" and accept the prompt.
 5. GitHub Desktop will open with the project.
 6. Type in the correct folder, for macOS, that looks like this:
     > [!IMPORTANT]
-    > Make sure to include the `/chessBot` at the end. This will create a chessBot folder for the project.
-    > <img width="1072" alt="Screenshot 2024-01-26 at 11 55 45 AM" src="https://github.com/Comet-Robotics/chessBot/assets/13490766/cf8eb1de-5731-4348-8e7e-5f6f0ad54221">
+    > Make sure to include the `/chessbots-server` at the end. This will create a chessBot folder for the project.
+    > <img width="1072" alt="Screenshot 2024-01-26 at 11 55 45 AM" src="https://github.com/Comet-Robotics/chessbots-server/assets/13490766/cf8eb1de-5731-4348-8e7e-5f6f0ad54221">
 7. Done! You now have the chessBot Source Code on your system!
 
 ### Setting up VSCode
@@ -138,7 +142,7 @@ In some situations, Windows will claim you do not have permission to run command
    `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned`
 3. Close and Re-Open VSCode
 
-## Running ChessBots!
+## Running ChessBots
 
 1. Open the project in VSCode
 2. Open a Terminal in VSCode

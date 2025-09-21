@@ -6,6 +6,9 @@
         "src/client",
         "src/server"
     ],
+    "engines": {
+        "node": ">= 20"
+    },
     "scripts": {
         "dev": "ts-node src/server/main.ts",
         "devup": "nodemon src/server/main.ts",

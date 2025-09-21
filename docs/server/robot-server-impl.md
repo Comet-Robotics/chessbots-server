@@ -1,3 +1,7 @@
+---
+title: Robot Manager
+---
+
 # Robot Server Implementation
 
 We choose to define the total area as a 12x12 grid, with an 8x8 chessboard in the middle.

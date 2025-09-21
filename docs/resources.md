@@ -1,3 +1,7 @@
+---
+title: Resource Library
+---
+
 Stuff is just kind of tossed in here in a semi sorted manner. If you come across some resource you think would be useful, just chuck its link into here under the closest category (or make a new one, idc)
 
 ### Programming Fundamentals

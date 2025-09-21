@@ -1,0 +1,21 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints": ["src/"],
+    "entryPointStrategy": "expand",
+    "out": "site",
+    "cname": "chessbots.cometrobotics.org",
+    "searchInComments": true,
+    "navigationLinks": {
+        "Server/Client Repository": "https://github.com/Comet-Robotics/chessbots-server",
+        "Embedded Repository": "https://github.com/Comet-Robotics/chessbots-embedded"
+    },
+    "name": "Chess Bots",
+    "exclude": ["**/node_modules/**/*"],
+    "readme": "docs/overview.md",
+    "projectDocuments": [
+        // "docs/overview.md",
+        "docs/resources.md",
+        "docs/esp/index.md",
+        "docs/server/index.md",
+    ],
+}

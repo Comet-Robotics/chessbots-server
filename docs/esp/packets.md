@@ -1,3 +1,7 @@
+---
+title: Packet Format
+---
+
 ## Data types
 
 -   `bool`: true/false
