@@ -5966,10 +5966,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"runtypes@npm:^6.7.0":
-  version: 6.7.0
-  resolution: "runtypes@npm:6.7.0"
-  checksum: 10c0/9799065e3cb9d924d5dbfd0253cf49d90cd0506e0d1ac42f491b5287829d9353f7b5861c5ed3a97e094bf5948225ababfc62e909f3f26cd8e5eba2bb64290a07
+"runtypes@npm:^7.0.4":
+  version: 7.0.4
+  resolution: "runtypes@npm:7.0.4"
+  checksum: 10c0/7b8409c75e40cc1297cd22f988acfcf1a7d92357fcc72bec4e90e594f1736fe076d8839967cb615ce6e604863234760dda2f0007a3f4d5b6768c449a100ec381
   languageName: node
   linkType: hard
 
@@ -6144,7 +6144,7 @@ __metadata:
     express-ws: "npm:^5.0.2"
     js-chess-engine: "npm:^1.0.3"
     launch-editor-middleware: "npm:^2.11.1"
-    runtypes: "npm:^6.7.0"
+    runtypes: "npm:^7.0.4"
     ws: "npm:^8.18.3"
   languageName: unknown
   linkType: soft

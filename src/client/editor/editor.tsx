@@ -306,7 +306,7 @@ export function Editor() {
 
                     const checkResult = RArray(
                         NonStartPointEventSchema,
-                    ).validate(pastedEvents);
+                    ).inspect(pastedEvents);
                     if (!checkResult.success) {
                         console.warn(
                             "Pasted events are not valid",

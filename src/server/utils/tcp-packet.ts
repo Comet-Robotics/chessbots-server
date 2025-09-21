@@ -2,10 +2,10 @@ import type { Static } from "runtypes";
 import {
     Number as NumberType,
     String,
-    Record,
+    Object,
     Union,
     Literal,
-    Dictionary,
+    Record,
 } from "runtypes";
 
 export enum PacketType {
@@ -28,22 +28,16 @@ export enum PacketType {
     SPIN_RADIANS = "SPIN_RADIANS",
 }
 
-const Float = NumberType.withConstraint((n) => Number.isFinite(n), {
-    name: "float",
-});
-const Int32 = Float.withConstraint((n) => Number.isSafeInteger(n), {
-    name: "int32",
-});
-export const Uint32 = Int32.withConstraint((n) => n >= 0, { name: "uint32" });
+const Float = NumberType.withConstraint((n) => Number.isFinite(n));//.withBrand("float");
+const Int32 = Float.withConstraint((n) => Number.isSafeInteger(n));//.withBrand("int32");
+export const Uint32 = Int32.withConstraint((n) => n >= 0);//.withBrand("uint32");
 const VarId = Uint32;
-const MotorPower = Float.withConstraint((n) => -1 <= n && n <= 1, {
-    name: "motor_power",
-});
+const MotorPower = Float.withConstraint((n) => -1 <= n && n <= 1).withBrand("motorPower");
 
-const Position = Record({
+const Position = Object({
     x: Float,
     y: Float,
-});
+}).withBrand("position");
 
 // MUST be kept in sync with chessBotArduino/include/packet.h PacketType
 export const SERVER_PROTOCOL_VERSION = 1;
@@ -51,7 +45,7 @@ export const SERVER_PROTOCOL_VERSION = 1;
 /**
  * A hello message from the client
  */
-export const CLIENT_HELLO_SCHEMA = Record({
+export const CLIENT_HELLO_SCHEMA = Object({
     type: Literal(PacketType.CLIENT_HELLO),
     macAddress: String,
 });
@@ -59,21 +53,21 @@ export const CLIENT_HELLO_SCHEMA = Record({
 /**
  * A hello message from the server
  */
-export const SERVER_HELLO_SCHEMA = Record({
+export const SERVER_HELLO_SCHEMA = Object({
     type: Literal(PacketType.SERVER_HELLO),
     protocol: Uint32,
-    config: Dictionary(NumberType, String),
+    config: Record(NumberType, String),
 });
 
 /**
  * send a ping
  */
-export const PING_SEND_SCHEMA = Record({ type: Literal(PacketType.PING_SEND) });
+export const PING_SEND_SCHEMA = Object({ type: Literal(PacketType.PING_SEND) });
 
 /**
  * respond to a ping
  */
-export const PING_RESPONSE_SCHEMA = Record({
+export const PING_RESPONSE_SCHEMA = Object({
     type: Literal(PacketType.PING_RESPONSE),
 });
 
@@ -82,7 +76,7 @@ export const PING_RESPONSE_SCHEMA = Record({
  *
  * could be float, unsigned, or int
  */
-export const QUERY_VAR_SCHEMA = Record({
+export const QUERY_VAR_SCHEMA = Object({
     type: Literal(PacketType.QUERY_VAR),
     var_id: VarId,
     var_type: Union(Literal("float"), Literal("uint32"), Literal("int32")),
@@ -91,7 +85,7 @@ export const QUERY_VAR_SCHEMA = Record({
 /**
  * respond to a query
  */
-export const QUERY_RESPONSE_SCHEMA = Record({
+export const QUERY_RESPONSE_SCHEMA = Object({
     type: Literal(PacketType.QUERY_RESPONSE),
     var_id: VarId,
     var_val: Union(Float, Uint32, Int32),
@@ -100,20 +94,20 @@ export const QUERY_RESPONSE_SCHEMA = Record({
 /**
  * send a message to set a variable by id
  */
-export const SET_VAR_SCHEMA = Record({
+export const SET_VAR_SCHEMA = Object({
     type: Literal(PacketType.SET_VAR),
     var_id: VarId,
-}).And(
+}).and(
     Union(
-        Record({
+        Object({
             var_type: Literal("float"),
             var_val: Float,
         }),
-        Record({
+        Object({
             var_type: Literal("uint32"),
             var_val: Uint32,
         }),
-        Record({
+        Object({
             var_type: Literal("int32"),
             var_val: Int32,
         }),
@@ -123,7 +117,7 @@ export const SET_VAR_SCHEMA = Record({
 /**
  * send a turn command
  */
-export const TURN_BY_ANGLE_SCHEMA = Record({
+export const TURN_BY_ANGLE_SCHEMA = Object({
     type: Literal(PacketType.TURN_BY_ANGLE),
     deltaHeadingRadians: Float,
 });
@@ -131,23 +125,23 @@ export const TURN_BY_ANGLE_SCHEMA = Record({
 /**
  * send a drive command with tile distance
  */
-export const DRIVE_TILES_SCHEMA = Record({
+export const DRIVE_TILES_SCHEMA = Object({
     type: Literal(PacketType.DRIVE_TILES),
     tileDistance: Float,
 });
 
-export const DRIVE_TICKS_SCHEMA = Record({
+export const DRIVE_TICKS_SCHEMA = Object({
     type: Literal(PacketType.DRIVE_TICKS),
     tickDistance: Int32,
 });
 
 /** success message */
-export const ACTION_SUCCESS_SCHEMA = Record({
+export const ACTION_SUCCESS_SCHEMA = Object({
     type: Literal(PacketType.ACTION_SUCCESS),
 });
 
 /** error message with reason */
-export const ACTION_FAIL_SCHEMA = Record({
+export const ACTION_FAIL_SCHEMA = Object({
     type: Literal(PacketType.ACTION_FAIL),
     reason: String,
 });
@@ -155,13 +149,13 @@ export const ACTION_FAIL_SCHEMA = Record({
 /**
  * start a tank drive with left and right motor powers
  */
-export const DRIVE_TANK_SCHEMA = Record({
+export const DRIVE_TANK_SCHEMA = Object({
     type: Literal(PacketType.DRIVE_TANK),
     left: MotorPower,
     right: MotorPower,
 });
 
-export const DRIVE_CUBIC_SPLINE_SCHEMA = Record({
+export const DRIVE_CUBIC_SPLINE_SCHEMA = Object({
     type: Literal(PacketType.DRIVE_CUBIC_SPLINE),
     startPosition: Position,
     endPosition: Position,
@@ -170,7 +164,7 @@ export const DRIVE_CUBIC_SPLINE_SCHEMA = Record({
     timeDeltaMs: Uint32,
 });
 
-export const DRIVE_QUADRATIC_SPLINE_SCHEMA = Record({
+export const DRIVE_QUADRATIC_SPLINE_SCHEMA = Object({
     type: Literal(PacketType.DRIVE_QUADRATIC_SPLINE),
     startPosition: Position,
     endPosition: Position,
@@ -178,13 +172,13 @@ export const DRIVE_QUADRATIC_SPLINE_SCHEMA = Record({
     timeDeltaMs: Uint32,
 });
 
-export const SPIN_RADIANS_SCHEMA = Record({
+export const SPIN_RADIANS_SCHEMA = Object({
     type: Literal(PacketType.SPIN_RADIANS),
     radians: Float,
     timeDeltaMs: Uint32,
 });
 
-export const ESTOP_SCHEMA = Record({ type: Literal(PacketType.ESTOP) });
+export const ESTOP_SCHEMA = Object({ type: Literal(PacketType.ESTOP) });
 
 export const Packet = Union(
     CLIENT_HELLO_SCHEMA,

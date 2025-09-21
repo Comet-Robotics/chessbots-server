@@ -1,5 +1,5 @@
 import type { Static } from "runtypes";
-import { Number as NumberType, Record, Union, Array, Literal } from "runtypes";
+import { Number as NumberType, Object, Union, Array, Literal } from "runtypes";
 
 export enum SplinePointType {
     StartPoint = "start",
@@ -7,19 +7,19 @@ export enum SplinePointType {
     CubicBezier = "cubic",
 }
 
-export const CoordsSchema = Record({
+export const CoordsSchema = Object({
     x: NumberType,
     y: NumberType,
 });
 export type Coords = Static<typeof CoordsSchema>;
 
-export const StartPointSchema = Record({
+export const StartPointSchema = Object({
     type: Literal(SplinePointType.StartPoint),
     point: CoordsSchema,
 });
 export type StartPointSchema = Static<typeof StartPointSchema>;
 
-export const CubicBezierSchema = Record({
+export const CubicBezierSchema = Object({
     type: Literal(SplinePointType.CubicBezier),
     controlPoint: CoordsSchema,
     controlPoint2: CoordsSchema,
@@ -27,7 +27,7 @@ export const CubicBezierSchema = Record({
 });
 export type CubicBezier = Static<typeof CubicBezierSchema>;
 
-export const QuadraticBezierSchema = Record({
+export const QuadraticBezierSchema = Object({
     type: Literal(SplinePointType.QuadraticBezier),
     endPoint: CoordsSchema,
     controlPoint: CoordsSchema,
@@ -37,7 +37,7 @@ export type QuadraticBezier = Static<typeof QuadraticBezierSchema>;
 export const MidpointSchema = Union(CubicBezierSchema, QuadraticBezierSchema);
 export type Midpoint = Static<typeof MidpointSchema>;
 
-export const SplineSchema = Record({
+export const SplineSchema = Object({
     start: StartPointSchema,
     points: Array(MidpointSchema),
 });

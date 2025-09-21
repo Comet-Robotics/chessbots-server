@@ -4,7 +4,7 @@ import { decode as cborDecode } from "cbor-x";
 import {
     Number,
     String,
-    Record as RuntypesRecord,
+    Object,
     Array,
     Literal,
     Union,
@@ -27,7 +27,7 @@ export const TimelineEventTypes = {
     TurnEvent: "turn",
 } as const;
 
-export const GoToPointEventSchema = RuntypesRecord({
+export const GoToPointEventSchema = Object({
     durationMs: Uint32,
     target: MidpointSchema,
     type: Literal(TimelineEventTypes.GoToPointEvent),
@@ -35,14 +35,14 @@ export const GoToPointEventSchema = RuntypesRecord({
 });
 export type GoToPointEvent = Static<typeof GoToPointEventSchema>;
 
-const WaitEventSchema = RuntypesRecord({
+const WaitEventSchema = Object({
     durationMs: Uint32,
     type: Literal(TimelineEventTypes.WaitEvent),
     id: String,
 });
 export type WaitEvent = Static<typeof WaitEventSchema>;
 
-const StartPointEventSchema = RuntypesRecord({
+const StartPointEventSchema = Object({
     type: Literal(TimelineEventTypes.StartPointEvent),
     target: StartPointSchema,
     durationMs: Uint32,
@@ -50,7 +50,7 @@ const StartPointEventSchema = RuntypesRecord({
 });
 export type StartPointEvent = Static<typeof StartPointEventSchema>;
 
-const TurnEventSchema = RuntypesRecord({
+const TurnEventSchema = Object({
     type: Literal(TimelineEventTypes.TurnEvent),
     radians: Number,
     durationMs: Uint32,
@@ -65,7 +65,7 @@ export const NonStartPointEventSchema = Union(
 );
 export type NonStartPointEvent = Static<typeof NonStartPointEventSchema>;
 
-const TimelineLayerSchema = RuntypesRecord({
+const TimelineLayerSchema = Object({
     startPoint: StartPointEventSchema,
     remainingEvents: Array(NonStartPointEventSchema),
 });
@@ -84,13 +84,13 @@ export type TimelineEvents =
  * The main reason for using a binary format is to allow the audio file to be included inline with the file. Alternatives include base64 encoding the audio file so
  * it could be stored as a string in a JSON file, or storing the audio file separately, perhaps using a ZIP file.
  */
-export const ShowfileSchema = RuntypesRecord({
+export const ShowfileSchema = Object({
     // Be sure to increment the schema version number when making breaking changes to the showfile schema.
     $chessbots_show_schema_version: Literal(4),
     // The timeline is an array of timeline 'layers'. A layer consists of an array that includes all the events for one robot.
     timeline: Array(TimelineLayerSchema),
     audio: Optional(
-        RuntypesRecord({
+        Object({
             data: InstanceOf<Uint8Array>(Uint8Array),
             mimeType: String,
         }),
@@ -169,7 +169,7 @@ export const loadShowfileFromBinary = (binary: Buffer | Uint8Array) => {
         return null;
     }
 
-    const result = ShowfileSchema.validate(decodedCborData);
+    const result = ShowfileSchema.inspect(decodedCborData);
 
     if (result.success) {
         return result.value;

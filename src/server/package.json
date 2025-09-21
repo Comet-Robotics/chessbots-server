@@ -9,7 +9,7 @@
         "express-ws": "^5.0.2",
         "js-chess-engine": "^1.0.3",
         "launch-editor-middleware": "^2.11.1",
-        "runtypes": "^6.7.0",
+        "runtypes": "^7.0.4",
         "ws": "^8.18.3"
     },
     "devDependencies": {
