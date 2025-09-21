@@ -112,7 +112,7 @@ export function useShowfile() {
 
     // handles encoding the showfile as a CBOR and saving it to the file system
     const saveShowfile = useCallback(async () => {
-        const blob = new Blob([cborEncode(show)], {
+        const blob = new Blob([cborEncode(show) as BlobPart], {
             type: CHESSBOTS_SHOWFILE_MIME_TYPE,
         });
         await fileSave(
@@ -467,7 +467,7 @@ export function useShowfile() {
         if (!audio) return;
 
         audioRef.current.src = URL.createObjectURL(
-            new Blob([audio.data], {
+            new Blob([audio.data as BlobPart], {
                 type: audio.mimeType,
             }),
         );

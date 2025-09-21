@@ -5,7 +5,7 @@ import { BoardContainer } from "./board-container";
 import type { ChessEngine } from "../../common/chess-engine";
 import type { Move, PieceType } from "../../common/game-types";
 import { Side } from "../../common/game-types";
-import { customSquareRenderer } from "./custom-square-renderer";
+import { CustomSquareRenderer } from "./custom-square-renderer";
 import { CustomSquareContext } from "./custom-square-context";
 import type { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 
@@ -178,10 +178,7 @@ export function ChessboardWrapper(props: ChessboardWrapperProps): JSX.Element {
                             setManualPromotionSquare(square);
                         } else {
                             // make the move normally
-                            doMove({
-                                from: lastClickedSquare,
-                                to: square,
-                            });
+                            doMove({ from: lastClickedSquare, to: square });
                         }
                         // Square is clicked again
                     } else if (lastClickedSquare === square) {
@@ -197,7 +194,7 @@ export function ChessboardWrapper(props: ChessboardWrapperProps): JSX.Element {
                     return piece[0] === side;
                 }}
                 arePremovesAllowed={false}
-                customSquare={customSquareRenderer}
+                customSquare={CustomSquareRenderer}
             />
         );
     }

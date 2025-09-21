@@ -80,7 +80,7 @@ export class ChessEngine {
     isKingSideCastling(move: Move) {
         if (this.getPieceTypeFromSquare(move.from) !== PieceType.KING) {
             return false;
-        } else if (this.chess.get(move.from).color === Side.WHITE) {
+        } else if (this.chess.get(move.from)!.color === Side.WHITE) {
             return move.from === "e1" && move.to === "g1";
         } else {
             return move.from === "e8" && move.to === "g8";
@@ -124,7 +124,7 @@ export class ChessEngine {
     isQueenSideCastling(move: Move) {
         if (this.getPieceTypeFromSquare(move.from) !== PieceType.KING) {
             return false;
-        } else if (this.chess.get(move.from).color === Side.WHITE) {
+        } else if (this.chess.get(move.from)!.color === Side.WHITE) {
             return move.from === "e1" && move.to === "c1";
         } else {
             return move.from === "e8" && move.to === "c8";
@@ -162,7 +162,7 @@ export class ChessEngine {
      */
     getPieceTypeFromSquare(square: Square): PieceType | undefined {
         const piece = this.chess.get(square);
-        if (piece !== null) {
+        if (piece !== undefined) {
             return piece.type as PieceType;
         } else {
             return undefined;
@@ -176,7 +176,7 @@ export class ChessEngine {
      */
     getPieceSide(square: Square): Side | undefined {
         const piece = this.chess.get(square);
-        if (piece !== null) {
+        if (piece !== undefined) {
             return piece.color as Side;
         } else {
             return undefined;
@@ -238,7 +238,7 @@ export class ChessEngine {
     checkPromotion(from: Square, to: Square): boolean {
         if (this.getPieceTypeFromSquare(from) !== PieceType.PAWN) {
             return false;
-        } else if (this.chess.get(from).color === Side.WHITE) {
+        } else if (this.chess.get(from)!.color === Side.WHITE) {
             return from[1] === "7" && to[1] === "8";
         }
         return from[1] === "2" && to[1] === "1";
