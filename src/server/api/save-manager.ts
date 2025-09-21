@@ -11,6 +11,7 @@
  */
 
 import { Side } from "../../common/game-types";
+import * as fs from "node:fs";
 
 // Save files contain a date in ms and pgn string
 export interface iSave {
@@ -138,7 +139,6 @@ export class SaveManager {
  */
 export class FileManager {
     private static FilePath = "saves";
-    private static fs = require("fs");
 
     /**
      * writeFile
@@ -152,10 +152,10 @@ export class FileManager {
      */
     public static writeFile(saveName: string, saveContents: iSave) {
         try {
-            if (!this.fs.existsSync(this.FilePath)) {
-                this.fs.mkdirSync(this.FilePath, { recursive: true });
+            if (!fs.existsSync(this.FilePath)) {
+                fs.mkdirSync(this.FilePath, { recursive: true });
             }
-            this.fs.writeFileSync(
+            fs.writeFileSync(
                 this.FilePath + "/" + saveName,
                 JSON.stringify(saveContents),
                 { flag: "w" },
@@ -176,9 +176,9 @@ export class FileManager {
      * Output: iSave
      */
     public static loadFile(fileName: string): iSave {
-        if (!this.fs.existsSync(this.FilePath)) return {} as iSave;
-        const a = this.fs.readFileSync(this.FilePath + "/" + fileName);
-        if (a) return JSON.parse(a);
+        if (!fs.existsSync(this.FilePath)) return {} as iSave;
+        const a = fs.readFileSync(this.FilePath + "/" + fileName);
+        if (a) return JSON.parse(a.toString());
         return {} as iSave;
     }
 
@@ -190,9 +190,9 @@ export class FileManager {
      * Output: Array of file names
      */
     public static getFileNames(): string[] {
-        if (!this.fs.existsSync(this.FilePath)) return [];
+        if (!fs.existsSync(this.FilePath)) return [];
         const fileNames: string[] = [];
-        const files = this.fs.readdirSync(this.FilePath);
+        const files = fs.readdirSync(this.FilePath);
 
         files.forEach((file) => {
             fileNames.push(file);
@@ -209,8 +209,8 @@ export class FileManager {
      * Input: host id, client id
      */
     public static deleteFile(fileName: string) {
-        if (!this.fs.existsSync(this.FilePath)) return [];
-        this.fs.unlink(this.FilePath + "/" + fileName, (err) => {
+        if (!fs.existsSync(this.FilePath)) return [];
+        fs.unlink(this.FilePath + "/" + fileName, (err) => {
             if (err) {
                 console.error(err);
                 return false;
