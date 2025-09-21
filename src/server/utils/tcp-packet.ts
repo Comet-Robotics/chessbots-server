@@ -28,11 +28,13 @@ export enum PacketType {
     SPIN_RADIANS = "SPIN_RADIANS",
 }
 
-const Float = NumberType.withConstraint((n) => Number.isFinite(n));//.withBrand("float");
-const Int32 = Float.withConstraint((n) => Number.isSafeInteger(n));//.withBrand("int32");
-export const Uint32 = Int32.withConstraint((n) => n >= 0);//.withBrand("uint32");
+const Float = NumberType.withConstraint((n) => Number.isFinite(n)); //.withBrand("float");
+const Int32 = Float.withConstraint((n) => Number.isSafeInteger(n)); //.withBrand("int32");
+export const Uint32 = Int32.withConstraint((n) => n >= 0); //.withBrand("uint32");
 const VarId = Uint32;
-const MotorPower = Float.withConstraint((n) => -1 <= n && n <= 1).withBrand("motorPower");
+const MotorPower = Float.withConstraint((n) => -1 <= n && n <= 1).withBrand(
+    "motorPower",
+);
 
 const Position = Object({
     x: Float,
