@@ -58,7 +58,7 @@ export function NotificationDialog(props: NotificationDialogProps) {
             className={buttonColor()}
             intent="primary"
             onClick={() => {
-                close();
+                setIsOpen(false);
             }}
         />
     );

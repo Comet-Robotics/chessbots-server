@@ -553,18 +553,17 @@ apiRouter.get("/get-puzzles", (_, res) => {
  */
 apiRouter.get("/pause-game", (_, res) => {
     gamePaused.flag = true;
+    robotManager.stopAllRobots();
     socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_PAUSED));
     return res.send({ message: "success" });
 });
 
 /**
  * Unpause the game
- * Resumes any leftover commands queued in the command executor
  * Todo: add authentication instead of an exposed unpause call
  */
 apiRouter.get("/unpause-game", async (_, res) => {
     gamePaused.flag = false;
-    await executor.finishExecution();
     socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_UNPAUSED));
     return res.send({ message: "success" });
 });

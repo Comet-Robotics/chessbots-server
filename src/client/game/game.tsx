@@ -175,7 +175,7 @@ export function Game(): JSX.Element {
         : null;
 
     /** make moves by making a copy of the chessboard and sending the move message */
-    const handleMove = paused? 
+    const handleMove = !paused? 
             (move: Move): void => {
                 setChess(chess.copy(move));
                 sendMessage(new MoveMessage(move));
