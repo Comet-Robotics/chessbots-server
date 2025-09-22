@@ -1,5 +1,5 @@
 import * as net from "node:net";
-import config from "./bot-server-config.json" with {type: "json"};
+import config from "./bot-server-config.json" with { type: "json" };
 import {
     type Packet,
     type PacketWithId,

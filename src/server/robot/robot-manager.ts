@@ -1,7 +1,7 @@
 import { DEGREE } from "../../common/units.js";
 import { GridIndices } from "./grid-indices.js";
 import { Robot } from "./robot.js";
-import config from "../api/bot-server-config.json" with {type: "json"};
+import config from "../api/bot-server-config.json" with { type: "json" };
 import { virtualRobots } from "../simulator.js";
 import { USE_VIRTUAL_ROBOTS } from "../utils/env.js";
 

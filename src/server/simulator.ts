@@ -1,6 +1,6 @@
 import { EventEmitter } from "@posva/event-emitter";
 import { Robot } from "./robot/robot.js";
-import config from "./api/bot-server-config.json" with {type: "json"};
+import config from "./api/bot-server-config.json" with { type: "json" };
 import type { Packet, PacketWithId } from "./utils/tcp-packet.js";
 import { PacketType } from "./utils/tcp-packet.js";
 import { Position } from "./robot/position.js";
