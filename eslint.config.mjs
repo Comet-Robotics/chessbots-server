@@ -1,38 +1,39 @@
-const {
-    defineConfig,
-    globalIgnores,
-} = require("eslint/config");
+import { defineConfig, globalIgnores } from "eslint/config";
+import globals from "globals";
+import { fixupConfigRules, fixupPluginRules } from "@eslint/compat";
+import tsParser from "@typescript-eslint/parser";
+import reactRefresh from "eslint-plugin-react-refresh";
+import tsdoc from "eslint-plugin-tsdoc";
+import _import from "eslint-plugin-import";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import js from "@eslint/js";
+import { FlatCompat } from "@eslint/eslintrc";
 
-const globals = require("globals");
-
-const {
-    fixupConfigRules,
-    fixupPluginRules,
-} = require("@eslint/compat");
-
-const tsParser = require("@typescript-eslint/parser");
-const reactRefresh = require("eslint-plugin-react-refresh");
-const tsdoc = require("eslint-plugin-tsdoc");
-const _import = require("eslint-plugin-import");
-const js = require("@eslint/js");
-
-const {
-    FlatCompat,
-} = require("@eslint/eslintrc");
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const compat = new FlatCompat({
     baseDirectory: __dirname,
     recommendedConfig: js.configs.recommended,
     allConfig: js.configs.all
 });
 
-module.exports = defineConfig([{
+export default defineConfig([{
     languageOptions: {
         globals: {
             ...globals.browser,
         },
 
         parser: tsParser,
+        parserOptions: {
+            ecmaVersion: "latest",
+            sourceType: "module",
+            project: "./tsconfig.json",
+            tsconfigRootDir: __dirname,
+            ecmaFeatures: {
+                jsx: true,
+            },
+        },
     },
 
     files: ["**/*.ts", "**/*.tsx"],
@@ -81,6 +82,9 @@ module.exports = defineConfig([{
             node: {
                 extensions: [".js", ".jsx", ".ts", ".tsx"],
             },
+            typescript: {
+                alwaysTryTypes: true,
+            },
         },
     },
-}, globalIgnores(["**/dist", "**/.eslintrc.cjs"])]);
+}, globalIgnores(["**/dist", "**/.eslintrc.mjs", "vite.config.ts"])]);

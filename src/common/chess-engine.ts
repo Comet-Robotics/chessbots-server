@@ -1,7 +1,6 @@
 import type { Square } from "chess.js";
 import { Chess } from "chess.js";
-import jsChessEngine from "js-chess-engine";
-const { aiMove } = jsChessEngine;
+import aiMove from "js-chess-engine";
 import { GameFinishedReason } from "./game-end-reasons.js";
 import type { Difficulty } from "./client-types.js";
 import type { Move } from "./game-types.js";

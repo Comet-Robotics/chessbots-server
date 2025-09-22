@@ -3,10 +3,10 @@
         "target": "ESNext",
         "useDefineForClassFields": true,
         "lib": ["DOM", "DOM.Iterable", "ESNext"],
-        "module": "nodenext",
+        "module": "esnext",
         "skipLibCheck": true,
 
-        "moduleResolution": "nodenext",
+        "moduleResolution": "bundler",
         "resolveJsonModule": true,
         "isolatedModules": true,
         "noEmit": true,
