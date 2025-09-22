@@ -9,7 +9,6 @@ import { StrictMode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { bgColor } from "./check-dark-mode";
 import { BeginCheckRefresh } from "./begin-check-refresh";
-
 export const queryClient = new QueryClient();
 
 FocusStyleManager.onlyShowFocusOnTabs();

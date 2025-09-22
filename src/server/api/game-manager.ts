@@ -30,9 +30,11 @@ import { robotManager } from "../robot/robot-manager";
 import { gamePaused } from "./managers";
 
 type GameState = {
+    type?: "puzzle" | "human" | "computer";
     side: Side;
     position: string;
     gameEndReason: GameEndReason | undefined;
+    tooltip?: string;
     aiDifficulty?: number;
     difficulty?: number;
 };
@@ -53,6 +55,7 @@ export abstract class GameManager {
         protected hostSide: Side,
         // true if host and client get reversed
         protected reverse: boolean,
+        protected tooltip?: string,
     ) {
         socketManager.sendToAll(new GameStartedMessage());
     }
@@ -87,6 +90,7 @@ export abstract class GameManager {
             side,
             position: this.chess.pgn,
             gameEndReason: this.getGameEndReason(),
+            tooltip: this.tooltip,
         };
     }
 
@@ -104,7 +108,7 @@ export class HumanGameManager extends GameManager {
         protected clientManager: ClientManager,
         protected reverse: boolean,
     ) {
-        super(chess, socketManager, hostSide, reverse);
+        super(chess, socketManager, hostSide, reverse, undefined);
     }
 
     /**
@@ -237,7 +241,7 @@ export class ComputerGameManager extends GameManager {
         protected difficulty: number,
         protected reverse: boolean,
     ) {
-        super(chess, socketManager, hostSide, reverse);
+        super(chess, socketManager, hostSide, reverse, undefined);
         this.aiFirstMove =
             (chess.pgn === "" && this.hostSide === Side.BLACK) ||
             (chess.pgn !== "" && this.hostSide === chess.getLastMove()?.color);
@@ -294,18 +298,10 @@ export class ComputerGameManager extends GameManager {
             }
 
             // Ensure MINIMUM_DELAY before responding
-            const startTime = Date.now();
+            // previous code didn't wait for robots and caused issues where you could move and make robots collide
             const move = this.chess.calculateAiMove(this.difficulty);
-            const elapsedTime = Date.now() - startTime;
-
-            // If elapsed time is less than minimum delay, timeout is set to 1ms
-            const delay = Math.max(1, this.MINIMUM_DELAY - elapsedTime);
-
-            setTimeout(async () => {
-                this.socketManager.sendToAll(new MoveMessage(move));
-                await this.executeRobotMovement(move);
-            }, delay);
-
+            await this.executeRobotMovement(move); // wait for robots to finish moving
+            this.socketManager.sendToAll(new MoveMessage(move)); // send move to clients after robots finish moving
             if (this.isGameEnded()) {
                 SaveManager.endGame(id, "ai");
             }
@@ -319,6 +315,7 @@ export class ComputerGameManager extends GameManager {
 
     public getGameState(clientType: ClientType): GameState {
         return {
+            type: "computer",
             ...super.getGameState(clientType),
             aiDifficulty: this.difficulty,
         };
@@ -333,6 +330,7 @@ export class PuzzleGameManager extends GameManager {
         chess: ChessEngine,
         socketManager: SocketManager,
         fen: string,
+        protected tooltip: string,
         private moves: Move[],
         protected difficulty: number,
     ) {
@@ -341,8 +339,12 @@ export class PuzzleGameManager extends GameManager {
             socketManager,
             fen.split(" ")[1] === "w" ? Side.WHITE : Side.BLACK,
             false,
+            tooltip,
         );
         chess.loadFen(fen);
+    }
+    public getTooltip(): string {
+        return this.tooltip;
     }
 
     public getDifficulty(): number {
@@ -428,6 +430,7 @@ export class PuzzleGameManager extends GameManager {
 
     public getGameState(clientType: ClientType): GameState {
         return {
+            type: "puzzle",
             ...super.getGameState(clientType),
             difficulty: this.difficulty,
         };
