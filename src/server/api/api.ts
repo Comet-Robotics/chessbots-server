@@ -558,9 +558,20 @@ apiRouter.get("/get-puzzles", (_, res) => {
     return res.send(out);
 });
 
+// created a pause and unpause game function separately from the endpoint call so that another backend function can call it as well.
 export function pauseGame(res, clientSide) {
+    console.log("Pausing Game!")
     gamePaused.flag = true;
     socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_PAUSED));
+    const returnedMessage = {message: "success"}
+    
+    return clientSide ? res.send(returnedMessage) : returnedMessage;
+}
+
+export function unpauseGame(res, clientSide) {
+    console.log("Resuming Game!")
+    gamePaused.flag = false;
+    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_UNPAUSED));
     const returnedMessage = {message: "success"}
     
     return clientSide ? res.send(returnedMessage) : returnedMessage;
@@ -571,7 +582,7 @@ export function pauseGame(res, clientSide) {
  * Todo: add authentication instead of an exposed pause call
  */
 apiRouter.get("/pause-game", (_, res) => {
-    return pauseGame(res, true)
+    return pauseGame(res, true);
 });
 
 /**
@@ -580,10 +591,7 @@ apiRouter.get("/pause-game", (_, res) => {
  * Todo: add authentication instead of an exposed unpause call
  */
 apiRouter.get("/unpause-game", async (_, res) => {
-    gamePaused.flag = false;
-    await executor.finishExecution();
-    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_UNPAUSED));
-    return res.send({ message: "success" });
+    return unpauseGame(res, true);
 });
 
 /**

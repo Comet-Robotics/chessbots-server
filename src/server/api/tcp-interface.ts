@@ -18,8 +18,12 @@ import {
 } from "../utils/env";
 import { BotTunnel, type RobotEventEmitter } from "./bot-tunnel";
 import { waitTime } from "../utils/time";
+import { pauseGame, unpauseGame } from "./api";
 
-/**
+//VARIABLE_HERE
+const disconnectedBots : Set<string> = new Set()
+
+/** 
  * The tunnel for handling communications to the robots
  */
 export class RealBotTunnel extends BotTunnel {
@@ -86,7 +90,13 @@ export class RealBotTunnel extends BotTunnel {
                     if (countFailures === MAX_PING_FAIL) {
                         console.log("AAA A BOT DISCONNECTED! ABORT! ABORT!");
 
-                        //how am i gonna send this?
+                        if(this.address != undefined)
+                        {
+                            disconnectedBots.add(this.address)
+                        }
+
+                        //send the pause signal.
+                        pauseGame(null, false);
 
                         // this.emitter.emit("actionComplete", {
                         //     success: true,
@@ -268,6 +278,18 @@ export class TCPServer {
         const remoteAddress = socket.remoteAddress + ":" + socket.remotePort;
         console.log("New client connection from %s", remoteAddress);
         socket.setNoDelay(true);
+
+        // if there was disconnected bot beforehand, remove it. If no more bots disconnected, send signal to unpause game
+        if(disconnectedBots.has(remoteAddress))
+        {
+            disconnectedBots.delete(remoteAddress);
+            if(disconnectedBots.size == 0)
+            {
+                unpauseGame(null, false);
+            }
+        }
+
+
 
         // create a new bot tunnel for the connection
         const tunnel = new RealBotTunnel(
