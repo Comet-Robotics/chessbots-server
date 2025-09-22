@@ -1,19 +1,19 @@
 import type { CustomSquareProps } from "react-chessboard/dist/chessboard/types";
 import type { FC, ReactElement } from "react";
-import { useContext } from "react";
+import { forwardRef, useContext } from "react";
 import {
     OutsideCorners,
     CenterDot,
     SquareHighlight,
     ClickedPiece,
-} from "./svg-components.js";
-import { CustomSquareContext } from "./custom-square-context.js";
+} from "./svg-components";
+import { CustomSquareContext } from "./custom-square-context";
 
 /**
  * A renderer for the square dots and piece highlighting
  * @param props - the square, its style, and any children
  */
-export const CustomSquareRenderer: FC<CustomSquareProps> = (props) => {
+export const CustomSquareRenderer = forwardRef((props, ref) => {
     const { legalSquares, chess, lastClickedSquare, side } =
         useContext(CustomSquareContext);
 
@@ -69,11 +69,11 @@ export const CustomSquareRenderer: FC<CustomSquareProps> = (props) => {
 
     // return all the highlights inside a div
     return (
-        <div style={props.style}>
+        <div style={props.style} ref={ref}>
             {clickedPieceHighlight}
             {lastMoveHighlight}
             {selectElement}
             {props.children}
         </div>
     );
-};
+}) as FC<CustomSquareProps>;
