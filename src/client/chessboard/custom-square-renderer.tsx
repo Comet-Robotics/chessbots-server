@@ -6,8 +6,8 @@ import {
     CenterDot,
     SquareHighlight,
     ClickedPiece,
-} from "./svg-components";
-import { CustomSquareContext } from "./custom-square-context";
+} from "./svg-components.js";
+import { CustomSquareContext } from "./custom-square-context.js";
 
 /**
  * A renderer for the square dots and piece highlighting

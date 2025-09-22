@@ -3,10 +3,10 @@ import type {
     Message,
     SendMessage,
     MessageHandler,
-} from "../common/message/message";
-import { RegisterWebsocketMessage } from "../common/message/message";
+} from "../common/message/message.js";
+import { RegisterWebsocketMessage } from "../common/message/message.js";
 import { useId, useMemo } from "react";
-import { parseMessage } from "../common/message/parse-message";
+import { parseMessage } from "../common/message/parse-message.js";
 import { useQuery } from "@tanstack/react-query";
 
 /**

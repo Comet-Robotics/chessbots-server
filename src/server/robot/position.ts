@@ -1,5 +1,5 @@
-import { Pair } from "../utils/pair";
-import type { GridIndices } from "./grid-indices";
+import { Pair } from "../utils/pair.js";
+import type { GridIndices } from "./grid-indices.js";
 
 /**
  * x,y positions

@@ -1,11 +1,11 @@
-import { Message, MessageType } from "./message";
-import type { Move } from "../game-types";
+import { Message, MessageType } from "./message.js";
+import type { Move } from "../game-types.js";
 import type {
     GameInterruptedReason,
     GameHoldReason,
     GameFinishedReason,
     GameEndReason,
-} from "../game-end-reasons";
+} from "../game-end-reasons.js";
 
 /**
  * A message that includes a position and pgn
@@ -33,10 +33,7 @@ export class MoveMessage extends Message {
     protected type = MessageType.MOVE;
 
     protected toObj(): object {
-        return {
-            ...super.toObj(),
-            move: this.move,
-        };
+        return { ...super.toObj(), move: this.move };
     }
 }
 
@@ -53,10 +50,7 @@ export class SetChessMessage extends Message {
     protected type = MessageType.SET_CHESS;
 
     protected toObj(): object {
-        return {
-            ...super.toObj(),
-            chess: this.chess,
-        };
+        return { ...super.toObj(), chess: this.chess };
     }
 }
 
@@ -82,10 +76,7 @@ export class GameInterruptedMessage extends Message {
     protected type = MessageType.GAME_INTERRUPTED;
 
     protected toObj(): object {
-        return {
-            ...super.toObj(),
-            reason: this.reason,
-        };
+        return { ...super.toObj(), reason: this.reason };
     }
 }
 
@@ -100,10 +91,7 @@ export class GameFinishedMessage extends Message {
     protected type = MessageType.GAME_FINISHED;
 
     protected toObj(): object {
-        return {
-            ...super.toObj(),
-            reason: this.reason,
-        };
+        return { ...super.toObj(), reason: this.reason };
     }
 }
 
@@ -118,10 +106,7 @@ export class GameHoldMessage extends Message {
     protected type = MessageType.GAME_HELD;
 
     protected toObj(): object {
-        return {
-            ...super.toObj(),
-            reason: this.reason,
-        };
+        return { ...super.toObj(), reason: this.reason };
     }
 }
 
@@ -133,9 +118,6 @@ export class GameEndMessage extends Message {
     protected type = MessageType.GAME_ENDED;
 
     protected toObj(): object {
-        return {
-            ...super.toObj(),
-            reason: this.reason,
-        };
+        return { ...super.toObj(), reason: this.reason };
     }
 }

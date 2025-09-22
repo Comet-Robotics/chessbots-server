@@ -1,18 +1,18 @@
-import { GameInterruptedReason } from "../../game-end-reasons";
-import { PieceType } from "../../game-types";
+import { GameInterruptedReason } from "../../game-end-reasons.js";
+import { PieceType } from "../../game-types.js";
 import {
     DriveRobotMessage,
     SetRobotVariableMessage,
     StopRobotMessage,
-} from "../robot-message";
+} from "../robot-message.js";
 import {
     MoveMessage,
     PositionMessage,
     GameInterruptedMessage,
     GameStartedMessage,
-} from "../game-message";
-import type { Message } from "../message";
-import { parseMessage } from "../parse-message";
+} from "../game-message.js";
+import type { Message } from "../message.js";
+import { parseMessage } from "../parse-message.js";
 import { expect, test } from "vitest";
 
 test.each([

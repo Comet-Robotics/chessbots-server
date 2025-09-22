@@ -1,7 +1,7 @@
 import type { WebSocket } from "ws";
-import type { SocketManager } from "./socket-manager";
-import { ClientType } from "../../common/client-types";
-import type { Message } from "../../common/message/message";
+import type { SocketManager } from "./socket-manager.js";
+import { ClientType } from "../../common/client-types.js";
+import type { Message } from "../../common/message/message.js";
 
 /**
  * A class which maps player client ids to their corresponding websocket (if any).

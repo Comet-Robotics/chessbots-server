@@ -1,12 +1,12 @@
 import { Chessboard } from "react-chessboard";
 import type { Square } from "chess.js";
 import { useState } from "react";
-import { BoardContainer } from "./board-container";
-import type { ChessEngine } from "../../common/chess-engine";
-import type { Move, PieceType } from "../../common/game-types";
-import { Side } from "../../common/game-types";
-import { CustomSquareRenderer } from "./custom-square-renderer";
-import { CustomSquareContext } from "./custom-square-context";
+import { BoardContainer } from "./board-container.js";
+import type { ChessEngine } from "../../common/chess-engine.js";
+import type { Move, PieceType } from "../../common/game-types.js";
+import { Side } from "../../common/game-types.js";
+import { CustomSquareRenderer } from "./custom-square-renderer.js";
+import { CustomSquareContext } from "./custom-square-context.js";
 import type { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 
 /**

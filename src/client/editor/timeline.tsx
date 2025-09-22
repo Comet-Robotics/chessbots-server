@@ -11,7 +11,7 @@ import interact from "interactjs";
 import { useDragControls, Reorder } from "motion/react";
 import type { PropsWithChildren } from "react";
 import { forwardRef, useEffect, useRef } from "react";
-import type { TimelineEvents } from "../../common/show";
+import type { TimelineEvents } from "../../common/show.js";
 import {
     EVENT_TYPE_TO_COLOR,
     millisToPixels,
@@ -19,7 +19,7 @@ import {
     RULER_TICK_INTERVAL_MS,
     RULER_EXTRA_TICK_COUNT,
     pixelsToMillis,
-} from "../../common/show-interface-utils";
+} from "../../common/show-interface-utils.js";
 
 export function ReorderableTimelineEvent({
     event,
@@ -89,9 +89,7 @@ export function TimelineEvent(props: {
         const el = ref.current;
 
         interact(el).resizable({
-            edges: {
-                right: true,
-            },
+            edges: { right: true },
             listeners: {
                 move: function (event) {
                     event.preventDefault();
@@ -164,9 +162,7 @@ export function TimelineEvent(props: {
                 </span>
                 {onPointerDownOnDragHandle && (
                     <span
-                        style={{
-                            cursor: "grab",
-                        }}
+                        style={{ cursor: "grab" }}
                         onPointerDown={onPointerDownOnDragHandle}
                     >
                         <svg

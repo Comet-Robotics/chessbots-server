@@ -16,24 +16,27 @@ import {
     NonIdealState,
     SectionCard,
 } from "@blueprintjs/core";
-import { RobotGrid, robotSize } from "../debug/simulator";
-import type { NonStartPointEvent, TimelineLayerType } from "../../common/show";
-import { NonStartPointEventSchema } from "../../common/show";
+import { RobotGrid, robotSize } from "../debug/simulator.js";
+import type {
+    NonStartPointEvent,
+    TimelineLayerType,
+} from "../../common/show.js";
+import { NonStartPointEventSchema } from "../../common/show.js";
 import {
     GridCursorMode,
     millisToPixels,
     pixelsToMillis,
     RULER_TICK_GAP_PX,
     TimelineDurationUpdateMode,
-} from "../../common/show-interface-utils";
+} from "../../common/show-interface-utils.js";
 import {
     Ruler,
     TimelineLayer,
     TimelineEvent,
     ReorderableTimelineEvent,
-} from "./timeline";
-import type { Midpoint } from "../../common/spline";
-import { SplinePointType } from "../../common/spline";
+} from "./timeline.js";
+import type { Midpoint } from "../../common/spline.js";
+import { SplinePointType } from "../../common/spline.js";
 import type { MotionValue } from "motion/react";
 import {
     motion,
@@ -42,14 +45,14 @@ import {
     useMotionValueEvent,
     Reorder,
 } from "motion/react";
-import { useShowfile } from "./showfile-state";
-import { getRobotStateAtTime } from "../../common/getRobotStateAtTime";
-import { MotionRobot } from "./motion-robot";
-import { SplineEditor } from "./spline-editor";
+import { useShowfile } from "./showfile-state.js";
+import { getRobotStateAtTime } from "../../common/getRobotStateAtTime.js";
+import { MotionRobot } from "./motion-robot.js";
+import { SplineEditor } from "./spline-editor.js";
 import interact from "interactjs";
 import { Array as RArray } from "runtypes";
-import { post } from "../api";
-import { Uint32 } from "../../common/runtypes-typing";
+import { post } from "../api.js";
+import { Uint32 } from "../../common/runtypes-typing.js";
 
 // Helper component to manage animation for a single robot
 function AnimatedRobotRenderer({
@@ -98,9 +101,7 @@ function AnimatedRobotRenderer({
             ref={scope}
             robotId={robotId}
             // Set initial position via style prop using transform
-            style={{
-                transform: initialTransform,
-            }}
+            style={{ transform: initialTransform }}
         />
     );
 }
@@ -347,9 +348,7 @@ export function Editor() {
         if (!seekBarRef.current) return;
         const el = seekBarRef.current;
         interact(el).resizable({
-            edges: {
-                right: true,
-            },
+            edges: { right: true },
             listeners: {
                 move: function (event) {
                     event.preventDefault();
@@ -626,10 +625,7 @@ export function Editor() {
                                     label: "Cursor",
                                     value: GridCursorMode.Cursor,
                                 },
-                                {
-                                    label: "Pen",
-                                    value: GridCursorMode.Pen,
-                                },
+                                { label: "Pen", value: GridCursorMode.Pen },
                             ]}
                             onValueChange={(value) =>
                                 setGridCursorMode(

@@ -8,16 +8,16 @@ import {
     NonIdealStateIconSize,
 } from "@blueprintjs/core";
 import { useNavigate } from "react-router-dom";
-import type { GameEndReason } from "../../common/game-end-reasons";
+import type { GameEndReason } from "../../common/game-end-reasons.js";
 import {
     GameFinishedReason,
     GameInterruptedReason,
-} from "../../common/game-end-reasons";
+} from "../../common/game-end-reasons.js";
 import { useState } from "react";
-import { Side } from "../../common/game-types";
-import { bgColor, buttonColor, textColor } from "../check-dark-mode";
+import { Side } from "../../common/game-types.js";
+import { bgColor, buttonColor, textColor } from "../check-dark-mode.js";
 import "../colors.css";
-import { post } from "../api";
+import { post } from "../api.js";
 
 interface GameEndDialogProps {
     reason: GameEndReason;

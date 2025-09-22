@@ -1,6 +1,6 @@
-import { FULL_ROTATION, RADIAN, clampHeading } from "../../common/units";
-import { Position } from "./position";
-import type { GridIndices } from "./grid-indices";
+import { FULL_ROTATION, RADIAN, clampHeading } from "../../common/units.js";
+import { Position } from "./position.js";
+import type { GridIndices } from "./grid-indices.js";
 import {
     DRIVE_CUBIC_SPLINE_SCHEMA,
     DRIVE_QUADRATIC_SPLINE_SCHEMA,
@@ -9,8 +9,8 @@ import {
     PacketType,
     SPIN_RADIANS_SCHEMA,
     TURN_BY_ANGLE_SCHEMA,
-} from "../utils/tcp-packet";
-import { type BotTunnel } from "../api/bot-tunnel";
+} from "../utils/tcp-packet.js";
+import { type BotTunnel } from "../api/bot-tunnel.js";
 
 /**
  * Represents a physical robot.

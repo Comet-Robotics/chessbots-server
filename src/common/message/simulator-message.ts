@@ -1,5 +1,5 @@
-import { Message, MessageType } from "./message";
-import type { PacketWithId } from "../../server/utils/tcp-packet";
+import { Message, MessageType } from "./message.js";
+import type { PacketWithId } from "../../server/utils/tcp-packet.js";
 export type SimulatedRobotLocation = {
     position: { x: number; y: number };
     headingRadians: number;

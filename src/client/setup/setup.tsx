@@ -5,21 +5,21 @@ import {
     NonIdealState,
     Spinner,
 } from "@blueprintjs/core";
-import { SetupBase } from "./setup-base";
+import { SetupBase } from "./setup-base.js";
 import type { Dispatch } from "react";
 import { useState } from "react";
-import { SetupGame } from "./setup-game";
+import { SetupGame } from "./setup-game.js";
 import { Navigate, useNavigate } from "react-router-dom";
-import { ClientType, GameType } from "../../common/client-types";
-import { SetupPuzzle } from "../puzzle/setup-puzzle";
-import { get, useEffectQuery } from "../api";
+import { ClientType, GameType } from "../../common/client-types.js";
+import { SetupPuzzle } from "../puzzle/setup-puzzle.js";
+import { get, useEffectQuery } from "../api.js";
 import {
     allSettings,
     buttonColor,
     setUserSetting,
     getUserSetting,
     textColor,
-} from "../check-dark-mode";
+} from "../check-dark-mode.js";
 import "../colors.css";
 
 enum SetupType {

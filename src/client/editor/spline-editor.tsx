@@ -3,14 +3,14 @@ import {
     type Coords,
     SplinePointType,
     splineToSvgDrawAttribute,
-} from "../../common/spline";
-import { SplinePoint, SplineControlPoint } from "./points";
+} from "../../common/spline.js";
+import { SplinePoint, SplineControlPoint } from "./points.js";
 import {
     type TimelineLayerType,
     timelineLayerToSpline,
     TimelineEventTypes,
-} from "../../common/show";
-import { GRID_CELL_PX } from "../../common/units";
+} from "../../common/show.js";
+import { GRID_CELL_PX } from "../../common/units.js";
 
 interface SplineEditorProps {
     layer: TimelineLayerType;
@@ -161,10 +161,7 @@ export function SplineEditor({
 }
 
 function navigateAndIdentifyTimelineElement(element: HTMLElement) {
-    element.scrollIntoView({
-        inline: "start",
-        block: "end",
-    });
+    element.scrollIntoView({ inline: "start", block: "end" });
     const originalBackgroundColor = element.style.backgroundColor;
     const flashColor = "black";
     element.style.backgroundColor = flashColor;

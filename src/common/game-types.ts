@@ -1,6 +1,6 @@
 import type { Square } from "chess.js";
-import type { Robot } from "../server/robot/robot";
-import { DEGREE } from "./units";
+import type { Robot } from "../server/robot/robot.js";
+import { DEGREE } from "./units.js";
 
 /**
  * Defines a specific piece.

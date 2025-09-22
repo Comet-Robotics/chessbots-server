@@ -1,6 +1,7 @@
 {
     "name": "client",
     "version": "1.0.0",
+    "type": "module",
     "dependencies": {
         "@blueprintjs/core": "^6.3.1",
         "@blueprintjs/icons": "^6.1.0",

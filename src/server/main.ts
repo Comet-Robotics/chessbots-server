@@ -3,9 +3,9 @@ import express from "express";
 // eslint-disable-next-line import/default
 import ViteExpress from "vite-express";
 import cookieParser from "cookie-parser";
-import { apiRouter, websocketHandler } from "./api/api";
+import { apiRouter, websocketHandler } from "./api/api.js";
 import expressWebSocket from "express-ws";
-import { clientManager } from "./api/managers";
+import { clientManager } from "./api/managers.js";
 import launchEditorMiddleware from "launch-editor-middleware";
 import { randomUUID } from "node:crypto";
 

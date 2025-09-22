@@ -1,5 +1,5 @@
 import type WebSocket from "ws";
-import type { Message } from "../../common/message/message";
+import type { Message } from "../../common/message/message.js";
 
 /**
  * A class which maps player client ids to their corresponding websocket (if any).

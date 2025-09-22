@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { get, useEffectQuery } from "./api";
+import { get, useEffectQuery } from "./api.js";
 import { NonIdealState, Spinner } from "@blueprintjs/core";
 
 /**

@@ -8,26 +8,26 @@ import {
     GameInterruptedMessage,
     SetChessMessage,
     MoveMessage,
-} from "../../common/message/game-message";
+} from "../../common/message/game-message.js";
 import type {
     GameEndReason,
     GameInterruptedReason,
-} from "../../common/game-end-reasons";
-import { GameHoldReason } from "../../common/game-end-reasons";
+} from "../../common/game-end-reasons.js";
+import { GameHoldReason } from "../../common/game-end-reasons.js";
 
-import { ChessboardWrapper } from "../chessboard/chessboard-wrapper";
-import { NavbarMenu } from "./navbar-menu";
-import { get, useEffectQuery, useSocket } from "../api";
-import type { MessageHandler } from "../../common/message/message";
-import { GameEndDialog } from "./game-end-dialog";
+import { ChessboardWrapper } from "../chessboard/chessboard-wrapper.js";
+import { NavbarMenu } from "./navbar-menu.js";
+import { get, useEffectQuery, useSocket } from "../api.js";
+import type { MessageHandler } from "../../common/message/message.js";
+import { GameEndDialog } from "./game-end-dialog.js";
 import { Navigate, Outlet } from "react-router-dom";
-import { ChessEngine } from "../../common/chess-engine";
-import type { Move } from "../../common/game-types";
+import { ChessEngine } from "../../common/chess-engine.js";
+import type { Move } from "../../common/game-types.js";
 import { NonIdealState, Spinner } from "@blueprintjs/core";
-import { AcceptDrawDialog, OfferDrawDialog } from "./draw-dialog";
-import { bgColor } from "../check-dark-mode";
+import { AcceptDrawDialog, OfferDrawDialog } from "./draw-dialog.js";
+import { bgColor } from "../check-dark-mode.js";
 import "../colors.css";
-import { PuzzleTipBox } from "../PuzzleTipBox";
+import { PuzzleTipBox } from "../PuzzleTipBox.js";
 
 /**
  * Creates a MessageHandler function to handle move messages and game interruptions.

@@ -2,6 +2,7 @@
     "name": "utd-chess-bots",
     "private": true,
     "version": "0.0.0",
+    "type": "module",
     "workspaces": [
         "src/client",
         "src/server"
@@ -10,7 +11,7 @@
         "node": ">= 20"
     },
     "scripts": {
-        "dev": "ts-node src/server/main.ts",
+        "dev": "tsc --noEmit && node --no-warnings=ExperimentalWarning --loader ts-node/esm/transpile-only src/server/main.ts",
         "devup": "nodemon src/server/main.ts",
         "start": "NODE_ENV=production ts-node ./src/server/main.ts",
         "build": "vite build",

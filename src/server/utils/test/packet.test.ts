@@ -1,10 +1,15 @@
 import { vi, test, expect, afterEach } from "vitest";
-import { Packet, jsonToPacket, packetToJson, PacketType } from "../tcp-packet";
+import {
+    Packet,
+    jsonToPacket,
+    packetToJson,
+    PacketType,
+} from "../tcp-packet.js";
 import { randomUUID } from "node:crypto";
-import { socketManager } from "../../api/managers";
-import { VirtualBotTunnel } from "../../simulator";
+import { socketManager } from "../../api/managers.js";
+import { VirtualBotTunnel } from "../../simulator.js";
 import WebSocket from "ws";
-import { ZERO_POSITION } from "../../robot/position";
+import { ZERO_POSITION } from "../../robot/position.js";
 
 const mockSocket = vi.mocked(WebSocket.prototype);
 const TEST_ROBOT_ID = "robot-1";

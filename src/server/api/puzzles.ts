@@ -1,5 +1,5 @@
 import { type Square } from "chess.js";
-import { type Move } from "../../common/game-types";
+import { type Move } from "../../common/game-types.js";
 
 export interface PuzzleComponents {
     fen: string;
@@ -99,9 +99,6 @@ export const puzzles: Record<string, PuzzleComponents> = {
 
         rating: 1000,
         tooltip: "tooltip for puzzle 7",
-        robotDefaultPositions: {
-            "robot-4": "d3",
-            "robot-12": "d6",
-        },
+        robotDefaultPositions: { "robot-4": "d3", "robot-12": "d6" },
     },
 };

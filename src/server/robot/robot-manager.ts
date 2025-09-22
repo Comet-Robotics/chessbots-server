@@ -1,9 +1,9 @@
-import { DEGREE } from "../../common/units";
-import { GridIndices } from "./grid-indices";
-import { Robot } from "./robot";
-import config from "../api/bot-server-config.json";
-import { virtualRobots } from "../simulator";
-import { USE_VIRTUAL_ROBOTS } from "../utils/env";
+import { DEGREE } from "../../common/units.js";
+import { GridIndices } from "./grid-indices.js";
+import { Robot } from "./robot.js";
+import config from "../api/bot-server-config.json" with {type: "json"};
+import { virtualRobots } from "../simulator.js";
+import { USE_VIRTUAL_ROBOTS } from "../utils/env.js";
 
 /**
  * Stores robots. Provides utilities for finding them by position.

@@ -1,8 +1,8 @@
-import type { Reversible } from "./command";
-import { RobotCommand } from "./command";
-import { Position } from "../robot/position";
-import { GridIndices } from "../robot/grid-indices";
-import { robotManager } from "../robot/robot-manager";
+import type { Reversible } from "./command.js";
+import { RobotCommand } from "./command.js";
+import { Position } from "../robot/position.js";
+import { GridIndices } from "../robot/grid-indices.js";
+import { robotManager } from "../robot/robot-manager.js";
 
 /**
  * Represents a rotation.

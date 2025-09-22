@@ -3,7 +3,7 @@ import {
     jsonToPacket,
     type Packet,
     type PacketWithId,
-} from "../utils/tcp-packet";
+} from "../utils/tcp-packet.js";
 
 export abstract class BotTunnel {
     connected: boolean = false;
@@ -130,9 +130,5 @@ export abstract class BotTunnel {
 }
 
 export type RobotEventEmitter = EventEmitter<{
-    actionComplete: {
-        success: boolean;
-        packetId: string;
-        reason?: string;
-    };
+    actionComplete: { success: boolean; packetId: string; reason?: string };
 }>;

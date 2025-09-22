@@ -1,7 +1,7 @@
 import { createContext } from "react";
-import { ChessEngine } from "../../common/chess-engine";
+import { ChessEngine } from "../../common/chess-engine.js";
 import type { Square } from "chess.js";
-import { Side } from "../../common/game-types";
+import { Side } from "../../common/game-types.js";
 
 /**
  * A context used to pass arguments to custom square renderer.

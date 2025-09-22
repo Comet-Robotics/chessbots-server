@@ -10,14 +10,14 @@ import {
 import type { CSSProperties, PropsWithChildren } from "react";
 import { forwardRef, useEffect, useReducer, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { get, useSocket } from "../api";
+import { get, useSocket } from "../api.js";
 import type {
     SimulatedRobotLocation,
     StackFrame,
-} from "../../common/message/simulator-message";
-import { SimulatorUpdateMessage } from "../../common/message/simulator-message";
+} from "../../common/message/simulator-message.js";
+import { SimulatorUpdateMessage } from "../../common/message/simulator-message.js";
 import "./simulator.scss";
-import { clampHeading, GRID_CELL_PX } from "../../common/units";
+import { clampHeading, GRID_CELL_PX } from "../../common/units.js";
 import {
     bgColor,
     darkModeIcon,
@@ -27,7 +27,7 @@ import {
     simRingCellColor,
     textColor,
     toggleUserSetting,
-} from "../check-dark-mode";
+} from "../check-dark-mode.js";
 
 const tileSize = GRID_CELL_PX;
 export const robotSize = tileSize / 2;

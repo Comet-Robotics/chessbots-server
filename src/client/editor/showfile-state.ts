@@ -1,7 +1,5 @@
-// @ts-expect-error: chessbots client is a CommonJS module, but this library is a ES Module, so we need to tell TypeScript that it's okay
 import { encode as cborEncode } from "cbor-x";
 
-// @ts-expect-error: chessbots client is a CommonJS module, but this library is a ES Module, so we need to tell TypeScript that it's okay
 import { fileOpen, fileSave } from "browser-fs-access";
 
 import { diff } from "deep-object-diff";
@@ -13,32 +11,32 @@ import type {
     NonStartPointEvent,
     WaitEvent,
     TurnEvent,
-} from "../../common/show";
+} from "../../common/show.js";
 import {
     createNewShowfile,
     loadShowfileFromBinary,
     TimelineEventTypes,
     CHESSBOTS_SHOWFILE_MIME_TYPE,
     CHESSBOTS_SHOWFILE_EXTENSION,
-} from "../../common/show";
+} from "../../common/show.js";
 import {
     TimelineDurationUpdateMode,
     GridCursorMode,
-} from "../../common/show-interface-utils";
-import { SplinePointType } from "../../common/spline";
+} from "../../common/show-interface-utils.js";
+import { SplinePointType } from "../../common/spline.js";
 import type {
     CubicBezier,
     QuadraticBezier,
     Coords,
     Midpoint,
-} from "../../common/spline";
+} from "../../common/spline.js";
 import {
     usePlayHead,
     usePreventExitWithUnsavedChanges,
     useStateWithTrackedHistory,
-} from "./hooks";
-import { GRID_CELL_PX } from "../../common/units";
-import { Uint32 } from "../../common/runtypes-typing";
+} from "./hooks.js";
+import { GRID_CELL_PX } from "../../common/units.js";
+import { Uint32 } from "../../common/runtypes-typing.js";
 
 export function useShowfile() {
     // used to store the initial showfile state before any changes were made in the editor, so we have something to compare against to see if there are unsaved changes
@@ -137,13 +135,7 @@ export function useShowfile() {
             extensions: [".mp3", ".wav"],
         });
         const audio = new Uint8Array(await blob.arrayBuffer());
-        setShow({
-            ...show,
-            audio: {
-                data: audio,
-                mimeType: blob.type,
-            },
-        });
+        setShow({ ...show, audio: { data: audio, mimeType: blob.type } });
     }, [setShow, show]);
 
     const handleStartPointMove = useCallback(
@@ -397,10 +389,7 @@ export function useShowfile() {
                 return;
             }
 
-            events[pointIndex] = {
-                ...eventToUpdate,
-                target: newTarget,
-            };
+            events[pointIndex] = { ...eventToUpdate, target: newTarget };
             newTimeline[layerIndex] = { startPoint, remainingEvents: events };
             setShow({ ...show, timeline: newTimeline });
         },
@@ -419,20 +408,14 @@ export function useShowfile() {
                 type: TimelineEventTypes.StartPointEvent,
                 target: {
                     type: SplinePointType.StartPoint,
-                    point: {
-                        x: 0,
-                        y: 10,
-                    },
+                    point: { x: 0, y: 10 },
                 },
                 durationMs: defaultEventDurationMs,
             },
             remainingEvents: [],
         };
         const layers = [...show.timeline, newLayer];
-        setShow({
-            ...show,
-            timeline: layers,
-        });
+        setShow({ ...show, timeline: layers });
 
         setSelectedLayerIndex(layers.length - 1);
     }, [show, setShow, defaultEventDurationMs]);
@@ -469,9 +452,7 @@ export function useShowfile() {
         if (!audio) return;
 
         audioRef.current.src = URL.createObjectURL(
-            new Blob([audio.data as BlobPart], {
-                type: audio.mimeType,
-            }),
+            new Blob([audio.data as BlobPart], { type: audio.mimeType }),
         );
         audioRef.current.load();
     }, [audio]);
@@ -641,10 +622,7 @@ export function useShowfile() {
     );
 
     const removeAudio = useCallback(() => {
-        setShow({
-            ...show,
-            audio: undefined,
-        });
+        setShow({ ...show, audio: undefined });
     }, [show, setShow]);
 
     const deleteTimelineEvent = useCallback(
@@ -681,10 +659,7 @@ export function useShowfile() {
                 durationMs: defaultEventDurationMs,
             };
             events.splice(eventIndex, 0, eventToAdd);
-            newTimeline[layerIndex] = {
-                startPoint,
-                remainingEvents: events,
-            };
+            newTimeline[layerIndex] = { startPoint, remainingEvents: events };
             setShow({ ...show, timeline: newTimeline });
         },
         [show, defaultEventDurationMs, setShow],
@@ -704,10 +679,7 @@ export function useShowfile() {
                 radians: 2 * Math.PI,
             };
             events.splice(eventIndex, 0, eventToAdd);
-            newTimeline[layerIndex] = {
-                startPoint,
-                remainingEvents: events,
-            };
+            newTimeline[layerIndex] = { startPoint, remainingEvents: events };
             setShow({ ...show, timeline: newTimeline });
         },
         [show, defaultEventDurationMs, setShow],

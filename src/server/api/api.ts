@@ -1,7 +1,7 @@
 import type { WebsocketRequestHandler } from "express-ws";
 import { Router } from "express";
 
-import { parseMessage } from "../../common/message/parse-message";
+import { parseMessage } from "../../common/message/parse-message.js";
 import {
     GameFinishedMessage,
     GameEndMessage,
@@ -9,60 +9,60 @@ import {
     GameInterruptedMessage,
     MoveMessage,
     SetChessMessage,
-} from "../../common/message/game-message";
+} from "../../common/message/game-message.js";
 import {
     DriveRobotMessage,
     SetRobotVariableMessage,
-} from "../../common/message/robot-message";
+} from "../../common/message/robot-message.js";
 
-import type { Difficulty } from "../../common/client-types";
-import { RegisterWebsocketMessage } from "../../common/message/message";
+import type { Difficulty } from "../../common/client-types.js";
+import { RegisterWebsocketMessage } from "../../common/message/message.js";
 import {
     clientManager,
     gameManager,
     setGameManager,
     socketManager,
-} from "./managers";
+} from "./managers.js";
 import {
     ComputerGameManager,
     HumanGameManager,
     PuzzleGameManager,
-} from "./game-manager";
-import { ChessEngine } from "../../common/chess-engine";
-import { Side } from "../../common/game-types";
-import { USE_VIRTUAL_ROBOTS, START_ROBOTS_AT_DEFAULT } from "../utils/env";
-import { SaveManager } from "./save-manager";
+} from "./game-manager.js";
+import { ChessEngine } from "../../common/chess-engine.js";
+import { Side } from "../../common/game-types.js";
+import { USE_VIRTUAL_ROBOTS, START_ROBOTS_AT_DEFAULT } from "../utils/env.js";
+import { SaveManager } from "./save-manager.js";
 
-import { VirtualBotTunnel, VirtualRobot } from "../simulator";
-import { Position } from "../robot/position";
-import { DEGREE } from "../../common/units";
+import { VirtualBotTunnel, VirtualRobot } from "../simulator.js";
+import { Position } from "../robot/position.js";
+import { DEGREE } from "../../common/units.js";
 import {
     DRIVE_TANK_SCHEMA,
     PacketType,
     SET_VAR_SCHEMA,
-} from "../utils/tcp-packet";
-import { ShowfileSchema, TimelineEventTypes } from "../../common/show";
-import { SplinePointType } from "../../common/spline";
-import type { Command } from "../command/command";
+} from "../utils/tcp-packet.js";
+import { ShowfileSchema, TimelineEventTypes } from "../../common/show.js";
+import { SplinePointType } from "../../common/spline.js";
+import type { Command } from "../command/command.js";
 import {
     SequentialCommandGroup,
     ParallelCommandGroup,
-} from "../command/command";
+} from "../command/command.js";
 import {
     DriveQuadraticSplineCommand,
     DriveCubicSplineCommand,
     SpinRadiansCommand,
-} from "../command/move-command";
-import { GridIndices } from "../robot/grid-indices";
-import { puzzles, type PuzzleComponents } from "./puzzles";
+} from "../command/move-command.js";
+import { GridIndices } from "../robot/grid-indices.js";
+import { puzzles, type PuzzleComponents } from "./puzzles.js";
 import {
     moveAllRobotsHomeToDefaultOptimized,
     moveAllRobotsToDefaultPositions,
     moveAllRobotsFromBoardToHome,
-} from "../robot/path-materializer";
-import { tcpServer } from "./tcp-interface";
-import { robotManager } from "../robot/robot-manager";
-import { executor } from "../command/executor";
+} from "../robot/path-materializer.js";
+import { tcpServer } from "./tcp-interface.js";
+import { robotManager } from "../robot/robot-manager.js";
+import { executor } from "../command/executor.js";
 
 /**
  * Helper function to move all robots from their home positions to their default positions
@@ -194,10 +194,7 @@ apiRouter.get("/client-information", async (req, res) => {
      * So removing the isGameEnded check here results in an infinite loop
      */
     const isGameActive = gameManager !== null && !gameManager.isGameEnded();
-    return res.send({
-        clientType,
-        isGameActive,
-    });
+    return res.send({ clientType, isGameActive });
 });
 
 /**
@@ -230,9 +227,9 @@ apiRouter.post("/start-computer-game", async (req, res) => {
         await setupDefaultRobotPositions(!START_ROBOTS_AT_DEFAULT);
     } catch (error) {
         console.error("Error positioning robots for computer game:", error);
-        return res.status(500).send({
-            message: "Failed to position robots for game start",
-        });
+        return res
+            .status(500)
+            .send({ message: "Failed to position robots for game start" });
     }
 
     // create a new computer game manager
@@ -263,9 +260,9 @@ apiRouter.post("/start-human-game", async (req, res) => {
         await setupDefaultRobotPositions(!START_ROBOTS_AT_DEFAULT);
     } catch (error) {
         console.error("Error positioning robots for human game:", error);
-        return res.status(500).send({
-            message: "Failed to position robots for game start",
-        });
+        return res
+            .status(500)
+            .send({ message: "Failed to position robots for game start" });
     }
 
     // create a new human game manager
@@ -304,12 +301,14 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
                     `Robot ${robotId} will move to square ${startSquare} (${gridIndices.toString()})`,
                 );
             } else {
-                return res.status(400).send({
-                    message:
-                        "Missing robot " +
-                        robotId +
-                        " which is required to start the puzzle, because it is included in the puzzle's robotDefaultPositions map.",
-                });
+                return res
+                    .status(400)
+                    .send({
+                        message:
+                            "Missing robot " +
+                            robotId +
+                            " which is required to start the puzzle, because it is included in the puzzle's robotDefaultPositions map.",
+                    });
             }
         }
 

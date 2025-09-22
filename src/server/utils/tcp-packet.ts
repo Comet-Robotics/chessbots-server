@@ -7,7 +7,7 @@ import {
     Literal,
     Record,
 } from "runtypes";
-import { Float, Int32, Uint32 } from "../../common/runtypes-typing";
+import { Float, Int32, Uint32 } from "../../common/runtypes-typing.js";
 
 export enum PacketType {
     CLIENT_HELLO = "CLIENT_HELLO",
@@ -34,10 +34,7 @@ const MotorPower = Float.withConstraint((n) => -1 <= n && n <= 1).withBrand(
     "motorPower",
 );
 
-const Position = Object({
-    x: Float,
-    y: Float,
-}).withBrand("position");
+const Position = Object({ x: Float, y: Float }).withBrand("position");
 
 // MUST be kept in sync with chessBotArduino/include/packet.h PacketType
 export const SERVER_PROTOCOL_VERSION = 1;
@@ -99,18 +96,9 @@ export const SET_VAR_SCHEMA = Object({
     var_id: VarId,
 }).and(
     Union(
-        Object({
-            var_type: Literal("float"),
-            var_val: Float,
-        }),
-        Object({
-            var_type: Literal("uint32"),
-            var_val: Uint32,
-        }),
-        Object({
-            var_type: Literal("int32"),
-            var_val: Int32,
-        }),
+        Object({ var_type: Literal("float"), var_val: Float }),
+        Object({ var_type: Literal("uint32"), var_val: Uint32 }),
+        Object({ var_type: Literal("int32"), var_val: Int32 }),
     ),
 );
 

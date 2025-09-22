@@ -4,24 +4,24 @@ import { useEffect, useState } from "react";
 import {
     GameInterruptedMessage,
     MoveMessage,
-} from "../../common/message/game-message";
+} from "../../common/message/game-message.js";
 import type {
     GameEndReason,
     GameInterruptedReason,
-} from "../../common/game-end-reasons";
+} from "../../common/game-end-reasons.js";
 
-import { ChessboardWrapper } from "../chessboard/chessboard-wrapper";
-import { NavbarMenu } from "../game/navbar-menu";
-import { useSocket } from "../api";
-import type { MessageHandler } from "../../common/message/message";
-//import { GameEndDialog } from "../game/game-end-dialog";
+import { ChessboardWrapper } from "../chessboard/chessboard-wrapper.js";
+import { NavbarMenu } from "../game/navbar-menu.js";
+import { useSocket } from "../api.js";
+import type { MessageHandler } from "../../common/message/message.js";
+//import { GameEndDialog } from "../game/game-end-dialog.js";
 import { Outlet } from "react-router-dom";
-import { ChessEngine } from "../../common/chess-engine";
-import type { Move } from "../../common/game-types";
-import { PieceType, Side } from "../../common/game-types";
+import { ChessEngine } from "../../common/chess-engine.js";
+import type { Move } from "../../common/game-types.js";
+import { PieceType, Side } from "../../common/game-types.js";
 //import { NonIdealState, Spinner } from "@blueprintjs/core";
-import { GameEndDialog } from "../game/game-end-dialog";
-// import { debugPath } from "../../server/robot/path-materializer";
+import { GameEndDialog } from "../game/game-end-dialog.js";
+// import { debugPath } from "../../server/robot/path-materializer.js";
 
 function getMessageHandler(
     chess: ChessEngine,

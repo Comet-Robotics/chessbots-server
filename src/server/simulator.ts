@@ -1,19 +1,19 @@
 import { EventEmitter } from "@posva/event-emitter";
-import { Robot } from "./robot/robot";
-import config from "./api/bot-server-config.json";
-import type { Packet, PacketWithId } from "./utils/tcp-packet";
-import { PacketType } from "./utils/tcp-packet";
-import { Position } from "./robot/position";
+import { Robot } from "./robot/robot.js";
+import config from "./api/bot-server-config.json" with {type: "json"};
+import type { Packet, PacketWithId } from "./utils/tcp-packet.js";
+import { PacketType } from "./utils/tcp-packet.js";
+import { Position } from "./robot/position.js";
 import path from "path";
-import type { StackFrame } from "../common/message/simulator-message";
-import { SimulatorUpdateMessage } from "../common/message/simulator-message";
-import { socketManager } from "./api/managers";
+import type { StackFrame } from "../common/message/simulator-message.js";
+import { SimulatorUpdateMessage } from "../common/message/simulator-message.js";
+import { socketManager } from "./api/managers.js";
 import { randomUUID } from "node:crypto";
-import { GridIndices } from "./robot/grid-indices";
-import { getStartHeading, Side } from "../common/game-types";
-import { BotTunnel, type RobotEventEmitter } from "./api/bot-tunnel";
+import { GridIndices } from "./robot/grid-indices.js";
+import { getStartHeading, Side } from "../common/game-types.js";
+import { BotTunnel, type RobotEventEmitter } from "./api/bot-tunnel.js";
 
-const srcDir = path.resolve(__dirname, "../");
+const srcDir = path.resolve(import.meta.dirname, "../");
 
 /**
  * get the current error stack
@@ -73,10 +73,7 @@ export class VirtualBotTunnel extends BotTunnel {
     connected = true;
     emitter: RobotEventEmitter;
 
-    static messages: {
-        ts: Date;
-        message: SimulatorUpdateMessage;
-    }[] = [];
+    static messages: { ts: Date; message: SimulatorUpdateMessage }[] = [];
 
     constructor(
         private robotId: string,
@@ -199,10 +196,7 @@ export class VirtualBotTunnel extends BotTunnel {
             const message = new SimulatorUpdateMessage(
                 this.robotId,
                 {
-                    position: {
-                        x: this.position.x,
-                        y: this.position.y,
-                    },
+                    position: { x: this.position.x, y: this.position.y },
                     headingRadians: this.headingRadians,
                 },
                 { ...packet, packetId },

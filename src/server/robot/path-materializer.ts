@@ -1,24 +1,24 @@
-import { type Move } from "../../common/game-types";
+import { type Move } from "../../common/game-types.js";
 import {
     type Command,
     ParallelCommandGroup,
     SequentialCommandGroup,
-} from "../command/command";
-import type { MoveCommand } from "../command/move-command";
+} from "../command/command.js";
+import type { MoveCommand } from "../command/move-command.js";
 import {
     AbsoluteMoveCommand,
     DriveCommand,
     ReversibleAbsoluteRotateCommand,
     RotateToStartCommand,
-} from "../command/move-command";
-import type { ReversibleRobotCommand } from "../command/move-piece";
-import { MovePiece } from "../command/move-piece";
-import { Position } from "./position";
-import { GridIndices } from "./grid-indices";
-import type { Robot } from "./robot";
+} from "../command/move-command.js";
+import type { ReversibleRobotCommand } from "../command/move-piece.js";
+import { MovePiece } from "../command/move-piece.js";
+import { Position } from "./position.js";
+import { GridIndices } from "./grid-indices.js";
+import type { Robot } from "./robot.js";
 //import { error } from "console"; replaced with Error
-import { robotManager } from "./robot-manager";
-import { gameManager } from "../api/managers";
+import { robotManager } from "./robot-manager.js";
+import { gameManager } from "../api/managers.js";
 
 export interface GridMove {
     from: GridIndices;

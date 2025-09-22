@@ -1,5 +1,5 @@
 import { Colors } from "@blueprintjs/colors";
-import { TimelineEventTypes } from "./show";
+import { TimelineEventTypes } from "./show.js";
 
 export const EVENT_TYPE_TO_COLOR: Record<
     (typeof TimelineEventTypes)[keyof typeof TimelineEventTypes],
@@ -41,10 +41,7 @@ export const TimelineDurationUpdateMode = {
  * able to drag existing points on the grid as in cursor mode.
  */
 
-export const GridCursorMode = {
-    Cursor: "cursor",
-    Pen: "pen",
-} as const;
+export const GridCursorMode = { Cursor: "cursor", Pen: "pen" } as const;
 
 export const RULER_TICK_INTERVAL_MS = 100;
 // TODO: make ruler tick size configurable so we can zoom. relatively low priority. would be nice if gestures could be supported too

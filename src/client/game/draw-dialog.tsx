@@ -6,16 +6,16 @@ import {
     DialogFooter,
 } from "@blueprintjs/core";
 import { useState } from "react";
-import type { SendMessage } from "../../common/message/message";
+import type { SendMessage } from "../../common/message/message.js";
 import {
     GameHoldMessage,
     GameInterruptedMessage,
-} from "../../common/message/game-message";
+} from "../../common/message/game-message.js";
 import {
     GameHoldReason,
     GameInterruptedReason,
-} from "../../common/game-end-reasons";
-import { bgColor, buttonColor, textColor } from "../check-dark-mode";
+} from "../../common/game-end-reasons.js";
+import { bgColor, buttonColor, textColor } from "../check-dark-mode.js";
 import "../colors.css";
 
 interface DrawDialogProps {

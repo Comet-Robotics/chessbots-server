@@ -1,5 +1,5 @@
-import { type TimelineLayerType, TimelineEventTypes } from "./show";
-import { GRID_CELL_PX } from "./units";
+import { type TimelineLayerType, TimelineEventTypes } from "./show.js";
+import { GRID_CELL_PX } from "./units.js";
 import {
     type Coords,
     SplinePointType,
@@ -8,7 +8,7 @@ import {
     derivativeQuadraticBezier,
     derivativeCubicBezier,
     reflectPoint,
-} from "./spline";
+} from "./spline.js";
 
 export interface RobotState {
     position: Coords;

@@ -10,7 +10,7 @@
  * Modified: 9/20/24
  */
 
-import { Side } from "../../common/game-types";
+import { Side } from "../../common/game-types.js";
 import * as fs from "node:fs";
 
 // Save files contain a date in ms and pgn string

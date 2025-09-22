@@ -2,17 +2,17 @@ import { Button, Card, Code, H1, H2, Spinner } from "@blueprintjs/core";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { get, useSocket } from "../api";
-import { SelectRobot } from "./select-robot";
-import { DriveRobot } from "./drive-robot";
-import { SetRobotVariable } from "./set-robot-variable";
+import { get, useSocket } from "../api.js";
+import { SelectRobot } from "./select-robot.js";
+import { DriveRobot } from "./drive-robot.js";
+import { SetRobotVariable } from "./set-robot-variable.js";
 import "./debug.scss";
 import {
     bgColor,
     darkModeIcon,
     textColor,
     toggleUserSetting,
-} from "../check-dark-mode";
+} from "../check-dark-mode.js";
 import "../colors.css";
 
 /**

@@ -2,9 +2,9 @@ import type { CSSProperties } from "react";
 import { forwardRef } from "react";
 import { motion } from "framer-motion";
 import { Tooltip } from "@blueprintjs/core";
-import { robotSize } from "../debug/simulator"; // Reuse size
-import { robotColor, innerRobotColor } from "../check-dark-mode";
-import type { Coords } from "../../common/spline";
+import { robotSize } from "../debug/simulator.js"; // Reuse size
+import { robotColor, innerRobotColor } from "../check-dark-mode.js";
+import type { Coords } from "../../common/spline.js";
 
 // Simple representation for display, doesn't need full simulation data
 interface MotionRobotProps {

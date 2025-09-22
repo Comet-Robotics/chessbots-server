@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { SetupBase } from "../setup/setup-base";
-import { SelectPuzzle } from "./select-puzzle";
+import { SetupBase } from "../setup/setup-base.js";
+import { SelectPuzzle } from "./select-puzzle.js";
 import { NonIdealState, Spinner } from "@blueprintjs/core";
-import { get, useEffectQuery } from "../api";
+import { get, useEffectQuery } from "../api.js";
 import { Navigate } from "react-router-dom";
-import type { PuzzleComponents } from "../../server/api/puzzles";
+import type { PuzzleComponents } from "../../server/api/puzzles.js";
 
 export function SetupPuzzle() {
     const [selectedPuzzle, setSelectedPuzzle] = useState<string | undefined>();

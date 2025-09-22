@@ -1,5 +1,5 @@
 import * as net from "node:net";
-import config from "./bot-server-config.json";
+import config from "./bot-server-config.json" with {type: "json"};
 import {
     type Packet,
     type PacketWithId,
@@ -7,18 +7,18 @@ import {
     packetToJson,
     PacketType,
     SERVER_HELLO_SCHEMA,
-} from "../utils/tcp-packet";
+} from "../utils/tcp-packet.js";
 import { EventEmitter } from "@posva/event-emitter";
 import { randomUUID } from "node:crypto";
-import { robotManager, type RobotManager } from "../robot/robot-manager";
+import { robotManager, type RobotManager } from "../robot/robot-manager.js";
 import {
     MAX_PING_FAIL,
     PING_INTERVAL,
     PING_TIMEOUT,
     USE_VIRTUAL_ROBOTS,
-} from "../utils/env";
-import { BotTunnel, type RobotEventEmitter } from "./bot-tunnel";
-import { waitTime } from "../utils/time";
+} from "../utils/env.js";
+import { BotTunnel, type RobotEventEmitter } from "./bot-tunnel.js";
+import { waitTime } from "../utils/time.js";
 
 /**
  * The tunnel for handling communications to the robots

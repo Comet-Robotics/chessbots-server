@@ -1,4 +1,4 @@
-import type { Command } from "./command";
+import type { Command } from "./command.js";
 
 /**
  * Custom error class to indicate a conflict in requirements.

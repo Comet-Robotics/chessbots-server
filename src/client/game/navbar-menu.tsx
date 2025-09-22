@@ -9,20 +9,20 @@ import { useNavigate } from "react-router-dom";
 import {
     GameHoldMessage,
     GameInterruptedMessage,
-} from "../../common/message/game-message";
+} from "../../common/message/game-message.js";
 import {
     GameHoldReason,
     GameInterruptedReason,
-} from "../../common/game-end-reasons";
-import type { SendMessage } from "../../common/message/message";
-import { Side } from "../../common/game-types";
+} from "../../common/game-end-reasons.js";
+import type { SendMessage } from "../../common/message/message.js";
+import { Side } from "../../common/game-types.js";
 import type { Dispatch } from "react";
 import {
     bgColor,
     textColor,
     darkModeIcon,
     toggleUserSetting,
-} from "../check-dark-mode";
+} from "../check-dark-mode.js";
 import "../colors.css";
 
 interface NavbarMenuProps {

@@ -1,5 +1,5 @@
-import type { Message, SendMessage } from "../../common/message/message";
-import type { ChessEngine } from "../../common/chess-engine";
+import type { Message, SendMessage } from "../../common/message/message.js";
+import type { ChessEngine } from "../../common/chess-engine.js";
 import {
     MoveMessage,
     GameInterruptedMessage,
@@ -8,24 +8,24 @@ import {
     GameFinishedMessage,
     GameEndMessage,
     SetChessMessage,
-} from "../../common/message/game-message";
-import type { SocketManager } from "./socket-manager";
-import type { ClientManager } from "./client-manager";
-import { ClientType } from "../../common/client-types";
-import type { Move } from "../../common/game-types";
-import { Side, oppositeSide } from "../../common/game-types";
+} from "../../common/message/game-message.js";
+import type { SocketManager } from "./socket-manager.js";
+import type { ClientManager } from "./client-manager.js";
+import { ClientType } from "../../common/client-types.js";
+import type { Move } from "../../common/game-types.js";
+import { Side, oppositeSide } from "../../common/game-types.js";
 import type {
     GameEndReason,
     GameEndReason as GameInterruptedReason,
-} from "../../common/game-end-reasons";
+} from "../../common/game-end-reasons.js";
 import {
     GameFinishedReason,
     GameHoldReason,
-} from "../../common/game-end-reasons";
-import { SaveManager } from "./save-manager";
-import { materializePath } from "../robot/path-materializer";
-import { DO_SAVES } from "../utils/env";
-import { executor } from "../command/executor";
+} from "../../common/game-end-reasons.js";
+import { SaveManager } from "./save-manager.js";
+import { materializePath } from "../robot/path-materializer.js";
+import { DO_SAVES } from "../utils/env.js";
+import { executor } from "../command/executor.js";
 
 type GameState = {
     type?: "puzzle" | "human" | "computer";

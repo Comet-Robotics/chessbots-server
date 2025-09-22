@@ -1,15 +1,15 @@
 import { Button, useHotkeys } from "@blueprintjs/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { DriveRobotMessage } from "../../common/message/robot-message";
-import type { SendMessage } from "../../common/message/message";
+import { DriveRobotMessage } from "../../common/message/robot-message.js";
+import type { SendMessage } from "../../common/message/message.js";
 import { Joystick } from "react-joystick-component";
 import type { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
-import { DriveSlider } from "./drive-slider";
+import { DriveSlider } from "./drive-slider.js";
 import {
     joystickInColor,
     joystickOutColor,
     textColor,
-} from "../check-dark-mode";
+} from "../check-dark-mode.js";
 
 interface DriveRobotProps {
     robotId: string;
@@ -266,12 +266,7 @@ export function DriveRobot(props: DriveRobotProps) {
                     />
                 </div>
                 <div>
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "center",
-                        }}
-                    >
+                    <div style={{ display: "flex", justifyContent: "center" }}>
                         <Joystick
                             baseColor={joystickOutColor()}
                             stickColor={joystickInColor()}
@@ -285,24 +280,14 @@ export function DriveRobot(props: DriveRobotProps) {
                             stop={handleStopMove}
                         ></Joystick>
                     </div>
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "center",
-                        }}
-                    >
+                    <div style={{ display: "flex", justifyContent: "center" }}>
                         <Button
                             icon="arrow-up"
                             onMouseUp={handleStopMove}
                             onMouseDown={handleDriveForward}
                         />
                     </div>
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "center",
-                        }}
-                    >
+                    <div style={{ display: "flex", justifyContent: "center" }}>
                         <Button
                             icon="arrow-left"
                             onMouseUp={handleStopMove}
@@ -319,12 +304,7 @@ export function DriveRobot(props: DriveRobotProps) {
                             onMouseDown={handleTurnRight}
                         />
                     </div>
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "center",
-                        }}
-                    >
+                    <div style={{ display: "flex", justifyContent: "center" }}>
                         <Button
                             icon="stop"
                             onClick={handleStopMove}

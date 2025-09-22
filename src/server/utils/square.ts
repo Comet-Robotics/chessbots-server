@@ -1,5 +1,5 @@
 import type { Square } from "chess.js";
-import { Position } from "../robot/position";
+import { Position } from "../robot/position.js";
 
 const FILE_LOOKUP = "abcdefgh";
 

@@ -1,9 +1,9 @@
 import { NonIdealState, Spinner } from "@blueprintjs/core";
-import { SetupBase } from "./setup-base";
+import { SetupBase } from "./setup-base.js";
 import { useNavigate, Navigate } from "react-router-dom";
-import { GameStartedMessage } from "../../common/message/game-message";
-import { useSocket, useEffectQuery, get } from "../api";
-import { ClientType } from "../../common/client-types";
+import { GameStartedMessage } from "../../common/message/game-message.js";
+import { useSocket, useEffectQuery, get } from "../api.js";
+import { ClientType } from "../../common/client-types.js";
 
 /**
  * check for an active game and waits for one or forwards to setup

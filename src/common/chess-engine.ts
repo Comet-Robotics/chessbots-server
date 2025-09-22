@@ -1,12 +1,13 @@
 import type { Square } from "chess.js";
 import { Chess } from "chess.js";
-import { aiMove } from "js-chess-engine";
-import { GameFinishedReason } from "./game-end-reasons";
-import type { Difficulty } from "./client-types";
-import type { Move } from "./game-types";
-import { PieceType, Side } from "./game-types";
-import { GridIndices } from "../server/robot/grid-indices";
-import type { RobotManager } from "../server/robot/robot-manager";
+import jsChessEngine from "js-chess-engine";
+const { aiMove } = jsChessEngine;
+import { GameFinishedReason } from "./game-end-reasons.js";
+import type { Difficulty } from "./client-types.js";
+import type { Move } from "./game-types.js";
+import { PieceType, Side } from "./game-types.js";
+import { GridIndices } from "../server/robot/grid-indices.js";
+import type { RobotManager } from "../server/robot/robot-manager.js";
 
 /**
  * Creates the engine to manage chess game
@@ -207,10 +208,7 @@ export class ChessEngine {
      * @returns - possible to squares
      */
     getLegalMoves(square?: Square) {
-        return this.chess.moves({
-            square,
-            verbose: true,
-        });
+        return this.chess.moves({ square, verbose: true });
     }
 
     /**
@@ -259,11 +257,7 @@ export class ChessEngine {
 
         if (this.checkPromotion(from, to)) {
             // ai always promotes to queen
-            return {
-                from,
-                to,
-                promotion: PieceType.QUEEN,
-            };
+            return { from, to, promotion: PieceType.QUEEN };
         }
         return { from, to };
     }

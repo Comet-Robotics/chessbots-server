@@ -1,4 +1,3 @@
-// @ts-expect-error: chessbots client is a CommonJS module, but this library is a ES Module, so we need to tell TypeScript that it's okay
 import { decode as cborDecode } from "cbor-x";
 
 import {
@@ -17,8 +16,8 @@ import {
     type Spline,
     SplinePointType,
     StartPointSchema,
-} from "./spline";
-import { Uint32 } from "./runtypes-typing";
+} from "./spline.js";
+import { Uint32 } from "./runtypes-typing.js";
 
 export const TimelineEventTypes = {
     GoToPointEvent: "goto_point",
@@ -90,10 +89,7 @@ export const ShowfileSchema = Object({
     // The timeline is an array of timeline 'layers'. A layer consists of an array that includes all the events for one robot.
     timeline: Array(TimelineLayerSchema),
     audio: Optional(
-        Object({
-            data: InstanceOf<Uint8Array>(Uint8Array),
-            mimeType: String,
-        }),
+        Object({ data: InstanceOf<Uint8Array>(Uint8Array), mimeType: String }),
     ),
     name: String,
 });
@@ -130,10 +126,7 @@ export function createNewShowfile(): Showfile {
                     type: TimelineEventTypes.StartPointEvent,
                     target: {
                         type: SplinePointType.StartPoint,
-                        point: {
-                            x: 2,
-                            y: 2,
-                        },
+                        point: { x: 2, y: 2 },
                     },
                     durationMs: 3000,
                     id: crypto.randomUUID(),

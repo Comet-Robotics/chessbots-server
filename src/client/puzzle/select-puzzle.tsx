@@ -1,9 +1,9 @@
 import { Button, MenuItem } from "@blueprintjs/core";
 import type { ItemRenderer } from "@blueprintjs/select";
 import { Select } from "@blueprintjs/select";
-import { post } from "../api";
+import { post } from "../api.js";
 import { useNavigate } from "react-router-dom";
-import type { PuzzleComponents } from "../../server/api/puzzles";
+import type { PuzzleComponents } from "../../server/api/puzzles.js";
 
 const renderPuzzleOptions: ItemRenderer<string> = (
     puzzleNumber,

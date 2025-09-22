@@ -1,5 +1,5 @@
 import { Callout } from "@blueprintjs/core";
-import { get, useEffectQuery } from "./api";
+import { get, useEffectQuery } from "./api.js";
 
 export function PuzzleTipBox() {
     const { isPending, data, isError } = useEffectQuery(

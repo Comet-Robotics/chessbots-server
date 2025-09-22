@@ -1,4 +1,4 @@
-import { Message, MessageType } from "./message";
+import { Message, MessageType } from "./message.js";
 
 /**
  * send a robot message
@@ -9,10 +9,7 @@ abstract class RobotMessage extends Message {
     }
 
     protected toObj(): object {
-        return {
-            ...super.toObj(),
-            id: this.id,
-        };
+        return { ...super.toObj(), id: this.id };
     }
 }
 

@@ -1,9 +1,13 @@
 import { ContextMenu, Menu, MenuItem, MenuDivider } from "@blueprintjs/core";
 import { useRef } from "react";
-import { type Point, SplinePointType, type Coords } from "../../common/spline";
-import { robotSize } from "../debug/simulator";
-import { GRID_CELL_PX } from "../../common/units";
-import { useDraggable } from "./hooks";
+import {
+    type Point,
+    SplinePointType,
+    type Coords,
+} from "../../common/spline.js";
+import { robotSize } from "../debug/simulator.js";
+import { GRID_CELL_PX } from "../../common/units.js";
+import { useDraggable } from "./hooks.js";
 
 export function SplinePoint({
     point,

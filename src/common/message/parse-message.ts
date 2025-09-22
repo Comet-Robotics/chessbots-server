@@ -1,6 +1,6 @@
-import type { Message } from "./message";
-import { MessageType, RegisterWebsocketMessage } from "./message";
-import { DriveRobotMessage, SetRobotVariableMessage } from "./robot-message";
+import type { Message } from "./message.js";
+import { MessageType, RegisterWebsocketMessage } from "./message.js";
+import { DriveRobotMessage, SetRobotVariableMessage } from "./robot-message.js";
 import {
     PositionMessage,
     MoveMessage,
@@ -10,8 +10,8 @@ import {
     GameFinishedMessage,
     GameEndMessage,
     SetChessMessage,
-} from "./game-message";
-import { SimulatorUpdateMessage } from "./simulator-message";
+} from "./game-message.js";
+import { SimulatorUpdateMessage } from "./simulator-message.js";
 
 /**
  * Parses sent messages into Message instances.

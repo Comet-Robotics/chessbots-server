@@ -2,15 +2,15 @@ import { Button, H3, H6, Slider } from "@blueprintjs/core";
 import type { Dispatch } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Difficulty, GameType } from "../../common/client-types";
-import { Side } from "../../common/game-types";
-import { post } from "../api";
+import { Difficulty, GameType } from "../../common/client-types.js";
+import { Side } from "../../common/game-types.js";
+import { post } from "../api.js";
 import {
     buttonColor,
     textColor,
     sliderColor,
     textBoxColor,
-} from "../check-dark-mode";
+} from "../check-dark-mode.js";
 import "../colors.css";
 /** User's desired side, b/w/random */
 enum DesiredSide {
@@ -96,9 +96,7 @@ export function SetupGame(props: SetupGameProps) {
                         difficulty: difficulty.toString(),
                     });
                 } else {
-                    promise = post("/start-human-game", {
-                        side: selectedSide,
-                    });
+                    promise = post("/start-human-game", { side: selectedSide });
                 }
                 promise.then(() => {
                     navigate("/game");

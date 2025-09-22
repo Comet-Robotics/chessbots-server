@@ -4,11 +4,11 @@ import "./index.scss";
 
 import { FocusStyleManager, BlueprintProvider } from "@blueprintjs/core";
 import { RouterProvider } from "react-router-dom";
-import { router } from "./router";
+import { router } from "./router.js";
 import { StrictMode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { bgColor } from "./check-dark-mode";
-import { BeginCheckRefresh } from "./begin-check-refresh";
+import { bgColor } from "./check-dark-mode.js";
+import { BeginCheckRefresh } from "./begin-check-refresh.js";
 export const queryClient = new QueryClient();
 
 FocusStyleManager.onlyShowFocusOnTabs();

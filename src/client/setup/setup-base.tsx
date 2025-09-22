@@ -1,10 +1,10 @@
 import { Dialog, DialogBody, DialogFooter } from "@blueprintjs/core";
 import { Outlet } from "react-router-dom";
-import { ChessboardWrapper } from "../chessboard/chessboard-wrapper";
+import { ChessboardWrapper } from "../chessboard/chessboard-wrapper.js";
 import type { PropsWithChildren, ReactNode } from "react";
-import { ChessEngine } from "../../common/chess-engine";
-import { Side } from "../../common/game-types";
-import { bgColor } from "../check-dark-mode";
+import { ChessEngine } from "../../common/chess-engine.js";
+import { Side } from "../../common/game-types.js";
+import { bgColor } from "../check-dark-mode.js";
 import "../colors.css";
 
 interface SetupBaseProps extends PropsWithChildren {
@@ -28,10 +28,7 @@ export function SetupBase(props: SetupBaseProps): JSX.Element {
                 rotation={0}
             />
             <Dialog
-                style={{
-                    backgroundColor: "transparent",
-                    boxShadow: "none",
-                }}
+                style={{ backgroundColor: "transparent", boxShadow: "none" }}
                 isOpen
                 canEscapeKeyClose={false}
                 canOutsideClickClose={false}
