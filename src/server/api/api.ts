@@ -558,14 +558,20 @@ apiRouter.get("/get-puzzles", (_, res) => {
     return res.send(out);
 });
 
+export function pauseGame(res, clientSide) {
+    gamePaused.flag = true;
+    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_PAUSED));
+    const returnedMessage = {message: "success"}
+    
+    return clientSide ? res.send(returnedMessage) : returnedMessage;
+}
+
 /**
  * Pause the game
  * Todo: add authentication instead of an exposed pause call
  */
 apiRouter.get("/pause-game", (_, res) => {
-    gamePaused.flag = true;
-    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_PAUSED));
-    return res.send({ message: "success" });
+    return pauseGame(res, true)
 });
 
 /**
