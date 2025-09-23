@@ -104,11 +104,12 @@ export function Game(): JSX.Element {
         "game-state",
         async () => {
             return get("/game-state").then((gameState) => {
-                setChess(new ChessEngine(gameState.position));
-                if (gameState.gameEndReason !== undefined) {
-                    setGameInterruptedReason(gameState.gameEndReason);
+                setChess(new ChessEngine(gameState.state.position));
+                setPause(gameState.pause);
+                if (gameState.state.gameEndReason !== undefined) {
+                    setGameInterruptedReason(gameState.state.gameEndReason);
                 }
-                return gameState;
+                return gameState.state;
             });
         },
         false,
@@ -161,12 +162,7 @@ export function Game(): JSX.Element {
             :   null
         :   null;
 
-    const gamePauseDialog =
-        gameHoldReason !== undefined ?
-            gameHoldReason === GameHoldReason.GAME_PAUSED ?
-                <PauseDialog />
-            :   null
-        :   null;
+    const gamePauseDialog = paused ? <PauseDialog /> : null;
 
     const gameUnpauseDialog =
         gameHoldReason !== undefined ?

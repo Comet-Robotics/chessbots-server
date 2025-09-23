@@ -62,7 +62,7 @@ export class SaveManager {
         };
         const oldGame = SaveManager.loadGame(hostId + "+" + clientID);
         if (oldGame && oldGame.pos !== null) {
-            saveContents.oldPos = oldGame.game;
+            saveContents.oldPos = oldGame.pos;
             saveContents.oldRobotPos = oldGame.robotPos;
         }
         return FileManager.writeFile(hostId + "+" + clientID, saveContents);

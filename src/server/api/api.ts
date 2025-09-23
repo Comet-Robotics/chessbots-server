@@ -221,7 +221,10 @@ apiRouter.get("/game-state", (req, res) => {
         return res.status(400).send({ message: "No game is currently active" });
     }
     const clientType = clientManager.getClientType(req.cookies.id);
-    return res.send(gameManager.getGameState(clientType));
+    return res.send({
+        state: gameManager.getGameState(clientType),
+        pause: gamePaused.flag,
+    });
 });
 
 /**
@@ -575,26 +578,32 @@ apiRouter.get("/pause-game", (_, res) => {
  * Todo: add authentication instead of an exposed unpause call
  */
 apiRouter.get("/unpause-game", async (_, res) => {
-    gamePaused.flag = false;
-    const ids = clientManager.getIds();
-    if (ids) {
-        const oldSave = SaveManager.loadGame(ids[0]);
-        gameManager?.chess.loadFen(oldSave!.oldPos);
-        setAllRobotsToDefaultPositions(
-            new Map(
-                oldSave!.oldRobotPos?.map<[string, GridIndices]>((obj) => [
-                    obj[1],
-                    new GridIndices(
-                        parseInt(obj[0].split(", ")[0]),
-                        parseInt(obj[0].split(", ")[1]),
-                    ),
-                ]),
-            ),
+    if (gamePaused.flag) {
+        gamePaused.flag = false;
+        const ids = clientManager.getIds();
+        if (ids) {
+            const oldSave = SaveManager.loadGame(ids[0]);
+            gameManager?.chess.loadFen(oldSave!.oldPos);
+            setAllRobotsToDefaultPositions(
+                new Map(
+                    oldSave!.oldRobotPos?.map<[string, GridIndices]>((obj) => [
+                        obj[1],
+                        new GridIndices(
+                            parseInt(obj[0].split(", ")[0]),
+                            parseInt(obj[0].split(", ")[1]),
+                        ),
+                    ]),
+                ),
+            );
+            socketManager.sendToAll(new SetChessMessage(oldSave!.oldPos));
+        }
+        socketManager.sendToAll(
+            new GameHoldMessage(GameHoldReason.GAME_UNPAUSED),
         );
-        socketManager.sendToAll(new SetChessMessage(oldSave!.oldPos));
+        return res.send({ message: "success" });
+    } else {
+        return res.send({ message: "game not paused" });
     }
-    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_UNPAUSED));
-    return res.send({ message: "success" });
 });
 
 /**
