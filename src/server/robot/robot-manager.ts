@@ -99,6 +99,12 @@ export class RobotManager {
         }
         indicesToIds.set(indices.toString(), robotId);
     }
+
+    stopAllRobots() {
+        Array.from(this.idsToRobots.values()).forEach((robot) => {
+            robot.sendStopPacket();
+        });
+    }
 }
 
 export const robotManager = new RobotManager(

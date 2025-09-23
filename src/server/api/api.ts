@@ -52,15 +52,16 @@ import {
     SpinRadiansCommand,
 } from "../command/move-command";
 import { GridIndices } from "../robot/grid-indices";
-import { puzzles, type PuzzleComponents } from "./puzzles";
 import {
     moveAllRobotsHomeToDefaultOptimized,
     moveAllRobotsToDefaultPositions,
-    moveAllRobotsFromBoardToHome,
 } from "../robot/path-materializer";
+import type { PuzzleComponents } from "./puzzles";
+import { puzzles } from "./puzzles";
 import { tcpServer } from "./tcp-interface";
 import { robotManager } from "../robot/robot-manager";
 import { executor } from "../command/executor";
+import { GameHoldReason } from "../../common/game-end-reasons";
 
 /**
  * Helper function to move all robots from their home positions to their default positions
@@ -76,7 +77,7 @@ async function setupDefaultRobotPositions(
                 moveAllRobotsToDefaultPositions(defaultPositionsMap);
             await executor.execute(command);
         } else {
-            setAllRobotsToDefaultPositions(defaultPositionsMap);
+            moveAllRobotsToDefaultPositions(defaultPositionsMap);
         }
     } else {
         if (isMoving) {
@@ -186,6 +187,17 @@ apiRouter.get("/client-information", async (req, res) => {
                 ),
             );
         }
+        const robotPos = new Map(
+            oldSave!.robotPos?.map<[string, GridIndices]>((obj) => [
+                obj[1],
+                new GridIndices(
+                    parseInt(obj[0].split(", ")[0]),
+                    parseInt(obj[0].split(", ")[1]),
+                ),
+            ]),
+        );
+        console.log(robotPos);
+        setAllRobotsToDefaultPositions(robotPos);
     }
     /**
      * Note the client currently redirects to home from the game over screen
@@ -210,7 +222,10 @@ apiRouter.get("/game-state", (req, res) => {
         return res.status(400).send({ message: "No game is currently active" });
     }
     const clientType = clientManager.getClientType(req.cookies.id);
-    return res.send(gameManager.getGameState(clientType));
+    return res.send({
+        state: gameManager.getGameState(clientType),
+        pause: gamePaused.flag,
+    });
 });
 
 /**
@@ -285,7 +300,6 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
     const fen = puzzle.fen;
     const moves = puzzle.moves;
     const difficulty = puzzle.rating;
-    const tooltip = puzzle.tooltip;
 
     if (puzzle.robotDefaultPositions) {
         // Convert puzzle.robotDefaultPositions from Record<string, string> to Map<string, GridIndices>
@@ -322,21 +336,12 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
             new ChessEngine(),
             socketManager,
             fen,
-            tooltip,
+            "",
             moves,
             difficulty,
         ),
     );
 
-    return res.send({ message: "success" });
-});
-
-/**
- * Returns robots to home after a game ends.
- */
-apiRouter.post("/return-home", async (_req, res) => {
-    const command = moveAllRobotsFromBoardToHome();
-    await executor.execute(command);
     return res.send({ message: "success" });
 });
 
@@ -568,6 +573,35 @@ apiRouter.get("/pause-game", (_, res) => {
 
 /**
  * Unpause the game
+ * Todo: add authentication instead of an exposed unpause call
+ */
+apiRouter.get("/unpause-game", async (_, res) => {
+    if (gamePaused.flag) {
+        gamePaused.flag = false;
+        const ids = clientManager.getIds();
+        if (ids) {
+            const oldSave = SaveManager.loadGame(ids[0]);
+            gameManager?.chess.loadFen(oldSave!.oldPos);
+            setAllRobotsToDefaultPositions(
+                new Map(
+                    oldSave!.oldRobotPos?.map<[string, GridIndices]>((obj) => [
+                        obj[1],
+                        new GridIndices(
+                            parseInt(obj[0].split(", ")[0]),
+                            parseInt(obj[0].split(", ")[1]),
+                        ),
+                    ]),
+                ),
+            );
+            socketManager.sendToAll(new SetChessMessage(oldSave!.oldPos));
+        }
+        socketManager.sendToAll(
+            new GameHoldMessage(GameHoldReason.GAME_UNPAUSED),
+        );
+        return res.send({ message: "success" });
+    } else {
+        return res.send({ message: "game not paused" });
+    }
  * Resumes any leftover commands queued in the command executor
  * Todo: add authentication instead of an exposed unpause call
  */

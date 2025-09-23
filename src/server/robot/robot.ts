@@ -193,4 +193,10 @@ export class Robot {
             timeDeltaMs: timeDeltaMs,
         });
     }
+
+    public async sendStopPacket(): Promise<void> {
+        await this.tunnel!.send({
+            type: PacketType.ESTOP,
+        });
+    }
 }
