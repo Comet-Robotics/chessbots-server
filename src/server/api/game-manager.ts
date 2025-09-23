@@ -145,7 +145,7 @@ export class HumanGameManager extends GameManager {
         const ids = this.clientManager.getIds();
         const currentSave = SaveManager.loadGame(id);
         // update the internal chess object if it is a move massage and game not paused
-        if (message instanceof MoveMessage && !gamePaused.flag) {
+        if (message instanceof MoveMessage && !gamePaused) {
             // Call path materializer and send to bots
             const command = materializePath(message.move);
 
@@ -266,7 +266,7 @@ export class ComputerGameManager extends GameManager {
      * @returns when the game ends
      */
     public async handleMessage(message: Message, id: string): Promise<void> {
-        if (message instanceof MoveMessage && !gamePaused.flag) {
+        if (message instanceof MoveMessage && !gamePaused) {
             // Call path materializer and send to bots for human move
             const command = materializePath(message.move);
 
@@ -351,7 +351,7 @@ export class PuzzleGameManager extends GameManager {
             if (
                 this.moves[this.moveNumber].from === message.move.from &&
                 this.moves[this.moveNumber].to === message.move.to &&
-                !gamePaused.flag
+                !gamePaused
             ) {
                 const command = materializePath(message.move);
 
