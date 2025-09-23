@@ -62,7 +62,6 @@ import { tcpServer } from "./tcp-interface";
 import { robotManager } from "../robot/robot-manager";
 import { executor } from "../command/executor";
 
-
 /**
  * Helper function to move all robots from their home positions to their default positions
  * for regular chess games

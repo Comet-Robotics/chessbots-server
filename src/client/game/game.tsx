@@ -42,7 +42,7 @@ function getMessageHandler(
     setGameInterruptedReason: Dispatch<GameInterruptedReason>,
     setGameEndedReason: Dispatch<GameEndReason>,
     setGameHoldReason: Dispatch<GameHoldReason>,
-    setPaused : Dispatch<boolean>,
+    setPaused: Dispatch<boolean>,
 ): MessageHandler {
     return (message) => {
         if (message instanceof MoveMessage) {
@@ -65,9 +65,9 @@ function getMessageHandler(
             setGameEndedReason(message.reason);
         } else if (message instanceof GameHoldMessage) {
             setGameHoldReason(message.reason);
-            if(message.reason === GameHoldReason.GAME_PAUSED){
+            if (message.reason === GameHoldReason.GAME_PAUSED) {
                 setPaused(true);
-            } else if(message.reason === GameHoldReason.GAME_UNPAUSED){
+            } else if (message.reason === GameHoldReason.GAME_UNPAUSED) {
                 setPaused(false);
             }
         }
@@ -161,27 +161,30 @@ export function Game(): JSX.Element {
             :   null
         :   null;
 
-    const gamePauseDialog = 
+    const gamePauseDialog =
         gameHoldReason !== undefined ?
             gameHoldReason === GameHoldReason.GAME_PAUSED ?
                 <PauseDialog />
-            : null
-        : null;
+            :   null
+        :   null;
 
-    const gameUnpauseDialog = 
+    const gameUnpauseDialog =
         gameHoldReason !== undefined ?
             gameHoldReason === GameHoldReason.GAME_UNPAUSED ?
-                <NotificationDialog dialogText="Game Unpaused"/>
-            : null
-        : null;
+                <NotificationDialog dialogText="Game Unpaused" />
+            :   null
+        :   null;
 
     /** make moves by making a copy of the chessboard and sending the move message */
-    const handleMove = paused? 
+    const handleMove =
+        paused ?
             (move: Move): void => {
                 setChess(chess.copy(move));
                 sendMessage(new MoveMessage(move));
             }
-        : (move:Move):void => {move;}; //send a do-nothing function if game is paused
+        :   (move: Move): void => {
+                move;
+            }; //send a do-nothing function if game is paused
 
     // return the chessboard wrapper, navbar, and potential end dialog
     return (

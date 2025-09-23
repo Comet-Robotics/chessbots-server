@@ -18,10 +18,9 @@ import {
 } from "../utils/env";
 import { BotTunnel, type RobotEventEmitter } from "./bot-tunnel";
 import { waitTime } from "../utils/time";
-import { pauseGame, unpauseGame } from "./managers";
-import { disconnectedBots } from "./managers";
+import { pauseGame, unpauseGame, disconnectedBots } from "./managers";
 
-/** 
+/**
  * The tunnel for handling communications to the robots
  */
 export class RealBotTunnel extends BotTunnel {
@@ -88,9 +87,8 @@ export class RealBotTunnel extends BotTunnel {
                     if (countFailures === MAX_PING_FAIL) {
                         console.log("AAA A BOT DISCONNECTED! ABORT! ABORT!");
 
-                        if(this.id != undefined)
-                        {
-                            disconnectedBots.add(this.id)
+                        if (this.id !== undefined) {
+                            disconnectedBots.add(this.id);
                         }
 
                         //send the pause signal.
@@ -277,8 +275,6 @@ export class TCPServer {
         console.log("New client connection from %s", remoteAddress);
         socket.setNoDelay(true);
 
-
-
         // create a new bot tunnel for the connection
         const tunnel = new RealBotTunnel(
             socket,
@@ -295,7 +291,7 @@ export class TCPServer {
                     config["bots"][mac] = id;
                 } else {
                     id = config["bots"][mac];
-                    
+
                     if (!(id in this.robotManager.idsToRobots)) {
                         this.robotManager.createRobotFromId(id);
                     }
@@ -303,11 +299,9 @@ export class TCPServer {
                 }
 
                 // if there was disconnected bot beforehand, remove it. If no more bots disconnected, send signal to unpause game
-                if(id !== undefined && disconnectedBots.has(id))
-                {
+                if (id !== undefined && disconnectedBots.has(id)) {
                     disconnectedBots.delete(id);
-                    if(disconnectedBots.size == 0)
-                    {
+                    if (disconnectedBots.size === 0) {
                         unpauseGame(false);
                     }
                 }

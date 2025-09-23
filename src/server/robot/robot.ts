@@ -112,8 +112,7 @@ export class Robot {
         console.log(
             `Sending turn packet to robot ${this.id} with delta heading ${deltaHeadingRadians}`,
         );
-        if(this.tunnel !== null)
-        {
+        if (this.tunnel !== null) {
             await this.tunnel!.send({
                 type: PacketType.TURN_BY_ANGLE,
                 deltaHeadingRadians: deltaHeadingRadians,
@@ -131,9 +130,11 @@ export class Robot {
         console.log(
             `Sending drive packet to robot ${this.id} with distance ${tileDistance}`,
         );
-        if(this.tunnel !== null)
-        {
-            await this.tunnel!.send({ type: PacketType.DRIVE_TILES, tileDistance });
+        if (this.tunnel !== null) {
+            await this.tunnel!.send({
+                type: PacketType.DRIVE_TILES,
+                tileDistance,
+            });
         }
     }
 
