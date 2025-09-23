@@ -51,12 +51,12 @@ import {
     SpinRadiansCommand,
 } from "../command/move-command";
 import { GridIndices } from "../robot/grid-indices";
-import { puzzles, type PuzzleComponents } from "./puzzles";
 import {
     moveAllRobotsHomeToDefaultOptimized,
     moveAllRobotsToDefaultPositions,
-    moveAllRobotsFromBoardToHome,
 } from "../robot/path-materializer";
+import type { PuzzleComponents } from "./puzzles";
+import { puzzles } from "./puzzles";
 import { tcpServer } from "./tcp-interface";
 import { robotManager } from "../robot/robot-manager";
 import { executor } from "../command/executor";
@@ -76,7 +76,7 @@ async function setupDefaultRobotPositions(
                 moveAllRobotsToDefaultPositions(defaultPositionsMap);
             await executor.execute(command);
         } else {
-            setAllRobotsToDefaultPositions(defaultPositionsMap);
+            moveAllRobotsToDefaultPositions(defaultPositionsMap);
         }
     } else {
         if (isMoving) {
@@ -186,6 +186,17 @@ apiRouter.get("/client-information", async (req, res) => {
                 ),
             );
         }
+        const robotPos = new Map(
+            oldSave!.robotPos?.map<[string, GridIndices]>((obj) => [
+                obj[1],
+                new GridIndices(
+                    parseInt(obj[0].split(", ")[0]),
+                    parseInt(obj[0].split(", ")[1]),
+                ),
+            ]),
+        );
+        console.log(robotPos);
+        setAllRobotsToDefaultPositions(robotPos);
     }
     /**
      * Note the client currently redirects to home from the game over screen
@@ -285,7 +296,6 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
     const fen = puzzle.fen;
     const moves = puzzle.moves;
     const difficulty = puzzle.rating;
-    const tooltip = puzzle.tooltip;
 
     if (puzzle.robotDefaultPositions) {
         // Convert puzzle.robotDefaultPositions from Record<string, string> to Map<string, GridIndices>
@@ -322,21 +332,12 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
             new ChessEngine(),
             socketManager,
             fen,
-            tooltip,
+            "",
             moves,
             difficulty,
         ),
     );
 
-    return res.send({ message: "success" });
-});
-
-/**
- * Returns robots to home after a game ends.
- */
-apiRouter.post("/return-home", async (_req, res) => {
-    const command = moveAllRobotsFromBoardToHome();
-    await executor.execute(command);
     return res.send({ message: "success" });
 });
 
@@ -575,6 +576,23 @@ apiRouter.get("/pause-game", (_, res) => {
  */
 apiRouter.get("/unpause-game", async (_, res) => {
     gamePaused.flag = false;
+    const ids = clientManager.getIds();
+    if (ids) {
+        const oldSave = SaveManager.loadGame(ids[0]);
+        gameManager?.chess.loadFen(oldSave!.oldPos);
+        setAllRobotsToDefaultPositions(
+            new Map(
+                oldSave!.oldRobotPos?.map<[string, GridIndices]>((obj) => [
+                    obj[1],
+                    new GridIndices(
+                        parseInt(obj[0].split(", ")[0]),
+                        parseInt(obj[0].split(", ")[1]),
+                    ),
+                ]),
+            ),
+        );
+        socketManager.sendToAll(new SetChessMessage(oldSave!.oldPos));
+    }
     socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_UNPAUSED));
     return res.send({ message: "success" });
 });

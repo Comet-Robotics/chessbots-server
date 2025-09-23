@@ -100,8 +100,10 @@ export class RobotManager {
         indicesToIds.set(indices.toString(), robotId);
     }
 
-    stopAllRobots(){
-        Array.from(this.idsToRobots.values()).forEach((robot)=>{robot.sendStopPacket()})
+    stopAllRobots() {
+        Array.from(this.idsToRobots.values()).forEach((robot) => {
+            robot.sendStopPacket();
+        });
     }
 }
 

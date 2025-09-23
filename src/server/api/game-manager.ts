@@ -220,7 +220,7 @@ export class HumanGameManager extends GameManager {
                     SaveManager.endGame(ids[0], ids[1]);
                 else SaveManager.endGame(ids[1], ids[0]);
             }
-        } 
+        }
     }
 }
 

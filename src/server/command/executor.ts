@@ -43,14 +43,14 @@ export class CommandExecutor {
     public async execute(command: Command): Promise<void> {
         this.checkRequirements(command);
         this.runningCommands.push(command);
-        if(!gamePaused.flag){ 
+        if (!gamePaused.flag) {
             return command.execute().finally(() => {
                 this.oldCommands.unshift(command);
                 const index = this.runningCommands.indexOf(command);
                 if (index >= 0) {
                     this.runningCommands.splice(index, 1);
                 }
-            })
+            });
         }
     }
 
@@ -59,19 +59,19 @@ export class CommandExecutor {
      * mainly used to finish the backlog from a paused game
      * @returns - The command to execute.
      */
-    public async finishExecution() : Promise<void> {
-        return this.runningCommands.forEach((command) =>{
-            command.execute().finally(()=>{
+    public async finishExecution(): Promise<void> {
+        return this.runningCommands.forEach((command) => {
+            command.execute().finally(() => {
                 this.oldCommands.unshift(command);
                 const index = this.runningCommands.indexOf(command);
                 if (index >= 0) {
                     this.runningCommands.splice(index, 1);
                 }
-            })
-        })
+            });
+        });
     }
 
-    public clearExecution(){
+    public clearExecution() {
         this.runningCommands = [];
     }
 
@@ -83,7 +83,7 @@ export class CommandExecutor {
         return this.oldCommands;
     }
 
-    public clearOldCommands(){
+    public clearOldCommands() {
         this.oldCommands = [];
     }
 }
