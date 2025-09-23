@@ -19,9 +19,7 @@ import {
 import { BotTunnel, type RobotEventEmitter } from "./bot-tunnel";
 import { waitTime } from "../utils/time";
 import { pauseGame, unpauseGame } from "./api";
-
-//VARIABLE_HERE
-const disconnectedBots : Set<string> = new Set()
+import { disconnectedBots } from "./managers";
 
 /** 
  * The tunnel for handling communications to the robots

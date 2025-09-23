@@ -21,7 +21,10 @@ import {
     clientManager,
     gameManager,
     gamePaused,
+    pauser,
     setGameManager,
+    setPaused,
+    setPauser,
     socketManager,
 } from "./managers";
 import {
@@ -62,7 +65,6 @@ import { robotManager } from "../robot/robot-manager";
 import { executor } from "../command/executor";
 import { GameHoldReason } from "../../common/game-end-reasons";
 
-let pauser : string = "";
 
 /**
  * Helper function to move all robots from their home positions to their default positions
@@ -564,7 +566,7 @@ apiRouter.get("/get-puzzles", (_, res) => {
 export function pauseGame(res, clientSide) {
 
     // means game is already paused
-    if(gamePaused.flag == true)
+    if(gamePaused == true)
     {
         if(pauser == "server")
         {
@@ -577,12 +579,12 @@ export function pauseGame(res, clientSide) {
     }
 
     console.log("Pausing Game!")
-    gamePaused.flag = true;
+    setPaused(true);
     socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_PAUSED));
     const successMessage = {message: "success"}
     
     // set the person who paused it
-    pauser = clientSide ? "admin" : "server"
+    setPauser(clientSide ? "admin" : "server");
 
     return clientSide ? res.send(successMessage) : successMessage;
 }
@@ -600,7 +602,7 @@ export function unpauseGame(res, clientSide) {
     }
     
     console.log("Resuming Game!")
-    gamePaused.flag = false;
+    setPaused(false);
     socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_UNPAUSED));
     const returnedMessage = {message: "success"}
     
