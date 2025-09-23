@@ -20,12 +20,10 @@ import { RegisterWebsocketMessage } from "../../common/message/message";
 import {
     clientManager,
     gameManager,
-    gamePaused,
-    pauser,
+    pauseGame,
     setGameManager,
-    setPaused,
-    setPauser,
     socketManager,
+    unpauseGame,
 } from "./managers";
 import {
     ComputerGameManager,
@@ -562,59 +560,12 @@ apiRouter.get("/get-puzzles", (_, res) => {
     return res.send(out);
 });
 
-// created a pause and unpause game function separately from the endpoint call so that another backend function can call it as well.
-export function pauseGame(res, clientSide) {
-
-    // means game is already paused
-    if(gamePaused == true)
-    {
-        if(pauser == "server")
-        {
-            return {message: "failure"}
-        }
-        else
-        {
-            return res.send({message: "failure"})
-        }
-    }
-
-    console.log("Pausing Game!")
-    setPaused(true);
-    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_PAUSED));
-    const successMessage = {message: "success"}
-    
-    // set the person who paused it
-    setPauser(clientSide ? "admin" : "server");
-
-    return clientSide ? res.send(successMessage) : successMessage;
-}
-
-export function unpauseGame(res, clientSide) {
-    // basically checks if someone is trying to unpause and they're not the ones who paused it.
-    if(clientSide && pauser == "server")
-    {
-        return res.send({message: "failure"})
-    }
-
-    if(!clientSide && pauser == "admin")
-    {
-        return {message: "failure"}
-    }
-    
-    console.log("Resuming Game!")
-    setPaused(false);
-    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_UNPAUSED));
-    const returnedMessage = {message: "success"}
-    
-    return clientSide ? res.send(returnedMessage) : returnedMessage;
-}
-
 /**
  * Pause the game
  * Todo: add authentication instead of an exposed pause call
  */
 apiRouter.get("/pause-game", (_, res) => {
-    return pauseGame(res, true);
+    return res.send(pauseGame(true));
 });
 
 /**
@@ -623,7 +574,7 @@ apiRouter.get("/pause-game", (_, res) => {
  * Todo: add authentication instead of an exposed unpause call
  */
 apiRouter.get("/unpause-game", async (_, res) => {
-    return unpauseGame(res, true);
+    return res.send(unpauseGame(true));
 });
 
 /**

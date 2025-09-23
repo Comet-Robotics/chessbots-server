@@ -18,7 +18,7 @@ import {
 } from "../utils/env";
 import { BotTunnel, type RobotEventEmitter } from "./bot-tunnel";
 import { waitTime } from "../utils/time";
-import { pauseGame, unpauseGame } from "./api";
+import { pauseGame, unpauseGame } from "./managers";
 import { disconnectedBots } from "./managers";
 
 /** 
@@ -94,7 +94,7 @@ export class RealBotTunnel extends BotTunnel {
                         }
 
                         //send the pause signal.
-                        pauseGame(null, false);
+                        pauseGame(false);
 
                         // this.emitter.emit("actionComplete", {
                         //     success: true,
@@ -308,7 +308,7 @@ export class TCPServer {
                     disconnectedBots.delete(id);
                     if(disconnectedBots.size == 0)
                     {
-                        unpauseGame(null, false);
+                        unpauseGame(false);
                     }
                 }
 
