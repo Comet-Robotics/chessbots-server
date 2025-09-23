@@ -90,9 +90,9 @@ export class RealBotTunnel extends BotTunnel {
                     if (countFailures === MAX_PING_FAIL) {
                         console.log("AAA A BOT DISCONNECTED! ABORT! ABORT!");
 
-                        if(this.address != undefined)
+                        if(this.id != undefined)
                         {
-                            disconnectedBots.add(this.address)
+                            disconnectedBots.add(this.id)
                         }
 
                         //send the pause signal.
@@ -279,16 +279,6 @@ export class TCPServer {
         console.log("New client connection from %s", remoteAddress);
         socket.setNoDelay(true);
 
-        // if there was disconnected bot beforehand, remove it. If no more bots disconnected, send signal to unpause game
-        if(disconnectedBots.has(remoteAddress))
-        {
-            disconnectedBots.delete(remoteAddress);
-            if(disconnectedBots.size == 0)
-            {
-                unpauseGame(null, false);
-            }
-        }
-
 
 
         // create a new bot tunnel for the connection
@@ -312,6 +302,17 @@ export class TCPServer {
                     }
                     console.log("Found address ID: " + id);
                 }
+
+                // if there was disconnected bot beforehand, remove it. If no more bots disconnected, send signal to unpause game
+                if(id !== undefined && disconnectedBots.has(id))
+                {
+                    disconnectedBots.delete(id);
+                    if(disconnectedBots.size == 0)
+                    {
+                        unpauseGame(null, false);
+                    }
+                }
+
                 tunnel.id = id;
                 tunnel.address = mac;
                 this.connections[id] = tunnel;
