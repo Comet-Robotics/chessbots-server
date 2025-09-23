@@ -297,6 +297,7 @@ export class TCPServer {
                     config["bots"][mac] = id;
                 } else {
                     id = config["bots"][mac];
+                    
                     if (!(id in this.robotManager.idsToRobots)) {
                         this.robotManager.createRobotFromId(id);
                     }

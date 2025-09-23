@@ -62,6 +62,8 @@ import { robotManager } from "../robot/robot-manager";
 import { executor } from "../command/executor";
 import { GameHoldReason } from "../../common/game-end-reasons";
 
+let pauser : string = "";
+
 /**
  * Helper function to move all robots from their home positions to their default positions
  * for regular chess games
@@ -560,15 +562,43 @@ apiRouter.get("/get-puzzles", (_, res) => {
 
 // created a pause and unpause game function separately from the endpoint call so that another backend function can call it as well.
 export function pauseGame(res, clientSide) {
+
+    // means game is already paused
+    if(gamePaused.flag == true)
+    {
+        if(pauser == "server")
+        {
+            return {message: "failure"}
+        }
+        else
+        {
+            return res.send({message: "failure"})
+        }
+    }
+
     console.log("Pausing Game!")
     gamePaused.flag = true;
     socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_PAUSED));
-    const returnedMessage = {message: "success"}
+    const successMessage = {message: "success"}
     
-    return clientSide ? res.send(returnedMessage) : returnedMessage;
+    // set the person who paused it
+    pauser = clientSide ? "admin" : "server"
+
+    return clientSide ? res.send(successMessage) : successMessage;
 }
 
 export function unpauseGame(res, clientSide) {
+    // basically checks if someone is trying to unpause and they're not the ones who paused it.
+    if(clientSide && pauser == "server")
+    {
+        return res.send({message: "failure"})
+    }
+
+    if(!clientSide && pauser == "admin")
+    {
+        return {message: "failure"}
+    }
+    
     console.log("Resuming Game!")
     gamePaused.flag = false;
     socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_UNPAUSED));
