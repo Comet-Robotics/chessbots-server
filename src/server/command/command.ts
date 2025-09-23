@@ -1,5 +1,6 @@
 import { gamePaused } from "../api/managers";
 import { robotManager } from "../robot/robot-manager";
+import { MOVE_TIMEOUT } from "../utils/env";
 
 /**
  * An command which operates on one or more robots.
@@ -10,6 +11,11 @@ export interface Command {
      * common resources to ensure they don't receive multiple inputs at once.
      */
     requirements: Set<object>;
+
+    /**
+     * used for time calculations
+     */
+    depth: number;
 
     /**
      * Executes the command.
@@ -45,6 +51,8 @@ export interface Reversible<T extends Reversible<T>> {
 export abstract class CommandBase implements Command {
     protected _requirements: Set<object> = new Set();
 
+    protected _depth: number = 1;
+
     public abstract execute(): Promise<void>;
 
     public then(next: Command): SequentialCommandGroup {
@@ -53,6 +61,14 @@ export abstract class CommandBase implements Command {
 
     public withTimePoint(seconds: number): Command {
         return new ParallelCommandGroup([this, new WaitCommand(seconds)]);
+    }
+
+    public get depth(): number {
+        return this._depth;
+    }
+
+    public set depth(depth: number) {
+        this._depth = depth;
     }
 
     public get requirements(): Set<object> {
@@ -86,6 +102,8 @@ export abstract class RobotCommand extends CommandBase {
 export class WaitCommand extends CommandBase {
     constructor(public readonly durationSec: number) {
         super();
+        //in case there is a long wait that isn't accounted for in the regular timeout
+        this.depth = durationSec / MOVE_TIMEOUT;
     }
     public async execute(): Promise<void> {
         return new Promise((resolve) =>
@@ -112,11 +130,27 @@ function isReversable(obj): obj is Reversible<typeof obj> {
  * Executes one or more commands in parallel.
  */
 export class ParallelCommandGroup extends CommandGroup {
+    constructor(public readonly commands: Command[]) {
+        super(commands);
+        let max = 0;
+        for (let x = 0; x < commands.length; x++) {
+            if (commands[x].depth > max) {
+                max = commands[x].depth;
+            }
+        }
+        this.depth = max;
+    }
+
     public async execute(): Promise<void> {
+        const timeout = new Promise<void>(() => {
+            setTimeout(() => {throw new Error("Move timeout")}, this.depth * MOVE_TIMEOUT);
+        });
+
         const promises = this.commands.map((move) => {
             gamePaused.flag ? null : move.execute();
         });
-        return Promise.all(promises).then(null);
+
+        return Promise.race([Promise.all(promises), timeout]).then(null);
     }
     public async reverse(): Promise<void> {
         const promises = this.commands.map((move) => {
@@ -132,14 +166,28 @@ export class ParallelCommandGroup extends CommandGroup {
  * Executes one or more commands in sequence, one after another.
  */
 export class SequentialCommandGroup extends CommandGroup {
+    constructor(public readonly commands: Command[]) {
+        super(commands);
+        let sum = 0;
+        for (let x = 0; x < commands.length; x++) {
+            sum += commands[x].depth;
+        }
+        this.depth = sum;
+    }
+
     public async execute(): Promise<void> {
         let promise = Promise.resolve();
+
+        const timeout = new Promise<void>(() => {
+            setTimeout(() => {throw new Error("Move timeout")}, this.depth * MOVE_TIMEOUT);
+        });
+
         for (const command of this.commands) {
             promise = promise.then(() => {
                 gamePaused.flag ? null : command.execute();
             });
         }
-        return promise;
+        return Promise.race([promise, timeout]);
     }
     public async reverse(): Promise<void> {
         let promise = Promise.resolve();
