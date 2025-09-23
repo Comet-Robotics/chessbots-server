@@ -20,9 +20,10 @@ import { RegisterWebsocketMessage } from "../../common/message/message";
 import {
     clientManager,
     gameManager,
-    gamePaused,
+    pauseGame,
     setGameManager,
     socketManager,
+    unpauseGame,
 } from "./managers";
 import {
     ComputerGameManager,
@@ -567,10 +568,7 @@ apiRouter.get("/get-puzzles", (_, res) => {
  * Todo: add authentication instead of an exposed pause call
  */
 apiRouter.get("/pause-game", (_, res) => {
-    gamePaused.flag = true;
-    robotManager.stopAllRobots();
-    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_PAUSED));
-    return res.send({ message: "success" });
+    return res.send(pauseGame(true));
 });
 
 /**
@@ -604,6 +602,11 @@ apiRouter.get("/unpause-game", async (_, res) => {
     } else {
         return res.send({ message: "game not paused" });
     }
+ * Resumes any leftover commands queued in the command executor
+ * Todo: add authentication instead of an exposed unpause call
+ */
+apiRouter.get("/unpause-game", async (_, res) => {
+    return res.send(unpauseGame(true));
 });
 
 /**
