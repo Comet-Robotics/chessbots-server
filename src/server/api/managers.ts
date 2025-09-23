@@ -49,9 +49,36 @@ export function unpauseGame(clientSide) {
         return { message: "failure" };
     }
 
+    if (!gamePaused) {
+        return { message: "game not paused" };
+    }
+    else
+    {
+        gamePaused = false;
+        const ids = clientManager.getIds();
+        if (ids) {
+            const oldSave = SaveManager.loadGame(ids[0]);
+            gameManager?.chess.loadFen(oldSave!.oldPos);
+            setAllRobotsToDefaultPositions(
+                new Map(
+                    oldSave!.oldRobotPos?.map<[string, GridIndices]>((obj) => [
+                        obj[1],
+                        new GridIndices(
+                            parseInt(obj[0].split(", ")[0]),
+                            parseInt(obj[0].split(", ")[1]),
+                        ),
+                    ]),
+                ),
+            );
+            socketManager.sendToAll(new SetChessMessage(oldSave!.oldPos));
+        }
+        socketManager.sendToAll(
+            new GameHoldMessage(GameHoldReason.GAME_UNPAUSED),
+        );
+    }
+
+
     console.log("Resuming Game!");
-    setPaused(false);
-    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_UNPAUSED));
 
     return { message: "success" };
 }

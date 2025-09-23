@@ -575,33 +575,41 @@ apiRouter.get("/pause-game", (_, res) => {
  * Unpause the game
  * Todo: add authentication instead of an exposed unpause call
  */
+
 apiRouter.get("/unpause-game", async (_, res) => {
-    if (gamePaused.flag) {
-        gamePaused.flag = false;
-        const ids = clientManager.getIds();
-        if (ids) {
-            const oldSave = SaveManager.loadGame(ids[0]);
-            gameManager?.chess.loadFen(oldSave!.oldPos);
-            setAllRobotsToDefaultPositions(
-                new Map(
-                    oldSave!.oldRobotPos?.map<[string, GridIndices]>((obj) => [
-                        obj[1],
-                        new GridIndices(
-                            parseInt(obj[0].split(", ")[0]),
-                            parseInt(obj[0].split(", ")[1]),
-                        ),
-                    ]),
-                ),
-            );
-            socketManager.sendToAll(new SetChessMessage(oldSave!.oldPos));
-        }
-        socketManager.sendToAll(
-            new GameHoldMessage(GameHoldReason.GAME_UNPAUSED),
-        );
-        return res.send({ message: "success" });
-    } else {
-        return res.send({ message: "game not paused" });
-    }
+    return res.send(unpauseGame(true))
+});
+
+// apiRouter.get("/unpause-game", async (_, res) => {
+//     if (gamePaused) {
+//         gamePaused = false;
+//         const ids = clientManager.getIds();
+//         if (ids) {
+//             const oldSave = SaveManager.loadGame(ids[0]);
+//             gameManager?.chess.loadFen(oldSave!.oldPos);
+//             setAllRobotsToDefaultPositions(
+//                 new Map(
+//                     oldSave!.oldRobotPos?.map<[string, GridIndices]>((obj) => [
+//                         obj[1],
+//                         new GridIndices(
+//                             parseInt(obj[0].split(", ")[0]),
+//                             parseInt(obj[0].split(", ")[1]),
+//                         ),
+//                     ]),
+//                 ),
+//             );
+//             socketManager.sendToAll(new SetChessMessage(oldSave!.oldPos));
+//         }
+//         socketManager.sendToAll(
+//             new GameHoldMessage(GameHoldReason.GAME_UNPAUSED),
+//         );
+//         return res.send({ message: "success" });
+//     } else {
+//         return res.send({ message: "game not paused" });
+//     }
+// });
+
+/*
  * Resumes any leftover commands queued in the command executor
  * Todo: add authentication instead of an exposed unpause call
  */
