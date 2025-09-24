@@ -20,6 +20,7 @@ import { RegisterWebsocketMessage } from "../../common/message/message";
 import {
     clientManager,
     gameManager,
+    gamePaused,
     pauseGame,
     setGameManager,
     socketManager,
@@ -61,7 +62,6 @@ import { puzzles } from "./puzzles";
 import { tcpServer } from "./tcp-interface";
 import { robotManager } from "../robot/robot-manager";
 import { executor } from "../command/executor";
-import { GameHoldReason } from "../../common/game-end-reasons";
 
 /**
  * Helper function to move all robots from their home positions to their default positions
@@ -224,7 +224,7 @@ apiRouter.get("/game-state", (req, res) => {
     const clientType = clientManager.getClientType(req.cookies.id);
     return res.send({
         state: gameManager.getGameState(clientType),
-        pause: gamePaused.flag,
+        pause: gamePaused,
     });
 });
 
@@ -563,6 +563,30 @@ apiRouter.get("/get-puzzles", (_, res) => {
     return res.send(out);
 });
 
+export function doRollBack() {
+    const ids = clientManager.getIds();
+    if (ids) 
+    {
+        doRollBack();
+        
+        const oldSave = SaveManager.loadGame(ids[0]);
+        gameManager?.chess.loadFen(oldSave!.oldPos);
+        setAllRobotsToDefaultPositions(
+            new Map(
+                oldSave!.oldRobotPos?.map<[string, GridIndices]>((obj) => [
+                    obj[1],
+                    new GridIndices(
+                        parseInt(obj[0].split(", ")[0]),
+                        parseInt(obj[0].split(", ")[1]),
+                    ),
+                ]),
+            ),
+        );
+        socketManager.sendToAll(new SetChessMessage(oldSave!.oldPos));
+    }
+
+}
+
 /**
  * Pause the game
  * Todo: add authentication instead of an exposed pause call
@@ -577,7 +601,9 @@ apiRouter.get("/pause-game", (_, res) => {
  */
 
 apiRouter.get("/unpause-game", async (_, res) => {
-    return res.send(unpauseGame(true))
+    const unpausePacket = unpauseGame(true)
+    
+    return res.send(unpausePacket)
 });
 
 // apiRouter.get("/unpause-game", async (_, res) => {

@@ -114,7 +114,7 @@ function isReversable(obj): obj is Reversible<typeof obj> {
 export class ParallelCommandGroup extends CommandGroup {
     public async execute(): Promise<void> {
         const promises = this.commands.map((move) => {
-            gamePaused.flag ? null : move.execute();
+            gamePaused ? null : move.execute();
         });
         return Promise.all(promises).then(null);
     }
@@ -136,7 +136,7 @@ export class SequentialCommandGroup extends CommandGroup {
         let promise = Promise.resolve();
         for (const command of this.commands) {
             promise = promise.then(() => {
-                gamePaused.flag ? null : command.execute();
+                gamePaused ? null : command.execute();
             });
         }
         return promise;

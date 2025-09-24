@@ -4,6 +4,7 @@
 
 import { GameHoldReason } from "../../common/game-end-reasons";
 import { GameHoldMessage } from "../../common/message/game-message";
+import { doRollBack } from "./api";
 import { ClientManager } from "./client-manager";
 import { type GameManager } from "./game-manager";
 import { SocketManager } from "./socket-manager";
@@ -52,30 +53,11 @@ export function unpauseGame(clientSide) {
     if (!gamePaused) {
         return { message: "game not paused" };
     }
-    else
-    {
-        gamePaused = false;
-        const ids = clientManager.getIds();
-        if (ids) {
-            const oldSave = SaveManager.loadGame(ids[0]);
-            gameManager?.chess.loadFen(oldSave!.oldPos);
-            setAllRobotsToDefaultPositions(
-                new Map(
-                    oldSave!.oldRobotPos?.map<[string, GridIndices]>((obj) => [
-                        obj[1],
-                        new GridIndices(
-                            parseInt(obj[0].split(", ")[0]),
-                            parseInt(obj[0].split(", ")[1]),
-                        ),
-                    ]),
-                ),
-            );
-            socketManager.sendToAll(new SetChessMessage(oldSave!.oldPos));
-        }
-        socketManager.sendToAll(
-            new GameHoldMessage(GameHoldReason.GAME_UNPAUSED),
-        );
-    }
+    gamePaused = false;
+    doRollBack()
+    socketManager.sendToAll(
+        new GameHoldMessage(GameHoldReason.GAME_UNPAUSED),
+    );
 
 
     console.log("Resuming Game!");
