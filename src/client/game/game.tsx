@@ -104,12 +104,12 @@ export function Game(): JSX.Element {
         "game-state",
         async () => {
             return get("/game-state").then((gameState) => {
-                setChess(new ChessEngine(gameState.state.position));
+                setChess(new ChessEngine(gameState.position));
                 setPause(gameState.pause);
-                if (gameState.state.gameEndReason !== undefined) {
-                    setGameInterruptedReason(gameState.state.gameEndReason);
+                if (gameState.gameEndReason !== undefined) {
+                    setGameInterruptedReason(gameState.gameEndReason);
                 }
-                return gameState.state;
+                return gameState;
             });
         },
         false,

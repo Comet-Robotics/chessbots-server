@@ -147,7 +147,7 @@ export class ParallelCommandGroup extends CommandGroup {
         });
 
         const promises = this.commands.map((move) => {
-            gamePaused.flag ? null : move.execute();
+            if (!gamePaused.flag) return move.execute();
         });
 
         return Promise.race([Promise.all(promises), timeout]).then(null);
@@ -184,7 +184,7 @@ export class SequentialCommandGroup extends CommandGroup {
 
         for (const command of this.commands) {
             promise = promise.then(() => {
-                gamePaused.flag ? null : command.execute();
+                if (!gamePaused.flag) return command.execute();
             });
         }
         return Promise.race([promise, timeout]);
