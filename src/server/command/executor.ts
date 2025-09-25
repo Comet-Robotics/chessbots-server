@@ -78,14 +78,6 @@ export class CommandExecutor {
     public getRunningCommands(): ReadonlyArray<Command> {
         return this.runningCommands;
     }
-
-    public getOldCommands(): ReadonlyArray<Command> {
-        return this.oldCommands;
-    }
-
-    public clearOldCommands() {
-        this.oldCommands = [];
-    }
 }
 
 export const executor = new CommandExecutor();
