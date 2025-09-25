@@ -34,6 +34,7 @@ type GameState = {
     side: Side;
     position: string;
     gameEndReason: GameEndReason | undefined;
+    pause: boolean;
     tooltip?: string;
     aiDifficulty?: number;
     difficulty?: number;
@@ -91,6 +92,7 @@ export abstract class GameManager {
             position: this.chess.pgn,
             gameEndReason: this.getGameEndReason(),
             tooltip: this.tooltip,
+            pause: gamePaused.flag,
         };
     }
 

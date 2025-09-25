@@ -221,10 +221,7 @@ apiRouter.get("/game-state", (req, res) => {
         return res.status(400).send({ message: "No game is currently active" });
     }
     const clientType = clientManager.getClientType(req.cookies.id);
-    return res.send({
-        state: gameManager.getGameState(clientType),
-        pause: gamePaused.flag,
-    });
+    return res.send(gameManager.getGameState(clientType));
 });
 
 /**
