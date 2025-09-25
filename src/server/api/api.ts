@@ -20,6 +20,7 @@ import { RegisterWebsocketMessage } from "../../common/message/message";
 import {
     clientManager,
     gameManager,
+    gamePaused,
     setGameManager,
     socketManager,
 } from "./managers";
@@ -59,6 +60,7 @@ import {
 import { tcpServer } from "./tcp-interface";
 import { robotManager } from "../robot/robot-manager";
 import { executor } from "../command/executor";
+import { GameHoldReason } from "../../common/game-end-reasons";
 
 /**
  * Helper function to move all robots from their home positions to their default positions
@@ -184,6 +186,17 @@ apiRouter.get("/client-information", async (req, res) => {
                 ),
             );
         }
+        const robotPos = new Map(
+            oldSave!.robotPos?.map<[string, GridIndices]>((obj) => [
+                obj[1],
+                new GridIndices(
+                    parseInt(obj[0].split(", ")[0]),
+                    parseInt(obj[0].split(", ")[1]),
+                ),
+            ]),
+        );
+        console.log(robotPos);
+        setAllRobotsToDefaultPositions(robotPos);
     }
     /**
      * Note the client currently redirects to home from the game over screen
@@ -554,6 +567,50 @@ apiRouter.get("/get-simulator-robot-state", (_, res) => {
 apiRouter.get("/get-puzzles", (_, res) => {
     const out: string = JSON.stringify(puzzles);
     return res.send(out);
+});
+
+/**
+ * Pause the game
+ * Todo: add authentication instead of an exposed pause call
+ */
+apiRouter.get("/pause-game", (_, res) => {
+    gamePaused.flag = true;
+    robotManager.stopAllRobots();
+    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_PAUSED));
+    return res.send({ message: "success" });
+});
+
+/**
+ * Unpause the game
+ * Todo: add authentication instead of an exposed unpause call
+ */
+apiRouter.get("/unpause-game", async (_, res) => {
+    if (gamePaused.flag) {
+        gamePaused.flag = false;
+        const ids = clientManager.getIds();
+        if (ids) {
+            const oldSave = SaveManager.loadGame(ids[0]);
+            gameManager?.chess.loadFen(oldSave!.oldPos);
+            setAllRobotsToDefaultPositions(
+                new Map(
+                    oldSave!.oldRobotPos?.map<[string, GridIndices]>((obj) => [
+                        obj[1],
+                        new GridIndices(
+                            parseInt(obj[0].split(", ")[0]),
+                            parseInt(obj[0].split(", ")[1]),
+                        ),
+                    ]),
+                ),
+            );
+            socketManager.sendToAll(new SetChessMessage(oldSave!.oldPos));
+        }
+        socketManager.sendToAll(
+            new GameHoldMessage(GameHoldReason.GAME_UNPAUSED),
+        );
+        return res.send({ message: "success" });
+    } else {
+        return res.send({ message: "game not paused" });
+    }
 });
 
 /**
