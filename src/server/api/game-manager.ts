@@ -27,7 +27,7 @@ import { materializePath } from "../robot/path-materializer";
 import { DO_SAVES } from "../utils/env";
 import { executor } from "../command/executor";
 import { robotManager } from "../robot/robot-manager";
-import { gamePaused } from "./managers";
+import { gamePaused } from "./pauseHandler";
 
 type GameState = {
     type?: "puzzle" | "human" | "computer";

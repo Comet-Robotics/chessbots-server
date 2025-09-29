@@ -195,8 +195,10 @@ export class Robot {
     }
 
     public async sendStopPacket(): Promise<void> {
-        await this.tunnel!.send({
-            type: PacketType.ESTOP,
-        });
+        if (this.tunnel !== null) {
+            await this.tunnel!.send({
+                type: PacketType.ESTOP,
+            });
+        }
     }
 }

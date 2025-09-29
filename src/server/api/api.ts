@@ -20,11 +20,7 @@ import { RegisterWebsocketMessage } from "../../common/message/message";
 import {
     clientManager,
     gameManager,
-    gamePaused,
-    pauser,
     setGameManager,
-    setPaused,
-    setPauser,
     socketManager,
 } from "./managers";
 import {
@@ -37,7 +33,7 @@ import { Side } from "../../common/game-types";
 import { USE_VIRTUAL_ROBOTS, START_ROBOTS_AT_DEFAULT } from "../utils/env";
 import { SaveManager } from "./save-manager";
 
-import { VirtualBotTunnel, VirtualRobot } from "../simulator";
+import { VirtualBotTunnel } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
@@ -63,7 +59,12 @@ import { puzzles } from "./puzzles";
 import { tcpServer } from "./tcp-interface";
 import { robotManager } from "../robot/robot-manager";
 import { executor } from "../command/executor";
-import { GameHoldReason } from "../../common/game-end-reasons";
+import {
+    gamePaused,
+    pauseGame,
+    setAllRobotsToDefaultPositions,
+    unpauseGame,
+} from "./pauseHandler";
 
 /**
  * Helper function to move all robots from their home positions to their default positions
@@ -87,26 +88,6 @@ async function setupDefaultRobotPositions(
             await executor.execute(command);
         } else {
             setAllRobotsToDefaultPositions();
-        }
-    }
-}
-
-function setAllRobotsToDefaultPositions(
-    defaultPositionsMap?: Map<string, GridIndices>,
-): void {
-    if (defaultPositionsMap) {
-        for (const [robotId, indices] of defaultPositionsMap.entries()) {
-            const robot = robotManager.getRobot(robotId);
-            robot.position = Position.fromGridIndices(indices);
-            if (robot instanceof VirtualRobot)
-                robot.updateTunnelPosition(robot.position);
-        }
-    } else {
-        for (const robot of robotManager.idsToRobots.values()) {
-            robot.position = Position.fromGridIndices(robot.defaultIndices);
-            if (robot instanceof VirtualRobot)
-                robot.updateTunnelPosition(robot.position);
-            robotManager.updateRobot(robot.id, robot.defaultIndices);
         }
     }
 }
@@ -564,66 +545,6 @@ apiRouter.get("/get-puzzles", (_, res) => {
     const out: string = JSON.stringify(puzzles);
     return res.send(out);
 });
-
-export function doRollBack() {
-    const ids = clientManager.getIds();
-    if (ids) {
-        const oldSave = SaveManager.loadGame(ids[0]);
-        gameManager?.chess.loadFen(oldSave!.oldPos);
-        setAllRobotsToDefaultPositions(
-            new Map(
-                oldSave!.oldRobotPos?.map<[string, GridIndices]>((obj) => [
-                    obj[1],
-                    new GridIndices(
-                        parseInt(obj[0].split(", ")[0]),
-                        parseInt(obj[0].split(", ")[1]),
-                    ),
-                ]),
-            ),
-        );
-        socketManager.sendToAll(new SetChessMessage(oldSave!.oldPos));
-    }
-}
-
-// created a pause and unpause game function separately from the endpoint call so that another backend function can call it as well.
-export function pauseGame(clientSide) {
-    // means game is already paused
-    if (gamePaused === true) {
-        return { message: "failure" };
-    }
-
-    console.log("Pausing Game!");
-
-    setPaused(true);
-    robotManager.stopAllRobots();
-    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_PAUSED));
-
-    // set the person who paused it
-    setPauser(clientSide ? "admin" : "server");
-
-    return { message: "success" };
-}
-
-export function unpauseGame(clientSide) {
-    // basically checks if someone is trying to unpause and they're not the ones who paused it.
-    if (
-        (clientSide && pauser === "server") ||
-        (!clientSide && pauser === "admin")
-    ) {
-        return { message: "failure" };
-    }
-
-    if (!gamePaused) {
-        return { message: "game not paused" };
-    }
-    setPaused(false);
-    doRollBack();
-    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_UNPAUSED));
-
-    console.log("Resuming Game!");
-
-    return { message: "success" };
-}
 
 /**
  * Pause the game

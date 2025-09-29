@@ -1,4 +1,4 @@
-import { gamePaused } from "../api/managers";
+import { gamePaused } from "../api/pauseHandler";
 import type { Command } from "./command";
 
 /**
