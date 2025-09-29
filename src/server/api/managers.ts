@@ -3,10 +3,14 @@
  */
 
 import { GameHoldReason } from "../../common/game-end-reasons";
-import { GameHoldMessage } from "../../common/message/game-message";
-import { doRollBack } from "./api";
+import { GameHoldMessage, SetChessMessage } from "../../common/message/game-message";
+import { GridIndices } from "../robot/grid-indices";
+import { Position } from "../robot/position";
+import { robotManager } from "../robot/robot-manager";
+import { VirtualRobot } from "../simulator";
 import { ClientManager } from "./client-manager";
 import { type GameManager } from "./game-manager";
+import { SaveManager } from "./save-manager";
 import { SocketManager } from "./socket-manager";
 
 export const socketManager = new SocketManager({});
@@ -39,6 +43,50 @@ export function pauseGame(clientSide) {
     setPauser(clientSide ? "admin" : "server");
 
     return { message: "success" };
+}
+
+export function setAllRobotsToDefaultPositions(
+    defaultPositionsMap?: Map<string, GridIndices>,
+): void {
+    if (defaultPositionsMap) {
+        for (const [robotId, indices] of defaultPositionsMap.entries()) {
+            const robot = robotManager.getRobot(robotId);
+            robot.position = Position.fromGridIndices(indices);
+            if (robot instanceof VirtualRobot)
+                robot.updateTunnelPosition(robot.position);
+        }
+    } else {
+        for (const robot of robotManager.idsToRobots.values()) {
+            robot.position = Position.fromGridIndices(robot.defaultIndices);
+            if (robot instanceof VirtualRobot)
+                robot.updateTunnelPosition(robot.position);
+            robotManager.updateRobot(robot.id, robot.defaultIndices);
+        }
+    }
+}
+
+
+
+export function doRollBack() {
+    const ids = clientManager.getIds();
+    if (ids) {
+        doRollBack();
+
+        const oldSave = SaveManager.loadGame(ids[0]);
+        gameManager?.chess.loadFen(oldSave!.oldPos);
+        setAllRobotsToDefaultPositions(
+            new Map(
+                oldSave!.oldRobotPos?.map<[string, GridIndices]>((obj) => [
+                    obj[1],
+                    new GridIndices(
+                        parseInt(obj[0].split(", ")[0]),
+                        parseInt(obj[0].split(", ")[1]),
+                    ),
+                ]),
+            ),
+        );
+        socketManager.sendToAll(new SetChessMessage(oldSave!.oldPos));
+    }
 }
 
 export function unpauseGame(clientSide) {
