@@ -410,13 +410,20 @@ function constructFinalCommand(
         }
     } else {
         console.log("no main piece");
-        return new MovePiece(rotateCommands, new SequentialCommandGroup([]), toDeadZone);
+        return new MovePiece(
+            rotateCommands,
+            new SequentialCommandGroup([]),
+            toDeadZone,
+        );
     }
 }
 
 // Takes in a move, and generates the commands required to get the main piece to it's destination
 // If there are pieces in the way, it shimmy's them out, and move them back after main piece passes
-export function moveMainPiece(move: GridMove, toDeadZone: boolean = false): MovePiece {
+export function moveMainPiece(
+    move: GridMove,
+    toDeadZone: boolean = false,
+): MovePiece {
     const driveCommands: DriveCommand[] = [];
     const rotateCommands: ReversibleRobotCommand[] = [];
     const collisionType = calcCollisionType(move);
