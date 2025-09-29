@@ -54,11 +54,8 @@ export function unpauseGame(clientSide) {
         return { message: "game not paused" };
     }
     gamePaused = false;
-    doRollBack()
-    socketManager.sendToAll(
-        new GameHoldMessage(GameHoldReason.GAME_UNPAUSED),
-    );
-
+    doRollBack();
+    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_UNPAUSED));
 
     console.log("Resuming Game!");
 

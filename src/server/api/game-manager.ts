@@ -92,7 +92,7 @@ export abstract class GameManager {
             position: this.chess.pgn,
             gameEndReason: this.getGameEndReason(),
             tooltip: this.tooltip,
-            pause: gamePaused.flag,
+            pause: gamePaused,
         };
     }
 

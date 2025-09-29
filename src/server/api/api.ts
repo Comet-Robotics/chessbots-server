@@ -565,10 +565,9 @@ apiRouter.get("/get-puzzles", (_, res) => {
 
 export function doRollBack() {
     const ids = clientManager.getIds();
-    if (ids) 
-    {
+    if (ids) {
         doRollBack();
-        
+
         const oldSave = SaveManager.loadGame(ids[0]);
         gameManager?.chess.loadFen(oldSave!.oldPos);
         setAllRobotsToDefaultPositions(
@@ -584,7 +583,6 @@ export function doRollBack() {
         );
         socketManager.sendToAll(new SetChessMessage(oldSave!.oldPos));
     }
-
 }
 
 /**
@@ -601,9 +599,9 @@ apiRouter.get("/pause-game", (_, res) => {
  */
 
 apiRouter.get("/unpause-game", async (_, res) => {
-    const unpausePacket = unpauseGame(true)
-    
-    return res.send(unpausePacket)
+    const unpausePacket = unpauseGame(true);
+
+    return res.send(unpausePacket);
 });
 
 // apiRouter.get("/unpause-game", async (_, res) => {
