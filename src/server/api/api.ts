@@ -568,8 +568,6 @@ apiRouter.get("/get-puzzles", (_, res) => {
 export function doRollBack() {
     const ids = clientManager.getIds();
     if (ids) {
-        doRollBack();
-
         const oldSave = SaveManager.loadGame(ids[0]);
         gameManager?.chess.loadFen(oldSave!.oldPos);
         setAllRobotsToDefaultPositions(
@@ -595,7 +593,9 @@ export function pauseGame(clientSide) {
     }
 
     console.log("Pausing Game!");
+
     setPaused(true);
+    robotManager.stopAllRobots();
     socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_PAUSED));
 
     // set the person who paused it
@@ -642,14 +642,6 @@ apiRouter.get("/unpause-game", async (_, res) => {
     const unpausePacket = unpauseGame(true);
 
     return res.send(unpausePacket);
-});
-
-/*
- * Resumes any leftover commands queued in the command executor
- * Todo: add authentication instead of an exposed unpause call
- */
-apiRouter.get("/unpause-game", async (_, res) => {
-    return res.send(unpauseGame(true));
 });
 
 /**

@@ -18,7 +18,8 @@ import {
 } from "../utils/env";
 import { BotTunnel, type RobotEventEmitter } from "./bot-tunnel";
 import { waitTime } from "../utils/time";
-import { pauseGame, unpauseGame, disconnectedBots } from "./managers";
+import { pauseGame, unpauseGame } from "./api";
+import { disconnectedBots } from "./managers";
 
 /**
  * The tunnel for handling communications to the robots
