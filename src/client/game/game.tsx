@@ -43,6 +43,7 @@ function getMessageHandler(
     setGameEndedReason: Dispatch<GameEndReason>,
     setGameHoldReason: Dispatch<GameHoldReason>,
     setPaused: Dispatch<boolean>,
+    setPaused: Dispatch<boolean>,
 ): MessageHandler {
     return (message) => {
         if (message instanceof MoveMessage) {
@@ -65,9 +66,9 @@ function getMessageHandler(
             setGameEndedReason(message.reason);
         } else if (message instanceof GameHoldMessage) {
             setGameHoldReason(message.reason);
-            if (message.reason === GameHoldReason.GAME_PAUSED) {
+            if  (message.reason === GameHoldReason.GAME_PAUSED)  {
                 setPaused(true);
-            } else if (message.reason === GameHoldReason.GAME_UNPAUSED) {
+            } else if  (message.reason === GameHoldReason.GAME_UNPAUSED)  {
                 setPaused(false);
             }
         }
