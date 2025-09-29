@@ -156,7 +156,15 @@ export class HumanGameManager extends GameManager {
 
             console.log("running executor");
             console.dir(command, { depth: null });
-            await executor.execute(command);
+            await executor.execute(command).catch((reason) => {
+                gamePaused.flag = true;
+                console.log(reason);
+                this.chess.undo();
+                this.socketManager.sendToAll(
+                    new GameHoldMessage(GameHoldReason.GAME_PAUSED),
+                );
+                return;
+            });
             console.log("executor done");
 
             if (ids && DO_SAVES) {
@@ -280,7 +288,15 @@ export class ComputerGameManager extends GameManager {
             this.socketManager.sendToAll(new MoveMessage(message.move));
             this.chess.makeMove(message.move);
 
-            await executor.execute(command);
+            await executor.execute(command).catch((reason) => {
+                gamePaused.flag = true;
+                console.log(reason);
+                this.chess.undo();
+                this.socketManager.sendToAll(
+                    new GameHoldMessage(GameHoldReason.GAME_PAUSED),
+                );
+                return;
+            });
 
             if (DO_SAVES) {
                 SaveManager.saveGame(
@@ -370,7 +386,15 @@ export class PuzzleGameManager extends GameManager {
 
                 console.log("running executor");
                 console.dir(command, { depth: null });
-                await executor.execute(command);
+                await executor.execute(command).catch((reason) => {
+                    gamePaused.flag = true;
+                    console.log(reason);
+                    this.chess.undo();
+                    this.socketManager.sendToAll(
+                        new GameHoldMessage(GameHoldReason.GAME_PAUSED),
+                    );
+                    return;
+                });
                 console.log("executor done");
 
                 //if there is another move, make it

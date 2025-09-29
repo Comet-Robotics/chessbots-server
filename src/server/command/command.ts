@@ -1,6 +1,6 @@
 import { gamePaused } from "../api/managers";
 import { robotManager } from "../robot/robot-manager";
-import { MOVE_TIMEOUT } from "../utils/env";
+import { MAX_RETRIES, MOVE_TIMEOUT } from "../utils/env";
 
 /**
  * An command which operates on one or more robots.
@@ -15,7 +15,7 @@ export interface Command {
     /**
      * used for time calculations
      */
-    depth: number;
+    height: number;
 
     /**
      * Executes the command.
@@ -51,7 +51,7 @@ export interface Reversible<T extends Reversible<T>> {
 export abstract class CommandBase implements Command {
     protected _requirements: Set<object> = new Set();
 
-    protected _depth: number = 1;
+    protected _height: number = 1;
 
     public abstract execute(): Promise<void>;
 
@@ -63,12 +63,12 @@ export abstract class CommandBase implements Command {
         return new ParallelCommandGroup([this, new WaitCommand(seconds)]);
     }
 
-    public get depth(): number {
-        return this._depth;
+    public get height(): number {
+        return this._height;
     }
 
-    public set depth(depth: number) {
-        this._depth = depth;
+    public set height(height: number) {
+        this._height = height;
     }
 
     public get requirements(): Set<object> {
@@ -103,7 +103,7 @@ export class WaitCommand extends CommandBase {
     constructor(public readonly durationSec: number) {
         super();
         //in case there is a long wait that isn't accounted for in the regular timeout
-        this.depth = durationSec / MOVE_TIMEOUT;
+        this.height = durationSec / MOVE_TIMEOUT;
     }
     public async execute(): Promise<void> {
         return new Promise((resolve) =>
@@ -134,31 +134,56 @@ export class ParallelCommandGroup extends CommandGroup {
         super(commands);
         let max = 0;
         for (let x = 0; x < commands.length; x++) {
-            if (commands[x].depth > max) {
-                max = commands[x].depth;
+            if (commands[x].height > max) {
+                max = commands[x].height;
             }
         }
-        this.depth = max;
+        this.height = max;
     }
 
     public async execute(): Promise<void> {
-        const timeout = new Promise<void>(() => {
-            setTimeout(() => {throw new Error("Move timeout")}, this.depth * MOVE_TIMEOUT);
-        });
+        const timeout = new Promise<void>((_, rej) => {
+            //time for each move to execute plus time to handle errors
+            setTimeout(
+                () => {
+                    console.log(this.commands);
+                    rej("Move Timeout");
+                },
+                this.height * MOVE_TIMEOUT * MAX_RETRIES * 1.1,
+            );
+        }).catch();
 
         const promises = this.commands.map((move) => {
-            if (!gamePaused.flag) return move.execute();
+            if (!gamePaused.flag) return move.execute().catch();
+            else return new Promise<void>(() => {}).catch();
         });
+        if (promises) {
+            const executor = async (count: number) => {
+                return Promise.race([
+                    Promise.all(promises).catch(),
+                    timeout.catch(),
+                ]).catch((reason) => {
+                    if (reason.indexOf("Move Timeout") >= 0) {
+                        if (count < MAX_RETRIES) {
+                            return executor(count + 1).catch();
+                        } else {
+                            throw (reason +=
+                                " failed at height: " + this.height.toString());
+                        }
+                    }
+                });
+            };
 
-        return Promise.race([Promise.all(promises), timeout]).then(null);
+            return executor(0).catch().then();
+        }
     }
     public async reverse(): Promise<void> {
         const promises = this.commands.map((move) => {
             if (isReversable(move)) {
-                move.reverse();
+                move.reverse().catch();
             }
         });
-        return Promise.all(promises).then(null);
+        return Promise.all(promises).catch().then(null);
     }
 }
 
@@ -170,32 +195,56 @@ export class SequentialCommandGroup extends CommandGroup {
         super(commands);
         let sum = 0;
         for (let x = 0; x < commands.length; x++) {
-            sum += commands[x].depth;
+            sum += commands[x].height;
         }
-        this.depth = sum;
+        this.height = sum;
     }
 
     public async execute(): Promise<void> {
         let promise = Promise.resolve();
 
-        const timeout = new Promise<void>(() => {
-            setTimeout(() => {throw new Error("Move timeout")}, this.depth * MOVE_TIMEOUT);
-        });
+        const timeout = new Promise<void>((_, rej) => {
+            //time for each move to execute plus time to handle errors
+            setTimeout(
+                () => {
+                    console.log(this.commands);
+                    rej("Move Timeout");
+                },
+                this.height * MOVE_TIMEOUT * MAX_RETRIES * 1.1,
+            );
+        }).catch();
 
         for (const command of this.commands) {
-            promise = promise.then(() => {
-                if (!gamePaused.flag) return command.execute();
-            });
+            promise = promise
+                .then(() => {
+                    if (!gamePaused.flag) return command.execute().catch();
+                })
+                .catch();
         }
-        return Promise.race([promise, timeout]);
+
+        const executor = async (count: number) => {
+            return Promise.race([promise, timeout]).catch((reason) => {
+                if (reason.indexOf("Move Timeout") >= 0) {
+                    if (count < MAX_RETRIES) {
+                        return executor(count + 1).catch();
+                    } else {
+                        throw (reason +=
+                            " failed at height: " + this.height.toString());
+                    }
+                }
+            });
+        };
+
+        return executor(0).catch();
     }
+
     public async reverse(): Promise<void> {
         let promise = Promise.resolve();
         for (const command of this.commands) {
             if (isReversable(command)) {
-                promise = promise.then(() => command.reverse());
+                promise = promise.then(() => command.reverse().catch());
             }
         }
-        return promise;
+        return promise.catch();
     }
 }
