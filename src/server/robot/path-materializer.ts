@@ -339,7 +339,7 @@ function constructFinalCommand(
     rotateCommands: ReversibleRobotCommand[],
     collisionType: CollisionType,
     numCollisions: number,
-    toDeadZone: boolean = false,
+    noReverse: boolean = false,
 ): MovePiece {
     const from = move.from;
     const robotAtFrom = robotManager.getRobotAtIndices(from);
@@ -372,7 +372,7 @@ function constructFinalCommand(
                     mainDrive3,
                 ]);
             setupCommands.push(...rotateCommands, mainTurn1, ...driveCommands);
-            return new MovePiece(setupCommands, mainDrive, toDeadZone);
+            return new MovePiece(setupCommands, mainDrive, noReverse);
         } else if (
             collisionType === CollisionType.VERTICAL &&
             numCollisions > 1
@@ -399,21 +399,21 @@ function constructFinalCommand(
                     mainDrive3,
                 ]);
             setupCommands.push(...rotateCommands, mainTurn1, ...driveCommands);
-            return new MovePiece(setupCommands, mainDrive, toDeadZone);
+            return new MovePiece(setupCommands, mainDrive, noReverse);
         } else {
             const pos = new Position(to.i + 0.5, to.j + 0.5);
             const mainDrive = constructDriveCommand(mainPiece, pos, null);
             const mainTurn = constructRotateCommand(mainPiece, pos, null);
             const setupCommands: ReversibleRobotCommand[] = [];
             setupCommands.push(...rotateCommands, mainTurn, ...driveCommands);
-            return new MovePiece(setupCommands, mainDrive, toDeadZone);
+            return new MovePiece(setupCommands, mainDrive, noReverse);
         }
     } else {
         console.log("no main piece");
         return new MovePiece(
             rotateCommands,
             new SequentialCommandGroup([]),
-            toDeadZone,
+            noReverse,
         );
     }
 }
@@ -422,7 +422,7 @@ function constructFinalCommand(
 // If there are pieces in the way, it shimmy's them out, and move them back after main piece passes
 export function moveMainPiece(
     move: GridMove,
-    toDeadZone: boolean = false,
+    noReverse: boolean = false,
 ): MovePiece {
     const driveCommands: DriveCommand[] = [];
     const rotateCommands: ReversibleRobotCommand[] = [];
@@ -440,7 +440,7 @@ export function moveMainPiece(
         rotateCommands,
         collisionType,
         collisions.length,
-        toDeadZone,
+        noReverse,
     );
 }
 

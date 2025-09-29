@@ -12,7 +12,7 @@ export class MovePiece extends SequentialCommandGroup {
     constructor(
         public setupMoves: ReversibleRobotCommand[],
         public mainMove: Command,
-        public toDeadZone: boolean = false,
+        public noReverse: boolean = false,
     ) {
         super([
             new ParallelCommandGroup(setupMoves),
@@ -21,7 +21,7 @@ export class MovePiece extends SequentialCommandGroup {
                 setupMoves
                     .map(
                         (command) =>
-                            !toDeadZone ? command.reverse() : command,
+                            !noReverse ? command.reverse() : command,
                         // .then(new RotateToStartCommand(command.robotId)), // TODO have rotatetostart at end of pathmat
                     )
                     .reverse(),
