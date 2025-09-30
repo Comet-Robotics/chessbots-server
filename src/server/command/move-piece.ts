@@ -20,8 +20,7 @@ export class MovePiece extends SequentialCommandGroup {
             new ParallelCommandGroup(
                 setupMoves
                     .map(
-                        (command) =>
-                            !noReverse ? command.reverse() : command,
+                        (command) => (!noReverse ? command.reverse() : command),
                         // .then(new RotateToStartCommand(command.robotId)), // TODO have rotatetostart at end of pathmat
                     )
                     .reverse(),
