@@ -13,8 +13,8 @@ import { SaveManager } from "./save-manager";
 export let gamePaused = false;
 export let pauser: string = "none";
 
-export function setPaused(theFlag) {
-    gamePaused = theFlag;
+export function setPaused(pauseFlag : boolean) {
+    gamePaused = pauseFlag;
 }
 
 export function setPauser(name: string) {
