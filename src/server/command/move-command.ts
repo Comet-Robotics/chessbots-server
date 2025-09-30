@@ -1,8 +1,9 @@
 import type { Reversible } from "./command";
-import { RobotCommand } from "./command";
+import { RobotCommand, timeoutRetry } from "./command";
 import { Position } from "../robot/position";
 import { GridIndices } from "../robot/grid-indices";
 import { robotManager } from "../robot/robot-manager";
+import { MAX_RETRIES } from "../utils/env";
 
 /**
  * Represents a rotation.
@@ -25,7 +26,13 @@ export class RelativeRotateCommand
 {
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
-        return robot.relativeRotate(this.headingRadians);
+        return timeoutRetry(
+            robot.relativeRotate(this.headingRadians),
+            MAX_RETRIES,
+            this.height,
+            0,
+            `Relative Rotate Command Error at Robot:${this.robotId}`,
+        ) as Promise<void>;
     }
 
     public reverse(): RelativeRotateCommand {
@@ -39,7 +46,13 @@ export class RelativeRotateCommand
 export class AbsoluteRotateCommand extends RotateCommand {
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
-        return robot.absoluteRotate(this.headingRadians);
+        return timeoutRetry(
+            robot.absoluteRotate(this.headingRadians),
+            MAX_RETRIES,
+            this.height,
+            0,
+            `Absolute Rotate Command Error at Robot:${this.robotId}`,
+        ) as Promise<void>;
     }
 }
 
@@ -63,7 +76,13 @@ export class ReversibleAbsoluteRotateCommand
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
         this.previousHeadingRadians = robot.headingRadians;
-        return robot.absoluteRotate(this.headingSupplier());
+        return timeoutRetry(
+            robot.absoluteRotate(this.headingSupplier()),
+            MAX_RETRIES,
+            this.height,
+            0,
+            `Reversible Absolute Rotate Command Error at Robot:${this.robotId}`,
+        ) as Promise<void>;
     }
 
     public reverse(): ReversibleAbsoluteRotateCommand {
@@ -80,7 +99,13 @@ export class ReversibleAbsoluteRotateCommand
 export class RotateToStartCommand extends RobotCommand {
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
-        return robot.absoluteRotate(robot.startHeadingRadians);
+        return timeoutRetry(
+            robot.absoluteRotate(robot.startHeadingRadians),
+            MAX_RETRIES,
+            this.height,
+            0,
+            `Rotate to Start Command Error at Robot:${this.robotId}`,
+        ) as Promise<void>;
     }
 }
 
@@ -98,13 +123,21 @@ export class DriveCubicSplineCommand extends RobotCommand {
 
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
-        return robot.sendDriveCubicPacket(
+        const promise = robot.sendDriveCubicPacket(
             this.startPosition,
             this.endPosition,
             this.controlPositionA,
             this.controlPositionB,
             this.timeDeltaMs,
         );
+
+        return timeoutRetry(
+            promise,
+            MAX_RETRIES,
+            this.height,
+            0,
+            `Drive Cubic Command Error at Robot:${this.robotId}`,
+        ) as Promise<void>;
     }
 }
 
@@ -118,7 +151,13 @@ export class SpinRadiansCommand extends RobotCommand {
     }
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
-        return robot.sendSpinPacket(this.radians, this.timeDeltaMs);
+        return timeoutRetry(
+            robot.sendSpinPacket(this.radians, this.timeDeltaMs),
+            MAX_RETRIES,
+            this.height,
+            0,
+            `Spin Radians Command Error at Robot:${this.robotId}`,
+        ) as Promise<void>;
     }
 }
 
@@ -134,19 +173,33 @@ export class DriveQuadraticSplineCommand extends RobotCommand {
     }
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
-        return robot.sendDriveQuadraticPacket(
+        const promise = robot.sendDriveQuadraticPacket(
             this.startPosition,
             this.endPosition,
             this.controlPosition,
             this.timeDeltaMs,
         );
+
+        return timeoutRetry(
+            promise,
+            MAX_RETRIES,
+            this.height,
+            0,
+            `Drive Quadratic Command Error at Robot:${this.robotId}`,
+        ) as Promise<void>;
     }
 }
 
 export class StopCommand extends RobotCommand {
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
-        return robot.sendDrivePacket(0);
+        return timeoutRetry(
+            robot.sendDrivePacket(0),
+            MAX_RETRIES,
+            this.height,
+            0,
+            `Stop Command Error at Robot:${this.robotId}`,
+        ) as Promise<void>;
     }
 }
 
@@ -181,7 +234,13 @@ export class DriveCommand
             this.robotId,
             GridIndices.fromPosition(robot.position),
         );
-        return robot.sendDrivePacket(this.tileDistance);
+        return timeoutRetry(
+            robot.sendDrivePacket(this.tileDistance),
+            MAX_RETRIES,
+            this.height,
+            0,
+            `Drive Command Error at Robot:${this.robotId}`,
+        ) as Promise<void>;
     }
 
     public reverse(): DriveCommand {
@@ -218,7 +277,13 @@ export class RelativeMoveCommand
             this.robotId,
             GridIndices.fromPosition(robot.position.add(this.position)),
         );
-        return robot.relativeMove(this.position);
+        return timeoutRetry(
+            robot.relativeMove(this.position),
+            MAX_RETRIES,
+            this.height,
+            0,
+            `Relative Move Command Error at Robot:${this.robotId}`,
+        ) as Promise<void>;
     }
 
     public reverse(): RelativeMoveCommand {
@@ -236,7 +301,13 @@ export class AbsoluteMoveCommand extends MoveCommand {
             this.robotId,
             GridIndices.fromPosition(this.position),
         );
-        return robot.relativeMove(this.position.sub(robot.position));
+        return timeoutRetry(
+            robot.relativeMove(this.position.sub(robot.position)),
+            MAX_RETRIES,
+            this.height,
+            0,
+            `Absolute Move Command Error at Robot:${this.robotId}`,
+        ) as Promise<void>;
     }
 }
 
@@ -253,7 +324,13 @@ export class DriveTicksCommand
 
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
-        return robot.sendDriveTicksPacket(this.ticksDistance);
+        return timeoutRetry(
+            robot.sendDriveTicksPacket(this.ticksDistance),
+            MAX_RETRIES,
+            this.height,
+            0,
+            `Drive Ticks Command Error at Robot:${this.robotId}`,
+        ) as Promise<void>;
     }
 
     public reverse(): DriveTicksCommand {
@@ -281,7 +358,13 @@ export class ReversibleAbsoluteMoveCommand
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
         this.previousPosition = robot.position;
-        return robot.relativeMove(this.positionSupplier().sub(robot.position));
+        return timeoutRetry(
+            robot.relativeMove(this.positionSupplier().sub(robot.position)),
+            MAX_RETRIES,
+            this.height,
+            0,
+            `Reversible Absolute Rotate Command Error at Robot:${this.robotId}`,
+        ) as Promise<void>;
     }
 
     public reverse(): ReversibleAbsoluteMoveCommand {

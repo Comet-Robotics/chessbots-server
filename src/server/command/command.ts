@@ -142,39 +142,18 @@ export class ParallelCommandGroup extends CommandGroup {
     }
 
     public async execute(): Promise<void> {
-        const timeout = new Promise<void>((_, rej) => {
-            //time for each move to execute plus time to handle errors
-            setTimeout(
-                () => {
-                    console.log(this.commands);
-                    rej("Move Timeout");
-                },
-                this.height * MOVE_TIMEOUT * MAX_RETRIES * 1.1,
-            );
-        }).catch();
-
         const promises = this.commands.map((move) => {
             if (!gamePaused.flag) return move.execute().catch();
             else return new Promise<void>(() => {}).catch();
         });
         if (promises) {
-            const executor = async (count: number) => {
-                return Promise.race([
-                    Promise.all(promises).catch(),
-                    timeout.catch(),
-                ]).catch((reason) => {
-                    if (reason.indexOf("Move Timeout") >= 0) {
-                        if (count < MAX_RETRIES) {
-                            return executor(count + 1).catch();
-                        } else {
-                            throw (reason +=
-                                " failed at height: " + this.height.toString());
-                        }
-                    }
-                });
-            };
-
-            return executor(0).catch().then();
+            return timeoutRetry(
+                Promise.all(promises),
+                MAX_RETRIES,
+                this.height,
+                0,
+                "Parallel Group Error",
+            ) as Promise<void>;
         }
     }
     public async reverse(): Promise<void> {
@@ -203,17 +182,6 @@ export class SequentialCommandGroup extends CommandGroup {
     public async execute(): Promise<void> {
         let promise = Promise.resolve();
 
-        const timeout = new Promise<void>((_, rej) => {
-            //time for each move to execute plus time to handle errors
-            setTimeout(
-                () => {
-                    console.log(this.commands);
-                    rej("Move Timeout");
-                },
-                this.height * MOVE_TIMEOUT * MAX_RETRIES * 1.1,
-            );
-        }).catch();
-
         for (const command of this.commands) {
             promise = promise
                 .then(() => {
@@ -222,20 +190,13 @@ export class SequentialCommandGroup extends CommandGroup {
                 .catch();
         }
 
-        const executor = async (count: number) => {
-            return Promise.race([promise, timeout]).catch((reason) => {
-                if (reason.indexOf("Move Timeout") >= 0) {
-                    if (count < MAX_RETRIES) {
-                        return executor(count + 1).catch();
-                    } else {
-                        throw (reason +=
-                            " failed at height: " + this.height.toString());
-                    }
-                }
-            });
-        };
-
-        return executor(0).catch();
+        return timeoutRetry(
+            promise,
+            MAX_RETRIES,
+            this.height,
+            0,
+            "Sequential Group Error",
+        ) as Promise<void>;
     }
 
     public async reverse(): Promise<void> {
@@ -247,4 +208,38 @@ export class SequentialCommandGroup extends CommandGroup {
         }
         return promise.catch();
     }
+}
+
+export function timeoutRetry(
+    promise: Promise<unknown>,
+    maxRetries: number,
+    height: number,
+    count: number,
+    debugInfo?: string,
+): typeof promise {
+    const timeout = new Promise<void>((_, rej) => {
+        //time for each move to execute plus time to handle errors
+        setTimeout(
+            () => {
+                rej("Move Timeout");
+            },
+            height * MOVE_TIMEOUT * maxRetries * 1.1,
+        );
+    }).catch();
+
+    return Promise.race([promise, timeout]).catch((reason) => {
+        if (reason.indexOf("Move Timeout") >= 0) {
+            if (count < MAX_RETRIES) {
+                return timeoutRetry(
+                    promise,
+                    maxRetries,
+                    height,
+                    count + 1,
+                    debugInfo,
+                ).catch();
+            } else {
+                throw `${reason} failed at height: ${height.toString()} with error: ${debugInfo} \\`;
+            }
+        }
+    });
 }
