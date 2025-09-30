@@ -112,12 +112,10 @@ export class Robot {
         console.log(
             `Sending turn packet to robot ${this.id} with delta heading ${deltaHeadingRadians}`,
         );
-        if (this.tunnel !== null) {
-            await this.tunnel!.send({
-                type: PacketType.TURN_BY_ANGLE,
-                deltaHeadingRadians: deltaHeadingRadians,
-            });
-        }
+        await this.tunnel!.send({
+            type: PacketType.TURN_BY_ANGLE,
+            deltaHeadingRadians: deltaHeadingRadians,
+        });
     }
 
     /**
@@ -130,12 +128,10 @@ export class Robot {
         console.log(
             `Sending drive packet to robot ${this.id} with distance ${tileDistance}`,
         );
-        if (this.tunnel !== null) {
-            await this.tunnel!.send({
-                type: PacketType.DRIVE_TILES,
-                tileDistance,
-            });
-        }
+        await this.tunnel!.send({
+            type: PacketType.DRIVE_TILES,
+            tileDistance,
+        });
     }
 
     /**
@@ -195,6 +191,7 @@ export class Robot {
     }
 
     public async sendStopPacket(): Promise<void> {
+        console.log("Stopoping the robot: " + this.id);
         if (this.tunnel !== null) {
             await this.tunnel!.send({
                 type: PacketType.ESTOP,

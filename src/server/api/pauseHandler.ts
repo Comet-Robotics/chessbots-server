@@ -21,6 +21,7 @@ export function setPauser(name: string) {
     pauser = name;
 }
 
+//have to put this method here, cause if we put it in api.ts where it initially was, we have dependency cycle.
 export function setAllRobotsToDefaultPositions(
     defaultPositionsMap?: Map<string, GridIndices>,
 ): void {
@@ -41,6 +42,7 @@ export function setAllRobotsToDefaultPositions(
     }
 }
 
+//function to actually do the rollback that tommy made
 export function doRollBack() {
     const ids = clientManager.getIds();
     if (ids) {

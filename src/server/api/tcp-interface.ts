@@ -89,6 +89,7 @@ export class RealBotTunnel extends BotTunnel {
                         console.log("AAA A BOT DISCONNECTED! ABORT! ABORT!");
 
                         if (this.id !== undefined) {
+                            robotManager.removeRobot(this.id);
                             disconnectedBots.add(this.id);
                         }
 
