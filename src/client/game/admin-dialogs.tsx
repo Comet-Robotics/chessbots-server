@@ -43,7 +43,7 @@ interface NotificationDialogProps {
 }
 
 /**
- * SHows a closable notification dialog
+ * Shows a closable notification dialog
  * @param props - dialog text
  * @returns - notification dialog
  */
