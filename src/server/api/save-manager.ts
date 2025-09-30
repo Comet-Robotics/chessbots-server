@@ -11,7 +11,6 @@
  */
 
 import { Side } from "../../common/game-types";
-2;
 
 // Save files contain a date in ms and pgn string
 export interface iSave {
