@@ -29,7 +29,7 @@ module.exports = {
         eqeqeq: "warn",
         "tsdoc/syntax": "warn",
         "import/no-cycle": "error",
-        "@typescript-eslint/consistent-type-imports": "error"
+        "@typescript-eslint/consistent-type-imports": "error",
     },
     settings: {
         "import/parsers": {
