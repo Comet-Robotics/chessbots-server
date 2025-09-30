@@ -13,7 +13,7 @@ import { SaveManager } from "./save-manager";
 export let gamePaused = false;
 export let pauser: string = "none";
 
-export function setPaused(pauseFlag : boolean) {
+export function setPaused(pauseFlag: boolean) {
     gamePaused = pauseFlag;
 }
 
@@ -64,7 +64,7 @@ export function doRollBack() {
 }
 
 // created a pause and unpause game function separately from the endpoint call so that another backend function can call it as well.
-export function pauseGame(clientSide : boolean) {
+export function pauseGame(clientSide: boolean) {
     // means game is already paused
     if (gamePaused === true) {
         return { message: "failure" };
@@ -82,7 +82,7 @@ export function pauseGame(clientSide : boolean) {
     return { message: "success" };
 }
 
-export function unpauseGame(clientSide : boolean) {
+export function unpauseGame(clientSide: boolean) {
     // basically checks if someone is trying to unpause and they're not the ones who paused it.
     if (
         (clientSide && pauser === "server") ||
