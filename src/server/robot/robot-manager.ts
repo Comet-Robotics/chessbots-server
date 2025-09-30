@@ -35,7 +35,7 @@ export class RobotManager {
         this.idsToRobots.set(robot.id, robot);
     }
 
-    //use this so on disconnect and reconnect we don't just have a bunch of values in here that shouldn't exist.
+    //use this so on disconnect and reconnect we don't just have a bunch of bots in here that shouldn't exist cause they're disconnected
     removeRobot(robotId: string) {
         this.idsToRobots.delete(robotId);
     }
