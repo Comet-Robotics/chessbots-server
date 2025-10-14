@@ -1,3 +1,4 @@
+import { gamePaused } from "../api/pauseHandler";
 import { robotManager } from "../robot/robot-manager";
 
 /**
@@ -112,7 +113,11 @@ function isReversable(obj): obj is Reversible<typeof obj> {
  */
 export class ParallelCommandGroup extends CommandGroup {
     public async execute(): Promise<void> {
-        const promises = this.commands.map((move) => move.execute());
+        const promises = this.commands
+            .map((move) => {
+                if (!gamePaused) return move.execute();
+            })
+            .filter(Boolean);
         return Promise.all(promises).then(null);
     }
     public async reverse(): Promise<void> {
@@ -132,7 +137,10 @@ export class SequentialCommandGroup extends CommandGroup {
     public async execute(): Promise<void> {
         let promise = Promise.resolve();
         for (const command of this.commands) {
-            promise = promise.then(() => command.execute());
+            promise = promise.then(() => {
+                if (!gamePaused) return command.execute();
+                else return Promise.resolve();
+            });
         }
         return promise;
     }

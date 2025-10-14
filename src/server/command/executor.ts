@@ -1,3 +1,4 @@
+import { gamePaused } from "../api/pauseHandler";
 import type { Command } from "./command";
 
 /**
@@ -18,6 +19,7 @@ export class CommandExecutor {
     constructor() {}
 
     private runningCommands: Command[] = [];
+    private oldCommands: Command[] = [];
 
     private checkRequirements(command: Command) {
         for (const req of command.requirements) {
@@ -41,12 +43,38 @@ export class CommandExecutor {
     public async execute(command: Command): Promise<void> {
         this.checkRequirements(command);
         this.runningCommands.push(command);
-        return command.execute().finally(() => {
-            const index = this.runningCommands.indexOf(command);
-            if (index >= 0) {
-                this.runningCommands.splice(index, 1);
-            }
-        });
+        if (!gamePaused) {
+            return command.execute().finally(() => {
+                this.oldCommands.unshift(command);
+                const index = this.runningCommands.indexOf(command);
+                if (index >= 0) {
+                    this.runningCommands.splice(index, 1);
+                }
+            });
+        }
+    }
+
+    /**
+     * run through the running command list
+     * mainly used to finish the backlog from a paused game
+     * @returns - The command to execute.
+     */
+    public async finishExecution(): Promise<void> {
+        return Promise.all(
+            this.runningCommands.map((command) => {
+                command.execute().finally(() => {
+                    this.oldCommands.unshift(command);
+                    const index = this.runningCommands.indexOf(command);
+                    if (index >= 0) {
+                        this.runningCommands.splice(index, 1);
+                    }
+                });
+            }),
+        ).then();
+    }
+
+    public clearExecution() {
+        this.runningCommands = [];
     }
 
     public getRunningCommands(): ReadonlyArray<Command> {
