@@ -88,6 +88,7 @@ export abstract class CommandBase implements Command {
  * Note this class redirects the execute implementation to executeRobot.
  */
 export abstract class RobotCommand extends CommandBase {
+    commandIsCompleted = false;
     constructor(public readonly robotId: string) {
         super();
         // TO DISCUSS: idk if its possible for a robot object to change between adding it as a requrement and executing the command but if it is, adding the robot object as a requirement semi defeats the purpose of using robot ids everywhere
@@ -226,7 +227,6 @@ export function timeoutRetry(
             height * MOVE_TIMEOUT * maxRetries * 1.1,
         );
     }).catch();
-
     return Promise.race([promise, timeout]).catch((reason) => {
         if (reason.indexOf("Move Timeout") >= 0) {
             if (count < MAX_RETRIES) {

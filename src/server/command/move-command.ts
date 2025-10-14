@@ -26,8 +26,8 @@ export class RelativeRotateCommand
 {
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
-        return timeoutRetry(
-            robot.relativeRotate(this.headingRadians),
+        return this.commandIsCompleted?Promise.resolve():timeoutRetry(
+            robot.relativeRotate(this.headingRadians).then(()=>{this.commandIsCompleted=true}),
             MAX_RETRIES,
             this.height,
             0,
@@ -46,8 +46,8 @@ export class RelativeRotateCommand
 export class AbsoluteRotateCommand extends RotateCommand {
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
-        return timeoutRetry(
-            robot.absoluteRotate(this.headingRadians),
+        return this.commandIsCompleted?Promise.resolve():timeoutRetry(
+            robot.absoluteRotate(this.headingRadians).then(()=>{this.commandIsCompleted=true}),
             MAX_RETRIES,
             this.height,
             0,
@@ -76,8 +76,8 @@ export class ReversibleAbsoluteRotateCommand
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
         this.previousHeadingRadians = robot.headingRadians;
-        return timeoutRetry(
-            robot.absoluteRotate(this.headingSupplier()),
+        return this.commandIsCompleted?Promise.resolve():timeoutRetry(
+            robot.absoluteRotate(this.headingSupplier()).then(()=>{this.commandIsCompleted=true}),
             MAX_RETRIES,
             this.height,
             0,
@@ -99,8 +99,8 @@ export class ReversibleAbsoluteRotateCommand
 export class RotateToStartCommand extends RobotCommand {
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
-        return timeoutRetry(
-            robot.absoluteRotate(robot.startHeadingRadians),
+        return this.commandIsCompleted?Promise.resolve():timeoutRetry(
+            robot.absoluteRotate(robot.startHeadingRadians).then(()=>{this.commandIsCompleted=true}),
             MAX_RETRIES,
             this.height,
             0,
@@ -131,8 +131,8 @@ export class DriveCubicSplineCommand extends RobotCommand {
             this.timeDeltaMs,
         );
 
-        return timeoutRetry(
-            promise,
+        return this.commandIsCompleted?Promise.resolve():timeoutRetry(
+            promise.then(()=>{this.commandIsCompleted=true}),
             MAX_RETRIES,
             this.height,
             0,
@@ -151,8 +151,8 @@ export class SpinRadiansCommand extends RobotCommand {
     }
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
-        return timeoutRetry(
-            robot.sendSpinPacket(this.radians, this.timeDeltaMs),
+        return this.commandIsCompleted?Promise.resolve():timeoutRetry(
+            robot.sendSpinPacket(this.radians, this.timeDeltaMs).then(()=>{this.commandIsCompleted=true}),
             MAX_RETRIES,
             this.height,
             0,
@@ -180,8 +180,8 @@ export class DriveQuadraticSplineCommand extends RobotCommand {
             this.timeDeltaMs,
         );
 
-        return timeoutRetry(
-            promise,
+        return this.commandIsCompleted?Promise.resolve():timeoutRetry(
+            promise.then(()=>{this.commandIsCompleted=true}),
             MAX_RETRIES,
             this.height,
             0,
@@ -193,8 +193,8 @@ export class DriveQuadraticSplineCommand extends RobotCommand {
 export class StopCommand extends RobotCommand {
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
-        return timeoutRetry(
-            robot.sendDrivePacket(0),
+        return this.commandIsCompleted?Promise.resolve():timeoutRetry(
+            robot.sendDrivePacket(0).then(()=>{this.commandIsCompleted=true}),
             MAX_RETRIES,
             this.height,
             0,
@@ -234,8 +234,8 @@ export class DriveCommand
             this.robotId,
             GridIndices.fromPosition(robot.position),
         );
-        return timeoutRetry(
-            robot.sendDrivePacket(this.tileDistance),
+        return this.commandIsCompleted?Promise.resolve():timeoutRetry(
+            robot.sendDrivePacket(this.tileDistance).then(()=>{this.commandIsCompleted=true}),
             MAX_RETRIES,
             this.height,
             0,
@@ -277,8 +277,8 @@ export class RelativeMoveCommand
             this.robotId,
             GridIndices.fromPosition(robot.position.add(this.position)),
         );
-        return timeoutRetry(
-            robot.relativeMove(this.position),
+        return this.commandIsCompleted?Promise.resolve():timeoutRetry(
+            robot.relativeMove(this.position).then(()=>{this.commandIsCompleted=true}),
             MAX_RETRIES,
             this.height,
             0,
@@ -301,8 +301,8 @@ export class AbsoluteMoveCommand extends MoveCommand {
             this.robotId,
             GridIndices.fromPosition(this.position),
         );
-        return timeoutRetry(
-            robot.relativeMove(this.position.sub(robot.position)),
+        return this.commandIsCompleted?Promise.resolve():timeoutRetry(
+            robot.relativeMove(this.position.sub(robot.position)).then(()=>{this.commandIsCompleted=true}),
             MAX_RETRIES,
             this.height,
             0,
@@ -324,8 +324,8 @@ export class DriveTicksCommand
 
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
-        return timeoutRetry(
-            robot.sendDriveTicksPacket(this.ticksDistance),
+        return this.commandIsCompleted?Promise.resolve():timeoutRetry(
+            robot.sendDriveTicksPacket(this.ticksDistance).then(()=>{this.commandIsCompleted=true}),
             MAX_RETRIES,
             this.height,
             0,
@@ -358,8 +358,8 @@ export class ReversibleAbsoluteMoveCommand
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
         this.previousPosition = robot.position;
-        return timeoutRetry(
-            robot.relativeMove(this.positionSupplier().sub(robot.position)),
+        return this.commandIsCompleted?Promise.resolve():timeoutRetry(
+            robot.relativeMove(this.positionSupplier().sub(robot.position)).then(()=>{this.commandIsCompleted=true}),
             MAX_RETRIES,
             this.height,
             0,
