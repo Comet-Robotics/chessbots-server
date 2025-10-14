@@ -138,11 +138,8 @@ export class SequentialCommandGroup extends CommandGroup {
         let promise = Promise.resolve();
         for (const command of this.commands) {
             promise = promise.then(() => {
-                if (!gamePaused) {
-                    return command.execute();
-                } else {
-                    return Promise.resolve();
-                }
+                if (!gamePaused) return command.execute();
+                else return Promise.resolve();
             });
         }
         return promise;
