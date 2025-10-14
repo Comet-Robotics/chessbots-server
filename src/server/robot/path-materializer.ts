@@ -34,6 +34,7 @@ enum CollisionType {
 
 const arrayOfCornersIndicies = [0, 9, 18, 27];
 
+// creates a "Border" around the geamboard that serves as a deadzone
 const arrayOfDeadzone = [
     new GridIndices(1, 1),
     new GridIndices(1, 2),
@@ -73,6 +74,7 @@ const arrayOfDeadzone = [
     new GridIndices(2, 1),
 ];
 
+// converts from the Move object to the GridMove object.
 function moveToGridMove(move: Move): GridMove {
     return {
         from: GridIndices.squareToGrid(move.from),
@@ -80,6 +82,7 @@ function moveToGridMove(move: Move): GridMove {
     };
 }
 
+// detects what type of collision may be  found when moving to a location
 function calcCollisionType(gridMove: GridMove): CollisionType {
     const from = gridMove.from;
     const to = gridMove.to;
@@ -101,6 +104,7 @@ function calcCollisionType(gridMove: GridMove): CollisionType {
     }
 }
 
+// takes in a coordinate, sees if a robot is there. If there is, add it to a list of collisions
 function addToCollisions(collisions: string[], x: number, y: number) {
     const square = new GridIndices(x, y);
     if (robotManager.isRobotAtIndices(square)) {
@@ -108,6 +112,7 @@ function addToCollisions(collisions: string[], x: number, y: number) {
     }
 }
 
+// detects collisions by cecking whats in the way depending on the collision type
 function detectCollisions(
     gridMove: GridMove,
     collisionType: CollisionType,
@@ -119,23 +124,27 @@ function detectCollisions(
     switch (collisionType) {
         // Horizontal
         case CollisionType.HORIZONTAL: {
+            // if we're moving left, check each index at left, seeing if there's any robots there
             if (to.i < from.i) {
                 for (let i = from.i - 1; i > to.i; i--) {
                     addToCollisions(collisions, i, from.j);
                 }
+                //If we didn't have a collision, yay, we have a clear path. If we didn't though, we'll have to go left or right (the closer one to the midpoint),
+                //and check if we travel along there, what collisions we'll have.
                 if (collisions.length > 0) {
-                    addToCollisions(collisions, from.i, from.j + direction[1]);
-                    for (let i = from.i - 1; i > to.i; i--) {
+                    for (let i = from.i; i > to.i; i--) {
                         addToCollisions(collisions, i, from.j + direction[1]);
                     }
                 }
-            } else {
+            } 
+            // if we're moving right now, check each index as we move right 
+            else {
                 for (let i = from.i + 1; i < to.i; i++) {
                     addToCollisions(collisions, i, from.j);
                 }
+                //same thing; if we got collisiions, now go closer to midpoint and see if traveling there what collisions we'd have.
                 if (collisions.length > 0) {
-                    addToCollisions(collisions, from.i, from.j + direction[1]);
-                    for (let i = from.i + 1; i < to.i; i++) {
+                    for (let i = from.i; i < to.i; i++) {
                         addToCollisions(collisions, i, from.j + direction[1]);
                     }
                 }
@@ -144,17 +153,21 @@ function detectCollisions(
         }
         // Vertical
         case CollisionType.VERTICAL: {
+            //if we are moving downwards
             if (to.j < from.j) {
                 for (let j = from.j - 1; j > to.j; j--) {
                     addToCollisions(collisions, from.i, j);
                 }
+                // try moving to column closer to middle, see collisions that way
                 if (collisions.length > 0) {
                     addToCollisions(collisions, from.i + direction[0], from.j);
                     for (let j = from.j - 1; j > to.j; j--) {
                         addToCollisions(collisions, from.i + direction[0], j);
                     }
                 }
-            } else {
+            } 
+            //means we are moving upwards
+            else {
                 for (let j = from.j + 1; j < to.j; j++) {
                     addToCollisions(collisions, from.i, j);
                 }
@@ -169,15 +182,13 @@ function detectCollisions(
         }
         // Diagonal
         case CollisionType.DIAGONAL: {
-            // Will be either positive or negative depending on direction
-            const dx = to.i - from.i;
-            const dy = to.j - from.j;
             // For diagonal, x and y offset by the same amount (not including signs)
             // thus, absolute value of either will be the same
+            const dx = to.i - from.i;
             const distance = Math.abs(dx);
             // Normalized to 1 or -1 to get direction (dividing by absolute value of self)
-            const nx = dx / distance;
-            const ny = dy / distance;
+            const nx = (dx) / distance;
+            const ny = (to.j - from.j) / distance;
 
             // Loop through the tiles along the diagonal excluding beginning and end
             // (Beginning is the moving piece, and end is capture piece. Capture handled separately)
@@ -188,6 +199,7 @@ function detectCollisions(
 
                 // Above or below the tile, depends on direction
                 const square1 = new GridIndices(midx, midy + ny);
+                // if robot there, add to collisions
                 if (robotManager.isRobotAtIndices(square1)) {
                     const piece: string =
                         robotManager.getRobotAtIndices(square1).id;
@@ -195,11 +207,14 @@ function detectCollisions(
                 }
                 // Left or right of tile, depends on direction
                 const square2 = new GridIndices(midx + nx, midy);
+                // robot there, add to collisions   
                 if (robotManager.isRobotAtIndices(square2)) {
                     const piece: string =
                         robotManager.getRobotAtIndices(square2).id;
                     collisions.push(piece);
                 }
+
+                //am i tweaking or do we not check the diagonal itself 
             }
             break;
         }
@@ -211,11 +226,12 @@ function detectCollisions(
             // Normalized to 1 or -1 (can also be directly used to get first piece)
             const nx = dx / Math.abs(dx);
             const ny = dy / Math.abs(dy);
-            // Shifted to get second piece, shift direction based on sign
+            // Shifted to get second piece, shift direction based on sign. Reduces the distance
+            // in its direction by 1
             const sx = dx - nx;
             const sy = dy - ny;
 
-            // Same sign horse moves share this square. Will always be 1 diagonal
+            // Same-sign horse moves share this square. Will always be 1 diagonal
             // of moving piece
             const square1 = new GridIndices(from.i + nx, from.j + ny);
             if (robotManager.isRobotAtIndices(square1)) {
@@ -484,6 +500,8 @@ function moveToDeadZone(origin: GridIndices): GridMove {
     return collisionTuple[0][0];
 }
 
+// based on where it wants to go, returns a vector of what edge it should go towards. The edge doesn't mean the board edge, but the square edge.
+// Idea seems to be that its biased towards going to edges of the square closer to the center, it seems, to prevent moving a lot of pieces early on.
 function directionToEdge(position: GridIndices) {
     let x = 0;
     let y = 0;
