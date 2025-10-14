@@ -145,10 +145,10 @@ export class ParallelCommandGroup extends CommandGroup {
     public async execute(): Promise<void> {
         const promises = this.commands
             .map((move) => {
-            if (!gamePaused) return move.execute().catch();
-            
-            else return new Promise<void>(() => {}).catch();
-        }).filter(Boolean);
+                if (!gamePaused) return move.execute().catch();
+                else return new Promise<void>(() => {}).catch();
+            })
+            .filter(Boolean);
         if (promises) {
             return timeoutRetry(
                 Promise.all(promises),
