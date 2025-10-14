@@ -1,4 +1,4 @@
-import { gamePaused } from "../api/managers";
+import { gamePaused } from "../api/pauseHandler";
 import { robotManager } from "../robot/robot-manager";
 import { MAX_RETRIES, MOVE_TIMEOUT } from "../utils/env";
 
@@ -133,7 +133,7 @@ function isReversable(obj): obj is Reversible<typeof obj> {
 export class ParallelCommandGroup extends CommandGroup {
     constructor(public readonly commands: Command[]) {
         super(commands);
-        let max = 0;
+        let max = 1;
         for (let x = 0; x < commands.length; x++) {
             if (commands[x].height > max) {
                 max = commands[x].height;
@@ -143,10 +143,12 @@ export class ParallelCommandGroup extends CommandGroup {
     }
 
     public async execute(): Promise<void> {
-        const promises = this.commands.map((move) => {
-            if (!gamePaused.flag) return move.execute().catch();
+        const promises = this.commands
+            .map((move) => {
+            if (!gamePaused) return move.execute().catch();
+            
             else return new Promise<void>(() => {}).catch();
-        });
+        }).filter(Boolean);
         if (promises) {
             return timeoutRetry(
                 Promise.all(promises),
@@ -186,7 +188,7 @@ export class SequentialCommandGroup extends CommandGroup {
         for (const command of this.commands) {
             promise = promise
                 .then(() => {
-                    if (!gamePaused.flag) return command.execute().catch();
+                    if (!gamePaused) return command.execute().catch();
                 })
                 .catch();
         }

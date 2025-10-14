@@ -27,7 +27,7 @@ import { materializePath } from "../robot/path-materializer";
 import { DO_SAVES } from "../utils/env";
 import { executor } from "../command/executor";
 import { robotManager } from "../robot/robot-manager";
-import { gamePaused } from "./managers";
+import { gamePaused, setPaused } from "./pauseHandler";
 
 type GameState = {
     type?: "puzzle" | "human" | "computer";
@@ -92,7 +92,7 @@ export abstract class GameManager {
             position: this.chess.pgn,
             gameEndReason: this.getGameEndReason(),
             tooltip: this.tooltip,
-            pause: gamePaused.flag,
+            pause: gamePaused,
         };
     }
 
@@ -148,7 +148,7 @@ export class HumanGameManager extends GameManager {
         const ids = this.clientManager.getIds();
         const currentSave = SaveManager.loadGame(id);
         // update the internal chess object if it is a move massage and game not paused
-        if (message instanceof MoveMessage && !gamePaused.flag) {
+        if (message instanceof MoveMessage && !gamePaused) {
             // Call path materializer and send to bots
             const command = materializePath(message.move);
 
@@ -157,7 +157,7 @@ export class HumanGameManager extends GameManager {
             console.log("running executor");
             console.dir(command, { depth: null });
             await executor.execute(command).catch((reason) => {
-                gamePaused.flag = true;
+                setPaused(true);
                 console.log(reason);
                 this.chess.undo();
                 this.socketManager.sendToAll(
@@ -281,7 +281,7 @@ export class ComputerGameManager extends GameManager {
      * @returns when the game ends
      */
     public async handleMessage(message: Message, id: string): Promise<void> {
-        if (message instanceof MoveMessage && !gamePaused.flag) {
+        if (message instanceof MoveMessage && !gamePaused) {
             // Call path materializer and send to bots for human move
             const command = materializePath(message.move);
 
@@ -289,7 +289,7 @@ export class ComputerGameManager extends GameManager {
             this.chess.makeMove(message.move);
 
             await executor.execute(command).catch((reason) => {
-                gamePaused.flag = true;
+                setPaused(true);
                 console.log(reason);
                 this.chess.undo();
                 this.socketManager.sendToAll(
@@ -376,7 +376,7 @@ export class PuzzleGameManager extends GameManager {
             if (
                 this.moves[this.moveNumber].from === message.move.from &&
                 this.moves[this.moveNumber].to === message.move.to &&
-                !gamePaused.flag
+                !gamePaused
             ) {
                 const command = materializePath(message.move);
 
@@ -387,7 +387,7 @@ export class PuzzleGameManager extends GameManager {
                 console.log("running executor");
                 console.dir(command, { depth: null });
                 await executor.execute(command).catch((reason) => {
-                    gamePaused.flag = true;
+                    setPaused(true);
                     console.log(reason);
                     this.chess.undo();
                     this.socketManager.sendToAll(

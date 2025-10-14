@@ -128,7 +128,10 @@ export class Robot {
         console.log(
             `Sending drive packet to robot ${this.id} with distance ${tileDistance}`,
         );
-        await this.tunnel!.send({ type: PacketType.DRIVE_TILES, tileDistance });
+        await this.tunnel!.send({
+            type: PacketType.DRIVE_TILES,
+            tileDistance,
+        });
     }
 
     /**
@@ -188,8 +191,11 @@ export class Robot {
     }
 
     public async sendStopPacket(): Promise<void> {
-        await this.tunnel!.send({
-            type: PacketType.ESTOP,
-        });
+        console.log("Stopping the robot: " + this.id);
+        if (this.tunnel !== null) {
+            await this.tunnel!.send({
+                type: PacketType.ESTOP,
+            });
+        }
     }
 }

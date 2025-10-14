@@ -57,7 +57,7 @@ export class SaveManager {
             game: pgn,
             pos: fen,
             robotPos: Array.from(robots),
-            oldPos: "",
+            oldPos: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             oldRobotPos: Array<[string, string]>(),
         };
         const oldGame = SaveManager.loadGame(hostId + "+" + clientID);

@@ -109,7 +109,7 @@ export function Game(): JSX.Element {
                 if (gameState.gameEndReason !== undefined) {
                     setGameInterruptedReason(gameState.gameEndReason);
                 }
-                return gameState;
+                return gameState.state;
             });
         },
         false,
@@ -178,9 +178,7 @@ export function Game(): JSX.Element {
                 setChess(chess.copy(move));
                 sendMessage(new MoveMessage(move));
             }
-        :   (move: Move): void => {
-                move;
-            }; //send a do-nothing function if game is paused
+        :   () => {}; //send a do-nothing function if game is paused
 
     // return the chessboard wrapper, navbar, and potential end dialog
     return (

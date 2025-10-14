@@ -20,7 +20,6 @@ import { RegisterWebsocketMessage } from "../../common/message/message";
 import {
     clientManager,
     gameManager,
-    gamePaused,
     setGameManager,
     socketManager,
 } from "./managers";
@@ -34,7 +33,7 @@ import { Side } from "../../common/game-types";
 import { USE_VIRTUAL_ROBOTS, START_ROBOTS_AT_DEFAULT } from "../utils/env";
 import { SaveManager } from "./save-manager";
 
-import { VirtualBotTunnel, VirtualRobot } from "../simulator";
+import { VirtualBotTunnel } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
@@ -51,16 +50,21 @@ import {
     SpinRadiansCommand,
 } from "../command/move-command";
 import { GridIndices } from "../robot/grid-indices";
-import { puzzles, type PuzzleComponents } from "./puzzles";
 import {
     moveAllRobotsHomeToDefaultOptimized,
     moveAllRobotsToDefaultPositions,
-    moveAllRobotsFromBoardToHome,
 } from "../robot/path-materializer";
+import type { PuzzleComponents } from "./puzzles";
+import { puzzles } from "./puzzles";
 import { tcpServer } from "./tcp-interface";
 import { robotManager } from "../robot/robot-manager";
 import { executor } from "../command/executor";
-import { GameHoldReason } from "../../common/game-end-reasons";
+import {
+    gamePaused,
+    pauseGame,
+    setAllRobotsToDefaultPositions,
+    unpauseGame,
+} from "./pauseHandler";
 
 /**
  * Helper function to move all robots from their home positions to their default positions
@@ -76,7 +80,7 @@ async function setupDefaultRobotPositions(
                 moveAllRobotsToDefaultPositions(defaultPositionsMap);
             await executor.execute(command);
         } else {
-            setAllRobotsToDefaultPositions(defaultPositionsMap);
+            moveAllRobotsToDefaultPositions(defaultPositionsMap);
         }
     } else {
         if (isMoving) {
@@ -84,26 +88,6 @@ async function setupDefaultRobotPositions(
             await executor.execute(command);
         } else {
             setAllRobotsToDefaultPositions();
-        }
-    }
-}
-
-function setAllRobotsToDefaultPositions(
-    defaultPositionsMap?: Map<string, GridIndices>,
-): void {
-    if (defaultPositionsMap) {
-        for (const [robotId, indices] of defaultPositionsMap.entries()) {
-            const robot = robotManager.getRobot(robotId);
-            robot.position = Position.fromGridIndices(indices);
-            if (robot instanceof VirtualRobot)
-                robot.updateTunnelPosition(robot.position);
-        }
-    } else {
-        for (const robot of robotManager.idsToRobots.values()) {
-            robot.position = Position.fromGridIndices(robot.defaultIndices);
-            if (robot instanceof VirtualRobot)
-                robot.updateTunnelPosition(robot.position);
-            robotManager.updateRobot(robot.id, robot.defaultIndices);
         }
     }
 }
@@ -221,7 +205,10 @@ apiRouter.get("/game-state", (req, res) => {
         return res.status(400).send({ message: "No game is currently active" });
     }
     const clientType = clientManager.getClientType(req.cookies.id);
-    return res.send(gameManager.getGameState(clientType));
+    return res.send({
+        state: gameManager.getGameState(clientType),
+        pause: gamePaused,
+    });
 });
 
 /**
@@ -296,7 +283,6 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
     const fen = puzzle.fen;
     const moves = puzzle.moves;
     const difficulty = puzzle.rating;
-    const tooltip = puzzle.tooltip;
 
     if (puzzle.robotDefaultPositions) {
         // Convert puzzle.robotDefaultPositions from Record<string, string> to Map<string, GridIndices>
@@ -333,21 +319,12 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
             new ChessEngine(),
             socketManager,
             fen,
-            tooltip,
+            "",
             moves,
             difficulty,
         ),
     );
 
-    return res.send({ message: "success" });
-});
-
-/**
- * Returns robots to home after a game ends.
- */
-apiRouter.post("/return-home", async (_req, res) => {
-    const command = moveAllRobotsFromBoardToHome();
-    await executor.execute(command);
     return res.send({ message: "success" });
 });
 
@@ -574,43 +551,18 @@ apiRouter.get("/get-puzzles", (_, res) => {
  * Todo: add authentication instead of an exposed pause call
  */
 apiRouter.get("/pause-game", (_, res) => {
-    gamePaused.flag = true;
-    robotManager.stopAllRobots();
-    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_PAUSED));
-    return res.send({ message: "success" });
+    return res.send(pauseGame(true));
 });
 
 /**
  * Unpause the game
  * Todo: add authentication instead of an exposed unpause call
  */
+
 apiRouter.get("/unpause-game", async (_, res) => {
-    if (gamePaused.flag) {
-        gamePaused.flag = false;
-        const ids = clientManager.getIds();
-        if (ids) {
-            const oldSave = SaveManager.loadGame(ids[0]);
-            gameManager?.chess.loadFen(oldSave!.oldPos);
-            setAllRobotsToDefaultPositions(
-                new Map(
-                    oldSave!.oldRobotPos?.map<[string, GridIndices]>((obj) => [
-                        obj[1],
-                        new GridIndices(
-                            parseInt(obj[0].split(", ")[0]),
-                            parseInt(obj[0].split(", ")[1]),
-                        ),
-                    ]),
-                ),
-            );
-            socketManager.sendToAll(new SetChessMessage(oldSave!.oldPos));
-        }
-        socketManager.sendToAll(
-            new GameHoldMessage(GameHoldReason.GAME_UNPAUSED),
-        );
-        return res.send({ message: "success" });
-    } else {
-        return res.send({ message: "game not paused" });
-    }
+    const unpausePacket = unpauseGame(true);
+
+    return res.send(unpausePacket);
 });
 
 /**
