@@ -27,6 +27,7 @@ import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { AcceptDrawDialog, OfferDrawDialog } from "./draw-dialog";
 import { bgColor } from "../check-dark-mode";
 import "../colors.css";
+import { NotificationDialog, PauseDialog } from "./admin-dialogs";
 import { PuzzleTipBox } from "../PuzzleTipBox";
 
 /**
@@ -41,6 +42,7 @@ function getMessageHandler(
     setGameInterruptedReason: Dispatch<GameInterruptedReason>,
     setGameEndedReason: Dispatch<GameEndReason>,
     setGameHoldReason: Dispatch<GameHoldReason>,
+    setPaused: Dispatch<boolean>,
 ): MessageHandler {
     return (message) => {
         if (message instanceof MoveMessage) {
@@ -63,6 +65,11 @@ function getMessageHandler(
             setGameEndedReason(message.reason);
         } else if (message instanceof GameHoldMessage) {
             setGameHoldReason(message.reason);
+            if (message.reason === GameHoldReason.GAME_PAUSED) {
+                setPaused(true);
+            } else if (message.reason === GameHoldReason.GAME_UNPAUSED) {
+                setPaused(false);
+            }
         }
     };
 }
@@ -78,6 +85,7 @@ export function Game(): JSX.Element {
     const [gameEndedReason, setGameEndedReason] = useState<GameEndReason>();
     const [gameHoldReason, setGameHoldReason] = useState<GameHoldReason>();
     const [rotation, setRotation] = useState<number>(0);
+    const [paused, setPause] = useState<boolean>(false);
 
     /** send any messages using our defined message handler inside a message socket for handling */
     const sendMessage = useSocket(
@@ -87,6 +95,7 @@ export function Game(): JSX.Element {
             setGameInterruptedReason,
             setGameEndedReason,
             setGameHoldReason,
+            setPause,
         ),
     );
 
@@ -95,11 +104,12 @@ export function Game(): JSX.Element {
         "game-state",
         async () => {
             return get("/game-state").then((gameState) => {
-                setChess(new ChessEngine(gameState.position));
-                if (gameState.gameEndReason !== undefined) {
-                    setGameInterruptedReason(gameState.gameEndReason);
+                setChess(new ChessEngine(gameState.state.position));
+                setPause(gameState.pause);
+                if (gameState.state.gameEndReason !== undefined) {
+                    setGameInterruptedReason(gameState.state.gameEndReason);
                 }
-                return gameState;
+                return gameState.state;
             });
         },
         false,
@@ -137,6 +147,7 @@ export function Game(): JSX.Element {
         gameEndReason !== undefined ?
             <GameEndDialog reason={gameEndReason} side={side} />
         :   null;
+
     const gameOfferDialog =
         gameHoldReason !== undefined ?
             gameHoldReason === GameHoldReason.DRAW_CONFIRMATION ?
@@ -151,11 +162,25 @@ export function Game(): JSX.Element {
             :   null
         :   null;
 
+    const gamePauseDialog = paused ? <PauseDialog /> : null;
+
+    const gameUnpauseDialog =
+        gameHoldReason !== undefined ?
+            gameHoldReason === GameHoldReason.GAME_UNPAUSED ?
+                <NotificationDialog dialogText="Game Unpaused" />
+            :   null
+        :   null;
+
     /** make moves by making a copy of the chessboard and sending the move message */
-    const handleMove = (move: Move): void => {
-        setChess(chess.copy(move));
-        sendMessage(new MoveMessage(move));
-    };
+    const handleMove =
+        !paused ?
+            (move: Move): void => {
+                setChess(chess.copy(move));
+                sendMessage(new MoveMessage(move));
+            }
+        :   (move: Move): void => {
+                move;
+            }; //send a do-nothing function if game is paused
 
     // return the chessboard wrapper, navbar, and potential end dialog
     return (
@@ -182,6 +207,8 @@ export function Game(): JSX.Element {
                 {gameEndDialog}
                 {gameOfferDialog}
                 {gameAcceptDialog}
+                {gamePauseDialog}
+                {gameUnpauseDialog}
                 <Outlet />
             </div>
         </>

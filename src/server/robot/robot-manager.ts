@@ -35,6 +35,11 @@ export class RobotManager {
         this.idsToRobots.set(robot.id, robot);
     }
 
+    //use this so on disconnect and reconnect we don't just have a bunch of bots in here that shouldn't exist cause they're disconnected
+    removeRobot(robotId: string) {
+        this.idsToRobots.delete(robotId);
+    }
+
     /**
      * Retrieves a robot by id.
      * Throws if no robot is found.
@@ -98,6 +103,12 @@ export class RobotManager {
             if (robotId === r) indicesToIds.delete(i);
         }
         indicesToIds.set(indices.toString(), robotId);
+    }
+
+    stopAllRobots() {
+        Array.from(this.idsToRobots.values()).forEach((robot) => {
+            robot.sendStopPacket();
+        });
     }
 }
 

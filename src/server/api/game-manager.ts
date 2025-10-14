@@ -26,12 +26,15 @@ import { SaveManager } from "./save-manager";
 import { materializePath } from "../robot/path-materializer";
 import { DO_SAVES } from "../utils/env";
 import { executor } from "../command/executor";
+import { robotManager } from "../robot/robot-manager";
+import { gamePaused } from "./pauseHandler";
 
 type GameState = {
     type?: "puzzle" | "human" | "computer";
     side: Side;
     position: string;
     gameEndReason: GameEndReason | undefined;
+    pause: boolean;
     tooltip?: string;
     aiDifficulty?: number;
     difficulty?: number;
@@ -89,6 +92,7 @@ export abstract class GameManager {
             position: this.chess.pgn,
             gameEndReason: this.getGameEndReason(),
             tooltip: this.tooltip,
+            pause: gamePaused,
         };
     }
 
@@ -143,8 +147,8 @@ export class HumanGameManager extends GameManager {
         );
         const ids = this.clientManager.getIds();
         const currentSave = SaveManager.loadGame(id);
-        // update the internal chess object if it is a move massage
-        if (message instanceof MoveMessage) {
+        // update the internal chess object if it is a move massage and game not paused
+        if (message instanceof MoveMessage && !gamePaused) {
             // Call path materializer and send to bots
             const command = materializePath(message.move);
 
@@ -163,6 +167,8 @@ export class HumanGameManager extends GameManager {
                         this.hostSide,
                         -1,
                         this.chess.pgn,
+                        this.chess.fen,
+                        robotManager.getIndicesToIds(),
                     );
                 } else {
                     SaveManager.saveGame(
@@ -171,6 +177,8 @@ export class HumanGameManager extends GameManager {
                         oppositeSide(this.hostSide),
                         -1,
                         this.chess.pgn,
+                        this.chess.fen,
+                        robotManager.getIndicesToIds(),
                     );
                 }
             }
@@ -265,7 +273,7 @@ export class ComputerGameManager extends GameManager {
      * @returns when the game ends
      */
     public async handleMessage(message: Message, id: string): Promise<void> {
-        if (message instanceof MoveMessage) {
+        if (message instanceof MoveMessage && !gamePaused) {
             // Call path materializer and send to bots for human move
             const command = materializePath(message.move);
 
@@ -281,6 +289,8 @@ export class ComputerGameManager extends GameManager {
                     this.hostSide,
                     this.difficulty,
                     this.chess.pgn,
+                    this.chess.fen,
+                    robotManager.getIndicesToIds(),
                 );
             }
 
@@ -349,7 +359,8 @@ export class PuzzleGameManager extends GameManager {
             //if the move is correct
             if (
                 this.moves[this.moveNumber].from === message.move.from &&
-                this.moves[this.moveNumber].to === message.move.to
+                this.moves[this.moveNumber].to === message.move.to &&
+                !gamePaused
             ) {
                 const command = materializePath(message.move);
 

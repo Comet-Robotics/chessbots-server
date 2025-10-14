@@ -19,6 +19,10 @@ export interface iSave {
     hostWhite: boolean;
     aiDifficulty: number;
     game: string;
+    pos: string;
+    robotPos: Array<[string, string]>;
+    oldPos: string;
+    oldRobotPos: Array<[string, string]>;
 }
 
 export class SaveManager {
@@ -27,9 +31,9 @@ export class SaveManager {
      *
      * Finds or creates a save file
      * Save name is host id + client id
-     * Saves include the game start time and save pgn as json
-     *
-     * Input: host id, client id, game pgn
+     * Saves include the game start time and save fen as json
+     * Robots are saved as a map of indices to robots
+     * Input: host id, client id, game fen, robots
      * Output: boolean competed
      */
     public static saveGame(
@@ -38,16 +42,28 @@ export class SaveManager {
         hostSide: Side,
         aiDiff: number,
         pgn: string,
+        fen: string,
+        robots: Map<string, string>,
     ) {
         const day = new Date().getTime();
         const side = hostSide === Side.WHITE;
+        console.log(JSON.stringify(robots));
         const saveContents = {
             host: hostId,
             date: day,
             hostWhite: side,
             aiDifficulty: aiDiff,
             game: pgn,
+            pos: fen,
+            robotPos: Array.from(robots),
+            oldPos: "",
+            oldRobotPos: Array<[string, string]>(),
         };
+        const oldGame = SaveManager.loadGame(hostId + "+" + clientID);
+        if (oldGame && oldGame.pos !== null) {
+            saveContents.oldPos = oldGame.pos;
+            saveContents.oldRobotPos = oldGame.robotPos;
+        }
         return FileManager.writeFile(hostId + "+" + clientID, saveContents);
     }
 
