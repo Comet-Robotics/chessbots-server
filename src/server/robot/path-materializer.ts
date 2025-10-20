@@ -112,7 +112,7 @@ function addToCollisions(collisions: string[], x: number, y: number) {
     }
 }
 
-// detects collisions by cecking whats in the way depending on the collision type
+// detects collisions by cecking whats in the way depending on the collision type. Note we don't check the destination square
 function detectCollisions(
     gridMove: GridMove,
     collisionType: CollisionType,
@@ -213,8 +213,6 @@ function detectCollisions(
                         robotManager.getRobotAtIndices(square2).id;
                     collisions.push(piece);
                 }
-
-                //am i tweaking or do we not check the diagonal itself 
             }
             break;
         }
@@ -248,16 +246,23 @@ function detectCollisions(
                 collisions.push(piece);
             }
             break;
+
+            // do we not check the other bots in the way of the L-shaped movement?
         }
     }
     return collisions;
 }
 
+// note to self: each "i" is a column, each "J" is a row
+
+// finds the location that a robot that would normally collide should shimmy towards. Move in this case
+// is the movement of the roiginal robot that causes the collision
 function findShimmyLocation(
     pieceId: string,
     move: GridMove,
     collisionType: CollisionType,
 ): Position {
+    // get current position of robot that may shimmy
     const shimmyPos: Position = robotManager.getRobot(pieceId).position;
     const axisShimmyAmount: number = 1 / 3;
     switch (collisionType) {
@@ -265,6 +270,9 @@ function findShimmyLocation(
         case CollisionType.HORIZONTAL: {
             const direction: [number, number] = directionToEdge(move.to);
             const gridY: number = Math.floor(shimmyPos.y);
+            // if the collision happened while the original robot was moving horizontally, and
+            // this robot is on the same row, then move away from the center of the board; otherwise,
+            // move closer to the center of the board
             if (gridY === move.to.j) {
                 const augmentY: number =
                     shimmyPos.y + direction[1] * -axisShimmyAmount;
@@ -279,6 +287,8 @@ function findShimmyLocation(
         case CollisionType.VERTICAL: {
             const direction: [number, number] = directionToEdge(move.to);
             const gridX: number = Math.floor(shimmyPos.y);
+            // if vertical collision, and on same row, move away from center; otherwise, 
+            // move closer to center.
             if (gridX === move.to.i) {
                 const augmentX: number =
                     shimmyPos.x + direction[0] * -axisShimmyAmount;
@@ -289,16 +299,24 @@ function findShimmyLocation(
                 return new Position(augmentX, shimmyPos.y);
             }
         }
+        //if diagonal or horse, use same idea
         case CollisionType.DIAGONAL:
         case CollisionType.HORSE: {
             const moveDistance: number = 0.5;
             const signedDistX: number = move.to.i - move.from.i;
             const signedDistY: number = move.to.j - move.from.j;
+            // gets total distance of the moving bot that it has to travel
             const distHypot = Math.hypot(signedDistX, signedDistY);
+            // distance normalized to a unit vector holding direction
             const normalX: number = signedDistX / distHypot;
             const normalY: number = signedDistY / distHypot;
+
+            // gets the vector perpendicular to the normal vector. These are the two options to take
             const orth1: Position = new Position(-normalY, normalX);
             const orth2: Position = new Position(normalY, -normalX);
+
+            // adds orthogonal vector to final position, so orthPos1 is a point slightly close to one side
+            // facing away from the destination, while orthPos2 is the same but in the opposite side.
             const orthPos1: Position = orth1.add(
                 Position.fromGridIndices(move.to),
             );
@@ -308,10 +326,13 @@ function findShimmyLocation(
 
             // distance calculations :)
             const val1: Position = shimmyPos.sub(orthPos1);
-            const val2: Position = shimmyPos.sub(orthPos2);
             const dist1: number = Math.hypot(val1.x, val1.y);
+
+            const val2: Position = shimmyPos.sub(orthPos2);
             const dist2: number = Math.hypot(val2.x, val2.y);
 
+            // between the two possible shimmy options, chooses the one that travels less distance, and move it in the direction
+            // of the orthogonal vector. Basically if there's a vector (from, to) of the Robot, this shimmy moves it away from that line.
             return dist1 < dist2 ?
                     new Position(
                         shimmyPos.x + orth1.x * moveDistance,
@@ -326,6 +347,8 @@ function findShimmyLocation(
     return new Position(0, 0);
 }
 
+// constructs the drive command, how much the robot should drive FORWARD from its
+// urrent heading
 function constructDriveCommand(
     pieceId: string,
     endLocation: Position,
@@ -337,6 +360,7 @@ function constructDriveCommand(
     return new DriveCommand(pieceId, distance);
 }
 
+//constructs rotat command of how m uch the robot should rotate
 function constructRotateCommand(
     pieceId: string,
     location: Position,
@@ -344,11 +368,15 @@ function constructRotateCommand(
 ): ReversibleRobotCommand {
     const robot = robotManager.getRobot(pieceId);
     const offset = location.sub(startLocation ?? robot.position);
+    // angle that the offset vector makes, so where to rotate towards
     const angle = Math.atan2(offset.y, offset.x);
     console.log("rotate cmd construct", robot.position, offset, angle);
     return new ReversibleAbsoluteRotateCommand(pieceId, () => angle);
 }
 
+// constructs final command for the robots
+
+//move in this case is the move of the original robot
 function constructFinalCommand(
     move: GridMove,
     driveCommands: DriveCommand[],
@@ -359,25 +387,38 @@ function constructFinalCommand(
     const from = move.from;
     const robotAtFrom = robotManager.getRobotAtIndices(from);
     const mainPiece = robotAtFrom.id;
+    // gets edge closer to center
     const dirToEdge = directionToEdge(from);
 
+    // all the commands needed to do the collision now
+    const setupCommands: ReversibleRobotCommand[] = [];
+
+    // we should be moving a piece, obviously, else raise error
     if (mainPiece !== undefined) {
         console.log("main piece");
         const to = move.to;
         if (collisionType === CollisionType.HORIZONTAL && numCollisions > 1) {
+            // y is like the distance we need to travel to get to that edge
             const y = dirToEdge[1] * 0.5;
+
+            //NOTE: to get MIDDLe of tile, each tile is 1x1, so it's 0.5
+
+            //first, set position as same horizontal value, but now veritcally in the direction closer to center.
             const pos1 = new Position(from.i + 0.5, from.j + y + 0.5);
+            // then, move it horizontally to the right location
             const pos2 = new Position(to.i + 0.5, from.j + y + 0.5);
+            //then, just move it a bit down (or up) towards the center of the chosen tile
             const pos3 = new Position(to.i + 0.5, to.j + 0.5);
             console.log("from, to ========", from, " ", to);
+            // create the commands needed
             const mainDrive1 = constructDriveCommand(mainPiece, pos1, null);
             const mainDrive2 = constructDriveCommand(mainPiece, pos2, pos1);
             const mainDrive3 = constructDriveCommand(mainPiece, pos3, pos2);
             const mainTurn1 = constructRotateCommand(mainPiece, pos1, null);
             const mainTurn2 = constructRotateCommand(mainPiece, pos2, pos1);
             const mainTurn3 = constructRotateCommand(mainPiece, pos3, pos2);
-            const setupCommands: ReversibleRobotCommand[] = [];
 
+            // want to specify that you have to do the turns in the right order
             const mainDrive: SequentialCommandGroup =
                 new SequentialCommandGroup([
                     mainDrive1,
@@ -403,7 +444,6 @@ function constructFinalCommand(
             const mainTurn1 = constructRotateCommand(mainPiece, pos1, null);
             const mainTurn2 = constructRotateCommand(mainPiece, pos2, pos1);
             const mainTurn3 = constructRotateCommand(mainPiece, pos3, pos2);
-            const setupCommands: ReversibleRobotCommand[] = [];
 
             const mainDrive: SequentialCommandGroup =
                 new SequentialCommandGroup([
@@ -419,7 +459,6 @@ function constructFinalCommand(
             const pos = new Position(to.i + 0.5, to.j + 0.5);
             const mainDrive = constructDriveCommand(mainPiece, pos, null);
             const mainTurn = constructRotateCommand(mainPiece, pos, null);
-            const setupCommands: ReversibleRobotCommand[] = [];
             setupCommands.push(...rotateCommands, mainTurn, ...driveCommands);
             return new MovePiece(setupCommands, mainDrive);
         }
@@ -435,13 +474,17 @@ export function moveMainPiece(move: GridMove): MovePiece {
     const driveCommands: DriveCommand[] = [];
     const rotateCommands: ReversibleRobotCommand[] = [];
     const collisionType = calcCollisionType(move);
+    // gets collisions
     const collisions: string[] = detectCollisions(move, collisionType);
+    //loop through the collisions. Find where they should shimmy, and push the appropriate drive and roate
+    // commands to get them to that location
     for (let i = 0; i < collisions.length; i++) {
         const pieceId = collisions[i];
         const location = findShimmyLocation(pieceId, move, collisionType);
         driveCommands.push(constructDriveCommand(pieceId, location, null));
         rotateCommands.push(constructRotateCommand(pieceId, location, null));
     }
+    // with all the data now, create all the final commands needed to handle any collisions with this move
     return constructFinalCommand(
         move,
         driveCommands,
