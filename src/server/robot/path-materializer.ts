@@ -374,8 +374,26 @@ function constructRotateCommand(
     return new ReversibleAbsoluteRotateCommand(pieceId, () => angle);
 }
 
-// constructs final command for the robots
+// takes in the 3 positions, main piece, and computes the sequential command sequence. Made to reduce duplicated code
+function getMoveSequence(mainPiece : string, pos1 : Position, pos2 : Position, pos3 : Position) : SequentialCommandGroup
+{
+    const mainDrive1 = constructDriveCommand(mainPiece, pos1, null);
+    const mainDrive2 = constructDriveCommand(mainPiece, pos2, pos1);
+    const mainDrive3 = constructDriveCommand(mainPiece, pos3, pos2);
+    
+    const mainTurn2 = constructRotateCommand(mainPiece, pos2, pos1);
+    const mainTurn3 = constructRotateCommand(mainPiece, pos3, pos2);
 
+    return new SequentialCommandGroup([
+        mainDrive1,
+        mainTurn2,
+        mainDrive2,
+        mainTurn3,
+        mainDrive3,
+    ]);
+}
+
+// constructs final command for the robots
 //move in this case is the move of the original robot
 function constructFinalCommand(
     move: GridMove,
@@ -397,6 +415,10 @@ function constructFinalCommand(
     if (mainPiece !== undefined) {
         console.log("main piece");
         const to = move.to;
+
+        let mainDrive: SequentialCommandGroup | DriveCommand
+        let mainTurn: ReversibleRobotCommand
+        
         if (collisionType === CollisionType.HORIZONTAL && numCollisions > 1) {
             // y is like the distance we need to travel to get to that edge
             const y = dirToEdge[1] * 0.5;
@@ -411,57 +433,40 @@ function constructFinalCommand(
             const pos3 = new Position(to.i + 0.5, to.j + 0.5);
             console.log("from, to ========", from, " ", to);
             // create the commands needed
-            const mainDrive1 = constructDriveCommand(mainPiece, pos1, null);
-            const mainDrive2 = constructDriveCommand(mainPiece, pos2, pos1);
-            const mainDrive3 = constructDriveCommand(mainPiece, pos3, pos2);
-            const mainTurn1 = constructRotateCommand(mainPiece, pos1, null);
-            const mainTurn2 = constructRotateCommand(mainPiece, pos2, pos1);
-            const mainTurn3 = constructRotateCommand(mainPiece, pos3, pos2);
 
-            // want to specify that you have to do the turns in the right order
-            const mainDrive: SequentialCommandGroup =
-                new SequentialCommandGroup([
-                    mainDrive1,
-                    mainTurn2,
-                    mainDrive2,
-                    mainTurn3,
-                    mainDrive3,
-                ]);
-            setupCommands.push(...rotateCommands, mainTurn1, ...driveCommands);
-            return new MovePiece(setupCommands, mainDrive);
+            mainTurn = constructRotateCommand(mainPiece, pos1, null);
+
+            // helper function to clean up the code, reudcing duplicated lines
+            mainDrive = getMoveSequence(mainPiece, pos1, pos2, pos3)
         } else if (
             collisionType === CollisionType.VERTICAL &&
             numCollisions > 1
         ) {
+            //distance to get to the edge needed
             const x = dirToEdge[0] * 0.5;
+            // move horizontally to one of the edges on the from square
             const pos1 = new Position(from.i + x + 0.5, from.j + 0.5);
+            // move veritcally to the "to" square
             const pos2 = new Position(from.i + x + 0.5, to.j + 0.5);
+            // move back in place to the center of the square
             const pos3 = new Position(to.i + 0.5, to.j + 0.5);
             console.log("from, to ========", from, " ", to);
-            const mainDrive1 = constructDriveCommand(mainPiece, pos1, null);
-            const mainDrive2 = constructDriveCommand(mainPiece, pos2, pos1);
-            const mainDrive3 = constructDriveCommand(mainPiece, pos3, pos2);
-            const mainTurn1 = constructRotateCommand(mainPiece, pos1, null);
-            const mainTurn2 = constructRotateCommand(mainPiece, pos2, pos1);
-            const mainTurn3 = constructRotateCommand(mainPiece, pos3, pos2);
 
-            const mainDrive: SequentialCommandGroup =
-                new SequentialCommandGroup([
-                    mainDrive1,
-                    mainTurn2,
-                    mainDrive2,
-                    mainTurn3,
-                    mainDrive3,
-                ]);
-            setupCommands.push(...rotateCommands, mainTurn1, ...driveCommands);
-            return new MovePiece(setupCommands, mainDrive);
-        } else {
+            mainTurn = constructRotateCommand(mainPiece, pos1, null);
+            
+            // helper function to clean up the code, reudcing duplicated lines
+            mainDrive = getMoveSequence(mainPiece, pos1, pos2, pos3)
+        } 
+        //diagonal or knight option
+        else {
             const pos = new Position(to.i + 0.5, to.j + 0.5);
-            const mainDrive = constructDriveCommand(mainPiece, pos, null);
-            const mainTurn = constructRotateCommand(mainPiece, pos, null);
-            setupCommands.push(...rotateCommands, mainTurn, ...driveCommands);
-            return new MovePiece(setupCommands, mainDrive);
+            //just drive directly to the location in question
+            mainDrive = constructDriveCommand(mainPiece, pos, null);
+            mainTurn = constructRotateCommand(mainPiece, pos, null);
         }
+
+        setupCommands.push(...rotateCommands, mainTurn, ...driveCommands);
+        return new MovePiece(setupCommands, mainDrive);
     } else {
         console.log("no main piece");
         return new MovePiece(rotateCommands, new SequentialCommandGroup([]));
@@ -515,6 +520,8 @@ function moveToDeadZone(origin: GridIndices): GridMove {
         to: new GridIndices(1, origin.j), //("a" + origin[1]) as Square,
     };
 
+    // check if there's any collisions by doing this
+
     const aboveCollision = detectCollisions(
         aboveMove,
         calcCollisionType(aboveMove),
@@ -539,6 +546,7 @@ function moveToDeadZone(origin: GridIndices): GridMove {
         [leftMove, leftCollision],
     ];
 
+    // sorts by which way has the least collisions, and then choose the one with the fewest collisions to return
     collisionTuple.sort((a, b) => a[1].length - b[1].length);
     return collisionTuple[0][0];
 }
@@ -563,6 +571,7 @@ function directionToEdge(position: GridIndices) {
     return DirectionTuple;
 }
 
+// given the array of grid indices, finds the specific grid index
 function findGridIndicesInArray(
     array: GridIndices[],
     obj: GridIndices,
@@ -570,92 +579,88 @@ function findGridIndicesInArray(
     return array.findIndex((o) => o.i === obj.i && o.j === obj.j);
 }
 
+function decreasingFunction(number : number)
+{
+    return Math.floor(number / 9) * 9
+}
+
+function increasingFunction(number : number)
+{
+    return Math.ceil(number / 9) * 9
+}
+
+//returns a piece back to its home position
 function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
     //const capturedPiece: GridIndices = GridIndices.squareToGrid(from);
     const home: GridIndices = robotManager.getRobot(id).homeIndices;
     const fastestMoveToDeadzone = moveToDeadZone(from);
+    //gets all the fun commands to move the piece to the deadzone
     const toDeadzone = moveMainPiece(fastestMoveToDeadzone);
 
+    //now that we're in teh deadzone, how we get back
     const startInDeadzone = fastestMoveToDeadzone.to;
-    let finalDestination: GridIndices | undefined;
 
-    const checkDirections: [number, number][] = [
-        [0, 1],
-        [1, 0],
-        [-1, 0],
-        [0, -1],
-    ];
-
-    for (const direction of checkDirections) {
-        try {
-            const adjacentToHome = home.addTuple(direction);
-            if (arrayOfDeadzone.find((dz) => dz.equals(adjacentToHome))) {
-                finalDestination = adjacentToHome;
-                break;
-            }
-        } catch (e) {
-            // adjacentToHome is out of bounds, skip check
-            continue;
-        }
-    }
-    if (!finalDestination) {
-        throw new Error("WHERE THE HELL ARE YOU GOING"); // real
-    }
-    const startInArray = findGridIndicesInArray(
+    // finds the index values
+    const startArrayIndex = findGridIndicesInArray(
         arrayOfDeadzone,
         startInDeadzone,
     );
-    const endInArray = findGridIndicesInArray(
+    const endArrayIndex = findGridIndicesInArray(
         arrayOfDeadzone,
-        finalDestination,
+        home,
     );
-    let differenceOfIndex = endInArray - startInArray;
+    
+    // gets net distance of this
+    let differenceOfIndex = endArrayIndex - startArrayIndex;
 
+    // if we got a negative value, make it positive this way, basically meant that a wraparound was required to travel downwards from startArrayIndex
     if (differenceOfIndex < 0) {
         differenceOfIndex += 36;
     }
 
+    // if short distance, go in that direciton. Otherwise, go opposite way since its shorter
     const botDirectionToHome = differenceOfIndex < 18 ? 1 : -1;
     console.log(
         "deadzone array checker",
-        startInArray,
-        endInArray,
+        startArrayIndex,
+        endArrayIndex,
         botDirectionToHome,
     );
 
-    let i = startInArray;
+    let i = startArrayIndex;
     const moveCommands: MoveCommand[] = [];
-    while (i !== endInArray) {
-        if (arrayOfCornersIndicies.includes(i)) {
+    // if already at the destination, don't run this
+
+    const incrementalFunction : Function = botDirectionToHome == 1 ? increasingFunction : decreasingFunction;
+    
+    // until we've gotten to our destination do this
+    while (i !== endArrayIndex) {
+        if (Math.abs(i - endArrayIndex) < 9)
+        {
+            // now head to the final tile
             moveCommands.push(
-                new AbsoluteMoveCommand(
-                    id,
-                    new Position(
-                        arrayOfDeadzone[i].i + 0.5,
-                        arrayOfDeadzone[i].j + 0.5,
-                    ),
-                ),
+                new AbsoluteMoveCommand(id, new Position(arrayOfDeadzone[endArrayIndex].i + 0.5, arrayOfDeadzone[endArrayIndex].j + 0.5))
             );
+            break;
         }
-        i += botDirectionToHome;
-        if (i < 0) i += 36;
-        if (i >= 36) i -= 36;
-    }
-    if (arrayOfDeadzone[endInArray]) {
+        i = incrementalFunction(i);
+
+        let currentPushing = i
+        
+        //wrappign aroudn when we reach a bound
+        if(i === 36)
+        {
+            currentPushing = i = 0;
+        }
+        else if(i === 0)
+        {
+            i = 36;
+        }
+        // now head to the final tile
         moveCommands.push(
-            new AbsoluteMoveCommand(
-                id,
-                new Position(
-                    arrayOfDeadzone[endInArray].i + 0.5,
-                    arrayOfDeadzone[endInArray].j + 0.5,
-                ),
-            ),
+            new AbsoluteMoveCommand(id, new Position(arrayOfDeadzone[currentPushing].i + 0.5, arrayOfDeadzone[currentPushing].j + 0.5))
         );
     }
-
-    moveCommands.push(
-        new AbsoluteMoveCommand(id, new Position(home.i + 0.5, home.j + 0.5)),
-    );
 
     const goHome: SequentialCommandGroup = new SequentialCommandGroup([
         toDeadzone,
