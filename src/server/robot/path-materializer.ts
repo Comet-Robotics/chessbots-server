@@ -702,6 +702,8 @@ export function moveAllRobotsToDefaultPositions(
 
     // Sort robots: column by column (left to right, no skipping), then bottom to top within each column
     // This prevents collisions by ensuring robots in the same column don't interfere with each other
+    
+    // this current code only seems to sort by column?
     const sortedRobots = robotsToMove.sort((a, b) => {
         const aPos = GridIndices.fromPosition(a.position);
         const bPos = GridIndices.fromPosition(b.position);
@@ -711,6 +713,7 @@ export function moveAllRobotsToDefaultPositions(
 
     const allCommands: Command[] = [];
 
+    // generates a path to the default square
     for (const robot of sortedRobots) {
         const robotCommands = generateRobotPathToDefault(
             robot,
@@ -750,11 +753,16 @@ export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
     const mainPieceTargets = new Map<string, GridIndices>();
     const pawnTargets = new Map<string, GridIndices>();
 
-    for (const robot of robotManager.idsToRobots.values()) {
+    // puts each piece into different targets based on the piece type
+    for (const robot of robotManager.idsToRobots.values()) 
+    {
         const def = robot.defaultIndices;
-        if (def.j === 2 || def.j === 9) {
+        if (robot.pieceType !== "w_pawn" && robot.pieceType !== "b_pawn") 
+        {
             mainPieceTargets.set(robot.id, def);
-        } else if (def.j === 3 || def.j === 8) {
+        } 
+        else  
+        {
             pawnTargets.set(robot.id, def);
         }
     }
@@ -775,35 +783,30 @@ export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
     // Home -> Deadzone entry on its side, Along deadzone to file aligned with its row,
     // Into its pawn row square. Repeat until all pawns are placed.
     type PawnInfo = { id: string; def: GridIndices; start: GridIndices };
-    const leftWhite: PawnInfo[] = [];
-    const leftBlack: PawnInfo[] = [];
-    const rightWhite: PawnInfo[] = [];
-    const rightBlack: PawnInfo[] = [];
+    const leftWhite: (PawnInfo | null)[] = [null, null, null, null];
+    const leftBlack: (PawnInfo | null)[] = [null, null, null, null];
+    const rightWhite: (PawnInfo | null)[] = [null, null, null, null];
+    const rightBlack: (PawnInfo | null)[] = [null, null, null, null];
 
+    // group pawns into 4 types as mentioned above
     for (const [robotId, def] of pawnTargets) {
-        const start = robotManager.getRobot(robotId).homeIndices;
-        const isWhite = def.j === 3;
-        const sideIsLeft = start.i === 0;
-        const info: PawnInfo = { id: robotId, def, start };
-        if (sideIsLeft) {
-            (isWhite ? leftWhite : leftBlack).push(info);
-        } else {
-            (isWhite ? rightWhite : rightBlack).push(info);
-        }
-    }
+        const robot = robotManager.getRobot(robotId);
+        const start = robot.homeIndices;
 
-    // Sort each group center-out by file to funnel from middle outward
-    const centerOutSort = (a: PawnInfo, b: PawnInfo) => {
-        const center = 5.5;
-        const da = Math.abs(a.def.i - center);
-        const db = Math.abs(b.def.i - center);
-        if (da !== db) return da - db;
-        return a.def.i - b.def.i;
-    };
-    leftWhite.sort(centerOutSort);
-    leftBlack.sort(centerOutSort);
-    rightWhite.sort(centerOutSort);
-    rightBlack.sort(centerOutSort);
+        const isWhite = robot.pieceType[0] === "w"
+        const sideIsLeft = start.i === 0;
+
+        const info: PawnInfo = { id: robotId, def, start };
+        // gets its index and palces it where ones closer to the center are farther x
+        const placementIndex =  Math.abs(start.j - (isWhite ? Math.floor(5.5) : Math.ceil(5.5)) )
+        let chosenList : (PawnInfo | null)[] = [null];
+        if (sideIsLeft) {
+            chosenList = isWhite ? leftWhite : leftBlack;
+        } else {
+            chosenList = isWhite ? rightWhite : rightBlack;
+        }
+        chosenList[placementIndex] = info
+    }
 
     const pawnBatches: ParallelCommandGroup[] = [];
     while (
@@ -813,7 +816,7 @@ export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
         rightBlack.length > 0
     ) {
         const batchSeqs: SequentialCommandGroup[] = [];
-        const pick = (arr: PawnInfo[] | undefined) => {
+        const pick = (arr: (PawnInfo | null)[] | undefined) => {
             if (!arr || arr.length === 0) return;
             const pawn = arr.shift()!;
             const dzStart = moveToDeadzoneFromHome(pawn.start);
