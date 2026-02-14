@@ -32,7 +32,7 @@ enum CollisionType {
     HORSE = 3,
 }
 
-const arrayOfCornersIndicies = [0, 9, 18, 27];
+// const arrayOfCornersIndicies = [0, 9, 18, 27];
 
 // creates a "Border" around the geamboard that serves as a deadzone
 const arrayOfDeadzone = [
