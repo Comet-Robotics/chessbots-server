@@ -77,6 +77,7 @@ export function Simulator() {
     // update the simulator when a message comes in
     useSocket((message) => {
         if (message instanceof SimulatorUpdateMessage) {
+            console.log("Updating bot!")
             dispatch({
                 type: "UPDATE_ROBOT",
                 payload: { robotId: message.robotId, state: message.location },
