@@ -68,7 +68,7 @@ import {
 
 /**
  * Helper function to move all robots from their home positions to their default positions
- * for regular chess games
+ * for regular chess games. IsMoving basically controls whether or not to actually move the robots to the right position.
  */
 async function setupDefaultRobotPositions(
     isMoving: boolean = true,
@@ -292,6 +292,8 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
     const moves = puzzle.moves;
     const difficulty = puzzle.rating;
 
+    console.log(`Fein is ${fen}, moves are ${moves}, difficulty is ${difficulty}`)
+
     if (puzzle.robotDefaultPositions) {
         // Convert puzzle.robotDefaultPositions from Record<string, string> to Map<string, GridIndices>
         const defaultPositionsMap = new Map<string, GridIndices>();
@@ -321,6 +323,10 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
             !START_ROBOTS_AT_DEFAULT,
             defaultPositionsMap,
         );
+    }
+    else
+    {
+        throw Error("Should have the default positions set up, but the config is missing.")
     }
     setGameManager(
         new PuzzleGameManager(
