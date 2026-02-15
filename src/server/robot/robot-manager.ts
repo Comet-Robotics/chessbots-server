@@ -60,16 +60,18 @@ export class RobotManager {
         const robot = new Robot(
             robotId,
             new GridIndices(
-                config[robotId]?.homeIndices.x,
-                config[robotId]?.homeIndices.y,
+                robotConfig?.homeIndices.x,
+                robotConfig?.homeIndices.y,
             ),
             new GridIndices(
-                config[robotId]?.defaultIndices.x,
-                config[robotId]?.defaultIndices.y,
+                robotConfig?.defaultIndices.x,
+                robotConfig?.defaultIndices.y,
             ),
-            config[robotId]?.startHeadingRadians * DEGREE,
+            robotConfig?.startHeadingRadians * DEGREE,
+            robotConfig?.attributes.piece_type
         );
         this.addRobot(robot);
+        console.log("We have the following:" + robotConfig?.defaultIndices)
         return robot;
     }
 
@@ -125,12 +127,14 @@ export const robotManager = new RobotManager(
                 new GridIndices(0, 5),
                 new GridIndices(5, 3),
                 90 * DEGREE,
+                "w_pawn"
             ),
             new Robot(
                 "robot-4",
                 new GridIndices(5, 0),
                 new GridIndices(5, 2),
                 90 * DEGREE,
+                "w_queen"
             ),
         ],
 );

@@ -10,7 +10,6 @@ import { SimulatorUpdateMessage } from "../common/message/simulator-message";
 import { socketManager } from "./api/managers";
 import { randomUUID } from "node:crypto";
 import { GridIndices } from "./robot/grid-indices";
-import { getStartHeading, Side } from "../common/game-types";
 import { BotTunnel, type RobotEventEmitter } from "./api/bot-tunnel";
 
 const srcDir = path.resolve(__dirname, "../");
@@ -225,8 +224,9 @@ export class VirtualRobot extends Robot {
         homeIndices: GridIndices,
         defaultIndices: GridIndices,
         headingRadians: number,
+        pieceType: String
     ) {
-        super(id, homeIndices, defaultIndices, headingRadians);
+        super(id, homeIndices, defaultIndices, headingRadians, pieceType);
         this.tunnel = new VirtualBotTunnel(id, headingRadians, this.position);
     }
 
@@ -251,7 +251,7 @@ function createVirtualRobots() {
         .map((_, i) => `robot-${(i + 1).toString()}`);
 
     return new Map<string, VirtualRobot>(
-        virtualBotIds.map((id, idx) => {
+        virtualBotIds.map((id) => {
             const realRobotConfig = config[id];
             return [
                 id,
@@ -265,7 +265,8 @@ function createVirtualRobots() {
                         realRobotConfig.defaultIndices.x,
                         realRobotConfig.defaultIndices.y,
                     ),
-                    getStartHeading(idx < 16 ? Side.WHITE : Side.BLACK),
+                    realRobotConfig.startHeadingRadians,
+                    realRobotConfig.attributes.piece_type
                 ),
             ] as const;
         }),

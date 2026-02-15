@@ -1,6 +1,5 @@
 import type { Square } from "chess.js";
 import type { Robot } from "../server/robot/robot";
-import { DEGREE } from "./units";
 
 /**
  * Defines a specific piece.
@@ -34,14 +33,15 @@ export function oppositeSide(side: Side) {
     return side === Side.WHITE ? Side.BLACK : Side.WHITE;
 }
 
-/**
- * get the robot's start heading based on the side it is on
- * @param side - the current side
- * @returns angle in radians
- */
-export function getStartHeading(side: Side) {
-    return side === Side.WHITE ? 90 * DEGREE : 270 * DEGREE;
-}
+// I don't think we need this anymore. DIE!
+// /**
+//  * get the robot's start heading based on the side it is on
+//  * @param side - the current side
+//  * @returns angle in radians
+//  */
+// export function getStartHeading(side: Side) {
+//     return side === Side.WHITE ? 90 * DEGREE : 270 * DEGREE;
+// }
 
 /**
  * holds the piece side, type, robot, and square

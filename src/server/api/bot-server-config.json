@@ -11,7 +11,9 @@
         "80:65:99:4e:70:2c": "robot-7"
     },
     "robot-1": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "w_rook"
+        },
         "homeIndices": {
             "x": 2,
             "y": 0
@@ -23,7 +25,9 @@
         "startHeadingRadians": 1.5707963268
     },
     "robot-2": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "w_knight"
+        },
         "homeIndices": {
             "x": 3,
             "y": 0
@@ -35,7 +39,9 @@
         "startHeadingRadians": 1.5707963268
     },
     "robot-3": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "w_bishop"
+        },
         "homeIndices": {
             "x": 4,
             "y": 0
@@ -47,7 +53,9 @@
         "startHeadingRadians": 1.5707963268
     },
     "robot-4": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "w_queen"
+        },
         "homeIndices": {
             "x": 5,
             "y": 0
@@ -59,7 +67,9 @@
         "startHeadingRadians": 1.5707963268
     },
     "robot-5": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "w_king"
+        },
         "homeIndices": {
             "x": 6,
             "y": 0
@@ -71,7 +81,9 @@
         "startHeadingRadians": 1.5707963268
     },
     "robot-6": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "w_bishop"
+        },
         "homeIndices": {
             "x": 7,
             "y": 0
@@ -83,7 +95,9 @@
         "startHeadingRadians": 1.5707963268
     },
     "robot-7": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "w_knight"
+        },
         "homeIndices": {
             "x": 8,
             "y": 0
@@ -95,7 +109,9 @@
         "startHeadingRadians": 1.5707963268
     },
     "robot-8": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "w_rook"
+        },
         "homeIndices": {
             "x": 9,
             "y": 0
@@ -107,7 +123,9 @@
         "startHeadingRadians": 1.5707963268
     },
     "robot-9": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "w_pawn"
+        },
         "homeIndices": {
             "x": 0,
             "y": 2
@@ -119,7 +137,9 @@
         "startHeadingRadians": 1.5707963268
     },
     "robot-10": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "w_pawn"
+        },
         "homeIndices": {
             "x": 0,
             "y": 3
@@ -131,7 +151,9 @@
         "startHeadingRadians": 1.5707963268
     },
     "robot-11": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "w_pawn"
+        },
         "homeIndices": {
             "x": 0,
             "y": 4
@@ -143,7 +165,9 @@
         "startHeadingRadians": 1.5707963268
     },
     "robot-12": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "w_pawn"
+        },
         "homeIndices": {
             "x": 0,
             "y": 5
@@ -155,7 +179,9 @@
         "startHeadingRadians": 1.5707963268
     },
     "robot-13": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "w_pawn"
+        },
         "homeIndices": {
             "x": 11,
             "y": 5
@@ -167,7 +193,9 @@
         "startHeadingRadians": 1.5707963268
     },
     "robot-14": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "w_pawn"
+        },
         "homeIndices": {
             "x": 11,
             "y": 4
@@ -181,7 +209,8 @@
     "robot-15": {
         "attributes": {
             "MOTOR_A_DRIVE_MULTIPLIER": 1.3,
-            "MOTOR_B_DRIVE_MULTIPLIER": 2
+            "MOTOR_B_DRIVE_MULTIPLIER": 2,
+            "piece_type": "w_pawn"
         },
         "homeIndices": {
             "x": 11,
@@ -194,7 +223,9 @@
         "startHeadingRadians": 1.5707963268
     },
     "robot-16": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "w_pawn"
+        },
         "homeIndices": {
             "x": 11,
             "y": 2
@@ -206,7 +237,9 @@
         "startHeadingRadians": 1.5707963268
     },
     "robot-17": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "b_pawn"
+        },
         "homeIndices": {
             "x": 0,
             "y": 9
@@ -218,7 +251,9 @@
         "startHeadingRadians": 4.7123889804
     },
     "robot-18": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "b_pawn"
+        },
         "homeIndices": {
             "x": 0,
             "y": 8
@@ -230,7 +265,9 @@
         "startHeadingRadians": 4.7123889804
     },
     "robot-19": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "b_pawn"
+        },
         "homeIndices": {
             "x": 0,
             "y": 7
@@ -242,7 +279,9 @@
         "startHeadingRadians": 4.7123889804
     },
     "robot-20": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "b_pawn"
+        },
         "homeIndices": {
             "x": 0,
             "y": 6
@@ -254,7 +293,9 @@
         "startHeadingRadians": 4.7123889804
     },
     "robot-21": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "b_pawn"
+        },
         "homeIndices": {
             "x": 11,
             "y": 6
@@ -266,7 +307,9 @@
         "startHeadingRadians": 4.7123889804
     },
     "robot-22": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "b_pawn"
+        },
         "homeIndices": {
             "x": 11,
             "y": 7
@@ -278,7 +321,9 @@
         "startHeadingRadians": 4.7123889804
     },
     "robot-23": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "b_pawn"
+        },
         "homeIndices": {
             "x": 11,
             "y": 8
@@ -290,7 +335,9 @@
         "startHeadingRadians": 4.7123889804
     },
     "robot-24": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "b_pawn"
+        },
         "homeIndices": {
             "x": 11,
             "y": 9
@@ -302,7 +349,9 @@
         "startHeadingRadians": 4.7123889804
     },
     "robot-25": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "b_rook"
+        },
         "homeIndices": {
             "x": 2,
             "y": 11
@@ -314,7 +363,9 @@
         "startHeadingRadians": 4.7123889804
     },
     "robot-26": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "b_knight"
+        },
         "homeIndices": {
             "x": 3,
             "y": 11
@@ -326,7 +377,9 @@
         "startHeadingRadians": 4.7123889804
     },
     "robot-27": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "b_bishop"
+        },
         "homeIndices": {
             "x": 4,
             "y": 11
@@ -338,7 +391,9 @@
         "startHeadingRadians": 4.7123889804
     },
     "robot-28": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "b_queen"
+        },
         "homeIndices": {
             "x": 5,
             "y": 11
@@ -350,7 +405,9 @@
         "startHeadingRadians": 4.7123889804
     },
     "robot-29": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "b_king"
+        },
         "homeIndices": {
             "x": 6,
             "y": 11
@@ -362,7 +419,9 @@
         "startHeadingRadians": 4.7123889804
     },
     "robot-30": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "b_bishop"
+        },
         "homeIndices": {
             "x": 7,
             "y": 11
@@ -374,7 +433,9 @@
         "startHeadingRadians": 4.7123889804
     },
     "robot-31": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "b_knight"
+        },
         "homeIndices": {
             "x": 8,
             "y": 11
@@ -386,7 +447,9 @@
         "startHeadingRadians": 4.7123889804
     },
     "robot-32": {
-        "attributes": {},
+        "attributes": {
+            "piece_type": "b_rook"
+        },
         "homeIndices": {
             "x": 9,
             "y": 11
