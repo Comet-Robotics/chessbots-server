@@ -100,6 +100,7 @@ async function setupDefaultRobotPositions(
 export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
     // on close, delete the cookie id
     ws.on("close", () => {
+        console.log("We closed the connection")
         socketManager.handleSocketClosed(req.cookies.id);
     });
 
@@ -109,7 +110,14 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
         console.log("Received message: " + message.toJson());
 
         if (message instanceof RegisterWebsocketMessage) {
-            socketManager.registerSocket(req.cookies.id, ws);
+            console.log(`Register a new socket with request ${req.url}`)
+            const cutoffIndex = req.url.indexOf("page=") + 5;
+            const pageValue = req.url.substring(cutoffIndex) + "|o|o|";
+            console.log(req.cookies.id)
+            const finalSocketId = pageValue.concat(req.cookies.id)
+            
+
+            socketManager.registerSocket(finalSocketId, ws);
         } else if (
             message instanceof GameInterruptedMessage ||
             message instanceof MoveMessage ||
