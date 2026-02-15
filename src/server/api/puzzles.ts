@@ -10,6 +10,8 @@ export interface PuzzleComponents {
     robotDefaultPositions?: Record<string, Square>;
 }
 
+
+
 export const puzzles: Record<string, PuzzleComponents> = {
     "Puzzle 1": {
         fen: "8/1p3p1k/8/p1p2Kr1/P2pP3/1P1P4/2P5/8 w - - 0 1",

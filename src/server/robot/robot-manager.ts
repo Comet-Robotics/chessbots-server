@@ -90,6 +90,10 @@ export class RobotManager {
     getRobotAtIndices(indices: GridIndices): Robot {
         const indicesToIds = this.getIndicesToIds();
         const robotId = indicesToIds.get(indices.toString());
+        const theKeys = indicesToIds.keys()
+        const keyArr = [...theKeys]
+        console.log(`Indices is ${indices.toString()}, current id's are,`, keyArr);
+        
         if (robotId === undefined) {
             throw new Error("Failed to find robot at indices " + indices);
         }
