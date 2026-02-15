@@ -169,8 +169,9 @@ export const puzzles: Record<string, PuzzleComponents> = {
         ],
         rating: 2915,
         tooltip: "tooltip for puzzle 5",
-        robotDefaultPositions: processFEINToDefaultPos("1r3k2/R4p2/5Kp1/1p1Pp3/2p1PbP1/2P2P2/4B3/8 b - - 0 1")
+        robotDefaultPositions: processFEINToDefaultPos("r1b3k1/1pq1b1r1/p2p3Q/3Pp3/3p1P2/P2B3P/1PP3P1/1R3RK1 w - - 0 1")
     },
+    //whoever made this puzzle is pretty stupid
     "Puzzle 6": {
         fen: "4k3/8/4p3/8/8/4P3/8/4K3 w - - 0 1",
         moves: [
@@ -182,7 +183,7 @@ export const puzzles: Record<string, PuzzleComponents> = {
 
         rating: 1000,
         tooltip: "tooltip for puzzle 6",
-        robotDefaultPositions: processFEINToDefaultPos("1r3k2/R4p2/5Kp1/1p1Pp3/2p1PbP1/2P2P2/4B3/8 b - - 0 1")
+        robotDefaultPositions: processFEINToDefaultPos("4k3/8/4p3/8/8/4P3/8/4K3 w - - 0 1")
     },
     "Puzzle 7": {
         fen: "8/8/3k4/8/8/3K4/8/3R4 w - - 0 1",
@@ -193,6 +194,6 @@ export const puzzles: Record<string, PuzzleComponents> = {
 
         rating: 1000,
         tooltip: "tooltip for puzzle 7",
-        robotDefaultPositions: processFEINToDefaultPos("1r3k2/R4p2/5Kp1/1p1Pp3/2p1PbP1/2P2P2/4B3/8 b - - 0 1")
+        robotDefaultPositions: processFEINToDefaultPos("8/8/3k4/8/8/3K4/8/3R4 w - - 0 1")
     },
 };

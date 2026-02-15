@@ -80,7 +80,7 @@ async function setupDefaultRobotPositions(
                 moveAllRobotsToDefaultPositions(defaultPositionsMap);
             await executor.execute(command);
         } else {
-            moveAllRobotsToDefaultPositions(defaultPositionsMap);
+            setAllRobotsToDefaultPositions(defaultPositionsMap);
         }
     } else {
         if (isMoving) {

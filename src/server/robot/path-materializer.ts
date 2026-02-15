@@ -32,9 +32,8 @@ enum CollisionType {
     HORSE = 3,
 }
 
-// const arrayOfCornersIndicies = [0, 9, 18, 27];
+const arrayOfCornersIndicies = [0, 9, 18, 27];
 
-// creates a "Border" around the geamboard that serves as a deadzone
 const arrayOfDeadzone = [
     new GridIndices(1, 1),
     new GridIndices(1, 2),
@@ -74,7 +73,6 @@ const arrayOfDeadzone = [
     new GridIndices(2, 1),
 ];
 
-// converts from the Move object to the GridMove object.
 function moveToGridMove(move: Move): GridMove {
     return {
         from: GridIndices.squareToGrid(move.from),
@@ -82,7 +80,6 @@ function moveToGridMove(move: Move): GridMove {
     };
 }
 
-// detects what type of collision may be  found when moving to a location
 function calcCollisionType(gridMove: GridMove): CollisionType {
     const from = gridMove.from;
     const to = gridMove.to;
@@ -104,7 +101,6 @@ function calcCollisionType(gridMove: GridMove): CollisionType {
     }
 }
 
-// takes in a coordinate, sees if a robot is there. If there is, add it to a list of collisions
 function addToCollisions(collisions: string[], x: number, y: number) {
     const square = new GridIndices(x, y);
     if (robotManager.isRobotAtIndices(square)) {
@@ -112,7 +108,6 @@ function addToCollisions(collisions: string[], x: number, y: number) {
     }
 }
 
-// detects collisions by cecking whats in the way depending on the collision type. Note we don't check the destination square
 function detectCollisions(
     gridMove: GridMove,
     collisionType: CollisionType,
@@ -124,27 +119,23 @@ function detectCollisions(
     switch (collisionType) {
         // Horizontal
         case CollisionType.HORIZONTAL: {
-            // if we're moving left, check each index at left, seeing if there's any robots there
             if (to.i < from.i) {
                 for (let i = from.i - 1; i > to.i; i--) {
                     addToCollisions(collisions, i, from.j);
                 }
-                //If we didn't have a collision, yay, we have a clear path. If we didn't though, we'll have to go left or right (the closer one to the midpoint),
-                //and check if we travel along there, what collisions we'll have.
                 if (collisions.length > 0) {
-                    for (let i = from.i; i > to.i; i--) {
+                    addToCollisions(collisions, from.i, from.j + direction[1]);
+                    for (let i = from.i - 1; i > to.i; i--) {
                         addToCollisions(collisions, i, from.j + direction[1]);
                     }
                 }
-            } 
-            // if we're moving right now, check each index as we move right 
-            else {
+            } else {
                 for (let i = from.i + 1; i < to.i; i++) {
                     addToCollisions(collisions, i, from.j);
                 }
-                //same thing; if we got collisiions, now go closer to midpoint and see if traveling there what collisions we'd have.
                 if (collisions.length > 0) {
-                    for (let i = from.i; i < to.i; i++) {
+                    addToCollisions(collisions, from.i, from.j + direction[1]);
+                    for (let i = from.i + 1; i < to.i; i++) {
                         addToCollisions(collisions, i, from.j + direction[1]);
                     }
                 }
@@ -153,21 +144,17 @@ function detectCollisions(
         }
         // Vertical
         case CollisionType.VERTICAL: {
-            //if we are moving downwards
             if (to.j < from.j) {
                 for (let j = from.j - 1; j > to.j; j--) {
                     addToCollisions(collisions, from.i, j);
                 }
-                // try moving to column closer to middle, see collisions that way
                 if (collisions.length > 0) {
                     addToCollisions(collisions, from.i + direction[0], from.j);
                     for (let j = from.j - 1; j > to.j; j--) {
                         addToCollisions(collisions, from.i + direction[0], j);
                     }
                 }
-            } 
-            //means we are moving upwards
-            else {
+            } else {
                 for (let j = from.j + 1; j < to.j; j++) {
                     addToCollisions(collisions, from.i, j);
                 }
@@ -182,13 +169,15 @@ function detectCollisions(
         }
         // Diagonal
         case CollisionType.DIAGONAL: {
+            // Will be either positive or negative depending on direction
+            const dx = to.i - from.i;
+            const dy = to.j - from.j;
             // For diagonal, x and y offset by the same amount (not including signs)
             // thus, absolute value of either will be the same
-            const dx = to.i - from.i;
             const distance = Math.abs(dx);
             // Normalized to 1 or -1 to get direction (dividing by absolute value of self)
-            const nx = (dx) / distance;
-            const ny = (to.j - from.j) / distance;
+            const nx = dx / distance;
+            const ny = dy / distance;
 
             // Loop through the tiles along the diagonal excluding beginning and end
             // (Beginning is the moving piece, and end is capture piece. Capture handled separately)
@@ -199,7 +188,6 @@ function detectCollisions(
 
                 // Above or below the tile, depends on direction
                 const square1 = new GridIndices(midx, midy + ny);
-                // if robot there, add to collisions
                 if (robotManager.isRobotAtIndices(square1)) {
                     const piece: string =
                         robotManager.getRobotAtIndices(square1).id;
@@ -207,7 +195,6 @@ function detectCollisions(
                 }
                 // Left or right of tile, depends on direction
                 const square2 = new GridIndices(midx + nx, midy);
-                // robot there, add to collisions   
                 if (robotManager.isRobotAtIndices(square2)) {
                     const piece: string =
                         robotManager.getRobotAtIndices(square2).id;
@@ -224,12 +211,11 @@ function detectCollisions(
             // Normalized to 1 or -1 (can also be directly used to get first piece)
             const nx = dx / Math.abs(dx);
             const ny = dy / Math.abs(dy);
-            // Shifted to get second piece, shift direction based on sign. Reduces the distance
-            // in its direction by 1
+            // Shifted to get second piece, shift direction based on sign
             const sx = dx - nx;
             const sy = dy - ny;
 
-            // Same-sign horse moves share this square. Will always be 1 diagonal
+            // Same sign horse moves share this square. Will always be 1 diagonal
             // of moving piece
             const square1 = new GridIndices(from.i + nx, from.j + ny);
             if (robotManager.isRobotAtIndices(square1)) {
@@ -246,23 +232,16 @@ function detectCollisions(
                 collisions.push(piece);
             }
             break;
-
-            // do we not check the other bots in the way of the L-shaped movement?
         }
     }
     return collisions;
 }
 
-// note to self: each "i" is a column, each "J" is a row
-
-// finds the location that a robot that would normally collide should shimmy towards. Move in this case
-// is the movement of the roiginal robot that causes the collision
 function findShimmyLocation(
     pieceId: string,
     move: GridMove,
     collisionType: CollisionType,
 ): Position {
-    // get current position of robot that may shimmy
     const shimmyPos: Position = robotManager.getRobot(pieceId).position;
     const axisShimmyAmount: number = 1 / 3;
     switch (collisionType) {
@@ -270,9 +249,6 @@ function findShimmyLocation(
         case CollisionType.HORIZONTAL: {
             const direction: [number, number] = directionToEdge(move.to);
             const gridY: number = Math.floor(shimmyPos.y);
-            // if the collision happened while the original robot was moving horizontally, and
-            // this robot is on the same row, then move away from the center of the board; otherwise,
-            // move closer to the center of the board
             if (gridY === move.to.j) {
                 const augmentY: number =
                     shimmyPos.y + direction[1] * -axisShimmyAmount;
@@ -286,9 +262,7 @@ function findShimmyLocation(
         // Vertical
         case CollisionType.VERTICAL: {
             const direction: [number, number] = directionToEdge(move.to);
-            const gridX: number = Math.floor(shimmyPos.y);
-            // if vertical collision, and on same row, move away from center; otherwise, 
-            // move closer to center.
+            const gridX: number = Math.floor(shimmyPos.x);
             if (gridX === move.to.i) {
                 const augmentX: number =
                     shimmyPos.x + direction[0] * -axisShimmyAmount;
@@ -299,24 +273,16 @@ function findShimmyLocation(
                 return new Position(augmentX, shimmyPos.y);
             }
         }
-        //if diagonal or horse, use same idea
         case CollisionType.DIAGONAL:
         case CollisionType.HORSE: {
             const moveDistance: number = 0.5;
             const signedDistX: number = move.to.i - move.from.i;
             const signedDistY: number = move.to.j - move.from.j;
-            // gets total distance of the moving bot that it has to travel
             const distHypot = Math.hypot(signedDistX, signedDistY);
-            // distance normalized to a unit vector holding direction
             const normalX: number = signedDistX / distHypot;
             const normalY: number = signedDistY / distHypot;
-
-            // gets the vector perpendicular to the normal vector. These are the two options to take
             const orth1: Position = new Position(-normalY, normalX);
             const orth2: Position = new Position(normalY, -normalX);
-
-            // adds orthogonal vector to final position, so orthPos1 is a point slightly close to one side
-            // facing away from the destination, while orthPos2 is the same but in the opposite side.
             const orthPos1: Position = orth1.add(
                 Position.fromGridIndices(move.to),
             );
@@ -326,13 +292,10 @@ function findShimmyLocation(
 
             // distance calculations :)
             const val1: Position = shimmyPos.sub(orthPos1);
-            const dist1: number = Math.hypot(val1.x, val1.y);
-
             const val2: Position = shimmyPos.sub(orthPos2);
+            const dist1: number = Math.hypot(val1.x, val1.y);
             const dist2: number = Math.hypot(val2.x, val2.y);
 
-            // between the two possible shimmy options, chooses the one that travels less distance, and move it in the direction
-            // of the orthogonal vector. Basically if there's a vector (from, to) of the Robot, this shimmy moves it away from that line.
             return dist1 < dist2 ?
                     new Position(
                         shimmyPos.x + orth1.x * moveDistance,
@@ -347,8 +310,6 @@ function findShimmyLocation(
     return new Position(0, 0);
 }
 
-// constructs the drive command, how much the robot should drive FORWARD from its
-// urrent heading
 function constructDriveCommand(
     pieceId: string,
     endLocation: Position,
@@ -360,7 +321,6 @@ function constructDriveCommand(
     return new DriveCommand(pieceId, distance);
 }
 
-//constructs rotat command of how m uch the robot should rotate
 function constructRotateCommand(
     pieceId: string,
     location: Position,
@@ -368,33 +328,11 @@ function constructRotateCommand(
 ): ReversibleRobotCommand {
     const robot = robotManager.getRobot(pieceId);
     const offset = location.sub(startLocation ?? robot.position);
-    // angle that the offset vector makes, so where to rotate towards
     const angle = Math.atan2(offset.y, offset.x);
     console.log("rotate cmd construct", robot.position, offset, angle);
     return new ReversibleAbsoluteRotateCommand(pieceId, () => angle);
 }
 
-// takes in the 3 positions, main piece, and computes the sequential command sequence. Made to reduce duplicated code
-function getMoveSequence(mainPiece : string, pos1 : Position, pos2 : Position, pos3 : Position) : SequentialCommandGroup
-{
-    const mainDrive1 = constructDriveCommand(mainPiece, pos1, null);
-    const mainDrive2 = constructDriveCommand(mainPiece, pos2, pos1);
-    const mainDrive3 = constructDriveCommand(mainPiece, pos3, pos2);
-    
-    const mainTurn2 = constructRotateCommand(mainPiece, pos2, pos1);
-    const mainTurn3 = constructRotateCommand(mainPiece, pos3, pos2);
-
-    return new SequentialCommandGroup([
-        mainDrive1,
-        mainTurn2,
-        mainDrive2,
-        mainTurn3,
-        mainDrive3,
-    ]);
-}
-
-// constructs final command for the robots
-//move in this case is the move of the original robot
 function constructFinalCommand(
     move: GridMove,
     driveCommands: DriveCommand[],
@@ -405,68 +343,70 @@ function constructFinalCommand(
     const from = move.from;
     const robotAtFrom = robotManager.getRobotAtIndices(from);
     const mainPiece = robotAtFrom.id;
-    // gets edge closer to center
     const dirToEdge = directionToEdge(from);
 
-    // all the commands needed to do the collision now
-    const setupCommands: ReversibleRobotCommand[] = [];
-
-    // we should be moving a piece, obviously, else raise error
     if (mainPiece !== undefined) {
         console.log("main piece");
         const to = move.to;
-
-        let mainDrive: SequentialCommandGroup | DriveCommand
-        let mainTurn: ReversibleRobotCommand
-        
         if (collisionType === CollisionType.HORIZONTAL && numCollisions > 1) {
-            // y is like the distance we need to travel to get to that edge
             const y = dirToEdge[1] * 0.5;
-
-            //NOTE: to get MIDDLe of tile, each tile is 1x1, so it's 0.5
-
-            //first, set position as same horizontal value, but now veritcally in the direction closer to center.
             const pos1 = new Position(from.i + 0.5, from.j + y + 0.5);
-            // then, move it horizontally to the right location
             const pos2 = new Position(to.i + 0.5, from.j + y + 0.5);
-            //then, just move it a bit down (or up) towards the center of the chosen tile
             const pos3 = new Position(to.i + 0.5, to.j + 0.5);
             console.log("from, to ========", from, " ", to);
-            // create the commands needed
+            const mainDrive1 = constructDriveCommand(mainPiece, pos1, null);
+            const mainDrive2 = constructDriveCommand(mainPiece, pos2, pos1);
+            const mainDrive3 = constructDriveCommand(mainPiece, pos3, pos2);
+            const mainTurn1 = constructRotateCommand(mainPiece, pos1, null);
+            const mainTurn2 = constructRotateCommand(mainPiece, pos2, pos1);
+            const mainTurn3 = constructRotateCommand(mainPiece, pos3, pos2);
+            const setupCommands: ReversibleRobotCommand[] = [];
 
-            mainTurn = constructRotateCommand(mainPiece, pos1, null);
-
-            // helper function to clean up the code, reudcing duplicated lines
-            mainDrive = getMoveSequence(mainPiece, pos1, pos2, pos3)
+            const mainDrive: SequentialCommandGroup =
+                new SequentialCommandGroup([
+                    mainDrive1,
+                    mainTurn2,
+                    mainDrive2,
+                    mainTurn3,
+                    mainDrive3,
+                ]);
+            setupCommands.push(...rotateCommands, mainTurn1, ...driveCommands);
+            return new MovePiece(setupCommands, mainDrive);
         } else if (
             collisionType === CollisionType.VERTICAL &&
             numCollisions > 1
         ) {
-            //distance to get to the edge needed
             const x = dirToEdge[0] * 0.5;
-            // move horizontally to one of the edges on the from square
             const pos1 = new Position(from.i + x + 0.5, from.j + 0.5);
-            // move veritcally to the "to" square
             const pos2 = new Position(from.i + x + 0.5, to.j + 0.5);
-            // move back in place to the center of the square
             const pos3 = new Position(to.i + 0.5, to.j + 0.5);
             console.log("from, to ========", from, " ", to);
+            const mainDrive1 = constructDriveCommand(mainPiece, pos1, null);
+            const mainDrive2 = constructDriveCommand(mainPiece, pos2, pos1);
+            const mainDrive3 = constructDriveCommand(mainPiece, pos3, pos2);
+            const mainTurn1 = constructRotateCommand(mainPiece, pos1, null);
+            const mainTurn2 = constructRotateCommand(mainPiece, pos2, pos1);
+            const mainTurn3 = constructRotateCommand(mainPiece, pos3, pos2);
+            const setupCommands: ReversibleRobotCommand[] = [];
 
-            mainTurn = constructRotateCommand(mainPiece, pos1, null);
-            
-            // helper function to clean up the code, reudcing duplicated lines
-            mainDrive = getMoveSequence(mainPiece, pos1, pos2, pos3)
-        } 
-        //diagonal or knight option
-        else {
+            const mainDrive: SequentialCommandGroup =
+                new SequentialCommandGroup([
+                    mainDrive1,
+                    mainTurn2,
+                    mainDrive2,
+                    mainTurn3,
+                    mainDrive3,
+                ]);
+            setupCommands.push(...rotateCommands, mainTurn1, ...driveCommands);
+            return new MovePiece(setupCommands, mainDrive);
+        } else {
             const pos = new Position(to.i + 0.5, to.j + 0.5);
-            //just drive directly to the location in question
-            mainDrive = constructDriveCommand(mainPiece, pos, null);
-            mainTurn = constructRotateCommand(mainPiece, pos, null);
+            const mainDrive = constructDriveCommand(mainPiece, pos, null);
+            const mainTurn = constructRotateCommand(mainPiece, pos, null);
+            const setupCommands: ReversibleRobotCommand[] = [];
+            setupCommands.push(...rotateCommands, mainTurn, ...driveCommands);
+            return new MovePiece(setupCommands, mainDrive);
         }
-
-        setupCommands.push(...rotateCommands, mainTurn, ...driveCommands);
-        return new MovePiece(setupCommands, mainDrive);
     } else {
         console.log("no main piece");
         return new MovePiece(rotateCommands, new SequentialCommandGroup([]));
@@ -479,17 +419,13 @@ export function moveMainPiece(move: GridMove): MovePiece {
     const driveCommands: DriveCommand[] = [];
     const rotateCommands: ReversibleRobotCommand[] = [];
     const collisionType = calcCollisionType(move);
-    // gets collisions
     const collisions: string[] = detectCollisions(move, collisionType);
-    //loop through the collisions. Find where they should shimmy, and push the appropriate drive and roate
-    // commands to get them to that location
     for (let i = 0; i < collisions.length; i++) {
         const pieceId = collisions[i];
         const location = findShimmyLocation(pieceId, move, collisionType);
         driveCommands.push(constructDriveCommand(pieceId, location, null));
         rotateCommands.push(constructRotateCommand(pieceId, location, null));
     }
-    // with all the data now, create all the final commands needed to handle any collisions with this move
     return constructFinalCommand(
         move,
         driveCommands,
@@ -520,8 +456,6 @@ function moveToDeadZone(origin: GridIndices): GridMove {
         to: new GridIndices(1, origin.j), //("a" + origin[1]) as Square,
     };
 
-    // check if there's any collisions by doing this
-
     const aboveCollision = detectCollisions(
         aboveMove,
         calcCollisionType(aboveMove),
@@ -546,13 +480,10 @@ function moveToDeadZone(origin: GridIndices): GridMove {
         [leftMove, leftCollision],
     ];
 
-    // sorts by which way has the least collisions, and then choose the one with the fewest collisions to return
     collisionTuple.sort((a, b) => a[1].length - b[1].length);
     return collisionTuple[0][0];
 }
 
-// based on where it wants to go, returns a vector of what edge it should go towards. The edge doesn't mean the board edge, but the square edge.
-// Idea seems to be that its biased towards going to edges of the square closer to the center, it seems, to prevent moving a lot of pieces early on.
 function directionToEdge(position: GridIndices) {
     let x = 0;
     let y = 0;
@@ -571,7 +502,6 @@ function directionToEdge(position: GridIndices) {
     return DirectionTuple;
 }
 
-// given the array of grid indices, finds the specific grid index
 function findGridIndicesInArray(
     array: GridIndices[],
     obj: GridIndices,
@@ -579,88 +509,92 @@ function findGridIndicesInArray(
     return array.findIndex((o) => o.i === obj.i && o.j === obj.j);
 }
 
-function decreasingFunction(number : number)
-{
-    return Math.floor(number / 9) * 9
-}
-
-function increasingFunction(number : number)
-{
-    return Math.ceil(number / 9) * 9
-}
-
-//returns a piece back to its home position
 function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
     //const capturedPiece: GridIndices = GridIndices.squareToGrid(from);
     const home: GridIndices = robotManager.getRobot(id).homeIndices;
     const fastestMoveToDeadzone = moveToDeadZone(from);
-    //gets all the fun commands to move the piece to the deadzone
     const toDeadzone = moveMainPiece(fastestMoveToDeadzone);
 
-    //now that we're in teh deadzone, how we get back
     const startInDeadzone = fastestMoveToDeadzone.to;
+    let finalDestination: GridIndices | undefined;
 
-    // finds the index values
-    const startArrayIndex = findGridIndicesInArray(
+    const checkDirections: [number, number][] = [
+        [0, 1],
+        [1, 0],
+        [-1, 0],
+        [0, -1],
+    ];
+
+    for (const direction of checkDirections) {
+        try {
+            const adjacentToHome = home.addTuple(direction);
+            if (arrayOfDeadzone.find((dz) => dz.equals(adjacentToHome))) {
+                finalDestination = adjacentToHome;
+                break;
+            }
+        } catch (e) {
+            // adjacentToHome is out of bounds, skip check
+            continue;
+        }
+    }
+    if (!finalDestination) {
+        throw new Error("WHERE THE HELL ARE YOU GOING"); // real
+    }
+    const startInArray = findGridIndicesInArray(
         arrayOfDeadzone,
         startInDeadzone,
     );
-    const endArrayIndex = findGridIndicesInArray(
+    const endInArray = findGridIndicesInArray(
         arrayOfDeadzone,
-        home,
+        finalDestination,
     );
-    
-    // gets net distance of this
-    let differenceOfIndex = endArrayIndex - startArrayIndex;
+    let differenceOfIndex = endInArray - startInArray;
 
-    // if we got a negative value, make it positive this way, basically meant that a wraparound was required to travel downwards from startArrayIndex
     if (differenceOfIndex < 0) {
         differenceOfIndex += 36;
     }
 
-    // if short distance, go in that direciton. Otherwise, go opposite way since its shorter
     const botDirectionToHome = differenceOfIndex < 18 ? 1 : -1;
     console.log(
         "deadzone array checker",
-        startArrayIndex,
-        endArrayIndex,
+        startInArray,
+        endInArray,
         botDirectionToHome,
     );
 
-    let i = startArrayIndex;
+    let i = startInArray;
     const moveCommands: MoveCommand[] = [];
-    // if already at the destination, don't run this
-
-    const incrementalFunction : Function = botDirectionToHome == 1 ? increasingFunction : decreasingFunction;
-    
-    // until we've gotten to our destination do this
-    while (i !== endArrayIndex) {
-        if (Math.abs(i - endArrayIndex) < 9)
-        {
-            // now head to the final tile
+    while (i !== endInArray) {
+        if (arrayOfCornersIndicies.includes(i)) {
             moveCommands.push(
-                new AbsoluteMoveCommand(id, new Position(arrayOfDeadzone[endArrayIndex].i + 0.5, arrayOfDeadzone[endArrayIndex].j + 0.5))
+                new AbsoluteMoveCommand(
+                    id,
+                    new Position(
+                        arrayOfDeadzone[i].i + 0.5,
+                        arrayOfDeadzone[i].j + 0.5,
+                    ),
+                ),
             );
-            break;
         }
-        i = incrementalFunction(i);
-
-        let currentPushing = i
-        
-        //wrappign aroudn when we reach a bound
-        if(i === 36)
-        {
-            currentPushing = i = 0;
-        }
-        else if(i === 0)
-        {
-            i = 36;
-        }
-        // now head to the final tile
+        i += botDirectionToHome;
+        if (i < 0) i += 36;
+        if (i >= 36) i -= 36;
+    }
+    if (arrayOfDeadzone[endInArray]) {
         moveCommands.push(
-            new AbsoluteMoveCommand(id, new Position(arrayOfDeadzone[currentPushing].i + 0.5, arrayOfDeadzone[currentPushing].j + 0.5))
+            new AbsoluteMoveCommand(
+                id,
+                new Position(
+                    arrayOfDeadzone[endInArray].i + 0.5,
+                    arrayOfDeadzone[endInArray].j + 0.5,
+                ),
+            ),
         );
     }
+
+    moveCommands.push(
+        new AbsoluteMoveCommand(id, new Position(home.i + 0.5, home.j + 0.5)),
+    );
 
     const goHome: SequentialCommandGroup = new SequentialCommandGroup([
         toDeadzone,
@@ -702,8 +636,6 @@ export function moveAllRobotsToDefaultPositions(
 
     // Sort robots: column by column (left to right, no skipping), then bottom to top within each column
     // This prevents collisions by ensuring robots in the same column don't interfere with each other
-    
-    // this current code only seems to sort by column?
     const sortedRobots = robotsToMove.sort((a, b) => {
         const aPos = GridIndices.fromPosition(a.position);
         const bPos = GridIndices.fromPosition(b.position);
@@ -713,7 +645,6 @@ export function moveAllRobotsToDefaultPositions(
 
     const allCommands: Command[] = [];
 
-    // generates a path to the default square
     for (const robot of sortedRobots) {
         const robotCommands = generateRobotPathToDefault(
             robot,
@@ -753,16 +684,11 @@ export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
     const mainPieceTargets = new Map<string, GridIndices>();
     const pawnTargets = new Map<string, GridIndices>();
 
-    // puts each piece into different targets based on the piece type
-    for (const robot of robotManager.idsToRobots.values()) 
-    {
+    for (const robot of robotManager.idsToRobots.values()) {
         const def = robot.defaultIndices;
-        if (robot.pieceType !== "w_pawn" && robot.pieceType !== "b_pawn") 
-        {
+        if (def.j === 2 || def.j === 9) {
             mainPieceTargets.set(robot.id, def);
-        } 
-        else  
-        {
+        } else if (def.j === 3 || def.j === 8) {
             pawnTargets.set(robot.id, def);
         }
     }
@@ -783,30 +709,35 @@ export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
     // Home -> Deadzone entry on its side, Along deadzone to file aligned with its row,
     // Into its pawn row square. Repeat until all pawns are placed.
     type PawnInfo = { id: string; def: GridIndices; start: GridIndices };
-    const leftWhite: (PawnInfo | null)[] = [null, null, null, null];
-    const leftBlack: (PawnInfo | null)[] = [null, null, null, null];
-    const rightWhite: (PawnInfo | null)[] = [null, null, null, null];
-    const rightBlack: (PawnInfo | null)[] = [null, null, null, null];
+    const leftWhite: PawnInfo[] = [];
+    const leftBlack: PawnInfo[] = [];
+    const rightWhite: PawnInfo[] = [];
+    const rightBlack: PawnInfo[] = [];
 
-    // group pawns into 4 types as mentioned above
     for (const [robotId, def] of pawnTargets) {
-        const robot = robotManager.getRobot(robotId);
-        const start = robot.homeIndices;
-
-        const isWhite = robot.pieceType[0] === "w"
+        const start = robotManager.getRobot(robotId).homeIndices;
+        const isWhite = def.j === 3;
         const sideIsLeft = start.i === 0;
-
         const info: PawnInfo = { id: robotId, def, start };
-        // gets its index and palces it where ones closer to the center are farther x
-        const placementIndex =  Math.abs(start.j - (isWhite ? Math.floor(5.5) : Math.ceil(5.5)) )
-        let chosenList : (PawnInfo | null)[] = [null];
         if (sideIsLeft) {
-            chosenList = isWhite ? leftWhite : leftBlack;
+            (isWhite ? leftWhite : leftBlack).push(info);
         } else {
-            chosenList = isWhite ? rightWhite : rightBlack;
+            (isWhite ? rightWhite : rightBlack).push(info);
         }
-        chosenList[placementIndex] = info
     }
+
+    // Sort each group center-out by file to funnel from middle outward
+    const centerOutSort = (a: PawnInfo, b: PawnInfo) => {
+        const center = 5.5;
+        const da = Math.abs(a.def.i - center);
+        const db = Math.abs(b.def.i - center);
+        if (da !== db) return da - db;
+        return a.def.i - b.def.i;
+    };
+    leftWhite.sort(centerOutSort);
+    leftBlack.sort(centerOutSort);
+    rightWhite.sort(centerOutSort);
+    rightBlack.sort(centerOutSort);
 
     const pawnBatches: ParallelCommandGroup[] = [];
     while (
@@ -816,7 +747,7 @@ export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
         rightBlack.length > 0
     ) {
         const batchSeqs: SequentialCommandGroup[] = [];
-        const pick = (arr: (PawnInfo | null)[] | undefined) => {
+        const pick = (arr: PawnInfo[] | undefined) => {
             if (!arr || arr.length === 0) return;
             const pawn = arr.shift()!;
             const dzStart = moveToDeadzoneFromHome(pawn.start);
