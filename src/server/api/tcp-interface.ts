@@ -307,11 +307,11 @@ export class TCPServer {
                         unpauseGame(false);
                     }
                 }
-
                 tunnel.id = id;
                 tunnel.address = mac;
                 this.connections[id] = tunnel;
                 this.robotManager.createRobotFromId(id).setTunnel(tunnel);
+                
             }).bind(this),
         );
 
