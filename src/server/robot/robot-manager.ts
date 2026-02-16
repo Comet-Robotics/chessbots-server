@@ -68,10 +68,10 @@ export class RobotManager {
                 robotConfig?.defaultIndices.y,
             ),
             robotConfig?.startHeadingRadians * DEGREE,
-            robotConfig?.attributes.piece_type
+            robotConfig?.attributes.piece_type,
         );
         this.addRobot(robot);
-        console.log("We have the following:" + robotConfig?.defaultIndices)
+        console.log("We have the following:" + robotConfig?.defaultIndices);
         return robot;
     }
 
@@ -90,10 +90,13 @@ export class RobotManager {
     getRobotAtIndices(indices: GridIndices): Robot {
         const indicesToIds = this.getIndicesToIds();
         const robotId = indicesToIds.get(indices.toString());
-        const theKeys = indicesToIds.keys()
-        const keyArr = [...theKeys]
-        console.log(`Indices is ${indices.toString()}, current id's are,`, keyArr);
-        
+        const theKeys = indicesToIds.keys();
+        const keyArr = [...theKeys];
+        console.log(
+            `Indices is ${indices.toString()}, current id's are,`,
+            keyArr,
+        );
+
         if (robotId === undefined) {
             throw new Error("Failed to find robot at indices " + indices);
         }
@@ -127,14 +130,14 @@ export const robotManager = new RobotManager(
                 new GridIndices(0, 5),
                 new GridIndices(5, 3),
                 90 * DEGREE,
-                "w_pawn"
+                "w_pawn",
             ),
             new Robot(
                 "robot-4",
                 new GridIndices(5, 0),
                 new GridIndices(5, 2),
                 90 * DEGREE,
-                "w_queen"
+                "w_queen",
             ),
         ],
 );

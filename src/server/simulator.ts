@@ -149,7 +149,6 @@ export class VirtualBotTunnel extends BotTunnel {
     }
 
     async send(packet: Packet): Promise<string> {
-        
         const packetId = randomUUID();
         let stack: StackFrame[] = [];
         try {
@@ -208,7 +207,7 @@ export class VirtualBotTunnel extends BotTunnel {
                 { ...packet, packetId },
                 stack,
             );
-            console.log("Pushing message!")
+            console.log("Pushing message!");
             VirtualBotTunnel.messages.push({ ts: new Date(), message });
             socketManager.sendToAll(message);
         });
@@ -224,7 +223,7 @@ export class VirtualRobot extends Robot {
         homeIndices: GridIndices,
         defaultIndices: GridIndices,
         headingRadians: number,
-        pieceType: String
+        pieceType: string,
     ) {
         super(id, homeIndices, defaultIndices, headingRadians, pieceType);
         this.tunnel = new VirtualBotTunnel(id, headingRadians, this.position);
@@ -245,7 +244,7 @@ export class VirtualRobot extends Robot {
 export const virtualRobots = createVirtualRobots();
 
 function createVirtualRobots() {
-    console.log("Creating virtual bots!")
+    console.log("Creating virtual bots!");
     const virtualBotIds = Array(32)
         .fill(undefined)
         .map((_, i) => `robot-${(i + 1).toString()}`);
@@ -266,7 +265,7 @@ function createVirtualRobots() {
                         realRobotConfig.defaultIndices.y,
                     ),
                     realRobotConfig.startHeadingRadians,
-                    realRobotConfig.attributes.piece_type
+                    realRobotConfig.attributes.piece_type,
                 ),
             ] as const;
         }),

@@ -100,7 +100,7 @@ async function setupDefaultRobotPositions(
 export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
     // on close, delete the cookie id
     ws.on("close", () => {
-        console.log("We closed the connection")
+        console.log("We closed the connection");
         socketManager.handleSocketClosed(req.cookies.id);
     });
 
@@ -110,12 +110,13 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
         console.log("Received message: " + message.toJson());
 
         if (message instanceof RegisterWebsocketMessage) {
-            console.log(`Register a new socket with request ${req.url}`)
+            console.log(`Register a new socket with request ${req.url}`);
+            //find in the url where we specify the page
             const cutoffIndex = req.url.indexOf("page=") + 5;
+            // take out that page value, add a delimeter
             const pageValue = req.url.substring(cutoffIndex) + "|o|o|";
-            console.log(req.cookies.id)
-            const finalSocketId = pageValue.concat(req.cookies.id)
-            
+            // add current page to the cookie id
+            const finalSocketId = pageValue.concat(req.cookies.id);
 
             socketManager.registerSocket(finalSocketId, ws);
         } else if (
@@ -292,7 +293,9 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
     const moves = puzzle.moves;
     const difficulty = puzzle.rating;
 
-    console.log(`Fein is ${fen}, moves are ${moves}, difficulty is ${difficulty}`)
+    console.log(
+        `Fein is ${fen}, moves are ${moves}, difficulty is ${difficulty}`,
+    );
 
     if (puzzle.robotDefaultPositions) {
         // Convert puzzle.robotDefaultPositions from Record<string, string> to Map<string, GridIndices>
@@ -323,10 +326,10 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
             !START_ROBOTS_AT_DEFAULT,
             defaultPositionsMap,
         );
-    }
-    else
-    {
-        throw Error("Should have the default positions set up, but the config is missing.")
+    } else {
+        throw Error(
+            "Should have the default positions set up, but the config is missing.",
+        );
     }
     setGameManager(
         new PuzzleGameManager(

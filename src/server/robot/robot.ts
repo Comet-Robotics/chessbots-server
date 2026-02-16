@@ -12,7 +12,7 @@ export class Robot {
     private _headingRadians: number;
     private _position: Position;
     protected tunnel: BotTunnel | null;
-    protected _pieceType: String;
+    protected _pieceType: string;
 
     constructor(
         public readonly id: string,
@@ -25,7 +25,7 @@ export class Robot {
          */
         public readonly defaultIndices: GridIndices,
         public readonly startHeadingRadians: number = 0,
-        public readonly thePieceType: String,
+        public readonly thePieceType: string,
         position?: Position,
     ) {
         if (
@@ -56,11 +56,11 @@ export class Robot {
         this._headingRadians = headingRadians;
     }
 
-    public get pieceType(): String {
+    public get pieceType(): string {
         return this._pieceType;
     }
 
-    public set pieceType(thePieceType: String) {
+    public set pieceType(thePieceType: string) {
         this._pieceType = thePieceType;
     }
 

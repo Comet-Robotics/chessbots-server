@@ -8,7 +8,7 @@ export class SocketManager {
     constructor(private sockets: Record<string, WebSocket>) {}
 
     public registerSocket(id: string, socket: WebSocket): void {
-        console.log(`Id is: ${id}`)
+        console.log(`Id is: ${id}`);
         this.sockets[id] = socket;
     }
 
@@ -48,7 +48,7 @@ export class SocketManager {
      */
     public sendToAll(message: Message): boolean {
         const sockets = Object.values(this.sockets);
-        console.log(`Current list of connections are: ${sockets.length}`)
+        console.log(`Current list of connections are: ${sockets.length}`);
         for (const socket of sockets) {
             socket.send(message.toJson());
         }

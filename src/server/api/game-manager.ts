@@ -357,8 +357,8 @@ export class PuzzleGameManager extends GameManager {
         id;
         if (message instanceof MoveMessage) {
             //if the move is correct
-            console.log("Move number is: ", this.moveNumber)
-            console.log("Number of moves is ", this.moves.length)
+            console.log("Move number is: ", this.moveNumber);
+            console.log("Number of moves is ", this.moves.length);
             // console.log("")
             if (
                 this.moves[this.moveNumber].from === message.move.from &&
