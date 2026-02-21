@@ -107,12 +107,28 @@ export class ClientManager {
         }
     }
 
+    public removeHost(): void {
+        this.hostId = undefined;
+    }
+
+    public removeClient(): void {
+        this.clientId = undefined;
+    }
+
+    public removeSpectator(id: string): void {
+        this.spectatorIds.delete(id);
+    }
+
+    public isPlayer(id: string): boolean {
+        return id === this.hostId || id === this.clientId;
+    }
+
     /**
      * gets the ids of all currently connected clients
      * @returns - list of ids, if available
      */
     public getIds(): undefined | [string, string] {
-        if (this.hostId && this.clientId) {
+        if (this.hostId !== undefined && this.clientId !== undefined) {
             return [this.hostId, this.clientId];
         } else {
             return;
