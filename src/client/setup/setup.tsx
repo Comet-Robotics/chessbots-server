@@ -132,20 +132,7 @@ function SetupMain(props: SetupMainProps) {
                 onClick={() => props.onPageChange(SetupType.PUZZLE)}
                 className={buttonColor()}
             />
-            <h3 className={textColor()}>Display Settings:</h3>
-            <ButtonGroup variant="outlined">
-                {allSettings.map((item, idx) => (
-                    <Button
-                        key={item[0]}
-                        textClassName={textColor()}
-                        //changed for better visibility
-                        icon={item[1]}
-                        text={item[0]}
-                        active={getUserSetting() === idx}
-                        onClick={() => setUserSetting(idx)}
-                    />
-                ))}
-            </ButtonGroup>
+            <ThemeButtons />
         </>
     );
 
@@ -163,8 +150,30 @@ function SetupMain(props: SetupMainProps) {
                 }}
             >
                 <H3 className={textColor()}>Welcome to Chess Bot!</H3>
+
                 {actions}
             </div>
+        </>
+    );
+}
+
+export function ThemeButtons(): JSX.Element {
+    return (
+        <>
+            <h3 className={textColor()}>Display Settings:</h3>
+            <ButtonGroup variant="outlined">
+                {allSettings.map((item, idx) => (
+                    <Button
+                        key={item[0]}
+                        textClassName={textColor()}
+                        //changed for better visibility
+                        icon={item[1]}
+                        text={item[0]}
+                        active={getUserSetting() === idx}
+                        onClick={() => setUserSetting(idx)}
+                    />
+                ))}
+            </ButtonGroup>
         </>
     );
 }
