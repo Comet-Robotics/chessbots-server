@@ -248,7 +248,10 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
         } else if (message instanceof SetRobotVariableMessage) {
             await doSetRobotVariable(message);
         } else if (message instanceof JoinQueue) {
-            if (!clientManager.isPlayer(req.cookies.id)) {
+            console.log("So we got the join message")
+            // this was initially !isPlayer, shouldn't it be isPlayer?
+            if (!clientManager.isPlayer(req.cookies.id)) 
+            {
                 if (queue.find(req.cookies.id) === undefined) {
                     queue.insert(req.cookies.id, 0);
                 }
