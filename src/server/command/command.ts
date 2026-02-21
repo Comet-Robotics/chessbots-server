@@ -1,5 +1,6 @@
 import { gamePaused } from "../api/pauseHandler";
 import { robotManager } from "../robot/robot-manager";
+import { MAX_RETRIES, MOVE_TIMEOUT } from "../utils/env";
 
 /**
  * An command which operates on one or more robots.
@@ -10,6 +11,11 @@ export interface Command {
      * common resources to ensure they don't receive multiple inputs at once.
      */
     requirements: Set<object>;
+
+    /**
+     * used for time calculations
+     */
+    height: number;
 
     /**
      * Executes the command.
@@ -45,6 +51,8 @@ export interface Reversible<T extends Reversible<T>> {
 export abstract class CommandBase implements Command {
     protected _requirements: Set<object> = new Set();
 
+    protected _height: number = 1;
+
     public abstract execute(): Promise<void>;
 
     public then(next: Command): SequentialCommandGroup {
@@ -53,6 +61,14 @@ export abstract class CommandBase implements Command {
 
     public withTimePoint(seconds: number): Command {
         return new ParallelCommandGroup([this, new WaitCommand(seconds)]);
+    }
+
+    public get height(): number {
+        return this._height;
+    }
+
+    public set height(height: number) {
+        this._height = height;
     }
 
     public get requirements(): Set<object> {
@@ -72,6 +88,7 @@ export abstract class CommandBase implements Command {
  * Note this class redirects the execute implementation to executeRobot.
  */
 export abstract class RobotCommand extends CommandBase {
+    commandIsCompleted = false;
     constructor(public readonly robotId: string) {
         super();
         // TO DISCUSS: idk if its possible for a robot object to change between adding it as a requrement and executing the command but if it is, adding the robot object as a requirement semi defeats the purpose of using robot ids everywhere
@@ -86,6 +103,8 @@ export abstract class RobotCommand extends CommandBase {
 export class WaitCommand extends CommandBase {
     constructor(public readonly durationSec: number) {
         super();
+        //in case there is a long wait that isn't accounted for in the regular timeout
+        this.height = durationSec / MOVE_TIMEOUT;
     }
     public async execute(): Promise<void> {
         return new Promise((resolve) =>
@@ -112,21 +131,41 @@ function isReversable(obj): obj is Reversible<typeof obj> {
  * Executes one or more commands in parallel.
  */
 export class ParallelCommandGroup extends CommandGroup {
+    constructor(public readonly commands: Command[]) {
+        super(commands);
+        let max = 1;
+        for (let x = 0; x < commands.length; x++) {
+            if (commands[x].height > max) {
+                max = commands[x].height;
+            }
+        }
+        this.height = max;
+    }
+
     public async execute(): Promise<void> {
         const promises = this.commands
             .map((move) => {
-                if (!gamePaused) return move.execute();
+                if (!gamePaused) return move.execute().catch();
+                else return new Promise<void>(() => {}).catch();
             })
             .filter(Boolean);
-        return Promise.all(promises).then(null);
+        if (promises) {
+            return timeoutRetry(
+                Promise.all(promises),
+                MAX_RETRIES,
+                this.height,
+                0,
+                "Parallel Group Error",
+            ) as Promise<void>;
+        }
     }
     public async reverse(): Promise<void> {
         const promises = this.commands.map((move) => {
             if (isReversable(move)) {
-                move.reverse();
+                move.reverse().catch();
             }
         });
-        return Promise.all(promises).then(null);
+        return Promise.all(promises).catch().then(null);
     }
 }
 
@@ -134,23 +173,75 @@ export class ParallelCommandGroup extends CommandGroup {
  * Executes one or more commands in sequence, one after another.
  */
 export class SequentialCommandGroup extends CommandGroup {
+    constructor(public readonly commands: Command[]) {
+        super(commands);
+        let sum = 0;
+        for (let x = 0; x < commands.length; x++) {
+            sum += commands[x].height;
+        }
+        this.height = sum;
+    }
+
     public async execute(): Promise<void> {
         let promise = Promise.resolve();
+
         for (const command of this.commands) {
-            promise = promise.then(() => {
-                if (!gamePaused) return command.execute();
-                else return Promise.resolve();
-            });
+            promise = promise
+                .then(() => {
+                    if (!gamePaused) return command.execute().catch();
+                })
+                .catch();
         }
-        return promise;
+
+        return timeoutRetry(
+            promise,
+            MAX_RETRIES,
+            this.height,
+            0,
+            "Sequential Group Error",
+        ) as Promise<void>;
     }
+
     public async reverse(): Promise<void> {
         let promise = Promise.resolve();
         for (const command of this.commands) {
             if (isReversable(command)) {
-                promise = promise.then(() => command.reverse());
+                promise = promise.then(() => command.reverse().catch());
             }
         }
-        return promise;
+        return promise.catch();
     }
+}
+
+export function timeoutRetry(
+    promise: Promise<unknown>,
+    maxRetries: number,
+    height: number,
+    count: number,
+    debugInfo?: string,
+): typeof promise {
+    const timeout = new Promise<void>((_, rej) => {
+        //time for each move to execute plus time to handle errors
+        setTimeout(
+            () => {
+                rej("Move Timeout");
+            },
+            height * MOVE_TIMEOUT * maxRetries * 1.1,
+        );
+    }).catch();
+    return Promise.race([promise, timeout]).catch((reason) => {
+        if (reason.indexOf("Move Timeout") >= 0) {
+            if (count < MAX_RETRIES) {
+                return timeoutRetry(
+                    promise,
+                    maxRetries,
+                    height,
+                    count + 1,
+                    debugInfo,
+                ).catch();
+            } else {
+                throw `${reason} failed at height: ${height.toString()} with error: ${debugInfo} \\`;
+            }
+        }
+    });
 }

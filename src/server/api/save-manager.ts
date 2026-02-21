@@ -11,6 +11,7 @@
  */
 
 import { Side } from "../../common/game-types";
+2;
 
 // Save files contain a date in ms and pgn string
 export interface iSave {
@@ -56,7 +57,7 @@ export class SaveManager {
             game: pgn,
             pos: fen,
             robotPos: Array.from(robots),
-            oldPos: "",
+            oldPos: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
             oldRobotPos: Array<[string, string]>(),
         };
         const oldGame = SaveManager.loadGame(hostId + "+" + clientID);
