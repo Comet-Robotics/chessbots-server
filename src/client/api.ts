@@ -51,7 +51,6 @@ export function useSocket(
     // handle sending a message and opening it
     const { sendMessage } = useWebSocket(WEBSOCKET_URL, {
         onOpen: () => {
-            console.log(`SOCKET URL IS: ${WEBSOCKET_URL}`);
             console.log("Connection established");
             sendMessage(new RegisterWebsocketMessage().toJson());
             if (onOpen !== undefined) {

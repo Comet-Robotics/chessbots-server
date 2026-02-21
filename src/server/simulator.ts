@@ -207,7 +207,6 @@ export class VirtualBotTunnel extends BotTunnel {
                 { ...packet, packetId },
                 stack,
             );
-            console.log("Pushing message!");
             VirtualBotTunnel.messages.push({ ts: new Date(), message });
             socketManager.sendToAll(message);
         });

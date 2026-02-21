@@ -76,7 +76,6 @@ export function Simulator() {
 
     // update the simulator when a message comes in
     useSocket((message) => {
-        console.log("Any message received!");
         if (message instanceof SimulatorUpdateMessage) {
             console.log("Updating bot!");
             dispatch({
