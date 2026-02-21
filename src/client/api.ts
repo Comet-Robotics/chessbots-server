@@ -66,10 +66,7 @@ export function useSocket(
                 onMessage(message);
             }
         },
-
-        onClose: () => {
-            console.log("IT'S CLOSED BRO!");
-        },
+        share: true,
     });
 
     // handle how a message is sent
