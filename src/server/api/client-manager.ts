@@ -120,7 +120,9 @@ export class ClientManager {
     }
 
     public isPlayer(id: string): boolean {
-        console.log(`Id passed in is ${id}, host id is ${this.hostId}, and client id is ${this.clientId}`)
+        console.log(
+            `Id passed in is ${id}, host id is ${this.hostId}, and client id is ${this.clientId}`,
+        );
         return id === this.hostId || id === this.clientId;
     }
 

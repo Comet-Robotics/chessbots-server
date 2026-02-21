@@ -34,7 +34,11 @@ import {
 } from "./game-manager";
 import { ChessEngine } from "../../common/chess-engine";
 import { Side } from "../../common/game-types";
-import { USE_VIRTUAL_ROBOTS, START_ROBOTS_AT_DEFAULT, DO_SAVES } from "../utils/env";
+import {
+    USE_VIRTUAL_ROBOTS,
+    START_ROBOTS_AT_DEFAULT,
+    DO_SAVES,
+} from "../utils/env";
 import { SaveManager } from "./save-manager";
 
 import { VirtualBotTunnel } from "../simulator";
@@ -249,10 +253,9 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
         } else if (message instanceof SetRobotVariableMessage) {
             await doSetRobotVariable(message);
         } else if (message instanceof JoinQueue) {
-            console.log("So we got the join message")
+            console.log("So we got the join message");
             // this was initially !isPlayer, shouldn't it be isPlayer?
-            if (!clientManager.isPlayer(req.cookies.id)) 
-            {
+            if (!clientManager.isPlayer(req.cookies.id)) {
                 if (queue.find(req.cookies.id) === undefined) {
                     queue.insert(req.cookies.id, 0);
                 }
@@ -293,7 +296,7 @@ apiRouter.get("/client-information", async (req, res) => {
     // loading saves from file if found
     const oldSave = SaveManager.loadGame(req.cookies.id);
     if (oldSave && DO_SAVES) {
-        console.log("ADACHI!!")
+        console.log("ADACHI!!");
         // if the game was an ai game, create a computer game manager with the ai difficulty
         if (oldSave.aiDifficulty !== -1) {
             const cgm = new ComputerGameManager(

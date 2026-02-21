@@ -208,8 +208,8 @@ export function Game(): JSX.Element {
                     {gameEndDialog}
                     {gameOfferDialog}
                     {gameAcceptDialog}
-                {gamePauseDialog}
-                {gameUnpauseDialog}
+                    {gamePauseDialog}
+                    {gameUnpauseDialog}
                     <Outlet />
                 </div>
             </div>

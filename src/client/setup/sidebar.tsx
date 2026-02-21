@@ -41,7 +41,7 @@ export function Sidebar(props: sidebarProps): JSX.Element {
             const newQueue = await get("/get-queue");
             setQueue(newQueue);
         },
-        true
+        true,
     );
 
     const names = useEffectQuery(

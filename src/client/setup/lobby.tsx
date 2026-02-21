@@ -45,8 +45,8 @@ export function Lobby() {
                 <>
                     <NonIdealState
                         title={
-                            data.clientType === ClientType.CLIENT 
-                            ?   "Waiting For Host to Start"
+                            data.clientType === ClientType.CLIENT ?
+                                "Waiting For Host to Start"
                             :   "Waiting in line"
                         }
                         icon={<Spinner intent="primary" />}
