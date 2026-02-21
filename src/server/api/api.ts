@@ -260,7 +260,7 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
         } else if (message instanceof JoinQueue) {
             console.log("So we got the join message");
             // this was initially !isPlayer, shouldn't it be isPlayer?
-            if (pageString.indexOf("debug") != -1 && !clientManager.isPlayer(req.cookies.id)) {
+            if (pageString.indexOf("debug") == -1 && !clientManager.isPlayer(req.cookies.id)) {
                 if (queue.find(req.cookies.id) === undefined) 
                 {
                     queue.insert(req.cookies.id, 0);
