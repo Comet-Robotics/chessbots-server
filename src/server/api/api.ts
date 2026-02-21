@@ -248,9 +248,8 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
             message instanceof GameEndMessage
         ) {
             // TODO: Handle game manager not existing
-            if(gameManager == null)
-            {
-                console.log("BRUHHH")
+            if (gameManager === null) {
+                console.log("BRUHHH");
             }
             await gameManager?.handleMessage(message, req.cookies.id);
         } else if (message instanceof DriveRobotMessage) {
@@ -260,9 +259,11 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
         } else if (message instanceof JoinQueue) {
             console.log("So we got the join message");
             // this was initially !isPlayer, shouldn't it be isPlayer?
-            if (pageString.indexOf("debug") == -1 && !clientManager.isPlayer(req.cookies.id)) {
-                if (queue.find(req.cookies.id) === undefined) 
-                {
+            if (
+                pageString.indexOf("debug") === -1 &&
+                !clientManager.isPlayer(req.cookies.id)
+            ) {
+                if (queue.find(req.cookies.id) === undefined) {
                     queue.insert(req.cookies.id, 0);
                 }
                 names.set(req.cookies.id, message.playerName);
@@ -379,7 +380,7 @@ apiRouter.get("/game-state", (req, res) => {
  * returns a success message
  */
 apiRouter.post("/start-computer-game", async (req, res) => {
-    console.log("start comp game")
+    console.log("start comp game");
     canReloadQueue = true;
     const side = req.query.side as Side;
     const difficulty = parseInt(req.query.difficulty as string) as Difficulty;

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { SetupBase } from "../setup/setup-base";
 import { SelectPuzzle } from "./select-puzzle";
 import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { get, useEffectQuery } from "../api";
@@ -29,10 +28,10 @@ export function SetupPuzzle() {
     }
 
     return (
-            <SelectPuzzle
-                puzzles={data}
-                selectedPuzzle={selectedPuzzle}
-                onPuzzleSelected={setSelectedPuzzle}
-            />
+        <SelectPuzzle
+            puzzles={data}
+            selectedPuzzle={selectedPuzzle}
+            onPuzzleSelected={setSelectedPuzzle}
+        />
     );
 }

@@ -1,4 +1,4 @@
-import WebSocket from "ws";
+import type WebSocket from "ws";
 import type { Message } from "../../common/message/message";
 
 /**
@@ -8,9 +8,8 @@ export class SocketManager {
     constructor(private sockets: Record<string, Set<WebSocket>>) {}
 
     public registerSocket(id: string, socket: WebSocket): void {
-        if(this.sockets[id] == null)
-        {
-            this.sockets[id] = new Set<WebSocket>()
+        if (this.sockets[id] === null) {
+            this.sockets[id] = new Set<WebSocket>();
         }
         console.log(`Id is: ${id}`);
         this.sockets[id].add(socket);
@@ -20,7 +19,7 @@ export class SocketManager {
      * deletes the socket at the provided id
      * @param id - id to be deleted
      */
-    public handleSocketClosed(id: string, socket : WebSocket): void {
+    public handleSocketClosed(id: string, socket: WebSocket): void {
         // find if the socket exists and is in the set for that user
         if (this.sockets[id] && this.sockets[id].has(socket)) {
             // if so, KILL IT!
@@ -59,10 +58,8 @@ export class SocketManager {
     public sendToAll(message: Message): boolean {
         const sockets = Object.values(this.sockets);
         console.log(`Current list of connections are: ${sockets.length}`);
-        for (const socketSet of sockets) 
-        {
-            for(const socket of socketSet )
-            {
+        for (const socketSet of sockets) {
+            for (const socket of socketSet) {
                 socket.send(message.toJson());
             }
         }
