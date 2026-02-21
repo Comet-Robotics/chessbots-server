@@ -307,7 +307,6 @@ export class TCPServer {
                         unpauseGame(false);
                     }
                 }
-
                 tunnel.id = id;
                 tunnel.address = mac;
                 this.connections[id] = tunnel;

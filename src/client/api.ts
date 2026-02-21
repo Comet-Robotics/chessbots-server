@@ -33,7 +33,9 @@ export function useEffectQuery<T>(
  */
 const USE_SSL = window.location.protocol === "https:";
 const WS_PROTOCOL = USE_SSL ? "wss" : "ws";
-const WEBSOCKET_URL = `${WS_PROTOCOL}://${new URL(window.location.href).host}/ws`;
+// added info about this, important in specifying socket connections
+const PAGE_LOCATION = window.location.pathname;
+const WEBSOCKET_URL = `${WS_PROTOCOL}://${new URL(window.location.href).host}/ws?page=${encodeURIComponent(PAGE_LOCATION)}`;
 
 /**
  * A custom hook which allows using a websocket to connect to the server.
@@ -63,6 +65,10 @@ export function useSocket(
             if (onMessage !== undefined) {
                 onMessage(message);
             }
+        },
+
+        onClose: () => {
+            console.log("IT'S CLOSED BRO!");
         },
     });
 
