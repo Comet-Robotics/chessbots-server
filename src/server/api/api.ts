@@ -282,14 +282,6 @@ apiRouter.get("/get-name", (req, res) => {
 });
 
 /**
- * gets the name associated with the request cookie
- */
-apiRouter.get("/get-name", (req, res) => {
-    if (names) return res.send({ message: names.get(req.cookies.id) });
-    else return res.send("");
-});
-
-/**
  * client information endpoint
  *
  * finds the client type and checks if the game is active

@@ -35,7 +35,8 @@ export class PriorityQueue<T> {
     public popInd(num: number | undefined): T | undefined {
         if (num !== undefined && this.data !== undefined) {
             const data = this.data[num][1];
-            this.data.slice(0, num).concat(this.data.slice(num + 1, -1));
+            // this.data.slice(0, num).concat(this.data.slice(num + 1, -1));
+            this.data = this.data.slice(0, num).concat(this.data.slice(num + 1));
             return data;
         }
         return undefined;
