@@ -8,7 +8,7 @@ export class SocketManager {
     constructor(private sockets: Record<string, Set<WebSocket>>) {}
 
     public registerSocket(id: string, socket: WebSocket): void {
-        if (this.sockets[id] === null) {
+        if (this.sockets[id] === null || this.sockets[id] === undefined) {
             this.sockets[id] = new Set<WebSocket>();
         }
         console.log(`Id is: ${id}`);

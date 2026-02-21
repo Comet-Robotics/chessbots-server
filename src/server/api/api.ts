@@ -248,7 +248,7 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
             message instanceof GameEndMessage
         ) {
             // TODO: Handle game manager not existing
-            if (gameManager === null) {
+            if (gameManager === null || gameManager === undefined) {
                 console.log("BRUHHH");
             }
             await gameManager?.handleMessage(message, req.cookies.id);
@@ -362,7 +362,7 @@ apiRouter.get("/client-information", async (req, res) => {
  * returns an object with the side, game pgn, and the game end reason
  */
 apiRouter.get("/game-state", (req, res) => {
-    if (gameManager === null) {
+    if (gameManager === null || gameManager === undefined) {
         console.warn("Invalid attempt to fetch game state");
         return res.status(400).send({ message: "No game is currently active" });
     }
