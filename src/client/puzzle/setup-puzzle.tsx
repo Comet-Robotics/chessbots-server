@@ -29,12 +29,10 @@ export function SetupPuzzle() {
     }
 
     return (
-        <SetupBase>
             <SelectPuzzle
                 puzzles={data}
                 selectedPuzzle={selectedPuzzle}
                 onPuzzleSelected={setSelectedPuzzle}
             />
-        </SetupBase>
     );
 }

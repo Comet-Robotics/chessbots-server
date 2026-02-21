@@ -119,6 +119,8 @@ export class HumanGameManager extends GameManager {
      * @param id - id of the sender
      */
     public async handleMessage(message: Message, id: string): Promise<void> {
+        console.log("handling message")
+        
         // check which type the id is
         const clientType = this.clientManager.getClientType(id);
         let sendToPlayer: SendMessage;
@@ -148,6 +150,7 @@ export class HumanGameManager extends GameManager {
         const ids = this.clientManager.getIds();
         const currentSave = SaveManager.loadGame(id);
         // update the internal chess object if it is a move massage and game not paused
+        console.log("up to here")
         if (message instanceof MoveMessage && !gamePaused) {
             // Call path materializer and send to bots
             const command = materializePath(message.move);

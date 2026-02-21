@@ -46,7 +46,7 @@ export function SetupBase(props: SetupBaseProps): JSX.Element {
                     </div>
                 </Dialog>
             </div>
-            <Sidebar />
+            <Sidebar/>
         </>
     );
 }
