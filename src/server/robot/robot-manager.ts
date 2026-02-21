@@ -35,6 +35,11 @@ export class RobotManager {
         this.idsToRobots.set(robot.id, robot);
     }
 
+    //use this so on disconnect and reconnect we don't just have a bunch of bots in here that shouldn't exist cause they're disconnected
+    removeRobot(robotId: string) {
+        this.idsToRobots.delete(robotId);
+    }
+
     /**
      * Retrieves a robot by id.
      * Throws if no robot is found.
@@ -55,16 +60,18 @@ export class RobotManager {
         const robot = new Robot(
             robotId,
             new GridIndices(
-                config[robotId]?.homeIndices.x,
-                config[robotId]?.homeIndices.y,
+                robotConfig?.homeIndices.x,
+                robotConfig?.homeIndices.y,
             ),
             new GridIndices(
-                config[robotId]?.defaultIndices.x,
-                config[robotId]?.defaultIndices.y,
+                robotConfig?.defaultIndices.x,
+                robotConfig?.defaultIndices.y,
             ),
-            config[robotId]?.startHeadingRadians * DEGREE,
+            robotConfig?.startHeadingRadians * DEGREE,
+            robotConfig?.attributes.piece_type,
         );
         this.addRobot(robot);
+        console.log("We have the following:" + robotConfig?.defaultIndices);
         return robot;
     }
 
@@ -83,6 +90,13 @@ export class RobotManager {
     getRobotAtIndices(indices: GridIndices): Robot {
         const indicesToIds = this.getIndicesToIds();
         const robotId = indicesToIds.get(indices.toString());
+        const theKeys = indicesToIds.keys();
+        const keyArr = [...theKeys];
+        console.log(
+            `Indices is ${indices.toString()}, current id's are,`,
+            keyArr,
+        );
+
         if (robotId === undefined) {
             throw new Error("Failed to find robot at indices " + indices);
         }
@@ -99,6 +113,12 @@ export class RobotManager {
         }
         indicesToIds.set(indices.toString(), robotId);
     }
+
+    stopAllRobots() {
+        Array.from(this.idsToRobots.values()).forEach((robot) => {
+            robot.sendStopPacket();
+        });
+    }
 }
 
 export const robotManager = new RobotManager(
@@ -110,12 +130,14 @@ export const robotManager = new RobotManager(
                 new GridIndices(0, 5),
                 new GridIndices(5, 3),
                 90 * DEGREE,
+                "w_pawn",
             ),
             new Robot(
                 "robot-4",
                 new GridIndices(5, 0),
                 new GridIndices(5, 2),
                 90 * DEGREE,
+                "w_queen",
             ),
         ],
 );

@@ -10,8 +10,16 @@ import {
 import { EventEmitter } from "@posva/event-emitter";
 import { randomUUID } from "node:crypto";
 import { robotManager, type RobotManager } from "../robot/robot-manager";
-import { USE_VIRTUAL_ROBOTS } from "../utils/env";
+import {
+    MAX_PING_FAIL,
+    PING_INTERVAL,
+    PING_TIMEOUT,
+    USE_VIRTUAL_ROBOTS,
+} from "../utils/env";
 import { BotTunnel, type RobotEventEmitter } from "./bot-tunnel";
+import { waitTime } from "../utils/time";
+import { disconnectedBots } from "./managers";
+import { pauseGame, unpauseGame } from "./pauseHandler";
 
 /**
  * The tunnel for handling communications to the robots
@@ -20,6 +28,7 @@ export class RealBotTunnel extends BotTunnel {
     address: string | undefined;
     id: string | undefined;
     emitter: RobotEventEmitter;
+    pingReceived: boolean;
 
     /**
      * take the robot socket and creates an emitter to notify dependencies
@@ -33,6 +42,7 @@ export class RealBotTunnel extends BotTunnel {
     ) {
         super();
         this.emitter = new EventEmitter();
+        this.pingReceived = false;
     }
 
     isActive() {
@@ -56,6 +66,50 @@ export class RealBotTunnel extends BotTunnel {
         }
     }
 
+    //waits for an interval, then sends a ping. If it doesn't receive a response, adds it to a count of failures.
+    //Too many failures means this bot has disconnected.
+    async runPings() {
+        let countFailures: number = 0;
+        for (;;) {
+            await waitTime(PING_INTERVAL);
+            if (this.connected) {
+                // console.log("SENDING PING!")
+                await this.send({ type: PacketType.PING_SEND });
+                //wait for a bit to receive result of the ping
+                await waitTime(PING_TIMEOUT);
+
+                if (this.pingReceived) {
+                    // console.log("PING RECEIVED!")
+                    this.pingReceived = false;
+                    countFailures = 0;
+                } else {
+                    // console.log("PING NOT RECEIVED!")
+                    countFailures++;
+                    if (countFailures === MAX_PING_FAIL) {
+                        console.log("AAA A BOT DISCONNECTED! ABORT! ABORT!");
+
+                        if (this.id !== undefined) {
+                            robotManager.removeRobot(this.id);
+                            disconnectedBots.add(this.id);
+                        }
+
+                        //send the pause signal.
+                        pauseGame(false);
+
+                        // this.emitter.emit("actionComplete", {
+                        //     success: true,
+                        //     packetId,
+                        // });
+
+                        this.connected = false;
+                    }
+                }
+            } else {
+                break;
+            }
+        }
+    }
+
     async processPacket(packet: PacketWithId) {
         const { packetId } = packet;
         console.log("Received Packet");
@@ -67,11 +121,15 @@ export class RealBotTunnel extends BotTunnel {
                 this.onHandshake(packet.macAddress);
                 await this.send(this.makeHello(packet.macAddress));
                 this.connected = true;
+                //get to start running pings.
+                this.runPings();
                 break;
             }
             // respond to pings
-            case "PING_SEND": {
-                await this.send({ type: PacketType.PING_RESPONSE });
+            case "PING_RESPONSE": {
+                console.log("WE GOT A PING!");
+                this.pingReceived = true;
+                // await this.send({ type: PacketType.PING_RESPONSE });
                 break;
             }
             // emit a action complete for further processing
@@ -91,6 +149,10 @@ export class RealBotTunnel extends BotTunnel {
                 });
                 break;
             }
+            //checks if we are receiving from the bot a response for a ping the server sent.
+            //if we are, then we can set pingReceived to true.
+            // case PacketType.PING_RESPONSE: {
+            // }
         }
     }
 
@@ -122,7 +184,10 @@ export class RealBotTunnel extends BotTunnel {
         console.log({ msg });
 
         // Packets that don't need to be waited on for completion
-        const EXCLUDED_PACKET_TYPES = [PacketType.SERVER_HELLO];
+        const EXCLUDED_PACKET_TYPES = [
+            PacketType.SERVER_HELLO,
+            PacketType.PING_SEND,
+        ];
 
         return new Promise((res, rej) => {
             if (EXCLUDED_PACKET_TYPES.includes(packet.type)) {
@@ -228,10 +293,19 @@ export class TCPServer {
                     config["bots"][mac] = id;
                 } else {
                     id = config["bots"][mac];
+
                     if (!(id in this.robotManager.idsToRobots)) {
                         this.robotManager.createRobotFromId(id);
                     }
                     console.log("Found address ID: " + id);
+                }
+
+                // if there was disconnected bot beforehand, remove it. If no more bots disconnected, send signal to unpause game
+                if (id !== undefined && disconnectedBots.has(id)) {
+                    disconnectedBots.delete(id);
+                    if (disconnectedBots.size === 0) {
+                        unpauseGame(false);
+                    }
                 }
                 tunnel.id = id;
                 tunnel.address = mac;

@@ -33,7 +33,7 @@ import { Side } from "../../common/game-types";
 import { USE_VIRTUAL_ROBOTS, START_ROBOTS_AT_DEFAULT } from "../utils/env";
 import { SaveManager } from "./save-manager";
 
-import { VirtualBotTunnel, VirtualRobot } from "../simulator";
+import { VirtualBotTunnel } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
@@ -55,14 +55,20 @@ import {
     moveAllRobotsToDefaultPositions,
 } from "../robot/path-materializer";
 import type { PuzzleComponents } from "./puzzles";
-import puzzles from "./puzzles";
+import { puzzles } from "./puzzles";
 import { tcpServer } from "./tcp-interface";
 import { robotManager } from "../robot/robot-manager";
 import { executor } from "../command/executor";
+import {
+    gamePaused,
+    pauseGame,
+    setAllRobotsToDefaultPositions,
+    unpauseGame,
+} from "./pauseHandler";
 
 /**
  * Helper function to move all robots from their home positions to their default positions
- * for regular chess games
+ * for regular chess games. IsMoving basically controls whether or not to actually move the robots to the right position.
  */
 async function setupDefaultRobotPositions(
     isMoving: boolean = true,
@@ -86,26 +92,6 @@ async function setupDefaultRobotPositions(
     }
 }
 
-function setAllRobotsToDefaultPositions(
-    defaultPositionsMap?: Map<string, GridIndices>,
-): void {
-    if (defaultPositionsMap) {
-        for (const [robotId, indices] of defaultPositionsMap.entries()) {
-            const robot = robotManager.getRobot(robotId);
-            robot.position = Position.fromGridIndices(indices);
-            if (robot instanceof VirtualRobot)
-                robot.updateTunnelPosition(robot.position);
-        }
-    } else {
-        for (const robot of robotManager.idsToRobots.values()) {
-            robot.position = Position.fromGridIndices(robot.defaultIndices);
-            if (robot instanceof VirtualRobot)
-                robot.updateTunnelPosition(robot.position);
-            robotManager.updateRobot(robot.id, robot.defaultIndices);
-        }
-    }
-}
-
 /**
  * An endpoint used to establish a websocket connection with the server.
  *
@@ -114,6 +100,7 @@ function setAllRobotsToDefaultPositions(
 export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
     // on close, delete the cookie id
     ws.on("close", () => {
+        console.log("We closed the connection");
         socketManager.handleSocketClosed(req.cookies.id);
     });
 
@@ -123,7 +110,15 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
         console.log("Received message: " + message.toJson());
 
         if (message instanceof RegisterWebsocketMessage) {
-            socketManager.registerSocket(req.cookies.id, ws);
+            console.log(`Register a new socket with request ${req.url}`);
+            //find in the url where we specify the page
+            const cutoffIndex = req.url.indexOf("page=") + 5;
+            // take out that page value, add a delimeter
+            const pageValue = req.url.substring(cutoffIndex) + "|o|o|";
+            // add current page to the cookie id
+            const finalSocketId = pageValue.concat(req.cookies.id);
+
+            socketManager.registerSocket(finalSocketId, ws);
         } else if (
             message instanceof GameInterruptedMessage ||
             message instanceof MoveMessage ||
@@ -184,6 +179,17 @@ apiRouter.get("/client-information", async (req, res) => {
                 ),
             );
         }
+        const robotPos = new Map(
+            oldSave!.robotPos?.map<[string, GridIndices]>((obj) => [
+                obj[1],
+                new GridIndices(
+                    parseInt(obj[0].split(", ")[0]),
+                    parseInt(obj[0].split(", ")[1]),
+                ),
+            ]),
+        );
+        console.log(robotPos);
+        setAllRobotsToDefaultPositions(robotPos);
     }
     /**
      * Note the client currently redirects to home from the game over screen
@@ -208,7 +214,10 @@ apiRouter.get("/game-state", (req, res) => {
         return res.status(400).send({ message: "No game is currently active" });
     }
     const clientType = clientManager.getClientType(req.cookies.id);
-    return res.send(gameManager.getGameState(clientType));
+    return res.send({
+        state: gameManager.getGameState(clientType),
+        pause: gamePaused,
+    });
 });
 
 /**
@@ -284,6 +293,10 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
     const moves = puzzle.moves;
     const difficulty = puzzle.rating;
 
+    console.log(
+        `Fein is ${fen}, moves are ${moves}, difficulty is ${difficulty}`,
+    );
+
     if (puzzle.robotDefaultPositions) {
         // Convert puzzle.robotDefaultPositions from Record<string, string> to Map<string, GridIndices>
         const defaultPositionsMap = new Map<string, GridIndices>();
@@ -313,12 +326,17 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
             !START_ROBOTS_AT_DEFAULT,
             defaultPositionsMap,
         );
+    } else {
+        throw Error(
+            "Should have the default positions set up, but the config is missing.",
+        );
     }
     setGameManager(
         new PuzzleGameManager(
             new ChessEngine(),
             socketManager,
             fen,
+            "",
             moves,
             difficulty,
         ),
@@ -543,6 +561,25 @@ apiRouter.get("/get-simulator-robot-state", (_, res) => {
 apiRouter.get("/get-puzzles", (_, res) => {
     const out: string = JSON.stringify(puzzles);
     return res.send(out);
+});
+
+/**
+ * Pause the game
+ * Todo: add authentication instead of an exposed pause call
+ */
+apiRouter.get("/pause-game", (_, res) => {
+    return res.send(pauseGame(true));
+});
+
+/**
+ * Unpause the game
+ * Todo: add authentication instead of an exposed unpause call
+ */
+
+apiRouter.get("/unpause-game", async (_, res) => {
+    const unpausePacket = unpauseGame(true);
+
+    return res.send(unpausePacket);
 });
 
 /**
