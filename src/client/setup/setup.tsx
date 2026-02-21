@@ -157,8 +157,7 @@ function SetupMain(props: SetupMainProps) {
     );
 }
 
-export function ThemeButtons(props): JSX.Element {
-    props;
+export function ThemeButtons(): JSX.Element {
     return (
         <>
             <h3 className={textColor()}>Display Settings:</h3>

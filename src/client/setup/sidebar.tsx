@@ -14,7 +14,7 @@ import {
 function getMessageHandler(setQueue: Dispatch<string[]>): MessageHandler {
     return (message) => {
         if (message instanceof UpdateQueue) {
-            setQueue(message.queue.slice());
+            setQueue(message.updatedPlayerList.slice());
         }
     };
 }
@@ -34,15 +34,14 @@ export function Sidebar(props: sidebarProps): JSX.Element {
     );
 
     const sendMessage = useSocket(getMessageHandler(setQueue));
-    const { isPending, data, isError } = useEffectQuery(
+
+    const { isPending, isError } = useEffectQuery(
         "get-queue",
         async () => {
-            return get("/get-queue").then((newQueue) => {
-                setQueue(newQueue);
-                return newQueue;
-            });
+            const newQueue = await get("/get-queue");
+            setQueue(newQueue);
         },
-        true,
+        true
     );
 
     const names = useEffectQuery(
@@ -60,7 +59,6 @@ export function Sidebar(props: sidebarProps): JSX.Element {
         console.log(names.isError);
     }
     //ts wanted me to do something with my data
-    data;
     if (isPending || names.isPending) {
         return <NonIdealState />;
     } else if (isError) {

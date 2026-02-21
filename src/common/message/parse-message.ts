@@ -42,9 +42,9 @@ export function parseMessage(text: string): Message {
         case MessageType.MOVE:
             return new MoveMessage(obj.move);
         case MessageType.JOIN_QUEUE:
-            return new JoinQueue(obj.queue);
+            return new JoinQueue(obj.playerName);
         case MessageType.UPDATE_QUEUE:
-            return new UpdateQueue(obj.queue);
+            return new UpdateQueue(obj.updatedPlayerList);
         case MessageType.SET_CHESS:
             return new SetChessMessage(obj.chess);
         case MessageType.DRIVE_ROBOT:

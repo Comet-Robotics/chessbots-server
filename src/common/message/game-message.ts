@@ -141,7 +141,7 @@ export class GameEndMessage extends Message {
 }
 
 export class JoinQueue extends Message {
-    constructor(public readonly queue: string) {
+    constructor(public readonly playerName: string) {
         super();
     }
 
@@ -150,13 +150,13 @@ export class JoinQueue extends Message {
     protected toObj(): object {
         return {
             ...super.toObj(),
-            queue: this.queue,
+            playerName: this.playerName,
         };
     }
 }
 
 export class UpdateQueue extends Message {
-    constructor(public readonly queue: string[]) {
+    constructor(public readonly updatedPlayerList: string[]) {
         super();
     }
 
@@ -165,7 +165,7 @@ export class UpdateQueue extends Message {
     protected toObj(): object {
         return {
             ...super.toObj(),
-            queue: this.queue,
+            updatedPlayerList: this.updatedPlayerList,
         };
     }
 }

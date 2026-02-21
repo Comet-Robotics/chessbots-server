@@ -99,10 +99,11 @@ async function setupDefaultRobotPositions(
 }
 
 const queue = new PriorityQueue<string>();
+//hashmap mapping cookie ids to user names
 const names = new Map<string, string>();
 
 //let the queue be moved once per game
-let onlyOnce = true;
+let canReloadQueue = true;
 
 /**
  * An endpoint used to establish a websocket connection with the server.
@@ -116,9 +117,9 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
         socketManager.handleSocketClosed(req.cookies.id);
 
         //if you reload and the game is over
-        if (gameManager?.isGameEnded() && onlyOnce) {
+        if (gameManager?.isGameEnded() && canReloadQueue) {
             //make the reassignment occur once per game instead of once per reload
-            onlyOnce = false;
+            canReloadQueue = false;
 
             //remove the old players and store them for future reference
             const oldPlayers = clientManager.getIds();
@@ -255,7 +256,7 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
                 if (queue.find(req.cookies.id) === undefined) {
                     queue.insert(req.cookies.id, 0);
                 }
-                names.set(req.cookies.id, message.queue);
+                names.set(req.cookies.id, message.playerName);
                 socketManager.sendToAll(new UpdateQueue([...names.values()]));
             }
         }
@@ -377,7 +378,7 @@ apiRouter.get("/game-state", (req, res) => {
  * returns a success message
  */
 apiRouter.post("/start-computer-game", async (req, res) => {
-    onlyOnce = true;
+    canReloadQueue = true;
     const side = req.query.side as Side;
     const difficulty = parseInt(req.query.difficulty as string) as Difficulty;
 
@@ -412,7 +413,7 @@ apiRouter.post("/start-computer-game", async (req, res) => {
  * returns a success message
  */
 apiRouter.post("/start-human-game", async (req, res) => {
-    onlyOnce = true;
+    canReloadQueue = true;
     const side = req.query.side as Side;
 
     // Position robots from home to default positions before starting the game
