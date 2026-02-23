@@ -247,10 +247,6 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
             message instanceof GameFinishedMessage ||
             message instanceof GameEndMessage
         ) {
-            // TODO: Handle game manager not existing
-            if (gameManager === null || gameManager === undefined) {
-                console.log("BRUHHH");
-            }
             await gameManager?.handleMessage(message, req.cookies.id);
         } else if (message instanceof DriveRobotMessage) {
             await doDriveRobot(message);
