@@ -1168,11 +1168,13 @@ export function materializePath(move: Move): Command {
                 rookPiece.id,
                 Position.fromGridIndices(new GridIndices(7, 2)),
             );
-        } else {
+        }
+        // black side castling 
+        else {
             rookPiece = robotManager.getRobotAtIndices(new GridIndices(9, 9));
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
-                Position.fromGridIndices(new GridIndices(9, 8)),
+                Position.fromGridIndices(new GridIndices(8, 9)),
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,
