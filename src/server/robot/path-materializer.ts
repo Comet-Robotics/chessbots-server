@@ -243,7 +243,7 @@ function findShimmyLocation(
     collisionType: CollisionType,
 ): Position {
     const shimmyPos: Position = robotManager.getRobot(pieceId).position;
-    const axisShimmyAmount: number = 1 / 3;
+    const axisShimmyAmount: number = 1 / 2;
     switch (collisionType) {
         // Horizontal
         case CollisionType.HORIZONTAL: {
@@ -490,6 +490,8 @@ function moveToDeadZone(origin: GridIndices): GridMove {
     ];
 
     collisionTuple.sort((a, b) => a[1].length - b[1].length);
+    console.log("Collision decision:")
+    console.log(collisionTuple[0])
     return collisionTuple[0][0];
 }
 
@@ -522,7 +524,7 @@ function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
     //const capturedPiece: GridIndices = GridIndices.squareToGrid(from);
     const home: GridIndices = robotManager.getRobot(id).homeIndices;
     const fastestMoveToDeadzone = moveToDeadZone(from);
-    const toDeadzone = moveMainPiece(fastestMoveToDeadzone, true);
+    const toDeadzone = moveMainPiece(fastestMoveToDeadzone, false);
 
     const startInDeadzone = fastestMoveToDeadzone.to;
     let finalDestination: GridIndices | undefined;

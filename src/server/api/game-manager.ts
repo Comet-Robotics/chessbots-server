@@ -158,7 +158,7 @@ export class HumanGameManager extends GameManager {
             this.chess.makeMove(message.move);
 
             console.log("running executor");
-            console.dir(command, { depth: null });
+            // console.dir(command, { depth: null });
             await executor.execute(command).catch((reason) => {
                 setPaused(true);
                 console.log(reason);
