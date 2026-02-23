@@ -490,8 +490,8 @@ function moveToDeadZone(origin: GridIndices): GridMove {
     ];
 
     collisionTuple.sort((a, b) => a[1].length - b[1].length);
-    console.log("Collision decision:")
-    console.log(collisionTuple[0])
+    console.log("Collision decision:");
+    console.log(collisionTuple[0]);
     return collisionTuple[0][0];
 }
 
@@ -1171,7 +1171,7 @@ export function materializePath(move: Move): Command {
                 Position.fromGridIndices(new GridIndices(7, 2)),
             );
         }
-        // black side castling 
+        // black side castling
         else {
             rookPiece = robotManager.getRobotAtIndices(new GridIndices(9, 9));
             kingMove = new AbsoluteMoveCommand(
