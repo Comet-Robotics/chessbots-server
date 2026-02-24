@@ -7,23 +7,13 @@ import { Home } from "./home";
 import { Debug2 } from "./debug/debug2";
 import { Simulator } from "./debug/simulator";
 import { Editor } from "./editor/editor";
+import { ProtectedRoute } from "./admin/protectedRoute";
+import Login from "./admin/login";
 
 export const router = createBrowserRouter([
     {
         path: "/home",
         element: <Home />,
-    },
-    {
-        path: "/debug/simulator",
-        element: <Simulator />,
-    },
-    {
-        path: "/debug",
-        element: <Debug />,
-    },
-    {
-        path: "/debug2",
-        element: <Debug2 />,
     },
     {
         path: "/setup",
@@ -40,5 +30,26 @@ export const router = createBrowserRouter([
     {
         path: "/editor",
         element: <Editor />,
+    },
+    {
+        path: "/login",
+        element: <Login />,
+    },
+    {
+        element: <ProtectedRoute />,
+        children: [
+            {
+                path: "/debug/simulator",
+                element: <Simulator />,
+            },
+            {
+                path: "/debug",
+                element: <Debug />,
+            },
+            {
+                path: "/debug2",
+                element: <Debug2 />,
+            },
+        ],
     },
 ]);
