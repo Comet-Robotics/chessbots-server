@@ -117,8 +117,8 @@ let canReloadQueue = true;
 export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
     // on close, delete the cookie id
     ws.on("close", () => {
-        console.log("We closed the connection");
-        socketManager.handleSocketClosed(req.cookies.id);
+        console.log(`We closed the connection of ${req.cookies.id}`);
+        socketManager.handleSocketClosed(req.cookies.id, ws);
 
         //if you reload and the game is over
         if (gameManager?.isGameEnded() && canReloadQueue) {
@@ -172,7 +172,7 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
 
         //wait in case the client is just reloading or disconnected instead of leaving
         setTimeout(() => {
-            if (socketManager.getSocket(req.cookies.id) === undefined) {
+            if (socketManager.getSockets(req.cookies.id) === undefined) {
                 //remove the person from the queue to free up space
                 queue.popInd(queue.find(req.cookies.id));
                 names.delete(req.cookies.id);
@@ -228,16 +228,14 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
         const message = parseMessage(data.toString());
         console.log("Received message: " + message.toJson());
 
-        if (message instanceof RegisterWebsocketMessage) {
-            console.log(`Register a new socket with request ${req.url}`);
-            //find in the url where we specify the page
-            const cutoffIndex = req.url.indexOf("page=") + 5;
-            // take out that page value, add a delimeter
-            const pageValue = req.url.substring(cutoffIndex) + "|o|o|";
-            // add current page to the cookie id
-            const finalSocketId = pageValue.concat(req.cookies.id);
+        // take out that page value, add a delimeter
+        // // add current page to the cookie id
+        // const finalSocketId = pageValue.concat(req.cookies.id);
 
-            socketManager.registerSocket(finalSocketId, ws);
+        if (message instanceof RegisterWebsocketMessage) {
+            console.log(`Register a new socket with request ${req.cookies.id}`);
+
+            socketManager.registerSocket(req.cookies.id, ws);
         } else if (
             message instanceof GameInterruptedMessage ||
             message instanceof MoveMessage ||
@@ -246,7 +244,6 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
             message instanceof GameFinishedMessage ||
             message instanceof GameEndMessage
         ) {
-            // TODO: Handle game manager not existing
             await gameManager?.handleMessage(message, req.cookies.id);
         } else if (message instanceof DriveRobotMessage) {
             await doDriveRobot(message);
@@ -373,6 +370,7 @@ apiRouter.get("/game-state", (req, res) => {
  * returns a success message
  */
 apiRouter.post("/start-computer-game", async (req, res) => {
+    console.log("start comp game");
     canReloadQueue = true;
     const side = req.query.side as Side;
     const difficulty = parseInt(req.query.difficulty as string) as Difficulty;

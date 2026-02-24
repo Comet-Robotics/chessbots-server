@@ -243,7 +243,7 @@ function findShimmyLocation(
     collisionType: CollisionType,
 ): Position {
     const shimmyPos: Position = robotManager.getRobot(pieceId).position;
-    const axisShimmyAmount: number = 1 / 3;
+    const axisShimmyAmount: number = 1 / 2;
     switch (collisionType) {
         // Horizontal
         case CollisionType.HORIZONTAL: {
@@ -490,6 +490,8 @@ function moveToDeadZone(origin: GridIndices): GridMove {
     ];
 
     collisionTuple.sort((a, b) => a[1].length - b[1].length);
+    console.log("Collision decision:");
+    console.log(collisionTuple[0]);
     return collisionTuple[0][0];
 }
 
@@ -522,7 +524,7 @@ function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
     //const capturedPiece: GridIndices = GridIndices.squareToGrid(from);
     const home: GridIndices = robotManager.getRobot(id).homeIndices;
     const fastestMoveToDeadzone = moveToDeadZone(from);
-    const toDeadzone = moveMainPiece(fastestMoveToDeadzone, true);
+    const toDeadzone = moveMainPiece(fastestMoveToDeadzone);
 
     const startInDeadzone = fastestMoveToDeadzone.to;
     let finalDestination: GridIndices | undefined;
@@ -1168,11 +1170,13 @@ export function materializePath(move: Move): Command {
                 rookPiece.id,
                 Position.fromGridIndices(new GridIndices(7, 2)),
             );
-        } else {
+        }
+        // black side castling
+        else {
             rookPiece = robotManager.getRobotAtIndices(new GridIndices(9, 9));
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
-                Position.fromGridIndices(new GridIndices(9, 8)),
+                Position.fromGridIndices(new GridIndices(8, 9)),
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,

@@ -20,9 +20,9 @@ export class ClientManager {
      * get the host's socket
      * @returns the host socket
      */
-    public getHostSocket(): WebSocket | undefined {
+    public getHostSocket(): Set<WebSocket> | undefined {
         if (this.hostId !== undefined) {
-            return this.socketManager.getSocket(this.hostId);
+            return this.socketManager.getSockets(this.hostId);
         }
         return undefined;
     }
@@ -33,11 +33,11 @@ export class ClientManager {
      * @returns if the socket was found
      */
     public sendToHost(message: Message): boolean {
-        const socket = this.getHostSocket();
-        if (socket !== undefined) {
-            socket.send(message.toJson());
+        const sockets = this.getHostSocket();
+        if (sockets !== undefined) {
+            for (const socket of sockets) socket.send(message.toJson());
         }
-        return socket !== undefined;
+        return sockets !== undefined;
     }
 
     /**
@@ -46,11 +46,11 @@ export class ClientManager {
      * @returns if the socket was found
      */
     public sendToClient(message: Message): boolean {
-        const socket = this.getClientSocket();
-        if (socket !== undefined) {
-            socket.send(message.toJson());
+        const sockets = this.getClientSocket();
+        if (sockets !== undefined) {
+            for (const socket of sockets) socket.send(message.toJson());
         }
-        return socket !== undefined;
+        return sockets !== undefined;
     }
 
     /**
@@ -61,8 +61,12 @@ export class ClientManager {
     public sendToSpectators(message: Message): boolean {
         if (this.spectatorIds.size !== 0) {
             for (const item of this.spectatorIds) {
-                if (this.socketManager.getSocket(item))
-                    this.socketManager.getSocket(item).send(message.toJson());
+                const potentialSocket = this.socketManager.getSockets(item);
+                if (potentialSocket !== null && potentialSocket !== undefined) {
+                    for (const socket of potentialSocket) {
+                        socket.send(message.toJson());
+                    }
+                }
             }
             return true;
         }
@@ -73,9 +77,9 @@ export class ClientManager {
      * get the client socket
      * @returns the socket of the client
      */
-    public getClientSocket(): WebSocket | undefined {
+    public getClientSocket(): Set<WebSocket> | undefined {
         if (this.clientId !== undefined) {
-            return this.socketManager.getSocket(this.clientId);
+            return this.socketManager.getSockets(this.clientId);
         }
         return undefined;
     }

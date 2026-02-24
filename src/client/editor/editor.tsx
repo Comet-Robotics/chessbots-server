@@ -275,7 +275,7 @@ export function Editor() {
                         startIdx,
                         endIdx + 1,
                     );
-                    console.log(selectedEvents);
+                    // console.log(selectedEvents);
 
                     await navigator.clipboard.writeText(
                         JSON.stringify(selectedEvents),
