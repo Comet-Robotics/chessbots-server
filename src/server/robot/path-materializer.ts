@@ -524,7 +524,7 @@ function returnToHome(from: GridIndices, id: string): SequentialCommandGroup {
     //const capturedPiece: GridIndices = GridIndices.squareToGrid(from);
     const home: GridIndices = robotManager.getRobot(id).homeIndices;
     const fastestMoveToDeadzone = moveToDeadZone(from);
-    const toDeadzone = moveMainPiece(fastestMoveToDeadzone, false);
+    const toDeadzone = moveMainPiece(fastestMoveToDeadzone);
 
     const startInDeadzone = fastestMoveToDeadzone.to;
     let finalDestination: GridIndices | undefined;

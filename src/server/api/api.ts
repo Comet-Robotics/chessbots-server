@@ -228,10 +228,7 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
         const message = parseMessage(data.toString());
         console.log("Received message: " + message.toJson());
 
-        //find in the url where we specify the page
-        const cutoffIndex = req.url.indexOf("page=") + 5;
         // take out that page value, add a delimeter
-        const pageString = req.url.substring(cutoffIndex);
         // // add current page to the cookie id
         // const finalSocketId = pageValue.concat(req.cookies.id);
 
@@ -255,10 +252,7 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
         } else if (message instanceof JoinQueue) {
             console.log("So we got the join message");
             // this was initially !isPlayer, shouldn't it be isPlayer?
-            if (
-                pageString.indexOf("debug") === -1 &&
-                !clientManager.isPlayer(req.cookies.id)
-            ) {
+            if (!clientManager.isPlayer(req.cookies.id)) {
                 if (queue.find(req.cookies.id) === undefined) {
                     queue.insert(req.cookies.id, 0);
                 }
@@ -358,7 +352,7 @@ apiRouter.get("/client-information", async (req, res) => {
  * returns an object with the side, game pgn, and the game end reason
  */
 apiRouter.get("/game-state", (req, res) => {
-    if (gameManager === null || gameManager === undefined) {
+    if (gameManager === null) {
         console.warn("Invalid attempt to fetch game state");
         return res.status(400).send({ message: "No game is currently active" });
     }

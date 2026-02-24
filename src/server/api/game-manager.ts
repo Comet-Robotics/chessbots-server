@@ -119,7 +119,7 @@ export class HumanGameManager extends GameManager {
      * @param id - id of the sender
      */
     public async handleMessage(message: Message, id: string): Promise<void> {
-        console.log("handling message");
+        // console.log("handling message");
 
         // check which type the id is
         const clientType = this.clientManager.getClientType(id);
