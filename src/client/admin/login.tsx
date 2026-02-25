@@ -1,18 +1,22 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./auth";
+import { useEffect } from "react";
 
 const Login = () => {
-    const { login } = useAuth();
+    const auth = useAuth();
     const navigate = useNavigate();
 
     const handleLogin = () => {
-        login({ name: "admin" });
-        navigate("/", { replace: true });
+        auth.login({ name: "admin" });
+        console.log("login");
+        navigate("/home", { replace: true });
     };
 
-    setTimeout(() => {
-        handleLogin();
-    }, 3 * 1000);
+    useEffect(() => {
+        setTimeout(() => {
+            handleLogin();
+        }, 2 * 1000);
+    });
 
     return <>Login Page</>;
 };

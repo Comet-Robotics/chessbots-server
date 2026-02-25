@@ -9,47 +9,53 @@ import { Simulator } from "./debug/simulator";
 import { Editor } from "./editor/editor";
 import { ProtectedRoute } from "./admin/protectedRoute";
 import Login from "./admin/login";
+import AuthProvider from "./admin/auth";
 
 export const router = createBrowserRouter([
     {
-        path: "/home",
-        element: <Home />,
-    },
-    {
-        path: "/setup",
-        element: <Setup />,
-    },
-    {
-        path: "/lobby",
-        element: <Lobby />,
-    },
-    {
-        path: "/game",
-        element: <Game />,
-    },
-    {
-        path: "/editor",
-        element: <Editor />,
-    },
-    {
-        path: "/login",
-        element: <Login />,
-    },
-    {
-        element: <ProtectedRoute />,
-        children: [
+        element: <AuthProvider/>,
+        children:[
             {
-                path: "/debug/simulator",
-                element: <Simulator />,
+                path: "/home",
+                element: <Home />,
             },
             {
-                path: "/debug",
-                element: <Debug />,
+                path: "/setup",
+                element: <Setup />,
             },
             {
-                path: "/debug2",
-                element: <Debug2 />,
+                path: "/lobby",
+                element: <Lobby />,
             },
-        ],
-    },
+            {
+                path: "/game",
+                element: <Game />,
+            },
+            {
+                path: "/editor",
+                element: <Editor />,
+            },
+            {
+                path: "/login",
+                element: <Login />,
+            },
+            {
+                element: <ProtectedRoute />,
+                children: [
+                    {
+                        path: "/debug/simulator",
+                        element: <Simulator />,
+                    },
+                    {
+                        path: "/debug",
+                        element: <Debug />,
+                    },
+                    {
+                        path: "/debug2",
+                        element: <Debug2 />,
+                    },
+                ],
+            },
+        ]
+    }
 ]);
