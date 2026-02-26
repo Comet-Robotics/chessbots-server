@@ -364,6 +364,34 @@ apiRouter.get("/game-state", (req, res) => {
 });
 
 /**
+ * admin state endpoint
+ *
+ * gets important admin information
+ */
+apiRouter.get("/admin-state", (_, res) => {
+    //number of robots in play
+    const numberRobots = robotManager.getIndicesToIds().size;
+    //connected players
+    const players = socketManager.getSocketCount();
+
+    const board = gameManager?.chess.fen;
+    const turn =
+        board ?
+            board.split(" ")[1] === "w" ?
+                "white"
+            :   "black"
+        :   null;
+
+    return res.send({
+        status: gamePaused,
+        numberRobots: numberRobots,
+        players: players,
+        board: board,
+        turn: turn,
+    });
+});
+
+/**
  * start computer game endpoint
  *
  * creates a new computer game manager based on the requests's side and difficulty
@@ -722,9 +750,9 @@ apiRouter.get("/get-real-robot-state", (_, res) => {
         }),
     );
 
-    //send the robots 
+    //send the robots
     return res.send({
-        robotState
+        robotState,
     });
 });
 

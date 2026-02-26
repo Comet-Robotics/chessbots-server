@@ -14,8 +14,8 @@ import { Admin } from "./admin/admin";
 
 export const router = createBrowserRouter([
     {
-        element: <AuthProvider/>,
-        children:[
+        element: <AuthProvider />,
+        children: [
             {
                 path: "/home",
                 element: <Home />,
@@ -63,11 +63,11 @@ export const router = createBrowserRouter([
                 element: <ProtectedRoute />,
                 children: [
                     {
-                        path:"",
-                        element:<Admin/>,
-                    }
-                ]
+                        path: "",
+                        element: <Admin />,
+                    },
+                ],
             },
-        ]
-    }
+        ],
+    },
 ]);

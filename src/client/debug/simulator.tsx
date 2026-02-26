@@ -219,7 +219,7 @@ export function RobotGrid({
     robotState,
     children,
     onClick,
-}: PropsWithChildren<{ robotState: RobotState, onClick? }>) {
+}: PropsWithChildren<{ robotState: RobotState; onClick? }>) {
     return (
         <div
             style={{
@@ -368,7 +368,7 @@ export const Robot = forwardRef<
         robotId: string;
         onTopOfRobots: string[];
         style?: CSSProperties;
-        onClick?: (id:string)=>null;
+        onClick?: (id: string) => null;
     }
 >(function Robot({ pos, robotId, onTopOfRobots, style, onClick }, ref) {
     return (
@@ -381,7 +381,9 @@ export const Robot = forwardRef<
                 bottom: `${pos.position.y * tileSize - 0.25 * tileSize}px`,
                 ...style,
             }}
-            onClick={()=>{onClick?onClick(robotId):undefined}}
+            onClick={() => {
+                onClick ? onClick(robotId) : undefined;
+            }}
         >
             <Tooltip content={`${robotId}: ${JSON.stringify(pos)}`}>
                 <div
@@ -406,7 +408,6 @@ export const Robot = forwardRef<
                             borderRadius: "50%",
                         }}
                     />
-                    
                 </div>
             </Tooltip>
         </div>

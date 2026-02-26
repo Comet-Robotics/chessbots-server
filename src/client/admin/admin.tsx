@@ -15,9 +15,19 @@ import type { ReactNode } from "react";
 import { useState, useReducer, useEffect } from "react";
 import "./admin.scss";
 
+interface AdminProps {
+    status: string;
+    numberRobots: string;
+    players: number;
+    board: string | null;
+    turn: string | null;
+}
+
 export function Admin() {
     const [selectedRobot, setSelectedRobot] =
         useState<[string, SimulatedRobotLocation]>();
+
+    const [info, setInfo] = useState<AdminProps>();
 
     const navigate = useNavigate();
     const sendMessage = useSocket();
@@ -56,8 +66,24 @@ export function Admin() {
         dispatch({ type: "SET_ALL_ROBOTS", payload: robotState });
     };
 
+    const fetchAdminState = async () => {
+        await get("/admin-state").then((props) => {
+            const holder: AdminProps = {
+                status: props.status,
+                numberRobots: props.numberRobots,
+                players: props.players,
+                board: props.board,
+                turn: props.turn,
+            };
+            setInfo(holder);
+        });
+    };
+
     useEffect(() => {
-        fetchRobotState();
+        setInterval(() => {
+            fetchRobotState();
+            fetchAdminState();
+        }, 250);
     }, []);
 
     //End of simulator duplicate
@@ -72,13 +98,18 @@ export function Admin() {
     //start of debug duplicate
 
     // create the select and move buttons
-    let body: ReactNode;
+    let overrides: ReactNode;
     if (selectedRobot === undefined) {
-        body = <div></div>;
-    } else {
-        body = (
-            <div className="debug-section " style={{width:"25vw"}}>
+        overrides = (
+            <div
+                style={{ width: "25vw", display: "grid", placeItems: "center" }}
+            >
                 <H2 className={textColor()}>Select Robot</H2>
+            </div>
+        );
+    } else {
+        overrides = (
+            <div className="debug-section " style={{ width: "25vw" }}>
                 {selectedRobot[0] === undefined ? null : (
                     <>
                         <div className="debug-section">
@@ -96,6 +127,39 @@ export function Admin() {
             </div>
         );
     }
+
+    //end of debug duplicate
+
+    const gameInfo: ReactNode = (
+        <div style={{ width: "25vw" }}>
+            <h2 className={textColor()}>
+                status:
+                <Code style={{ background: "rgba(0,0,0,0)" }}>
+                    {info?.status ? "Paused" : "Running"}
+                </Code>
+                <br />
+                number of robots:
+                <Code style={{ background: "rgba(0,0,0,0)" }}>
+                    {info?.numberRobots}
+                </Code>
+                <br />
+                player count:
+                <Code style={{ background: "rgba(0,0,0,0)" }}>
+                    {info?.players}
+                </Code>
+                <br />
+                board state:
+                <Code style={{ background: "rgba(0,0,0,0)" }}>
+                    {info?.board}
+                </Code>
+                <br />
+                turn:
+                <Code style={{ background: "rgba(0,0,0,0)" }}>
+                    {info?.turn}
+                </Code>
+            </h2>
+        </div>
+    );
 
     return (
         <Card className={bgColor()}>
@@ -118,28 +182,32 @@ export function Admin() {
                 onClick={toggleUserSetting}
             />
             <div className="container">
-                {body}
-                <div style={{display:"grid", placeItems:"center", width:"50vw"}}>
+                {overrides}
+                <div
+                    style={{
+                        display: "grid",
+                        placeItems: "center",
+                        width: "50vw",
+                    }}
+                >
                     <div
                         style={{
-                            display:"flex",
+                            display: "flex",
                             gap: "1rem",
                             marginBottom: "1rem",
                             alignItems: "center",
                         }}
                     >
-                        <H1 className={textColor()}>Robot Simulator</H1>
+                        <H1 className={textColor()}>Robot Positions</H1>
                         <Button icon="refresh" onClick={fetchRobotState}>
                             Refresh
                         </Button>
                     </div>
-                    <div
-                        style={{ display: "flex", gap: "1rem",  }}
-                    >
+                    <div style={{ display: "flex", gap: "1rem" }}>
                         <RobotGrid robotState={robotState} onClick={onClick} />
-                        
                     </div>
                 </div>
+                {gameInfo}
             </div>
         </Card>
     );

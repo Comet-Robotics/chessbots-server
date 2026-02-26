@@ -1,5 +1,6 @@
-.container{
+.container {
     display: grid;
     grid-template-columns: auto auto auto;
     place-items: center;
+    width: 100vw;
 }
