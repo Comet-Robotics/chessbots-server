@@ -539,6 +539,33 @@ apiRouter.get("/get-simulator-robot-state", (_, res) => {
 });
 
 /**
+ * get the current state of the real robots for the simulator
+ */
+apiRouter.get("/get-real-robot-state", (_, res) => {
+    const robotsEntries = Array.from(robotManager.idsToRobots);
+
+    // get all of the robots and their positions
+    const robotState = Object.fromEntries(
+        robotsEntries.map(([id, robot]) => {
+            const headingRadians = robot.headingRadians;
+            const position = new Position(robot.position.x, robot.position.y);
+
+            // const tunnel = robot.getTunnel();
+            // if (tunnel instanceof VirtualBotTunnel) {
+            //     position = tunnel.position;
+            //     headingRadians = tunnel.headingRadians;
+            // }
+            return [id, { position, headingRadians: headingRadians }];
+        }),
+    );
+
+    //send the robots 
+    return res.send({
+        robotState
+    });
+});
+
+/**
  * Returns a list of available puzzles.
  */
 apiRouter.get("/get-puzzles", (_, res) => {

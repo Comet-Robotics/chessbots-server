@@ -7,9 +7,10 @@ import { Home } from "./home";
 import { Debug2 } from "./debug/debug2";
 import { Simulator } from "./debug/simulator";
 import { Editor } from "./editor/editor";
-import { ProtectedRoute } from "./admin/protectedRoute";
-import Login from "./admin/login";
-import AuthProvider from "./admin/auth";
+import { ProtectedRoute } from "./auth/protectedRoute";
+import Login from "./auth/login";
+import AuthProvider from "./auth/auth";
+import { Admin } from "./admin/admin";
 
 export const router = createBrowserRouter([
     {
@@ -40,21 +41,32 @@ export const router = createBrowserRouter([
                 element: <Login />,
             },
             {
+                path: "/debug",
                 element: <ProtectedRoute />,
                 children: [
                     {
-                        path: "/debug/simulator",
-                        element: <Simulator />,
-                    },
-                    {
-                        path: "/debug",
+                        path: "",
                         element: <Debug />,
                     },
                     {
-                        path: "/debug2",
+                        path: "2",
                         element: <Debug2 />,
                     },
+                    {
+                        path: "simulator",
+                        element: <Simulator />,
+                    },
                 ],
+            },
+            {
+                path: "/admin",
+                element: <ProtectedRoute />,
+                children: [
+                    {
+                        path:"",
+                        element:<Admin/>,
+                    }
+                ]
             },
         ]
     }
