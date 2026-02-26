@@ -27,7 +27,7 @@ import { materializePath } from "../robot/path-materializer";
 import { DO_SAVES } from "../utils/env";
 import { executor } from "../command/executor";
 import { robotManager } from "../robot/robot-manager";
-import { gamePaused } from "./pauseHandler";
+import { gamePaused, setPaused } from "./pauseHandler";
 
 type GameState = {
     type?: "puzzle" | "human" | "computer";
@@ -119,6 +119,8 @@ export class HumanGameManager extends GameManager {
      * @param id - id of the sender
      */
     public async handleMessage(message: Message, id: string): Promise<void> {
+        // console.log("handling message");
+
         // check which type the id is
         const clientType = this.clientManager.getClientType(id);
         let sendToPlayer: SendMessage;
@@ -148,6 +150,7 @@ export class HumanGameManager extends GameManager {
         const ids = this.clientManager.getIds();
         const currentSave = SaveManager.loadGame(id);
         // update the internal chess object if it is a move massage and game not paused
+        console.log("up to here");
         if (message instanceof MoveMessage && !gamePaused) {
             // Call path materializer and send to bots
             const command = materializePath(message.move);
@@ -155,8 +158,16 @@ export class HumanGameManager extends GameManager {
             this.chess.makeMove(message.move);
 
             console.log("running executor");
-            console.dir(command, { depth: null });
-            await executor.execute(command);
+            // console.dir(command, { depth: null });
+            await executor.execute(command).catch((reason) => {
+                setPaused(true);
+                console.log(reason);
+                this.chess.undo();
+                this.socketManager.sendToAll(
+                    new GameHoldMessage(GameHoldReason.GAME_PAUSED),
+                );
+                return;
+            });
             console.log("executor done");
 
             if (ids && DO_SAVES) {
@@ -280,7 +291,15 @@ export class ComputerGameManager extends GameManager {
             this.socketManager.sendToAll(new MoveMessage(message.move));
             this.chess.makeMove(message.move);
 
-            await executor.execute(command);
+            await executor.execute(command).catch((reason) => {
+                setPaused(true);
+                console.log(reason);
+                this.chess.undo();
+                this.socketManager.sendToAll(
+                    new GameHoldMessage(GameHoldReason.GAME_PAUSED),
+                );
+                return;
+            });
 
             if (DO_SAVES) {
                 SaveManager.saveGame(
@@ -370,7 +389,15 @@ export class PuzzleGameManager extends GameManager {
 
                 console.log("running executor");
                 console.dir(command, { depth: null });
-                await executor.execute(command);
+                await executor.execute(command).catch((reason) => {
+                    setPaused(true);
+                    console.log(reason);
+                    this.chess.undo();
+                    this.socketManager.sendToAll(
+                        new GameHoldMessage(GameHoldReason.GAME_PAUSED),
+                    );
+                    return;
+                });
                 console.log("executor done");
 
                 //if there is another move, make it

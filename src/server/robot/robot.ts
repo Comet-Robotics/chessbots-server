@@ -12,6 +12,7 @@ export class Robot {
     private _headingRadians: number;
     private _position: Position;
     protected tunnel: BotTunnel | null;
+    protected _pieceType: string;
 
     constructor(
         public readonly id: string,
@@ -24,6 +25,7 @@ export class Robot {
          */
         public readonly defaultIndices: GridIndices,
         public readonly startHeadingRadians: number = 0,
+        public readonly thePieceType: string,
         position?: Position,
     ) {
         if (
@@ -35,6 +37,7 @@ export class Robot {
         this._headingRadians = startHeadingRadians;
         this._position = position ?? Position.fromGridIndices(homeIndices);
         this.tunnel = null;
+        this._pieceType = thePieceType;
     }
 
     public get position(): Position {
@@ -51,6 +54,14 @@ export class Robot {
 
     public set headingRadians(headingRadians: number) {
         this._headingRadians = headingRadians;
+    }
+
+    public get pieceType(): string {
+        return this._pieceType;
+    }
+
+    public set pieceType(thePieceType: string) {
+        this._pieceType = thePieceType;
     }
 
     /**
@@ -126,7 +137,7 @@ export class Robot {
      */
     public async sendDrivePacket(tileDistance: number): Promise<void> {
         console.log(
-            `Sending drive packet to robot ${this.id} with distance ${tileDistance}`,
+            `Sending drive packet to robot ${this.id} with distance ${tileDistance}, where the piece type is ${this.pieceType}`,
         );
         await this.tunnel!.send({
             type: PacketType.DRIVE_TILES,

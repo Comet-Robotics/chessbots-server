@@ -25,6 +25,7 @@ import { ChessEngine } from "../../common/chess-engine";
 import type { Move } from "../../common/game-types";
 import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { AcceptDrawDialog, OfferDrawDialog } from "./draw-dialog";
+import { Sidebar } from "../setup/sidebar";
 import { bgColor } from "../check-dark-mode";
 import "../colors.css";
 import { NotificationDialog, PauseDialog } from "./admin-dialogs";
@@ -104,10 +105,10 @@ export function Game(): JSX.Element {
         "game-state",
         async () => {
             return get("/game-state").then((gameState) => {
-                setChess(new ChessEngine(gameState.state.position));
+                setChess(new ChessEngine(gameState.position));
                 setPause(gameState.pause);
-                if (gameState.state.gameEndReason !== undefined) {
-                    setGameInterruptedReason(gameState.state.gameEndReason);
+                if (gameState.gameEndReason !== undefined) {
+                    setGameInterruptedReason(gameState.gameEndReason);
                 }
                 return gameState.state;
             });
@@ -195,19 +196,22 @@ export function Game(): JSX.Element {
                 <PuzzleTipBox />
             </div>
 
-            <div id="body-container" className={bgColor()}>
-                <ChessboardWrapper
-                    side={side}
-                    chess={chess}
-                    onMove={handleMove}
-                    rotation={rotation ? rotation : 0}
-                />
-                {gameEndDialog}
-                {gameOfferDialog}
-                {gameAcceptDialog}
-                {gamePauseDialog}
-                {gameUnpauseDialog}
-                <Outlet />
+            <Sidebar top={50} />
+            <div className="main-dialog">
+                <div id="body-container" className={bgColor()}>
+                    <ChessboardWrapper
+                        side={side}
+                        chess={chess}
+                        onMove={handleMove}
+                        rotation={rotation ? rotation : 0}
+                    />
+                    {gameEndDialog}
+                    {gameOfferDialog}
+                    {gameAcceptDialog}
+                    {gamePauseDialog}
+                    {gameUnpauseDialog}
+                    <Outlet />
+                </div>
             </div>
         </>
     );

@@ -11,6 +11,6 @@ export const clientManager = new ClientManager(socketManager);
 export let gameManager: GameManager | null = null;
 export const disconnectedBots: Set<string> = new Set();
 
-export function setGameManager(manager: GameManager) {
+export function setGameManager(manager: GameManager | null) {
     gameManager = manager;
 }

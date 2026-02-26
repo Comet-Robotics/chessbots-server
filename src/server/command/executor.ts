@@ -60,17 +60,15 @@ export class CommandExecutor {
      * @returns - The command to execute.
      */
     public async finishExecution(): Promise<void> {
-        return Promise.all(
-            this.runningCommands.map((command) => {
-                command.execute().finally(() => {
-                    this.oldCommands.unshift(command);
-                    const index = this.runningCommands.indexOf(command);
-                    if (index >= 0) {
-                        this.runningCommands.splice(index, 1);
-                    }
-                });
-            }),
-        ).then();
+        return this.runningCommands.forEach((command) => {
+            command.execute().finally(() => {
+                this.oldCommands.unshift(command);
+                const index = this.runningCommands.indexOf(command);
+                if (index >= 0) {
+                    this.runningCommands.splice(index, 1);
+                }
+            });
+        });
     }
 
     public clearExecution() {

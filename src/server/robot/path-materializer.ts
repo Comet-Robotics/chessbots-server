@@ -243,7 +243,7 @@ function findShimmyLocation(
     collisionType: CollisionType,
 ): Position {
     const shimmyPos: Position = robotManager.getRobot(pieceId).position;
-    const axisShimmyAmount: number = 1 / 3;
+    const axisShimmyAmount: number = 1 / 2;
     switch (collisionType) {
         // Horizontal
         case CollisionType.HORIZONTAL: {
@@ -339,6 +339,7 @@ function constructFinalCommand(
     rotateCommands: ReversibleRobotCommand[],
     collisionType: CollisionType,
     numCollisions: number,
+    noReverse: boolean = false,
 ): MovePiece {
     const from = move.from;
     const robotAtFrom = robotManager.getRobotAtIndices(from);
@@ -371,7 +372,7 @@ function constructFinalCommand(
                     mainDrive3,
                 ]);
             setupCommands.push(...rotateCommands, mainTurn1, ...driveCommands);
-            return new MovePiece(setupCommands, mainDrive);
+            return new MovePiece(setupCommands, mainDrive, noReverse);
         } else if (
             collisionType === CollisionType.VERTICAL &&
             numCollisions > 1
@@ -398,24 +399,31 @@ function constructFinalCommand(
                     mainDrive3,
                 ]);
             setupCommands.push(...rotateCommands, mainTurn1, ...driveCommands);
-            return new MovePiece(setupCommands, mainDrive);
+            return new MovePiece(setupCommands, mainDrive, noReverse);
         } else {
             const pos = new Position(to.i + 0.5, to.j + 0.5);
             const mainDrive = constructDriveCommand(mainPiece, pos, null);
             const mainTurn = constructRotateCommand(mainPiece, pos, null);
             const setupCommands: ReversibleRobotCommand[] = [];
             setupCommands.push(...rotateCommands, mainTurn, ...driveCommands);
-            return new MovePiece(setupCommands, mainDrive);
+            return new MovePiece(setupCommands, mainDrive, noReverse);
         }
     } else {
         console.log("no main piece");
-        return new MovePiece(rotateCommands, new SequentialCommandGroup([]));
+        return new MovePiece(
+            rotateCommands,
+            new SequentialCommandGroup([]),
+            noReverse,
+        );
     }
 }
 
 // Takes in a move, and generates the commands required to get the main piece to it's destination
 // If there are pieces in the way, it shimmy's them out, and move them back after main piece passes
-export function moveMainPiece(move: GridMove): MovePiece {
+export function moveMainPiece(
+    move: GridMove,
+    noReverse: boolean = false,
+): MovePiece {
     const driveCommands: DriveCommand[] = [];
     const rotateCommands: ReversibleRobotCommand[] = [];
     const collisionType = calcCollisionType(move);
@@ -432,6 +440,7 @@ export function moveMainPiece(move: GridMove): MovePiece {
         rotateCommands,
         collisionType,
         collisions.length,
+        noReverse,
     );
 }
 
@@ -481,6 +490,8 @@ function moveToDeadZone(origin: GridIndices): GridMove {
     ];
 
     collisionTuple.sort((a, b) => a[1].length - b[1].length);
+    console.log("Collision decision:");
+    console.log(collisionTuple[0]);
     return collisionTuple[0][0];
 }
 
@@ -1159,11 +1170,13 @@ export function materializePath(move: Move): Command {
                 rookPiece.id,
                 Position.fromGridIndices(new GridIndices(7, 2)),
             );
-        } else {
+        }
+        // black side castling
+        else {
             rookPiece = robotManager.getRobotAtIndices(new GridIndices(9, 9));
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
-                Position.fromGridIndices(new GridIndices(9, 8)),
+                Position.fromGridIndices(new GridIndices(8, 9)),
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,

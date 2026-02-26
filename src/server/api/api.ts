@@ -7,7 +7,10 @@ import {
     GameEndMessage,
     GameHoldMessage,
     GameInterruptedMessage,
+    GameStartedMessage,
+    JoinQueue,
     MoveMessage,
+    UpdateQueue,
     SetChessMessage,
 } from "../../common/message/game-message";
 import {
@@ -15,6 +18,7 @@ import {
     SetRobotVariableMessage,
 } from "../../common/message/robot-message";
 
+import { ClientType } from "../../common/client-types";
 import type { Difficulty } from "../../common/client-types";
 import { RegisterWebsocketMessage } from "../../common/message/message";
 import {
@@ -30,13 +34,19 @@ import {
 } from "./game-manager";
 import { ChessEngine } from "../../common/chess-engine";
 import { Side } from "../../common/game-types";
-import { USE_VIRTUAL_ROBOTS, START_ROBOTS_AT_DEFAULT } from "../utils/env";
+import {
+    USE_VIRTUAL_ROBOTS,
+    START_ROBOTS_AT_DEFAULT,
+    DO_SAVES,
+} from "../utils/env";
 import { SaveManager } from "./save-manager";
 
 import { VirtualBotTunnel } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
+import { PriorityQueue } from "./queue";
+import { GameInterruptedReason } from "../../common/game-end-reasons";
 import { ShowfileSchema, TimelineEventTypes } from "../../common/show";
 import { SplinePointType } from "../../common/spline";
 import type { Command } from "../command/command";
@@ -68,7 +78,7 @@ import {
 
 /**
  * Helper function to move all robots from their home positions to their default positions
- * for regular chess games
+ * for regular chess games. IsMoving basically controls whether or not to actually move the robots to the right position.
  */
 async function setupDefaultRobotPositions(
     isMoving: boolean = true,
@@ -80,7 +90,7 @@ async function setupDefaultRobotPositions(
                 moveAllRobotsToDefaultPositions(defaultPositionsMap);
             await executor.execute(command);
         } else {
-            moveAllRobotsToDefaultPositions(defaultPositionsMap);
+            setAllRobotsToDefaultPositions(defaultPositionsMap);
         }
     } else {
         if (isMoving) {
@@ -92,6 +102,13 @@ async function setupDefaultRobotPositions(
     }
 }
 
+const queue = new PriorityQueue<string>();
+//hashmap mapping cookie ids to user names
+const names = new Map<string, string>();
+
+//let the queue be moved once per game
+let canReloadQueue = true;
+
 /**
  * An endpoint used to establish a websocket connection with the server.
  *
@@ -100,7 +117,110 @@ async function setupDefaultRobotPositions(
 export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
     // on close, delete the cookie id
     ws.on("close", () => {
-        socketManager.handleSocketClosed(req.cookies.id);
+        console.log(`We closed the connection of ${req.cookies.id}`);
+        socketManager.handleSocketClosed(req.cookies.id, ws);
+
+        //if you reload and the game is over
+        if (gameManager?.isGameEnded() && canReloadQueue) {
+            //make the reassignment occur once per game instead of once per reload
+            canReloadQueue = false;
+
+            //remove the old players and store them for future reference
+            const oldPlayers = clientManager.getIds();
+            clientManager.removeHost();
+            clientManager.removeClient();
+
+            if (oldPlayers !== undefined) {
+                //in most cases, the second player becomes the host
+                clientManager.assignPlayer(oldPlayers[1]);
+
+                //if no one else wants to play, the host just swaps
+                if (queue.size() === 0) {
+                    clientManager.assignPlayer(oldPlayers[0]);
+                }
+
+                //if there is one person who wants to play, host moves to the second player
+                if (queue.size() === 1) {
+                    const newPlayer = queue.pop();
+                    if (newPlayer) {
+                        clientManager.removeSpectator(newPlayer);
+                        clientManager.assignPlayer(newPlayer);
+                        names.delete(newPlayer);
+                    }
+                }
+
+                //are enough people to start a game, forget the old people
+                if (queue.size() >= 2) {
+                    const newPlayer = queue.pop();
+                    const newSecondPlayer = queue.pop();
+                    if (newPlayer && newSecondPlayer) {
+                        //reset the clients
+                        clientManager.removeHost();
+                        clientManager.removeClient();
+
+                        //assign new players
+                        clientManager.removeSpectator(newPlayer);
+                        clientManager.assignPlayer(newPlayer);
+                        names.delete(newPlayer);
+                        clientManager.removeSpectator(newSecondPlayer);
+                        clientManager.assignPlayer(newSecondPlayer);
+                        names.delete(newSecondPlayer);
+                    }
+                }
+            }
+        }
+
+        //wait in case the client is just reloading or disconnected instead of leaving
+        setTimeout(() => {
+            if (socketManager.getSockets(req.cookies.id) === undefined) {
+                //remove the person from the queue to free up space
+                queue.popInd(queue.find(req.cookies.id));
+                names.delete(req.cookies.id);
+                const clientType = clientManager.getClientType(req.cookies.id);
+
+                //if the person was a host / client, a new one needs to be reassigned
+                if (clientManager.isPlayer(req.cookies.id)) {
+                    //clear the existing game
+                    const ids = clientManager.getIds();
+                    if (ids) {
+                        if (
+                            SaveManager.loadGame(req.cookies.id)?.host ===
+                            ids[0]
+                        )
+                            SaveManager.endGame(ids[0], ids[1]);
+                        else SaveManager.endGame(ids[1], ids[0]);
+                    }
+
+                    setGameManager(null);
+
+                    //remove the old host/client
+                    clientType === ClientType.HOST ?
+                        clientManager.removeHost()
+                    :   clientManager.removeClient();
+
+                    //if there exists someone to take their place
+                    const newPlayer = queue.pop();
+                    if (newPlayer) {
+                        //transfer them from spectator to the newly-opened spot and remove them from queue
+                        clientManager.removeSpectator(newPlayer);
+                        clientManager.assignPlayer(newPlayer);
+                        names.delete(newPlayer);
+                        socketManager.sendToAll(
+                            new GameInterruptedMessage(
+                                GameInterruptedReason.ABORTED,
+                            ),
+                        );
+                    }
+                    //else they were a spectator and don't need game notifications anymore
+                } else {
+                    clientManager.removeSpectator(req.cookies.id);
+                }
+
+                //update the queue and reload all the pages
+                socketManager.sendToAll(new UpdateQueue([...names.values()]));
+                socketManager.sendToAll(new GameStartedMessage());
+            }
+        }, 5000);
     });
 
     // if there is an actual message, forward it to appropriate handler
@@ -108,7 +228,13 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
         const message = parseMessage(data.toString());
         console.log("Received message: " + message.toJson());
 
+        // take out that page value, add a delimeter
+        // // add current page to the cookie id
+        // const finalSocketId = pageValue.concat(req.cookies.id);
+
         if (message instanceof RegisterWebsocketMessage) {
+            console.log(`Register a new socket with request ${req.cookies.id}`);
+
             socketManager.registerSocket(req.cookies.id, ws);
         } else if (
             message instanceof GameInterruptedMessage ||
@@ -118,17 +244,42 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
             message instanceof GameFinishedMessage ||
             message instanceof GameEndMessage
         ) {
-            // TODO: Handle game manager not existing
             await gameManager?.handleMessage(message, req.cookies.id);
         } else if (message instanceof DriveRobotMessage) {
             await doDriveRobot(message);
         } else if (message instanceof SetRobotVariableMessage) {
             await doSetRobotVariable(message);
+        } else if (message instanceof JoinQueue) {
+            console.log("So we got the join message");
+            // this was initially !isPlayer, shouldn't it be isPlayer?
+            if (!clientManager.isPlayer(req.cookies.id)) {
+                if (queue.find(req.cookies.id) === undefined) {
+                    queue.insert(req.cookies.id, 0);
+                }
+                names.set(req.cookies.id, message.playerName);
+                socketManager.sendToAll(new UpdateQueue([...names.values()]));
+            }
         }
     });
 };
 
 export const apiRouter = Router();
+
+/**
+ * gets the current stored queue
+ */
+apiRouter.get("/get-queue", (_, res) => {
+    if (names) return res.send([...names.values()]);
+    else return res.send([]);
+});
+
+/**
+ * gets the name associated with the request cookie
+ */
+apiRouter.get("/get-name", (req, res) => {
+    if (names) return res.send({ message: names.get(req.cookies.id) });
+    else return res.send("");
+});
 
 /**
  * client information endpoint
@@ -141,7 +292,8 @@ apiRouter.get("/client-information", async (req, res) => {
     const clientType = clientManager.getClientType(req.cookies.id);
     // loading saves from file if found
     const oldSave = SaveManager.loadGame(req.cookies.id);
-    if (oldSave) {
+    if (oldSave && DO_SAVES) {
+        console.log("ADACHI!!");
         // if the game was an ai game, create a computer game manager with the ai difficulty
         if (oldSave.aiDifficulty !== -1) {
             const cgm = new ComputerGameManager(
@@ -218,6 +370,8 @@ apiRouter.get("/game-state", (req, res) => {
  * returns a success message
  */
 apiRouter.post("/start-computer-game", async (req, res) => {
+    console.log("start comp game");
+    canReloadQueue = true;
     const side = req.query.side as Side;
     const difficulty = parseInt(req.query.difficulty as string) as Difficulty;
 
@@ -252,6 +406,7 @@ apiRouter.post("/start-computer-game", async (req, res) => {
  * returns a success message
  */
 apiRouter.post("/start-human-game", async (req, res) => {
+    canReloadQueue = true;
     const side = req.query.side as Side;
 
     // Position robots from home to default positions before starting the game
@@ -284,6 +439,10 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
     const moves = puzzle.moves;
     const difficulty = puzzle.rating;
 
+    console.log(
+        `Fein is ${fen}, moves are ${moves}, difficulty is ${difficulty}`,
+    );
+
     if (puzzle.robotDefaultPositions) {
         // Convert puzzle.robotDefaultPositions from Record<string, string> to Map<string, GridIndices>
         const defaultPositionsMap = new Map<string, GridIndices>();
@@ -312,6 +471,10 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
         await setupDefaultRobotPositions(
             !START_ROBOTS_AT_DEFAULT,
             defaultPositionsMap,
+        );
+    } else {
+        throw Error(
+            "Should have the default positions set up, but the config is missing.",
         );
     }
     setGameManager(
