@@ -27,14 +27,15 @@ export class MovePiece extends SequentialCommandGroup {
                     )
                     .reverse(),
             ),
-            
-           new ParallelCommandGroup(
+
+            new ParallelCommandGroup(
                 setupMoves.map(
-                    (command) => (
-                        new CenterCommand(([...command.requirements][0] as Robot).id)
-                    )
-                )
-            )
+                    (command) =>
+                        new CenterCommand(
+                            ([...command.requirements][0] as Robot).id,
+                        ),
+                ),
+            ),
         ]);
     }
 }

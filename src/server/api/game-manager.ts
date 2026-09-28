@@ -102,7 +102,7 @@ export abstract class GameManager {
 
     public abstract handleMessage(message: Message, id: string): Promise<void>;
 
-    public async cleanupGame(isHexapawn : boolean): Promise<void> {
+    public async cleanupGame(isHexapawn: boolean): Promise<void> {
         const command = moveAllRobotsFromBoardToHome(isHexapawn);
         await executor.execute(command);
     }
@@ -618,8 +618,7 @@ export class HexapawnGameManager extends GameManager {
             }
         }
 
-        if(this.isGameEnded())
-        {
+        if (this.isGameEnded()) {
             if (ids) {
                 if (currentSave?.host === ids[0])
                     SaveManager.endGame(ids[0], ids[1]);

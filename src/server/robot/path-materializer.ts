@@ -354,7 +354,7 @@ function constructFinalCommand(
     collisionType: CollisionType,
     numCollisions: number,
     noReverse: boolean = false,
-    movingRobotId? : string
+    movingRobotId?: string,
 ): MovePiece {
     const from = move.from;
     const mainPiece = movingRobotId ?? robotManager.getRobotAtIndices(from).id;
@@ -434,7 +434,8 @@ function constructFinalCommand(
             return new MovePiece(setupCommands, mainDrive, noReverse);
         } else {
             const pos = new Position(to.i + 0.5, to.j + 0.5);
-            const startPos = movingRobotId ? new Position(from.i + 0.5, from.j + 0.5) : null;
+            const startPos =
+                movingRobotId ? new Position(from.i + 0.5, from.j + 0.5) : null;
             const mainDrive = constructDriveCommand(mainPiece, pos, startPos);
             const mainTurn = constructRotateCommand(mainPiece, pos, startPos);
             const setupCommands: SequentialCommandGroup[] = [];
@@ -465,15 +466,15 @@ function constructFinalCommand(
 export function moveMainPiece(
     move: GridMove,
     noReverse: boolean = false,
-    movingRobotId? : string
+    movingRobotId?: string,
 ): MovePiece {
     const driveCommands: DriveCommand[] = [];
     const rotateCommands: ReversibleRobotCommand[] = [];
     const collisionType = calcCollisionType(move);
-    console.log("Move is: ")
-    console.log(move)
-    console.log("Coll type is:")
-    console.log(collisionType)
+    console.log("Move is: ");
+    console.log(move);
+    console.log("Coll type is:");
+    console.log(collisionType);
     const collisions: string[] = detectCollisions(move, collisionType);
     for (let i = 0; i < collisions.length; i++) {
         const pieceId = collisions[i];
@@ -488,7 +489,7 @@ export function moveMainPiece(
         collisionType,
         collisions.length,
         noReverse,
-        movingRobotId
+        movingRobotId,
     );
 }
 
@@ -586,7 +587,10 @@ function findGridIndicesInArray(
     return array.findIndex((o) => o.i === obj.i && o.j === obj.j);
 }
 
-function returnToHomeHexapawn(from: GridIndices, id: string): [SequentialCommandGroup, boolean] {
+function returnToHomeHexapawn(
+    from: GridIndices,
+    id: string,
+): [SequentialCommandGroup, boolean] {
     const home: GridIndices = robotManager.getRobot(id).homeIndices;
     //  check if column aligned first
     // const goHome: SequentialCommandGroup = new SequentialCommandGroup([
@@ -594,39 +598,35 @@ function returnToHomeHexapawn(from: GridIndices, id: string): [SequentialCommand
     //     ...moveCommands,
     // ]);
 
-    console.log("home j is: " + home.j + "from j is: " + from.j)
+    console.log("home j is: " + home.j + "from j is: " + from.j);
 
-    if(home.i === from.i)
-    {
-        console.log("Home is:")
-        console.log(home)
+    if (home.i === from.i) {
+        console.log("Home is:");
+        console.log(home);
         const columnHomeMove = {
             from: from,
             to: home, //(origin[0] + "8" as unknown as GridIndices),
         };
         const rightToHome = moveMainPiece(columnHomeMove);
         return [new SequentialCommandGroup([rightToHome]), true];
-    }
-    else
-    {
-        console.log("we can't just dig straight down!")
-        console.log(home)
-        const sidewaysDest : GridIndices = new GridIndices(home.i, from.j);
+    } else {
+        console.log("we can't just dig straight down!");
+        console.log(home);
+        const sidewaysDest: GridIndices = new GridIndices(home.i, from.j);
         const sidewaysMove = {
             from: from,
-            to: sidewaysDest
-        }
+            to: sidewaysDest,
+        };
         const sidewaysCollisions = detectCollisions(
             sidewaysMove,
             calcCollisionType(sidewaysMove),
         );
 
-        if(sidewaysCollisions.length > 0)
-        {
+        if (sidewaysCollisions.length > 0) {
             const directMove = {
                 from: from,
-                to: home
-            }
+                to: home,
+            };
             const directMovement = moveMainPiece(directMove);
             return [new SequentialCommandGroup([directMovement]), false];
         }
@@ -638,7 +638,10 @@ function returnToHomeHexapawn(from: GridIndices, id: string): [SequentialCommand
             to: home, //(origin[0] + "8" as unknown as GridIndices),
         };
         const rightToHome = moveMainPiece(columnHomeMove, true, id);
-        return [new SequentialCommandGroup([sidewaysMovement, rightToHome]), true];
+        return [
+            new SequentialCommandGroup([sidewaysMovement, rightToHome]),
+            true,
+        ];
     }
 }
 
@@ -797,7 +800,12 @@ export function moveAllRobotsToDefaultPositionsHexapawn(
     for (const robotId of defaultPositions.keys()) {
         try {
             const robot = robotManager.getRobot(robotId);
-            allCommands.push(new AbsoluteMoveCommand(robot.id, Position.fromGridIndices(defaultPositions.get(robotId)!)));
+            allCommands.push(
+                new AbsoluteMoveCommand(
+                    robot.id,
+                    Position.fromGridIndices(defaultPositions.get(robotId)!),
+                ),
+            );
         } catch (error) {
             throw new Error(`Robot ${robotId} didn't work with robot manager`);
         }
@@ -964,7 +972,9 @@ export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
  * Each robot goes: current position → deadzone → clockwise around deadzone to home.
  * Processed one at a time to avoid collisions.
  */
-export function moveAllRobotsFromBoardToHome(isHexapawn : boolean): SequentialCommandGroup {
+export function moveAllRobotsFromBoardToHome(
+    isHexapawn: boolean,
+): SequentialCommandGroup {
     const commands: Command[] = [];
 
     // Get all robots on the board, grouped by row
@@ -1002,17 +1012,16 @@ export function moveAllRobotsFromBoardToHome(isHexapawn : boolean): SequentialCo
         // Move each robot in this row
         for (const robot of robotsInRow) {
             const currentPos = GridIndices.fromPosition(robot.position);
-            if(isHexapawn)
-            {
-                const allCommandsLol = returnToHomeHexapawn(currentPos, robot.id);
+            if (isHexapawn) {
+                const allCommandsLol = returnToHomeHexapawn(
+                    currentPos,
+                    robot.id,
+                );
                 commands.push(allCommandsLol[0]);
-            }
-            else
-            {
+            } else {
                 const allCommandsLol = returnToHome(currentPos, robot.id);
                 commands.push(allCommandsLol);
             }
-            
 
             // // 1. Move from current position to deadzone
             // const deadzonePos = moveFromBoardToDeadzone(currentPos);
@@ -1372,9 +1381,7 @@ export function materializePath(move: Move): Command {
 }
 
 export function materializePathHexapawn(move: Move): Command {
-    if (
-        gameManager?.chess.isRegularCapture(move)
-    ) {
+    if (gameManager?.chess.isRegularCapture(move)) {
         const capturePiece = gameManager.chess.getCapturedPieceId(
             move,
             robotManager,
@@ -1384,9 +1391,11 @@ export function materializePathHexapawn(move: Move): Command {
                 robotManager.getRobot(capturePiece).position,
             );
 
-            const captureCommand = returnToHomeHexapawn(captureSquare, capturePiece);
-            if(captureCommand[1] === false)
-            {
+            const captureCommand = returnToHomeHexapawn(
+                captureSquare,
+                capturePiece,
+            );
+            if (captureCommand[1] === false) {
                 throw Error("THIS SHOULDN'T HAVE HAPPEEND, WHAT!!");
             }
             const mainCommand = moveMainPiece(moveToGridMove(move));

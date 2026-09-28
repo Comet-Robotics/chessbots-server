@@ -111,7 +111,12 @@ export function Game(): JSX.Element {
             return get("/game-state").then((gameState) => {
                 // console.log("GAMESTATE ACQUIRED!");
                 // console.log(gameState);
-                setChess(new ChessEngine(gameState.type === "puzzle", gameState.position));
+                setChess(
+                    new ChessEngine(
+                        gameState.type === "puzzle",
+                        gameState.position,
+                    ),
+                );
                 setPause(gameState.pause);
                 if (gameState.gameEndReason !== undefined) {
                     setGameInterruptedReason(gameState.gameEndReason);

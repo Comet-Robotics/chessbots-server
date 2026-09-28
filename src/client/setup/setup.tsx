@@ -66,9 +66,10 @@ export function Setup(): JSX.Element {
                 ) ?
                     <SetupGame
                         gameType={
-                            setupType === SetupType.COMPUTER ?
-                                GameType.COMPUTER
-                            :   setupType === SetupType.HUMAN ? GameType.HUMAN : GameType.HEXAPAWN
+                            setupType === SetupType.COMPUTER ? GameType.COMPUTER
+                            : setupType === SetupType.HUMAN ?
+                                GameType.HUMAN
+                            :   GameType.HEXAPAWN
                         }
                     />
                 :   null}

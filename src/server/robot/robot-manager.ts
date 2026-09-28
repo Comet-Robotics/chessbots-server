@@ -3,7 +3,11 @@ import { GridIndices } from "./grid-indices";
 import { Robot } from "./robot";
 import config from "../api/bot-server-config.json";
 import { virtualRobots } from "../simulator";
-import { USE_BANQUET_INDICES, USE_HEXAPAWN_INDICES, USE_VIRTUAL_ROBOTS } from "../utils/env";
+import {
+    USE_BANQUET_INDICES,
+    USE_HEXAPAWN_INDICES,
+    USE_VIRTUAL_ROBOTS,
+} from "../utils/env";
 
 /**
  * Stores robots. Provides utilities for finding them by position.
@@ -58,29 +62,38 @@ export class RobotManager {
             throw new Error("Failed to find robot config for id " + robotId);
         }
 
-        const iIndex = USE_BANQUET_INDICES && robotConfig.banquetIndices !== undefined ? robotConfig?.banquetIndices.x : 
-            USE_HEXAPAWN_INDICES && robotConfig.hexapawnIndices !== undefined ?
-                robotConfig?.hexapawnIndices.x :
-                    robotConfig?.homeIndices.x;
-        const jIndex = USE_BANQUET_INDICES && robotConfig.banquetIndices !== undefined ? robotConfig?.banquetIndices.y : 
-            USE_HEXAPAWN_INDICES && robotConfig.hexapawnIndices !== undefined ?
-                robotConfig?.hexapawnIndices.y :
-                    robotConfig?.homeIndices.y;    
-                    
-        console.log("Hexapawn status " + USE_HEXAPAWN_INDICES)
-        if(robotConfig.banquetIndices !== undefined)
-        {
-            console.log("Ok so we should be using them, specifically ti is:")
-            console.log(robotConfig?.hexapawnIndices.x + " " + robotConfig?.hexapawnIndices.y)
+        const iIndex =
+            USE_BANQUET_INDICES && robotConfig.banquetIndices !== undefined ?
+                robotConfig?.banquetIndices.x
+            : (
+                USE_HEXAPAWN_INDICES &&
+                robotConfig.hexapawnIndices !== undefined
+            ) ?
+                robotConfig?.hexapawnIndices.x
+            :   robotConfig?.homeIndices.x;
+        const jIndex =
+            USE_BANQUET_INDICES && robotConfig.banquetIndices !== undefined ?
+                robotConfig?.banquetIndices.y
+            : (
+                USE_HEXAPAWN_INDICES &&
+                robotConfig.hexapawnIndices !== undefined
+            ) ?
+                robotConfig?.hexapawnIndices.y
+            :   robotConfig?.homeIndices.y;
+
+        console.log("Hexapawn status " + USE_HEXAPAWN_INDICES);
+        if (robotConfig.banquetIndices !== undefined) {
+            console.log("Ok so we should be using them, specifically ti is:");
+            console.log(
+                robotConfig?.hexapawnIndices.x +
+                    " " +
+                    robotConfig?.hexapawnIndices.y,
+            );
         }
-        
 
         const robot = new Robot(
             robotId,
-            new GridIndices(
-                iIndex,
-                jIndex
-            ),
+            new GridIndices(iIndex, jIndex),
             new GridIndices(
                 robotConfig?.defaultIndices.x,
                 robotConfig?.defaultIndices.y,
@@ -138,8 +151,6 @@ export class RobotManager {
             console.log("If this gets robot-2, it should be set:");
             console.log(indicesToIds.get(indices.toString()));
         }
-
-        
     }
 
     stopAllRobots() {

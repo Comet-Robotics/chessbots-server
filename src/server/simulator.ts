@@ -183,7 +183,6 @@ export class VirtualBotTunnel extends BotTunnel {
                         Math.round((this.position.x + deltaX) * 10) / 10,
                         Math.round((this.position.y + deltaY) * 10) / 10,
                     );
-                    
 
                     console.log(
                         `Robot ${this.robotId} moved to ${newPosition.x}, ${newPosition.y} from ${this.position.x}, ${this.position.y}`,
@@ -256,24 +255,37 @@ function createVirtualRobots() {
     return new Map<string, VirtualRobot>(
         virtualBotIds.map((id) => {
             const realRobotConfig = config[id];
-            console.log("Robit id is " + id)
+            console.log("Robit id is " + id);
 
-            const iIndex = (USE_BANQUET_INDICES && realRobotConfig.banquetIndices !== undefined) ? realRobotConfig?.banquetIndices.x : 
-                (USE_HEXAPAWN_INDICES && realRobotConfig.hexapawnIndices !== undefined) ?
-                    realRobotConfig?.hexapawnIndices.x :
-                        realRobotConfig?.homeIndices.x;
-            const jIndex = (USE_BANQUET_INDICES && realRobotConfig.banquetIndices !== undefined) ? realRobotConfig?.banquetIndices.y : 
-                (USE_HEXAPAWN_INDICES && realRobotConfig.hexapawnIndices !== undefined) ?
-                    realRobotConfig?.hexapawnIndices.y :
-                        realRobotConfig?.homeIndices.y;    
+            const iIndex =
+                (
+                    USE_BANQUET_INDICES &&
+                    realRobotConfig.banquetIndices !== undefined
+                ) ?
+                    realRobotConfig?.banquetIndices.x
+                : (
+                    USE_HEXAPAWN_INDICES &&
+                    realRobotConfig.hexapawnIndices !== undefined
+                ) ?
+                    realRobotConfig?.hexapawnIndices.x
+                :   realRobotConfig?.homeIndices.x;
+            const jIndex =
+                (
+                    USE_BANQUET_INDICES &&
+                    realRobotConfig.banquetIndices !== undefined
+                ) ?
+                    realRobotConfig?.banquetIndices.y
+                : (
+                    USE_HEXAPAWN_INDICES &&
+                    realRobotConfig.hexapawnIndices !== undefined
+                ) ?
+                    realRobotConfig?.hexapawnIndices.y
+                :   realRobotConfig?.homeIndices.y;
             return [
                 id,
                 new VirtualRobot(
                     id,
-                    new GridIndices(
-                        iIndex,
-                        jIndex
-                    ),
+                    new GridIndices(iIndex, jIndex),
                     new GridIndices(
                         realRobotConfig.defaultIndices.x,
                         realRobotConfig.defaultIndices.y,

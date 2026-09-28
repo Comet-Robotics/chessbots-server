@@ -55,6 +55,9 @@ import {
     DriveQuadraticSplineCommand,
     DriveCubicSplineCommand,
     SpinRadiansCommand,
+    DriveCommand,
+    CenterCommand,
+    RelativeRotateCommand,
 } from "../command/move-command";
 import { GridIndices } from "../robot/grid-indices";
 import {
@@ -116,7 +119,6 @@ async function setupDefaultRobotPositionsHexapawn(
         throw new Error(`We cooked bro`);
     }
 }
-
 
 const queue = new PriorityQueue<string>();
 //hashmap mapping cookie ids to user names
@@ -375,9 +377,7 @@ apiRouter.get("/game-state", (req, res) => {
         return res.status(400).send({ message: "No game is currently active" });
     }
     const clientType = clientManager.getClientType(req.cookies.id);
-    return res.send(
-        gameManager.getGameState(clientType)
-    );
+    return res.send(gameManager.getGameState(clientType));
 });
 
 /**
@@ -805,6 +805,34 @@ apiRouter.get("/unpause-game", async (_, res) => {
     return res.send(unpausePacket);
 });
 
+apiRouter.post("/force-move", async (req, res) => {
+    const command = new DriveCommand(
+        req.query.robotId as string,
+        Number(req.query.dist as string),
+    );
+    return executor.execute(command).then(() => {
+        return res.send({ message: "success" });
+    });
+});
+
+apiRouter.post("/force-turn", async (req, res) => {
+    console.log(req.query);
+    const command = new RelativeRotateCommand(
+        req.query.robotId as string,
+        Number(req.query.rad as string),
+    );
+
+    return executor.execute(command).then(() => {
+        return res.send({ message: "success" });
+    });
+});
+
+apiRouter.post("/force-center", async (req, res) => {
+    console.log(req.query);
+    const command = new CenterCommand(req.query.robotId as string);
+    executor.execute(command);
+    return res.send({ message: "success" });
+});
 /**
  * sends a drive message through the tcp connection
  *

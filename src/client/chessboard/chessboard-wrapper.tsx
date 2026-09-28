@@ -113,7 +113,7 @@ export function ChessboardWrapper(props: ChessboardWrapperProps): JSX.Element {
             <Chessboard
                 // set up the board
                 boardOrientation={side === Side.WHITE ? "white" : "black"}
-                boardWidth={width*2}
+                boardWidth={width * 2}
                 position={chess.fen}
                 // do a promotion check
                 onPromotionCheck={(from: Square, to: Square) => {

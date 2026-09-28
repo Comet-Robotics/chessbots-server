@@ -150,7 +150,7 @@ export class RealBotTunnel extends BotTunnel {
                 break;
             }
 
-            case PacketType.QUERY_RESPONSE : {
+            case PacketType.QUERY_RESPONSE: {
                 console.log(packet);
             }
             //checks if we are receiving from the bot a response for a ping the server sent.

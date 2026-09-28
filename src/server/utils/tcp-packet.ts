@@ -74,7 +74,9 @@ export const PING_SEND_SCHEMA = Record({ type: Literal(PacketType.PING_SEND) });
 /**
  * send a centering packet
  */
-export const CENTER_SEND_SCHEMA = Record({ type: Literal(PacketType.CENTER_SEND) });
+export const CENTER_SEND_SCHEMA = Record({
+    type: Literal(PacketType.CENTER_SEND),
+});
 
 /**
  * respond to a ping
