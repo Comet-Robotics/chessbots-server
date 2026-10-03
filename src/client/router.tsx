@@ -9,7 +9,7 @@ import { Simulator } from "./debug/simulator";
 import { Editor } from "./editor/editor";
 import { ProtectedRoute } from "./auth/protectedRoute";
 import Login from "./auth/login";
-import AuthProvider from "./auth/auth";
+import { AuthProvider } from "./auth/auth";
 import { Admin } from "./admin/admin";
 
 export const router = createBrowserRouter([
