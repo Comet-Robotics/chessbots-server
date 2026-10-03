@@ -4,6 +4,7 @@ import { Position } from "../robot/position";
 import { GridIndices } from "../robot/grid-indices";
 import { robotManager } from "../robot/robot-manager";
 import { MAX_RETRIES } from "../utils/env";
+import { type ReversibleRobotCommand } from "./move-piece";
 
 /**
  * Represents a rotation.
@@ -41,6 +42,33 @@ export class RelativeRotateCommand
 
     public reverse(): RelativeRotateCommand {
         return new RelativeRotateCommand(this.robotId, -this.headingRadians);
+    }
+}
+
+/**
+ * Tell the robot to center
+ */
+export class CenterCommand
+    extends RobotCommand
+    implements Reversible<ReversibleRobotCommand>
+{
+    public async execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+        return this.commandIsCompleted ?
+                Promise.resolve()
+            :   (timeoutRetry(
+                    robot.sendCenterPacket().then(() => {
+                        this.commandIsCompleted = true;
+                    }),
+                    MAX_RETRIES,
+                    this.height,
+                    0,
+                    `Center Command Error at Robot:${this.robotId}`,
+                ) as Promise<void>);
+    }
+
+    public reverse(): CenterCommand {
+        return new CenterCommand(this.robotId);
     }
 }
 

@@ -12,7 +12,7 @@
         "interactjs": "^1.10.27",
         "motion": "^12.6.0",
         "react": "^18.2.0",
-        "react-chessboard": "^4.5.0",
+        "react-chessboard": "patch:react-chessboard@npm%3A4.7.3#~/.yarn/patches/react-chessboard-npm-4.7.3-53276f9bfb.patch",
         "react-dom": "^18.2.0",
         "react-joystick-component": "^6.2.1",
         "react-router-dom": "^6.21.3",

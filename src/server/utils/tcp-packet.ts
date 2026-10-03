@@ -11,6 +11,7 @@ import {
 export enum PacketType {
     CLIENT_HELLO = "CLIENT_HELLO",
     SERVER_HELLO = "SERVER_HELLO",
+    CENTER_SEND = "CENTER_SEND",
     PING_SEND = "PING_SEND",
     PING_RESPONSE = "PING_RESPONSE",
     QUERY_VAR = "QUERY_VAR",
@@ -69,6 +70,13 @@ export const SERVER_HELLO_SCHEMA = Record({
  * send a ping
  */
 export const PING_SEND_SCHEMA = Record({ type: Literal(PacketType.PING_SEND) });
+
+/**
+ * send a centering packet
+ */
+export const CENTER_SEND_SCHEMA = Record({
+    type: Literal(PacketType.CENTER_SEND),
+});
 
 /**
  * respond to a ping
@@ -189,6 +197,7 @@ export const ESTOP_SCHEMA = Record({ type: Literal(PacketType.ESTOP) });
 export const Packet = Union(
     CLIENT_HELLO_SCHEMA,
     SERVER_HELLO_SCHEMA,
+    CENTER_SEND_SCHEMA,
     PING_SEND_SCHEMA,
     PING_RESPONSE_SCHEMA,
     QUERY_VAR_SCHEMA,

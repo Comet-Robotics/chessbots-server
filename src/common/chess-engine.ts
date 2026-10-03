@@ -15,12 +15,14 @@ import type { RobotManager } from "../server/robot/robot-manager";
  */
 export class ChessEngine {
     private chess: Chess;
+    private isPuzzle: boolean;
 
     /**
      * @param pgn - The pgn to use. If undefined, a new game is created.
      */
-    constructor(pgn?: string) {
+    constructor(isPuzzle: boolean = false, pgn?: string) {
         this.chess = new Chess();
+        this.isPuzzle = isPuzzle;
         if (pgn !== undefined) {
             this.chess.loadPgn(pgn);
         }
@@ -31,7 +33,7 @@ export class ChessEngine {
      * @param move - A move to make.
      */
     copy(move?: Move): ChessEngine {
-        const copy = new ChessEngine();
+        const copy = new ChessEngine(this.isPuzzle, this.pgn);
         copy.loadPgn(this.pgn);
         if (move !== undefined) {
             copy.makeMove(move);
@@ -273,6 +275,10 @@ export class ChessEngine {
      * @returns - a game finished reason from the enum
      */
     getGameFinishedReason(): GameFinishedReason | undefined {
+        if (this.isPuzzle) {
+            return undefined;
+        }
+
         if (this.chess.isCheckmate()) {
             // If it's your turn, you lost
             return this.chess.turn() === "w" ?

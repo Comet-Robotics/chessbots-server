@@ -23,4 +23,5 @@ export enum Difficulty {
 export enum GameType {
     COMPUTER = "computer",
     HUMAN = "human",
+    HEXAPAWN = "hexapawn",
 }

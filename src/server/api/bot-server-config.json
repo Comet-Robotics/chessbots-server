@@ -2,15 +2,90 @@
     "tcpServerPort": 3001,
     "bots": {
         "80:65:99:4d:f3:e8": "robot-15",
-        "c0:4e:30:4b:68:76": "robot-11",
+        "c0:4e:30:4b:68:76": "robot-19",
         "80:65:99:4d:f3:9a": "robot-3",
         "80:65:99:4e:07:b0": "robot-4",
-        "80:65:99:4e:07:9c": "robot-5",
-        "80:65:99:4e:07:70": "robot-12",
-        "80:65:99:4e:70:4a": "robot-8",
-        "80:65:99:4e:70:2c": "robot-7"
+        "80:65:99:4e:07:9c": "robot-11",
+        "80:65:99:4e:07:ae": "robot-12",
+        "80:65:99:4e:70:48": "robot-2",
+        "80:65:99:4e:70:46": "robot-7",
+        "80:65:99:4e:70:4c": "robot-6",
+        "c0:4e:30:4b:66:98": "robot-1",
+        "80:65:99:4e:70:6a": "robot-5"
     },
-    "robot-1": {
+
+    "robot-6": {
+        "attributes": {
+            "piece_type": "w_bishop"
+        },
+        "homeIndices": {
+            "x": 0,
+            "y": 10
+        },
+        "defaultIndices": {
+            "x": 7,
+            "y": 2
+        },
+        "startHeadingRadians": 1.5707963268
+    },
+    "robot-2": {
+        "attributes": {
+            "piece_type": "w_knight"
+        },
+        "homeIndices": {
+            "x": 5,
+            "y": 5
+        },
+        "defaultIndices": {
+            "x": 5,
+            "y": 5
+        },
+        "startHeadingRadians": 1.5707963268
+    },
+    "robot-5": {
+        "attributes": {
+            "piece_type": "w_king"
+        },
+        "homeIndices": {
+            "x": 3,
+            "y": 11
+        },
+        "defaultIndices": {
+            "x": 9,
+            "y": 2
+        },
+        "startHeadingRadians": 1.5707963268
+    },
+    "robot-12": {
+        "attributes": {
+            "piece_type": "b_king"
+        },
+        "homeIndices": {
+            "x": 2,
+            "y": 11
+        },
+        "defaultIndices": {
+            "x": 5,
+            "y": 3
+        },
+        "startHeadingRadians": 1.5707963268
+    },
+    "robot-11": {
+        "attributes": {
+            "piece_type": "b_king"
+        },
+        "homeIndices": {
+            "x": 2,
+            "y": 11
+        },
+        "defaultIndices": {
+            "x": 5,
+            "y": 3
+        },
+        "startHeadingRadians": 1.5707963268
+    },
+
+    "robot-7": {
         "attributes": {
             "piece_type": "w_rook"
         },
@@ -22,9 +97,14 @@
             "x": 2,
             "y": 2
         },
+        "hexapawnIndices": {
+            "x": 2,
+            "y": 2
+        },
+
         "startHeadingRadians": 1.5707963268
     },
-    "robot-2": {
+    "robot-1": {
         "attributes": {
             "piece_type": "w_knight"
         },
@@ -33,6 +113,14 @@
             "y": 0
         },
         "defaultIndices": {
+            "x": 3,
+            "y": 2
+        },
+        "banquetIndices": {
+            "x": 0,
+            "y": 9
+        },
+        "hexapawnIndices": {
             "x": 3,
             "y": 2
         },
@@ -50,6 +138,14 @@
             "x": 4,
             "y": 2
         },
+        "banquetIndices": {
+            "x": 0,
+            "y": 10
+        },
+        "hexapawnIndices": {
+            "x": 4,
+            "y": 2
+        },
         "startHeadingRadians": 1.5707963268
     },
     "robot-4": {
@@ -64,9 +160,13 @@
             "x": 5,
             "y": 2
         },
+        "hexapawnIndices": {
+            "x": 2,
+            "y": 6
+        },
         "startHeadingRadians": 1.5707963268
     },
-    "robot-5": {
+    "robot-8": {
         "attributes": {
             "piece_type": "w_king"
         },
@@ -78,9 +178,17 @@
             "x": 6,
             "y": 2
         },
+        "banquetIndices": {
+            "x": 3,
+            "y": 11
+        },
+        "hexapawnIndices": {
+            "x": 3,
+            "y": 6
+        },
         "startHeadingRadians": 1.5707963268
     },
-    "robot-6": {
+    "robot-10": {
         "attributes": {
             "piece_type": "w_bishop"
         },
@@ -91,6 +199,10 @@
         "defaultIndices": {
             "x": 7,
             "y": 2
+        },
+        "hexapawnIndices": {
+            "x": 4,
+            "y": 6
         },
         "startHeadingRadians": 1.5707963268
     },
@@ -146,34 +258,6 @@
         },
         "defaultIndices": {
             "x": 3,
-            "y": 3
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-11": {
-        "attributes": {
-            "piece_type": "w_pawn"
-        },
-        "homeIndices": {
-            "x": 0,
-            "y": 4
-        },
-        "defaultIndices": {
-            "x": 4,
-            "y": 3
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-12": {
-        "attributes": {
-            "piece_type": "w_pawn"
-        },
-        "homeIndices": {
-            "x": 0,
-            "y": 5
-        },
-        "defaultIndices": {
-            "x": 5,
             "y": 3
         },
         "startHeadingRadians": 1.5707963268
@@ -248,6 +332,10 @@
             "x": 2,
             "y": 8
         },
+        "banquetIndices": {
+            "x": 10,
+            "y": 11
+        },
         "startHeadingRadians": 4.7123889804
     },
     "robot-18": {
@@ -261,6 +349,10 @@
         "defaultIndices": {
             "x": 3,
             "y": 8
+        },
+        "banquetIndices": {
+            "x": 11,
+            "y": 11
         },
         "startHeadingRadians": 4.7123889804
     },
@@ -360,6 +452,10 @@
             "x": 2,
             "y": 9
         },
+        "banquetIndices": {
+            "x": 10,
+            "y": 0
+        },
         "startHeadingRadians": 4.7123889804
     },
     "robot-26": {
@@ -374,6 +470,10 @@
             "x": 3,
             "y": 9
         },
+        "banquetIndices": {
+            "x": 11,
+            "y": 0
+        },
         "startHeadingRadians": 4.7123889804
     },
     "robot-27": {
@@ -387,6 +487,10 @@
         "defaultIndices": {
             "x": 4,
             "y": 9
+        },
+        "banquetIndices": {
+            "x": 11,
+            "y": 1
         },
         "startHeadingRadians": 4.7123889804
     },
@@ -415,6 +519,10 @@
         "defaultIndices": {
             "x": 6,
             "y": 9
+        },
+        "banquetIndices": {
+            "x": 2,
+            "y": 11
         },
         "startHeadingRadians": 4.7123889804
     },

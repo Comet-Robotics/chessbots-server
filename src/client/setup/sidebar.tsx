@@ -39,7 +39,11 @@ export function Sidebar(props: sidebarProps): JSX.Element {
         "get-queue",
         async () => {
             const newQueue = await get("/get-queue");
+            // console.log("queue data:")
+            // console.log(newQueue)
             setQueue(newQueue);
+            // console.log("Set queue went fine");
+            return newQueue;
         },
         true,
     );
