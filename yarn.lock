@@ -2284,7 +2284,7 @@ __metadata:
     interactjs: "npm:^1.10.27"
     motion: "npm:^12.6.0"
     react: "npm:^18.2.0"
-    react-chessboard: "patch:react-chessboard@npm%3A4.7.3#~/.yarn/patches/react-chessboard-npm-4.7.3-53276f9bfb.patch"
+    react-chessboard: "npm:4.7.3"
     react-dom: "npm:^18.2.0"
     react-joystick-component: "npm:^6.2.1"
     react-router-dom: "npm:^6.21.3"
@@ -5367,20 +5367,6 @@ __metadata:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
   checksum: 10c0/7d03291d60346a1e5f1a0d3fb57f5139c862f0e69a1302c45f0a8658b5e68136cc43ac32a3bfd15e168f233df9f1aa71d1bb360adac777720169f19f660dac84
-  languageName: node
-  linkType: hard
-
-"react-chessboard@patch:react-chessboard@npm%3A4.7.3#~/.yarn/patches/react-chessboard-npm-4.7.3-53276f9bfb.patch":
-  version: 4.7.3
-  resolution: "react-chessboard@patch:react-chessboard@npm%3A4.7.3#~/.yarn/patches/react-chessboard-npm-4.7.3-53276f9bfb.patch::version=4.7.3&hash=e53b26"
-  dependencies:
-    react-dnd: "npm:^16.0.1"
-    react-dnd-html5-backend: "npm:^16.0.1"
-    react-dnd-touch-backend: "npm:^16.0.1"
-  peerDependencies:
-    react: ">=16.14.0"
-    react-dom: ">=16.14.0"
-  checksum: 10c0/24434244d94c6ef836e617e9ed8c4834a4ba598a14695eacfceb606e527d6a10edd28cdf09f0fbab35ef02f0be3c85804fbe3f0a34e420b182563a09ccc412e1
   languageName: node
   linkType: hard
 

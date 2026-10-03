@@ -225,17 +225,19 @@ export const puzzles: Record<string, PuzzleComponents> = {
         ),
     },
     "Puzzle 8": {
-        fen: "8/8/8/1k6/7q/8/8/K7 b - c3 0 1",
+        fen: "Nk6/8/1KB5/8/8/8/8/8 w - - 0 1",
         moves: [
-            { from: "b4", to: "c3" },
-            { from: "b1", to: "a2" },
-            { from: "c3", to: "c2" },
+            { from: "a8", to: "c7" },
+            { from: "b8", to: "c8" },
+            { from: "c6", to: "b7" },
+            { from: "c8", to: "b8" },
+            { from: "c7", to: "a6" },
         ],
 
-        rating: 1000,
+        rating: 100,
         tooltip: "tooltip for puzzle 8",
         robotDefaultPositions: processFEINToDefaultPos(
-            "8/8/8/1k6/7q/8/8/K7 b - c3 0 1",
+            "Nk6/8/1KB5/8/8/8/8/8 w - - 0 1",
         ),
-    },
+    }
 };
