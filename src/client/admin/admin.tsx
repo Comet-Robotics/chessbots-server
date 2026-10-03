@@ -83,7 +83,7 @@ export function Admin() {
         dispatch({ type: "SET_ALL_ROBOTS", payload: robotState });
     };
 
-    const [robotPieces, setRobotPieces] = useState<[string, string]>(["",""]);
+    const [robotPieces, setRobotPieces] = useState<[string, string]>(["", ""]);
 
     const fetchRobotPieces = async () => {
         const { robotState } = await get("/get-robot-pieces");
@@ -423,9 +423,7 @@ export function SetRobotPiece(props: SetRobotPieceProps): JSX.Element {
                     onValueChange={(value: string) => {
                         setPiece(value);
                     }}
-                    placeholder={
-                        props.robotPiece
-                    }
+                    placeholder={props.robotPiece}
                 />
             </FormGroup>
             <Button
@@ -434,19 +432,31 @@ export function SetRobotPiece(props: SetRobotPieceProps): JSX.Element {
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => {
-                    if(piece !== props.robotPiece && ["w_king","w_queen","w_bishop","w_knight","w_rook","w_pawn","b_king","b_queen","b_bishop","b_knight","b_rook","b_pawn"].includes(piece))
+                    if (
+                        piece !== props.robotPiece &&
+                        [
+                            "w_king",
+                            "w_queen",
+                            "w_bishop",
+                            "w_knight",
+                            "w_rook",
+                            "w_pawn",
+                            "b_king",
+                            "b_queen",
+                            "b_bishop",
+                            "b_knight",
+                            "b_rook",
+                            "b_pawn",
+                        ].includes(piece)
+                    )
                         props.sendMessage(
-                            new SetRobotPieceMessage(
-                                props.robotId,
-                                piece
-                            ),
+                            new SetRobotPieceMessage(props.robotId, piece),
                         );
                 }}
             />
         </>
     );
 }
-
 
 interface SendRobotMoveProps {
     robotId: string;
@@ -474,9 +484,7 @@ export function SendRobotMove(props: SendRobotMoveProps): JSX.Element {
                     onValueChange={(value: string) => {
                         setPiece(value);
                     }}
-                    placeholder={
-                        props.robotPiece
-                    }
+                    placeholder={props.robotPiece}
                 />
             </FormGroup>
             <Button
@@ -485,12 +493,9 @@ export function SendRobotMove(props: SendRobotMoveProps): JSX.Element {
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => {
-                        props.sendMessage(
-                            new SetRobotPieceMessage(
-                                props.robotId,
-                                piece
-                            ),
-                        );
+                    props.sendMessage(
+                        new SetRobotPieceMessage(props.robotId, piece),
+                    );
                 }}
             />
         </>

@@ -122,9 +122,5 @@ export class RobotManager {
 }
 
 export const robotManager = new RobotManager(
-    USE_VIRTUAL_ROBOTS ?
-        Array.from(virtualRobots.values())
-    :   [
-            
-        ],
+    USE_VIRTUAL_ROBOTS ? Array.from(virtualRobots.values()) : [],
 );

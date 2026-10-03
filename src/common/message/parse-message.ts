@@ -1,6 +1,11 @@
 import type { Message } from "./message";
 import { MessageType, RegisterWebsocketMessage } from "./message";
-import { DriveRobotMessage, SetRobotPieceMessage, SetRobotPositionMessage, SetRobotVariableMessage } from "./robot-message";
+import {
+    DriveRobotMessage,
+    SetRobotPieceMessage,
+    SetRobotPositionMessage,
+    SetRobotVariableMessage,
+} from "./robot-message";
 import {
     PositionMessage,
     MoveMessage,
@@ -64,13 +69,10 @@ export function parseMessage(text: string): Message {
                 obj.id,
                 obj.xpos,
                 obj.ypos,
-                obj.deg
+                obj.deg,
             );
         case MessageType.SET_ROBOT_PIECE:
-            return new SetRobotPieceMessage(
-                obj.id,
-                obj.piece,
-            );
+            return new SetRobotPieceMessage(obj.id, obj.piece);
         case MessageType.SIMULATOR_UPDATE:
             return new SimulatorUpdateMessage(
                 obj.robotId,

@@ -9,7 +9,7 @@ import { SimulatorUpdateMessage } from "../common/message/simulator-message";
 import { socketManager } from "./api/managers";
 import { randomUUID } from "node:crypto";
 import { GridIndices } from "./robot/grid-indices";
-import { BotTunnel, } from "./api/bot-tunnel";
+import { BotTunnel } from "./api/bot-tunnel";
 
 const srcDir = path.resolve(__dirname, "../");
 

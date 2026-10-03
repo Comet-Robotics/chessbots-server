@@ -229,7 +229,7 @@ export const puzzles: Record<string, PuzzleComponents> = {
         moves: [
             { from: "b4", to: "c3" },
             { from: "b1", to: "a2" },
-            { from: "c3", to: "c2"}
+            { from: "c3", to: "c2" },
         ],
 
         rating: 1000,
