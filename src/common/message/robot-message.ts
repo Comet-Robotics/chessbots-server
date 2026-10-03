@@ -40,6 +40,52 @@ export class SetRobotVariableMessage extends RobotMessage {
 }
 
 /**
+ * A message to set the robots position
+ */
+export class SetRobotPositionMessage extends RobotMessage {
+    constructor(
+        id: string,
+        public readonly xpos: number,
+        public readonly ypos: number,
+        public readonly deg: number,
+    ) {
+        super(id);
+    }
+
+    protected type = MessageType.SET_ROBOT_POSITION;
+
+    protected toObj(): object {
+        return {
+            ...super.toObj(),
+            xpos: this.xpos,
+            ypos: this.ypos,
+            deg: this.deg,
+        };
+    }
+}
+
+/**
+ * A message to set a variable on the robot
+ */
+export class SetRobotPieceMessage extends RobotMessage {
+    constructor(
+        id: string,
+        public readonly piece: string,
+    ) {
+        super(id);
+    }
+
+    protected type = MessageType.SET_ROBOT_PIECE;
+
+    protected toObj(): object {
+        return {
+            ...super.toObj(),
+            piece: this.piece,
+        };
+    }
+}
+
+/**
  * A message to drive the robot based on left and right motor power
  * @returns an object with the id, left, right motor power
  */
@@ -59,6 +105,26 @@ export class DriveRobotMessage extends RobotMessage {
             ...super.toObj(),
             leftPower: this.leftPower,
             rightPower: this.rightPower,
+        };
+    }
+}
+
+export class MoveRobotMessage extends RobotMessage {
+    constructor(
+        id: string,
+        public readonly tileDistance: number,
+        public readonly deltaHeadingRadians: number,
+    ) {
+        super(id);
+    }
+
+    protected type = MessageType.MOVE_ROBOT;
+
+    protected toObj(): object {
+        return {
+            ...super.toObj(),
+            tileDistance: this.tileDistance,
+            deltaHeadingRadians: this.deltaHeadingRadians,
         };
     }
 }

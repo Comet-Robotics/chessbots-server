@@ -38,6 +38,14 @@ export class SocketManager {
     }
 
     /**
+     * get the total number of connected sockets
+     * @returns the number of sockets
+     */
+    public getSocketCount(): number {
+        return Object.keys(this.sockets).length;
+    }
+
+    /**
      * Sends a message to a socket with the specified id.
      * Returns true if the message was sent successfully, and false otherwise.
      */

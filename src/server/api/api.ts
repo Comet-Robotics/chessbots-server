@@ -15,6 +15,9 @@ import {
 } from "../../common/message/game-message";
 import {
     DriveRobotMessage,
+    MoveRobotMessage,
+    SetRobotPieceMessage,
+    SetRobotPositionMessage,
     SetRobotVariableMessage,
 } from "../../common/message/robot-message";
 
@@ -38,7 +41,7 @@ import { Side } from "../../common/game-types";
 import { START_ROBOTS_AT_DEFAULT, DO_SAVES } from "../utils/env";
 import { SaveManager } from "./save-manager";
 
-import { VirtualBotTunnel } from "../simulator";
+import { VirtualBotTunnel, VirtualRobot } from "../simulator";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "../utils/tcp-packet";
@@ -265,8 +268,14 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
             await gameManager?.handleMessage(message, req.cookies.id);
         } else if (message instanceof DriveRobotMessage) {
             await doDriveRobot(message);
+        } else if (message instanceof MoveRobotMessage) {
+            await doMoveRobot(message);
         } else if (message instanceof SetRobotVariableMessage) {
             await doSetRobotVariable(message);
+        } else if (message instanceof SetRobotPositionMessage) {
+            await doSetRobotPosition(message);
+        } else if (message instanceof SetRobotPieceMessage) {
+            await doSetRobotPiece(message);
         } else if (message instanceof JoinQueue) {
             console.log("So we got the join message");
             // this was initially !isPlayer, shouldn't it be isPlayer?
@@ -378,6 +387,34 @@ apiRouter.get("/game-state", (req, res) => {
     }
     const clientType = clientManager.getClientType(req.cookies.id);
     return res.send(gameManager.getGameState(clientType));
+});
+
+/**
+ * admin state endpoint
+ *
+ * gets important admin information
+ */
+apiRouter.get("/admin-state", (_, res) => {
+    //number of robots in play
+    const numberRobots = robotManager.getIndicesToIds().size;
+    //connected players
+    const players = socketManager.getSocketCount();
+
+    const board = gameManager?.chess.fen;
+    const turn =
+        board ?
+            board.split(" ")[1] === "w" ?
+                "white"
+            :   "black"
+        :   null;
+
+    return res.send({
+        status: gamePaused,
+        numberRobots: numberRobots,
+        players: players,
+        board: board,
+        turn: turn,
+    });
 });
 
 /**
@@ -779,6 +816,57 @@ apiRouter.get("/get-simulator-robot-state", (_, res) => {
 });
 
 /**
+ * get the current state of the real robots for the simulator
+ */
+apiRouter.get("/get-real-robot-state", (_, res) => {
+    const robotsEntries = Array.from(robotManager.idsToRobots);
+
+    // get all of the robots and their positions
+    const robotState = Object.fromEntries(
+        robotsEntries.map(([id, robot]) => {
+            const headingRadians = robot.headingRadians;
+            const position = new Position(robot.position.x, robot.position.y);
+
+            // const tunnel = robot.getTunnel();
+            // if (tunnel instanceof VirtualBotTunnel) {
+            //     position = tunnel.position;
+            //     headingRadians = tunnel.headingRadians;
+            // }
+            return [id, { position, headingRadians: headingRadians }];
+        }),
+    );
+
+    //send the robots
+    return res.send({
+        robotState,
+    });
+});
+
+/**
+ * get the current piece type for each robot
+ */
+apiRouter.get("/get-robot-pieces", (_, res) => {
+    const robotsEntries = Array.from(robotManager.idsToRobots);
+
+    // get all of the robots and their positions
+    const robotState = Object.fromEntries(
+        robotsEntries.map(([id, robot]) => {
+            // const tunnel = robot.getTunnel();
+            // if (tunnel instanceof VirtualBotTunnel) {
+            //     position = tunnel.position;
+            //     headingRadians = tunnel.headingRadians;
+            // }
+            return [id, robot.pieceType];
+        }),
+    );
+
+    //send the robots
+    return res.send({
+        robotState,
+    });
+});
+
+/**
  * Returns a list of available puzzles.
  */
 apiRouter.get("/get-puzzles", (_, res) => {
@@ -873,6 +961,51 @@ async function doDriveRobot(message: DriveRobotMessage): Promise<boolean> {
 }
 
 /**
+ * sends a move message through the tcp connection
+ * specifically drive tiles and turn radians
+ *
+ * @param message - the robot id and left/right motor powers
+ * @returns boolean if successful
+ */
+async function doMoveRobot(message: MoveRobotMessage): Promise<boolean> {
+    // check if robot is registered
+    if (!tcpServer) {
+        console.warn("Attempted to drive robot without TCP server.");
+        return false;
+    }
+    if (!tcpServer.getConnectedIds().includes(message.id)) {
+        console.warn(
+            "attempted manual move for non-existent robot ID " + message.id,
+        );
+        return false;
+    } else {
+        const tunnel = tcpServer.getTunnelFromId(message.id);
+
+        // check if robot is connected
+        if (!tunnel.connected) {
+            console.warn(
+                "attempted manual move for disconnected robot ID " + message.id,
+            );
+            return false;
+
+            // send the robot message
+        } else {
+            if (message.tileDistance)
+                await tunnel.send({
+                    type: PacketType.DRIVE_TILES,
+                    tileDistance: message.tileDistance,
+                });
+            else
+                await tunnel.send({
+                    type: PacketType.TURN_BY_ANGLE,
+                    deltaHeadingRadians: message.deltaHeadingRadians,
+                });
+        }
+    }
+    return true;
+}
+
+/**
  * set a variable on the robot
  * @param message - the robot id and variable information to change
  * @returns boolean completed successfully
@@ -906,5 +1039,40 @@ async function doSetRobotVariable(
             });
         }
     }
+    return true;
+}
+
+/**
+ * set position of the robot
+ * @param message - the robot id and position information to change
+ * @returns boolean completed successfully
+ */
+async function doSetRobotPosition(
+    message: SetRobotPositionMessage,
+): Promise<boolean> {
+    robotManager.updateRobot(
+        message.id,
+        new GridIndices(Math.floor(message.xpos), Math.floor(message.ypos)),
+    );
+    const selected = robotManager.getRobot(message.id);
+    if (selected instanceof VirtualRobot) {
+        selected.updateTunnelPosition(new Position(message.xpos, message.ypos));
+        selected.updateTunnelRotation((message.deg * Math.PI) / 180);
+    }
+    selected.position = new Position(message.xpos, message.ypos);
+    selected.headingRadians = (message.deg * Math.PI) / 180;
+
+    return true;
+}
+
+/**
+ * set position of the robot
+ * @param message - the robot id and position information to change
+ * @returns boolean completed successfully
+ */
+async function doSetRobotPiece(
+    message: SetRobotPieceMessage,
+): Promise<boolean> {
+    robotManager.getRobot(message.id).pieceType = message.piece;
     return true;
 }

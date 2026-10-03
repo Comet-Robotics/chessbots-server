@@ -49,9 +49,21 @@ export enum MessageType {
      */
     DRIVE_ROBOT = "drive-robot",
     /**
+     * A client-server message containing instructions for manually driving a robot.
+     */
+    MOVE_ROBOT = "move-robot",
+    /**
      * A client-server message used to update a variable (like rotations per square) on a robot.
      */
     SET_ROBOT_VARIABLE = "set-robot-variable",
+    /**
+     * A client-server message used to update the server's robot representation
+     */
+    SET_ROBOT_POSITION = "set-robot-position",
+     /**
+     * A client-server message used to update the robot's piece
+     */
+    SET_ROBOT_PIECE = "set-robot-piece",
     /**
      * A message sent from server to all clients for updating the robot simulator.
      */

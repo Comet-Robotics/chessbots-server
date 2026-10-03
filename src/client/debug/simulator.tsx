@@ -220,7 +220,8 @@ const openInEditor = async (frame: StackFrame) => {
 export function RobotGrid({
     robotState,
     children,
-}: PropsWithChildren<{ robotState: RobotState }>) {
+    onClick,
+}: PropsWithChildren<{ robotState: RobotState; onClick? }>) {
     return (
         <div
             style={{
@@ -257,6 +258,7 @@ export function RobotGrid({
                     robotId={robotId}
                     key={robotId}
                     onTopOfRobots={[]}
+                    onClick={onClick}
                 />
             ))}
             {children}
@@ -368,8 +370,9 @@ export const Robot = forwardRef<
         robotId: string;
         onTopOfRobots: string[];
         style?: CSSProperties;
+        onClick?: (id: string) => null;
     }
->(function Robot({ pos, robotId, onTopOfRobots, style }, ref) {
+>(function Robot({ pos, robotId, onTopOfRobots, style, onClick }, ref) {
     return (
         <div
             ref={ref}
@@ -379,6 +382,9 @@ export const Robot = forwardRef<
                 left: `${pos.position.x * tileSize - 0.25 * tileSize}px`,
                 bottom: `${pos.position.y * tileSize - 0.25 * tileSize}px`,
                 ...style,
+            }}
+            onClick={() => {
+                onClick ? onClick(robotId) : undefined;
             }}
         >
             <Tooltip content={`${robotId}: ${JSON.stringify(pos)}`}>

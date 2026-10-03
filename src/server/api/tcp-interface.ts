@@ -7,7 +7,6 @@ import {
     packetToJson,
     PacketType,
 } from "../utils/tcp-packet";
-import { EventEmitter } from "@posva/event-emitter";
 import { randomUUID } from "node:crypto";
 import { robotManager, type RobotManager } from "../robot/robot-manager";
 import {
@@ -16,7 +15,7 @@ import {
     PING_TIMEOUT,
     USE_VIRTUAL_ROBOTS,
 } from "../utils/env";
-import { BotTunnel, type RobotEventEmitter } from "./bot-tunnel";
+import { BotTunnel } from "./bot-tunnel";
 import { waitTime } from "../utils/time";
 import { disconnectedBots } from "./managers";
 import { pauseGame, unpauseGame } from "./pauseHandler";
@@ -27,7 +26,6 @@ import { pauseGame, unpauseGame } from "./pauseHandler";
 export class RealBotTunnel extends BotTunnel {
     address: string | undefined;
     id: string | undefined;
-    emitter: RobotEventEmitter;
     pingReceived: boolean;
 
     /**
@@ -41,7 +39,6 @@ export class RealBotTunnel extends BotTunnel {
         private onHandshake: (packetContent: string) => void,
     ) {
         super();
-        this.emitter = new EventEmitter();
         this.pingReceived = false;
     }
 

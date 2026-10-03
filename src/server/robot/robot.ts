@@ -67,7 +67,7 @@ export class Robot {
     /**
      * @param headingRadians - An absolute heading to turn to, in radians. 0 is up (from white to black). CW is positive.
      */
-    public async absoluteRotate(headingRadians: number): Promise<void> {
+    public async absoluteRotate(headingRadians: number): Promise<string> {
         const delta1: number = headingRadians - this.headingRadians;
         let delta2: number;
         if (this.headingRadians < headingRadians) {
@@ -84,7 +84,7 @@ export class Robot {
     /**
      * @param deltaHeadingRadians - A relative heading to turn by, in radians.
      */
-    public async relativeRotate(deltaHeadingRadians: number): Promise<void> {
+    public async relativeRotate(deltaHeadingRadians: number): Promise<string> {
         this.headingRadians = clampHeading(
             this.headingRadians + deltaHeadingRadians,
         );
@@ -95,7 +95,7 @@ export class Robot {
      * Turns and drives the robot to `this.position + deltaPosition`.
      * @param deltaPosition - The amount to offset the current position by.
      */
-    public async relativeMove(deltaPosition: Position): Promise<void> {
+    public async relativeMove(deltaPosition: Position): Promise<string> {
         // NOTE: the implementation of this is wrong. it doesn't work properly but it is not needed for now so just ignoring. if someone wants to use this in the future, we can fix it but we probably won't need it in the future anyway (or at least that is what Dylan says)
         const distance = Math.hypot(deltaPosition.x, deltaPosition.y);
         const angle = clampHeading(
@@ -119,14 +119,14 @@ export class Robot {
      *
      * @param deltaHeadingRadians - A relative heading to turn by, in radians. May be positive or negative.
      */
-    public async sendTurnPacket(deltaHeadingRadians: number): Promise<void> {
+    public async sendTurnPacket(deltaHeadingRadians: number): Promise<string> {
         console.log(
             `Sending turn packet to robot ${this.id} with delta heading ${deltaHeadingRadians}`,
         );
-        await this.tunnel!.send({
+        return this.tunnel!.send({
             type: PacketType.TURN_BY_ANGLE,
             deltaHeadingRadians: deltaHeadingRadians,
-        });
+        }); 
     }
 
     /**
@@ -135,11 +135,11 @@ export class Robot {
      *
      * @param tileDistance - The distance to drive forward or backwards by. 1 is defined as the length of a tile.
      */
-    public async sendDrivePacket(tileDistance: number): Promise<void> {
+    public async sendDrivePacket(tileDistance: number): Promise<string> {
         console.log(
             `Sending drive packet to robot ${this.id} with distance ${tileDistance}, where the piece type is ${this.pieceType}`,
         );
-        await this.tunnel!.send({
+        return this.tunnel!.send({
             type: PacketType.DRIVE_TILES,
             tileDistance,
         });

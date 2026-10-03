@@ -1,4 +1,4 @@
-import { type EventEmitter } from "@posva/event-emitter";
+import { EventEmitter } from "@posva/event-emitter";
 import {
     jsonToPacket,
     type Packet,
@@ -8,6 +8,7 @@ import {
 export abstract class BotTunnel {
     connected: boolean = false;
     dataBuffer: Buffer | undefined;
+    emitter: RobotEventEmitter = new EventEmitter();
 
     abstract isActive(): boolean;
     abstract getIdentifier(): string;
