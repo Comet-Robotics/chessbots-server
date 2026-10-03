@@ -60,7 +60,7 @@ export enum MessageType {
      * A client-server message used to update the server's robot representation
      */
     SET_ROBOT_POSITION = "set-robot-position",
-     /**
+    /**
      * A client-server message used to update the robot's piece
      */
     SET_ROBOT_PIECE = "set-robot-piece",

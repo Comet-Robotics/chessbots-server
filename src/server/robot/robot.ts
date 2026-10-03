@@ -126,7 +126,7 @@ export class Robot {
         return this.tunnel!.send({
             type: PacketType.TURN_BY_ANGLE,
             deltaHeadingRadians: deltaHeadingRadians,
-        }); 
+        });
     }
 
     /**
