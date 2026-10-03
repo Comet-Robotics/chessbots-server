@@ -77,6 +77,7 @@ import {
     pauseGame,
     setAllRobotsToDefaultPositions,
     unpauseGame,
+    gamePaused
 } from "./pauseHandler";
 import { type Square } from "chess.js";
 
