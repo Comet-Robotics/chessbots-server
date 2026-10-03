@@ -13,7 +13,7 @@ jobs:
                   cache: yarn
 
             - name: Install modules
-              run: yarn --frozen-lockfile
+              run: yarn --immutable
 
             - name: Run typedoc
               run: yarn run docs:build
