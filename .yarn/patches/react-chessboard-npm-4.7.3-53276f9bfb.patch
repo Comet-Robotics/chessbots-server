@@ -1,0 +1,135 @@
+diff --git a/dist/index.esm.js b/dist/index.esm.js
+index 3267047874ff62812505a97c7a96d3fae7a8e220..0992869f2bc525d938ad60815cd0630895a02bac 100644
+--- a/dist/index.esm.js
++++ b/dist/index.esm.js
+@@ -69,9 +69,9 @@ const WHITE_COLUMN_VALUES = {
+     c: 2,
+     d: 3,
+     e: 4,
+-    f: 5,
+-    g: 6,
+-    h: 7,
++    f: 0,
++    g: 1,
++    h: 2,
+ };
+ const BLACK_COLUMN_VALUES = {
+     a: 7,
+@@ -83,8 +83,8 @@ const BLACK_COLUMN_VALUES = {
+     g: 1,
+     h: 0,
+ };
+-const WHITE_ROWS = [7, 6, 5, 4, 3, 2, 1, 0];
+-const BLACK_ROWS = [0, 1, 2, 3, 4, 5, 6, 7];
++const WHITE_ROWS = [2, 1, 0];
++const BLACK_ROWS = [0, 1, 2];
+ 
+ // https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
+ // By en:User:Cburnett - Own work
+@@ -778,19 +778,19 @@ function Notation({ row, col }) {
+     const whiteColor = customLightSquareStyle.backgroundColor;
+     const blackColor = customDarkSquareStyle.backgroundColor;
+     const isRow = col === 0;
+-    const isColumn = row === 7;
++    const isColumn = row === 2;
+     const isBottomLeftSquare = isRow && isColumn;
+     function getRow() {
+-        return boardOrientation === "white" ? 8 - row : row + 1;
++        return boardOrientation === "white" ? 3 - row : row + 1;
+     }
+     function getColumn() {
+         return boardOrientation === "black" ? COLUMNS[7 - col] : COLUMNS[col];
+     }
+     function renderBottomLeft() {
+-        return (jsxs(Fragment, { children: [jsx("div", Object.assign({ style: Object.assign(Object.assign({ zIndex: 3, position: "absolute" }, { color: whiteColor }), numericStyle(boardWidth, customNotationStyle)) }, { children: getRow() })), jsx("div", Object.assign({ style: Object.assign(Object.assign({ zIndex: 3, position: "absolute" }, { color: whiteColor }), alphaStyle(boardWidth, customNotationStyle)) }, { children: getColumn() }))] }));
++        return (jsxs(Fragment, { children: [jsx("div", Object.assign({ style: Object.assign(Object.assign({ zIndex: 3, position: "absolute" }, { color: blackColor }), numericStyle(boardWidth, customNotationStyle)) }, { children: getRow() })), jsx("div", Object.assign({ style: Object.assign(Object.assign({ zIndex: 3, position: "absolute" }, { color: blackColor }), alphaStyle(boardWidth, customNotationStyle)) }, { children: getColumn() }))] }));
+     }
+     function renderLetters() {
+-        return (jsx("div", Object.assign({ style: Object.assign(Object.assign({ userSelect: "none", zIndex: 3, position: "absolute" }, { color: col % 2 !== 0 ? blackColor : whiteColor }), alphaStyle(boardWidth, customNotationStyle)) }, { children: getColumn() })));
++        return (jsx("div", Object.assign({ style: Object.assign(Object.assign({ userSelect: "none", zIndex: 3, position: "absolute" }, { color: col % 2 === 0 ? blackColor : whiteColor }), alphaStyle(boardWidth, customNotationStyle)) }, { children: getColumn() })));
+     }
+     function renderNumbers() {
+         return (jsx("div", Object.assign({ style: Object.assign(Object.assign({ userSelect: "none", zIndex: 3, position: "absolute" }, (boardOrientation === "black"
+@@ -4844,15 +4844,15 @@ function Squares() {
+         });
+         return result;
+     }, [premoves]);
+-    return (jsx("div", Object.assign({ "data-boardid": id }, { children: [...Array(8)].map((_, r) => {
++    return (jsx("div", Object.assign({ "data-boardid": id }, { children: [...Array(3)].map((_, r) => {
+             return (jsx("div", Object.assign({ style: {
+                     display: "flex",
+                     flexWrap: "nowrap",
+                     width: boardWidth,
+-                } }, { children: [...Array(8)].map((_, c) => {
++                } }, { children: [...Array(3)].map((_, c) => {
+                     const square = boardOrientation === "black"
+-                        ? (COLUMNS[7 - c] + (r + 1))
+-                        : (COLUMNS[c] + (8 - r));
++                        ? (COLUMNS[2 - c] + (r + 2))
++                        : (COLUMNS[c] + (4 - r));
+                     const squareColor = c % 2 === r % 2 ? "white" : "black";
+                     const squareHasPremove = premoves.find((p) => p.sourceSq === square || p.targetSq === square);
+                     const squareHasPremoveTarget = premovesHistory
+diff --git a/dist/index.js b/dist/index.js
+index a55a978e1a9de9b7eb3ec174177fc60186384931..fddcb4cc3fdd5ff2697ab748afc24bf4a58da8fb 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -30,7 +30,7 @@ function __rest(s, e) {
+     return t;
+ }
+ 
+-const COLUMNS = "abcdefgh".split("");
++const COLUMNS = "abc".split("");
+ const START_POSITION_OBJECT = {
+     a8: "bR",
+     b8: "bN",
+@@ -69,24 +69,14 @@ const WHITE_COLUMN_VALUES = {
+     a: 0,
+     b: 1,
+     c: 2,
+-    d: 3,
+-    e: 4,
+-    f: 5,
+-    g: 6,
+-    h: 7,
+ };
+ const BLACK_COLUMN_VALUES = {
+-    a: 7,
+-    b: 6,
+-    c: 5,
+-    d: 4,
+-    e: 3,
+-    f: 2,
+-    g: 1,
+-    h: 0,
++    a: 2,
++    b: 1,
++    c: 0,
+ };
+-const WHITE_ROWS = [7, 6, 5, 4, 3, 2, 1, 0];
+-const BLACK_ROWS = [0, 1, 2, 3, 4, 5, 6, 7];
++const WHITE_ROWS = [2, 1, 0];
++const BLACK_ROWS = [0, 1, 2];
+ 
+ // https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
+ // By en:User:Cburnett - Own work
+@@ -4846,15 +4836,15 @@ function Squares() {
+         });
+         return result;
+     }, [premoves]);
+-    return (jsxRuntime.jsx("div", Object.assign({ "data-boardid": id }, { children: [...Array(8)].map((_, r) => {
++    return (jsxRuntime.jsx("div", Object.assign({ "data-boardid": id }, { children: [...Array(3)].map((_, r) => {
+             return (jsxRuntime.jsx("div", Object.assign({ style: {
+                     display: "flex",
+                     flexWrap: "nowrap",
+                     width: boardWidth,
+-                } }, { children: [...Array(8)].map((_, c) => {
++                } }, { children: [...Array(3)].map((_, c) => {
+                     const square = boardOrientation === "black"
+-                        ? (COLUMNS[7 - c] + (r + 1))
+-                        : (COLUMNS[c] + (8 - r));
++                        ? (COLUMNS[2 - c] + (r + 1))
++                        : (COLUMNS[c] + (3 - r));
+                     const squareColor = c % 2 === r % 2 ? "white" : "black";
+                     const squareHasPremove = premoves.find((p) => p.sourceSq === square || p.targetSq === square);
+                     const squareHasPremoveTarget = premovesHistory
