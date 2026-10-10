@@ -33,12 +33,12 @@
             "piece_type": "w_knight"
         },
         "homeIndices": {
-            "x": 5,
-            "y": 5
+            "x": 0,
+            "y":9
         },
         "defaultIndices": {
-            "x": 5,
-            "y": 5
+            "x": 0,
+            "y": 9
         },
         "startHeadingRadians": 1.5707963268
     },
