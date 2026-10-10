@@ -1137,7 +1137,6 @@ function findNextCornerOrEnd(
     return endIndex;
 }
 
-
 /**
  * Determines the deadzone position to move to from a home position
  */
