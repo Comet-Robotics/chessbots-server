@@ -109,8 +109,6 @@ export function Game(): JSX.Element {
         "game-state",
         async () => {
             return get("/game-state").then((gameState) => {
-                // console.log("GAMESTATE ACQUIRED!");
-                // console.log(gameState);
                 setChess(
                     new ChessEngine(
                         gameState.type === "puzzle",

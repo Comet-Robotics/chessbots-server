@@ -114,11 +114,6 @@ function addToCollisions(collisions: string[], x: number, y: number) {
             return;
         }
         collisions.push(robotId);
-        // if(robotManager.getRobotAtIndices(square).id === "robot-2")
-        // {
-        //     console.log("aha! current indices is:")
-        //     console.log(square)
-        // }
     }
 }
 
@@ -1013,59 +1008,15 @@ export function moveAllRobotsFromBoardToHome(
         for (const robot of robotsInRow) {
             const currentPos = GridIndices.fromPosition(robot.position);
             if (isHexapawn) {
-                const allCommandsLol = returnToHomeHexapawn(
+                const allCommandsToHome = returnToHomeHexapawn(
                     currentPos,
                     robot.id,
                 );
-                commands.push(allCommandsLol[0]);
+                commands.push(allCommandsToHome[0]);
             } else {
-                const allCommandsLol = returnToHome(currentPos, robot.id);
-                commands.push(allCommandsLol);
+                const allCommandsToHome = returnToHome(currentPos, robot.id);
+                commands.push(allCommandsToHome);
             }
-
-            // // 1. Move from current position to deadzone
-            // const deadzonePos = moveFromBoardToDeadzone(currentPos);
-            // commands.push(
-            //     new AbsoluteMoveCommand(
-            //         robot.id,
-            //         new Position(deadzonePos.i + 0.5, deadzonePos.j + 0.5),
-            //     ),
-            // );
-
-            // // 2. Travel clockwise around deadzone to home
-            // const homeAdjacent = findDeadzonePositionAdjacentToHome(
-            //     robot.homeIndices,
-            // );
-            // if (!deadzonePos.equals(homeAdjacent)) {
-            //     const deadzoneCommands = generateDeadzonePath(
-            //         robot.id,
-            //         deadzonePos,
-            //         homeAdjacent,
-            //     );
-            //     commands.push(...deadzoneCommands);
-            // }
-
-            // // 3. Move from deadzone to home
-            // commands.push(
-            //     new AbsoluteMoveCommand(
-            //         robot.id,
-            //         new Position(
-            //             robot.homeIndices.i + 0.5,
-            //             robot.homeIndices.j + 0.5,
-            //         ),
-            //     ),
-            // );
-
-            // const homePos : Position = new Position(
-            //     robot.homeIndices.i + 0.5,
-            //     robot.homeIndices.j + 0.5,
-            // )
-
-            // if(robot.id === "robot-2")
-            // {
-            //     console.log("New position is:");
-            //     console.log(robot.position);
-            // }
 
             alreadyHomePieces.add(robot.id);
         }
@@ -1073,33 +1024,6 @@ export function moveAllRobotsFromBoardToHome(
 
     return new SequentialCommandGroup(commands);
 }
-
-/**
- * Finds the deadzone position adjacent to a home position
- */
-// function findDeadzonePositionAdjacentToHome(homePos: GridIndices): GridIndices {
-//     const checkDirections: [number, number][] = [
-//         [0, 1], // up
-//         [1, 0], // right
-//         [-1, 0], // left
-//         [0, -1], // down
-//     ];
-
-//     for (const direction of checkDirections) {
-//         try {
-//             const adjacent = homePos.addTuple(direction);
-//             if (arrayOfDeadzone.find((dz) => dz.equals(adjacent))) {
-//                 return adjacent;
-//             }
-//         } catch (e) {
-//             // adjacent is out of bounds, skip
-//             continue;
-//         }
-//     }
-
-//     // Fallback - shouldn't happen if home positions are correct
-//     return new GridIndices(1, 1);
-// }
 
 /**
  * Generates the path commands for a single robot to move from home to default position
@@ -1213,16 +1137,6 @@ function findNextCornerOrEnd(
     return endIndex;
 }
 
-/**
- * Determines the deadzone position to move to from a board position
- * All robots should go down to the bottom deadzone (j = 1) to avoid phasing through others..
- * NOT ANYMORE! SCREW THAT
- */
-// function moveFromBoardToDeadzone(boardPos: GridIndices): GridIndices {
-//     // All robots go down to the bottom deadzone (j = 1) to avoid collisions
-//     // return new GridIndices(boardPos.i, 1);
-//     return new GridIndices(1, boardPos.j);
-// }
 
 /**
  * Determines the deadzone position to move to from a home position

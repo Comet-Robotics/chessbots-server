@@ -143,14 +143,6 @@ export class RobotManager {
             if (robotId === r) indicesToIds.delete(i);
         }
         indicesToIds.set(indices.toString(), robotId);
-
-        if (robotId === "robot-2") {
-            console.log("Ok we are updating it...");
-            console.log("We shoudl be updating it to:");
-            console.log(indices);
-            console.log("If this gets robot-2, it should be set:");
-            console.log(indicesToIds.get(indices.toString()));
-        }
     }
 
     stopAllRobots() {

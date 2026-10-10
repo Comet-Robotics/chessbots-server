@@ -287,8 +287,6 @@ export const apiRouter = Router();
  * gets the current stored queue
  */
 apiRouter.get("/get-queue", (_, res) => {
-    console.log("Yeah we have names bro");
-    console.log(names);
     if (names) return res.send([...names.values()]);
     else return res.send([]);
 });

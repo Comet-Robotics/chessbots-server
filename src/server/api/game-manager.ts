@@ -449,12 +449,9 @@ export class PuzzleGameManager extends GameManager {
                 );
             }
 
-            // RIGHT HERE PROBABLY
-
             //send a finished message
             if (this.isGameEnded()) {
                 const gameEnd = this.getGameEndReason();
-                console.log("Game ended! time to raise hell!");
                 await this.cleanupGame(false);
                 if (gameEnd) {
                     this.socketManager.sendToAll(new GameEndMessage(gameEnd));
