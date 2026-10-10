@@ -3,7 +3,11 @@ import { GridIndices } from "./grid-indices";
 import { Robot } from "./robot";
 import config from "../api/bot-server-config.json";
 import { virtualRobots } from "../simulator";
-import { USE_VIRTUAL_ROBOTS } from "../utils/env";
+import {
+    USE_BANQUET_INDICES,
+    USE_HEXAPAWN_INDICES,
+    USE_VIRTUAL_ROBOTS,
+} from "../utils/env";
 
 /**
  * Stores robots. Provides utilities for finding them by position.
@@ -57,12 +61,39 @@ export class RobotManager {
         if (!robotConfig) {
             throw new Error("Failed to find robot config for id " + robotId);
         }
+
+        const iIndex =
+            USE_BANQUET_INDICES && robotConfig.banquetIndices !== undefined ?
+                robotConfig?.banquetIndices.x
+            : (
+                USE_HEXAPAWN_INDICES &&
+                robotConfig.hexapawnIndices !== undefined
+            ) ?
+                robotConfig?.hexapawnIndices.x
+            :   robotConfig?.homeIndices.x;
+        const jIndex =
+            USE_BANQUET_INDICES && robotConfig.banquetIndices !== undefined ?
+                robotConfig?.banquetIndices.y
+            : (
+                USE_HEXAPAWN_INDICES &&
+                robotConfig.hexapawnIndices !== undefined
+            ) ?
+                robotConfig?.hexapawnIndices.y
+            :   robotConfig?.homeIndices.y;
+
+        console.log("Hexapawn status " + USE_HEXAPAWN_INDICES);
+        if (robotConfig.banquetIndices !== undefined) {
+            console.log("Ok so we should be using them, specifically ti is:");
+            console.log(
+                robotConfig?.hexapawnIndices.x +
+                    " " +
+                    robotConfig?.hexapawnIndices.y,
+            );
+        }
+
         const robot = new Robot(
             robotId,
-            new GridIndices(
-                robotConfig?.homeIndices.x,
-                robotConfig?.homeIndices.y,
-            ),
+            new GridIndices(iIndex, jIndex),
             new GridIndices(
                 robotConfig?.defaultIndices.x,
                 robotConfig?.defaultIndices.y,
@@ -122,22 +153,5 @@ export class RobotManager {
 }
 
 export const robotManager = new RobotManager(
-    USE_VIRTUAL_ROBOTS ?
-        Array.from(virtualRobots.values())
-    :   [
-            new Robot(
-                "robot-12",
-                new GridIndices(0, 5),
-                new GridIndices(5, 3),
-                90 * DEGREE,
-                "w_pawn",
-            ),
-            new Robot(
-                "robot-4",
-                new GridIndices(5, 0),
-                new GridIndices(5, 2),
-                90 * DEGREE,
-                "w_queen",
-            ),
-        ],
+    USE_VIRTUAL_ROBOTS ? Array.from(virtualRobots.values()) : [],
 );

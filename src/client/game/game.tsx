@@ -101,16 +101,25 @@ export function Game(): JSX.Element {
     );
 
     // checks if a game is currently active
-    const { isPending, data, isError } = useEffectQuery(
+    const {
+        isPending,
+        data: gameState,
+        isError,
+    } = useEffectQuery(
         "game-state",
         async () => {
             return get("/game-state").then((gameState) => {
-                setChess(new ChessEngine(gameState.position));
+                setChess(
+                    new ChessEngine(
+                        gameState.type === "puzzle",
+                        gameState.position,
+                    ),
+                );
                 setPause(gameState.pause);
                 if (gameState.gameEndReason !== undefined) {
                     setGameInterruptedReason(gameState.gameEndReason);
                 }
-                return gameState.state;
+                return gameState;
             });
         },
         false,
@@ -126,10 +135,12 @@ export function Game(): JSX.Element {
         );
         // go to /home if error
     } else if (isError) {
+        console.log(isError);
+        console.log("error");
         return <Navigate to="/home" />;
     }
 
-    const side = data.side;
+    const side = gameState.side;
 
     // check if the game has ended or been interrupted
     let gameEndReason: GameEndReason | undefined = undefined;
@@ -178,6 +189,7 @@ export function Game(): JSX.Element {
             (move: Move): void => {
                 setChess(chess.copy(move));
                 sendMessage(new MoveMessage(move));
+                window.location.reload();
             }
         :   () => {}; //send a do-nothing function if game is paused
 
@@ -187,8 +199,8 @@ export function Game(): JSX.Element {
             <NavbarMenu
                 sendMessage={sendMessage}
                 side={side}
-                difficulty={data.difficulty}
-                aiDifficulty={data.aiDifficulty}
+                difficulty={gameState.difficulty}
+                aiDifficulty={gameState.aiDifficulty}
                 setRotation={setRotation}
             />
 

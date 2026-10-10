@@ -29,16 +29,13 @@ import {
 } from "./managers";
 import {
     ComputerGameManager,
+    HexapawnGameManager,
     HumanGameManager,
     PuzzleGameManager,
 } from "./game-manager";
 import { ChessEngine } from "../../common/chess-engine";
 import { Side } from "../../common/game-types";
-import {
-    USE_VIRTUAL_ROBOTS,
-    START_ROBOTS_AT_DEFAULT,
-    DO_SAVES,
-} from "../utils/env";
+import { START_ROBOTS_AT_DEFAULT, DO_SAVES } from "../utils/env";
 import { SaveManager } from "./save-manager";
 
 import { VirtualBotTunnel } from "../simulator";
@@ -58,11 +55,15 @@ import {
     DriveQuadraticSplineCommand,
     DriveCubicSplineCommand,
     SpinRadiansCommand,
+    DriveCommand,
+    CenterCommand,
+    RelativeRotateCommand,
 } from "../command/move-command";
 import { GridIndices } from "../robot/grid-indices";
 import {
     moveAllRobotsHomeToDefaultOptimized,
     moveAllRobotsToDefaultPositions,
+    moveAllRobotsToDefaultPositionsHexapawn,
 } from "../robot/path-materializer";
 import type { PuzzleComponents } from "./puzzles";
 import { puzzles } from "./puzzles";
@@ -70,11 +71,11 @@ import { tcpServer } from "./tcp-interface";
 import { robotManager } from "../robot/robot-manager";
 import { executor } from "../command/executor";
 import {
-    gamePaused,
     pauseGame,
     setAllRobotsToDefaultPositions,
     unpauseGame,
 } from "./pauseHandler";
+import { type Square } from "chess.js";
 
 /**
  * Helper function to move all robots from their home positions to their default positions
@@ -99,6 +100,23 @@ async function setupDefaultRobotPositions(
         } else {
             setAllRobotsToDefaultPositions();
         }
+    }
+}
+
+async function setupDefaultRobotPositionsHexapawn(
+    isMoving: boolean = true,
+    defaultPositionsMap?: Map<string, GridIndices>,
+): Promise<void> {
+    if (defaultPositionsMap) {
+        if (isMoving) {
+            const command =
+                moveAllRobotsToDefaultPositionsHexapawn(defaultPositionsMap);
+            await executor.execute(command);
+        } else {
+            setAllRobotsToDefaultPositions(defaultPositionsMap);
+        }
+    } else {
+        throw new Error(`We cooked bro`);
     }
 }
 
@@ -297,7 +315,7 @@ apiRouter.get("/client-information", async (req, res) => {
         // if the game was an ai game, create a computer game manager with the ai difficulty
         if (oldSave.aiDifficulty !== -1) {
             const cgm = new ComputerGameManager(
-                new ChessEngine(oldSave.game),
+                new ChessEngine(false, oldSave.game),
                 socketManager,
                 oldSave.host === req.cookies.id ?
                     oldSave.hostWhite ?
@@ -314,7 +332,7 @@ apiRouter.get("/client-information", async (req, res) => {
             // create a new human game manger with appropriate clients
             setGameManager(
                 new HumanGameManager(
-                    new ChessEngine(oldSave.game),
+                    new ChessEngine(false, oldSave.game),
                     socketManager,
                     oldSave.hostWhite ? Side.WHITE : Side.BLACK,
                     clientManager,
@@ -357,10 +375,7 @@ apiRouter.get("/game-state", (req, res) => {
         return res.status(400).send({ message: "No game is currently active" });
     }
     const clientType = clientManager.getClientType(req.cookies.id);
-    return res.send({
-        state: gameManager.getGameState(clientType),
-        pause: gamePaused,
-    });
+    return res.send(gameManager.getGameState(clientType));
 });
 
 /**
@@ -432,6 +447,64 @@ apiRouter.post("/start-human-game", async (req, res) => {
     return res.send({ message: "success" });
 });
 
+/**
+ * start hexapawn game endpoint
+ *
+ * creates a new human game engine based on the request's side
+ *
+ * returns a success message
+ */
+apiRouter.post("/start-hexapawn-game", async (req, res) => {
+    canReloadQueue = true;
+    const side = req.query.side as Side;
+
+    // Convert puzzle.robotDefaultPositions from Record<string, string> to Map<string, GridIndices>
+    const defaultPositionsMap = new Map<string, GridIndices>();
+    for (const [robotId, startSquare] of Object.entries({
+        "robot-1": "a2",
+        "robot-2": "b2",
+        "robot-3": "c2",
+        "robot-4": "a4",
+        "robot-5": "b4",
+        "robot-6": "c4",
+    })) {
+        const robot = robotManager.getRobot(robotId);
+        if (robot) {
+            // Convert square string to GridIndices using squareToGrid
+            const gridIndices = GridIndices.squareToGrid(startSquare as Square);
+            defaultPositionsMap.set(robotId, gridIndices);
+            console.log(
+                `Robot ${robotId} will move to square ${startSquare} (${gridIndices.toString()})`,
+            );
+        } else {
+            return res.status(400).send({
+                message:
+                    "Missing robot " +
+                    robotId +
+                    " which is required to start the puzzle, because it is included in the puzzle's robotDefaultPositions map.",
+            });
+        }
+    }
+
+    // Execute the movement command with the converted positions
+    await setupDefaultRobotPositionsHexapawn(
+        !START_ROBOTS_AT_DEFAULT,
+        defaultPositionsMap,
+    );
+
+    // create a new human game manager
+    setGameManager(
+        new HexapawnGameManager(
+            new ChessEngine(),
+            socketManager,
+            side,
+            clientManager,
+            false,
+        ),
+    );
+    return res.send({ message: "success" });
+});
+
 apiRouter.post("/start-puzzle-game", async (req, res) => {
     //get puzzle components
     const puzzle = JSON.parse(req.query.puzzle as string) as PuzzleComponents;
@@ -479,7 +552,7 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
     }
     setGameManager(
         new PuzzleGameManager(
-            new ChessEngine(),
+            new ChessEngine(true),
             socketManager,
             fen,
             "",
@@ -674,9 +747,11 @@ apiRouter.post("/do-big", async (req, res) => {
  * get the current state of the virtual robots for the simulator
  */
 apiRouter.get("/get-simulator-robot-state", (_, res) => {
+    /*
     if (!USE_VIRTUAL_ROBOTS) {
         return res.status(400).send({ message: "Simulator is not enabled." });
     }
+        */
     const robotsEntries = Array.from(robotManager.idsToRobots);
 
     // get all of the robots and their positions
@@ -728,6 +803,34 @@ apiRouter.get("/unpause-game", async (_, res) => {
     return res.send(unpausePacket);
 });
 
+apiRouter.post("/force-move", async (req, res) => {
+    const command = new DriveCommand(
+        req.query.robotId as string,
+        Number(req.query.dist as string),
+    );
+    return executor.execute(command).then(() => {
+        return res.send({ message: "success" });
+    });
+});
+
+apiRouter.post("/force-turn", async (req, res) => {
+    console.log(req.query);
+    const command = new RelativeRotateCommand(
+        req.query.robotId as string,
+        Number(req.query.rad as string),
+    );
+
+    return executor.execute(command).then(() => {
+        return res.send({ message: "success" });
+    });
+});
+
+apiRouter.post("/force-center", async (req, res) => {
+    console.log(req.query);
+    const command = new CenterCommand(req.query.robotId as string);
+    executor.execute(command);
+    return res.send({ message: "success" });
+});
 /**
  * sends a drive message through the tcp connection
  *

@@ -8,6 +8,8 @@ export const DO_SAVES = process.env.ENABLE_SAVES === "true";
 export const USE_VIRTUAL_ROBOTS = process.env.VIRTUAL_ROBOTS === "true";
 export const START_ROBOTS_AT_DEFAULT =
     process.env.START_ROBOTS_AT_DEFAULT === "true";
+export const USE_BANQUET_INDICES = process.env.USE_BANQUET_INDICES === "true";
+export const USE_HEXAPAWN_INDICES = process.env.USE_HEXAPAWN_INDICES === "true";
 export const MOVE_TIMEOUT: number =
     process.env.MOVE_TIMEOUT ? parseInt(process.env.MOVE_TIMEOUT) : 1000;
 export const MAX_RETRIES: number =

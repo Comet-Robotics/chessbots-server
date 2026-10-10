@@ -224,4 +224,20 @@ export const puzzles: Record<string, PuzzleComponents> = {
             "8/8/3k4/8/8/3K4/8/3R4 w - - 0 1",
         ),
     },
+    "Puzzle 8": {
+        fen: "Nk6/8/1KB5/8/8/8/8/8 w - - 0 1",
+        moves: [
+            { from: "a8", to: "c7" },
+            { from: "b8", to: "c8" },
+            { from: "c6", to: "b7" },
+            { from: "c8", to: "b8" },
+            { from: "c7", to: "a6" },
+        ],
+
+        rating: 100,
+        tooltip: "tooltip for puzzle 8",
+        robotDefaultPositions: processFEINToDefaultPos(
+            "Nk6/8/1KB5/8/8/8/8/8 w - - 0 1",
+        ),
+    },
 };

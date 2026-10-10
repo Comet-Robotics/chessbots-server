@@ -122,7 +122,7 @@ export class RealBotTunnel extends BotTunnel {
                 await this.send(this.makeHello(packet.macAddress));
                 this.connected = true;
                 //get to start running pings.
-                this.runPings();
+                //this.runPings();
                 break;
             }
             // respond to pings
@@ -148,6 +148,10 @@ export class RealBotTunnel extends BotTunnel {
                     packetId,
                 });
                 break;
+            }
+
+            case PacketType.QUERY_RESPONSE: {
+                console.log(packet);
             }
             //checks if we are receiving from the bot a response for a ping the server sent.
             //if we are, then we can set pingReceived to true.
@@ -235,6 +239,10 @@ export class RealBotTunnel extends BotTunnel {
         console.error(JSON.stringify(ret));
 
         return ret;
+    }
+
+    sendCenter() {
+        this.send({ type: PacketType.CENTER_SEND });
     }
 }
 

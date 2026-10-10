@@ -40,6 +40,7 @@ export function Sidebar(props: sidebarProps): JSX.Element {
         async () => {
             const newQueue = await get("/get-queue");
             setQueue(newQueue);
+            return newQueue;
         },
         true,
     );

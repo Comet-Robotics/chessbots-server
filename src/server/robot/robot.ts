@@ -158,6 +158,16 @@ export class Robot {
         });
     }
 
+    /**
+     * Send a packet to the robot requesting a center. Returns a promise that finishes when the
+     * robot finishes the action.
+     */
+    public async sendCenterPacket(): Promise<void> {
+        await this.tunnel!.send({
+            type: PacketType.CENTER_SEND,
+        });
+    }
+
     public async sendDriveCubicPacket(
         startPosition: { x: number; y: number },
         endPosition: { x: number; y: number },

@@ -27,6 +27,7 @@ enum SetupType {
     COMPUTER = "computer",
     HUMAN = "human",
     PUZZLE = "puzzle",
+    HEXAPAWN = "hexapawn",
 }
 
 /**
@@ -60,13 +61,15 @@ export function Setup(): JSX.Element {
                 :   null}
                 {(
                     setupType === SetupType.COMPUTER ||
-                    setupType === SetupType.HUMAN
+                    setupType === SetupType.HUMAN ||
+                    setupType === SetupType.HEXAPAWN
                 ) ?
                     <SetupGame
                         gameType={
-                            setupType === SetupType.COMPUTER ?
-                                GameType.COMPUTER
-                            :   GameType.HUMAN
+                            setupType === SetupType.COMPUTER ? GameType.COMPUTER
+                            : setupType === SetupType.HUMAN ?
+                                GameType.HUMAN
+                            :   GameType.HEXAPAWN
                         }
                     />
                 :   null}
@@ -130,6 +133,14 @@ function SetupMain(props: SetupMainProps) {
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.PUZZLE)}
+                className={buttonColor()}
+            />
+            <Button
+                large
+                text="Hexapawn"
+                rightIcon="arrow-right"
+                intent="primary"
+                onClick={() => props.onPageChange(SetupType.HEXAPAWN)}
                 className={buttonColor()}
             />
             <ThemeButtons />
