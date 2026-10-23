@@ -38,7 +38,7 @@ import {
 } from "./game-manager";
 import { ChessEngine } from "../../common/chess-engine";
 import { Side } from "../../common/game-types";
-import { START_ROBOTS_AT_DEFAULT, DO_SAVES } from "../utils/env";
+import { START_ROBOTS_AT_DEFAULT, DO_SAVES, CHESSBOTS_PASSWORD } from "../utils/env";
 import { SaveManager } from "./save-manager";
 
 import { VirtualBotTunnel, VirtualRobot } from "../simulator";
@@ -81,48 +81,6 @@ import {
 } from "./pauseHandler";
 import { type Square } from "chess.js";
 
-/**
- * Helper function to move all robots from their home positions to their default positions
- * for regular chess games. IsMoving basically controls whether or not to actually move the robots to the right position.
- */
-async function setupDefaultRobotPositions(
-    isMoving: boolean = true,
-    defaultPositionsMap?: Map<string, GridIndices>,
-): Promise<void> {
-    if (defaultPositionsMap) {
-        if (isMoving) {
-            const command =
-                moveAllRobotsToDefaultPositions(defaultPositionsMap);
-            await executor.execute(command);
-        } else {
-            setAllRobotsToDefaultPositions(defaultPositionsMap);
-        }
-    } else {
-        if (isMoving) {
-            const command = moveAllRobotsHomeToDefaultOptimized();
-            await executor.execute(command);
-        } else {
-            setAllRobotsToDefaultPositions();
-        }
-    }
-}
-
-async function setupDefaultRobotPositionsHexapawn(
-    isMoving: boolean = true,
-    defaultPositionsMap?: Map<string, GridIndices>,
-): Promise<void> {
-    if (defaultPositionsMap) {
-        if (isMoving) {
-            const command =
-                moveAllRobotsToDefaultPositionsHexapawn(defaultPositionsMap);
-            await executor.execute(command);
-        } else {
-            setAllRobotsToDefaultPositions(defaultPositionsMap);
-        }
-    } else {
-        throw new Error(`We cooked bro`);
-    }
-}
 
 const queue = new PriorityQueue<string>();
 //hashmap mapping cookie ids to user names
@@ -894,6 +852,12 @@ apiRouter.get("/unpause-game", async (_, res) => {
     return res.send(unpausePacket);
 });
 
+// when someone tries to sign in as an admin
+apiRouter.post("/login-admin", async (req, res) => {
+    const inputPassword = req.query["password"];
+    return res.send({success: inputPassword === CHESSBOTS_PASSWORD})
+});
+
 apiRouter.post("/force-move", async (req, res) => {
     const command = new DriveCommand(
         req.query.robotId as string,
@@ -1076,4 +1040,47 @@ async function doSetRobotPiece(
 ): Promise<boolean> {
     robotManager.getRobot(message.id).pieceType = message.piece;
     return true;
+}
+
+/**
+ * Helper function to move all robots from their home positions to their default positions
+ * for regular chess games. IsMoving basically controls whether or not to actually move the robots to the right position.
+ */
+async function setupDefaultRobotPositions(
+    isMoving: boolean = true,
+    defaultPositionsMap?: Map<string, GridIndices>,
+): Promise<void> {
+    if (defaultPositionsMap) {
+        if (isMoving) {
+            const command =
+                moveAllRobotsToDefaultPositions(defaultPositionsMap);
+            await executor.execute(command);
+        } else {
+            setAllRobotsToDefaultPositions(defaultPositionsMap);
+        }
+    } else {
+        if (isMoving) {
+            const command = moveAllRobotsHomeToDefaultOptimized();
+            await executor.execute(command);
+        } else {
+            setAllRobotsToDefaultPositions();
+        }
+    }
+}
+
+async function setupDefaultRobotPositionsHexapawn(
+    isMoving: boolean = true,
+    defaultPositionsMap?: Map<string, GridIndices>,
+): Promise<void> {
+    if (defaultPositionsMap) {
+        if (isMoving) {
+            const command =
+                moveAllRobotsToDefaultPositionsHexapawn(defaultPositionsMap);
+            await executor.execute(command);
+        } else {
+            setAllRobotsToDefaultPositions(defaultPositionsMap);
+        }
+    } else {
+        throw new Error(`We cooked bro`);
+    }
 }

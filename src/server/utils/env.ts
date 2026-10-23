@@ -15,6 +15,8 @@ export const MOVE_TIMEOUT: number =
 export const MAX_RETRIES: number =
     process.env.MAX_RETRIES ? parseInt(process.env.MAX_RETRIES) : 2;
 
-export const PING_INTERVAL = 1000;
-export const PING_TIMEOUT = 100;
-export const MAX_PING_FAIL = 3;
+export const CHESSBOTS_PASSWORD = process.env.CHESSBOTS_PASSWORD
+
+export const PING_INTERVAL = process.env.PING_INTERVAL ? parseInt(process.env.PING_INTERVAL) : 1000;
+export const PING_TIMEOUT = process.env.PING_TIMEOUT ? parseInt(process.env.PING_TIMEOUT) : 100;
+export const MAX_PING_FAIL = process.env.MAX_PING_FAIL ? parseInt(process.env.MAX_PING_FAIL) : 3;
