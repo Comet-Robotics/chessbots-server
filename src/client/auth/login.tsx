@@ -20,7 +20,7 @@ const Login = () => {
         if(result["success"])
         {
             // if not successful, alert failed, otherwise do that auth login and navigate to home
-            auth.login({ name: "admin" });
+            auth.login({ name: result["username"] });
             
             navigate("/home", { replace: true });
         }

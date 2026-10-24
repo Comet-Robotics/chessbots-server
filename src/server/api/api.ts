@@ -89,6 +89,17 @@ const names = new Map<string, string>();
 //let the queue be moved once per game
 let canReloadQueue = true;
 
+async function hashPassword(password): Promise<string> {
+    const data = new TextEncoder().encode(password);
+    const hash = await crypto.subtle.digest("SHA-256", data);
+
+    return Array.from(new Uint8Array(hash))
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
+}
+
+const hashedPassword = await hashPassword(CHESSBOTS_PASSWORD);
+
 /**
  * An endpoint used to establish a websocket connection with the server.
  *
@@ -855,8 +866,22 @@ apiRouter.get("/unpause-game", async (_, res) => {
 // when someone tries to sign in as an admin
 apiRouter.post("/login-admin", async (req, res) => {
     const inputPassword = req.query["password"];
+    
+    if(inputPassword === CHESSBOTS_PASSWORD)
+    {
+        res.send({success: true, username: hashedPassword})
+    }
+    else
+    {
+        return res.send({success: false});
+    }
     return res.send({success: inputPassword === CHESSBOTS_PASSWORD})
 });
+
+apiRouter.post("/check-admin", async (req, res) => {
+    const sentUser = req.query["username"]
+    return res.send({success: sentUser === hashedPassword})
+})
 
 apiRouter.post("/force-move", async (req, res) => {
     const command = new DriveCommand(

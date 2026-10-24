@@ -27,7 +27,7 @@ export const router = createBrowserRouter([
             {
                 path: "/lobby",
                 element: <Lobby />,
-            },
+            },  
             {
                 path: "/game",
                 element: <Game />,
