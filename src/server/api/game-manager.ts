@@ -274,7 +274,15 @@ export class ComputerGameManager extends GameManager {
     private async executeRobotMovement(move: Move): Promise<void> {
         const command = materializePath(move);
         this.chess.makeMove(move);
-        await executor.execute(command);
+        await executor.execute(command).catch((reason) => {
+            setPaused(true);
+            console.log(reason);
+            this.chess.undo();
+            this.socketManager.sendToAll(
+                new GameHoldMessage(GameHoldReason.GAME_PAUSED),
+            );
+            return;
+        });
     }
 
     /**

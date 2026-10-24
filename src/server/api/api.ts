@@ -440,7 +440,7 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
     const difficulty = puzzle.rating;
 
     console.log(
-        `Fein is ${fen}, moves are ${moves}, difficulty is ${difficulty}`,
+        `Fen is ${fen}, moves are ${moves}, difficulty is ${difficulty}`,
     );
 
     if (puzzle.robotDefaultPositions) {
@@ -449,15 +449,15 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
         for (const [robotId, startSquare] of Object.entries(
             puzzle.robotDefaultPositions,
         )) {
-            const robot = robotManager.getRobot(robotId);
-            if (robot) {
+            try {
+                robotManager.getRobot(robotId);
                 // Convert square string to GridIndices using squareToGrid
                 const gridIndices = GridIndices.squareToGrid(startSquare);
                 defaultPositionsMap.set(robotId, gridIndices);
                 console.log(
                     `Robot ${robotId} will move to square ${startSquare} (${gridIndices.toString()})`,
                 );
-            } else {
+            } catch {
                 return res.status(400).send({
                     message:
                         "Missing robot " +
