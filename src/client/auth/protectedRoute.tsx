@@ -15,7 +15,7 @@ export const ProtectedRoute = () => {
         
         const serverSideCheck = async() => {            
             const serverResponse = await post("/check-admin", {
-                "username": user?.name ?? ""
+                "username": user ?? ""
             });
 
             console.log(serverResponse);

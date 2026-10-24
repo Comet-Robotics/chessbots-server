@@ -38,7 +38,7 @@ import {
 } from "./game-manager";
 import { ChessEngine } from "../../common/chess-engine";
 import { Side } from "../../common/game-types";
-import { START_ROBOTS_AT_DEFAULT, DO_SAVES, CHESSBOTS_PASSWORD, REQUIRE_LOGIN } from "../utils/env";
+import { START_ROBOTS_AT_DEFAULT, DO_SAVES, CHESSBOTS_PASSWORD } from "../utils/env";
 import { SaveManager } from "./save-manager";
 
 import { VirtualBotTunnel, VirtualRobot } from "../simulator";
@@ -100,7 +100,7 @@ async function hashPassword(password) {
         .join("");
 }
 
-hashPassword(REQUIRE_LOGIN);
+hashPassword(CHESSBOTS_PASSWORD);
 
 
 /**
@@ -879,6 +879,8 @@ apiRouter.post("/login-admin", async (req, res) => {
 
 apiRouter.post("/check-admin", async (req, res) => {
     const sentUser = req.query["username"]
+    console.log(hashedPassword);
+    console.log(sentUser);
     return res.send({success: sentUser === hashedPassword})
 })
 
