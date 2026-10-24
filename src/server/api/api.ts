@@ -38,7 +38,7 @@ import {
 } from "./game-manager";
 import { ChessEngine } from "../../common/chess-engine";
 import { Side } from "../../common/game-types";
-import { START_ROBOTS_AT_DEFAULT, DO_SAVES, CHESSBOTS_PASSWORD } from "../utils/env";
+import { START_ROBOTS_AT_DEFAULT, DO_SAVES, CHESSBOTS_PASSWORD, REQUIRE_LOGIN } from "../utils/env";
 import { SaveManager } from "./save-manager";
 
 import { VirtualBotTunnel, VirtualRobot } from "../simulator";
@@ -89,16 +89,19 @@ const names = new Map<string, string>();
 //let the queue be moved once per game
 let canReloadQueue = true;
 
-async function hashPassword(password): Promise<string> {
+let hashedPassword = "skibidi";
+
+async function hashPassword(password) {
     const data = new TextEncoder().encode(password);
     const hash = await crypto.subtle.digest("SHA-256", data);
 
-    return Array.from(new Uint8Array(hash))
+    hashedPassword = Array.from(new Uint8Array(hash))
         .map(b => b.toString(16).padStart(2, "0"))
         .join("");
 }
 
-const hashedPassword = await hashPassword(CHESSBOTS_PASSWORD);
+hashPassword(REQUIRE_LOGIN);
+
 
 /**
  * An endpoint used to establish a websocket connection with the server.
@@ -869,13 +872,9 @@ apiRouter.post("/login-admin", async (req, res) => {
     
     if(inputPassword === CHESSBOTS_PASSWORD)
     {
-        res.send({success: true, username: hashedPassword})
+        return res.send({success: true, username: hashedPassword})
     }
-    else
-    {
-        return res.send({success: false});
-    }
-    return res.send({success: inputPassword === CHESSBOTS_PASSWORD})
+    return res.send({success: false});
 });
 
 apiRouter.post("/check-admin", async (req, res) => {

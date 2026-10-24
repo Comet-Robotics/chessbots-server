@@ -20,5 +20,3 @@ export const CHESSBOTS_PASSWORD = process.env.CHESSBOTS_PASSWORD
 export const PING_INTERVAL = process.env.PING_INTERVAL ? parseInt(process.env.PING_INTERVAL) : 1000;
 export const PING_TIMEOUT = process.env.PING_TIMEOUT ? parseInt(process.env.PING_TIMEOUT) : 100;
 export const MAX_PING_FAIL = process.env.MAX_PING_FAIL ? parseInt(process.env.MAX_PING_FAIL) : 3;
-
-export const REQUIRE_LOGIN = process.env.REQUIRE_LOGIN === "true"

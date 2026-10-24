@@ -10,10 +10,15 @@ export const ProtectedRoute = () => {
 
     // ding dong ditch!
     useEffect(() => {
+        SetCheckStatus(true);
+        console.log("running again!");
+        
         const serverSideCheck = async() => {            
             const serverResponse = await post("/check-admin", {
-                "username": user ?? ""
+                "username": user?.name ?? ""
             });
+
+            console.log(serverResponse);
 
             SetCheckStatus(false);
             SetAuthenticationSuccessful(serverResponse["success"]);
