@@ -29,7 +29,7 @@ function almostEqual(v1: number, v2: number, epsilon: number = 0.01): boolean {
 export function DriveRobot(props: DriveRobotProps) {
     // state variable for handling the power levels of the robot
     const [power, setPower] = useState({ left: 0, right: 0 });
-    const [prevPad, setPrevPad] = useState({ left: 0, right: 0 });
+    const [prevPad  , setPrevPad] = useState({ left: 0, right: 0 });
     const [prev, setPrev] = useState({ left: 0, right: 0 });
 
     // useEffect hook to send the power levels to the robot if there is a change in the power levels

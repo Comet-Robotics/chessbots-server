@@ -1,3 +1,5 @@
+// rewrite with zod
+
 import type { Static } from "runtypes";
 import {
     Number as NumberType,
