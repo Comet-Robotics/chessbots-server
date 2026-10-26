@@ -32,8 +32,6 @@ import {
     TimelineEvent,
     ReorderableTimelineEvent,
 } from "./timeline";
-import type { Midpoint } from "../../common/spline";
-import { SplinePointType } from "../../common/spline";
 import type { MotionValue } from "motion/react";
 import {
     motion,

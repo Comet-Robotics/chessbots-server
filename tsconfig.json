@@ -27,7 +27,6 @@
     },
     "include": ["src"],
     "files": ["src/server/js-chess-engine.d.ts"],
-    "references": [{ "path": "./tsconfig.node.json" }],
     "typedocOptions": {
         "entryPoints": ["src/"],
         "entryPointStrategy": "expand",
