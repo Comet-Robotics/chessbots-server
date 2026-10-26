@@ -1,7 +1,6 @@
 import { z } from "zod";
 
-// ─── Enums ───────────────────────────────────────────────────────────────────
-
+export type GameFinishedReason = z.infer<typeof gameFinishedReason>;
 const gameFinishedReason = z.enum([
     "white-checkmated",
     "black-checkmated",
@@ -11,16 +10,16 @@ const gameFinishedReason = z.enum([
     "fifty-moves",
     "puzzle-solved",
 ]);
-export type GameFinishedReason = z.infer<typeof gameFinishedReason>;
 
+export type GameInterruptedReason = z.infer<typeof gameInterruptedReason>;
 const gameInterruptedReason = z.enum([
     "white-resigned",
     "black-resigned",
     "draw-accepted",
     "aborted",
 ]);
-export type GameInterruptedReason = z.infer<typeof gameInterruptedReason>;
 
+export type GameHoldReason = z.infer<typeof gameHoldReason>;
 const gameHoldReason = z.enum([
     "draw-offered",
     "draw-confirmation",
@@ -28,7 +27,6 @@ const gameHoldReason = z.enum([
     "game-paused",
     "game-unpaused",
 ]);
-export type GameHoldReason = z.infer<typeof gameHoldReason>;
 
 const gameEndReason = z.union([gameFinishedReason, gameInterruptedReason]);
 export type GameEndReason = z.infer<typeof gameEndReason>;
