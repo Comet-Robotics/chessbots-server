@@ -4,9 +4,9 @@ import type {
     SendMessage,
     MessageHandler,
 } from "../common/message/message";
-import { RegisterWebsocketMessage } from "../common/message/message";
+import { createRegisterWebsocketMessage } from "../common/message/message";
 import { useId, useMemo } from "react";
-import { parseMessage } from "../common/message/parse-message";
+import { parseMessage } from "../common/message/message";
 import { useQuery } from "@tanstack/react-query";
 
 /**
@@ -52,7 +52,7 @@ export function useSocket(
     const { sendMessage } = useWebSocket(WEBSOCKET_URL, {
         onOpen: () => {
             console.log("Connection established");
-            sendMessage(new RegisterWebsocketMessage().toJson());
+            sendMessage(JSON.stringify(createRegisterWebsocketMessage()));
             if (onOpen !== undefined) {
                 onOpen();
             }
@@ -60,7 +60,7 @@ export function useSocket(
         // handle what to do with the message
         onMessage: (msg: MessageEvent) => {
             const message = parseMessage(msg.data.toString());
-            console.log("Handle message: " + message.toJson());
+            console.log("Handle message: " + JSON.stringify(message));
 
             if (onMessage !== undefined) {
                 onMessage(message);
@@ -72,8 +72,8 @@ export function useSocket(
     // handle how a message is sent
     const sendMessageHandler = useMemo(() => {
         return (message: Message) => {
-            console.log("Sending message: " + message.toJson());
-            sendMessage(message.toJson());
+            console.log("Sending message: " + JSON.stringify(message));
+            sendMessage(JSON.stringify(message));
         };
     }, [sendMessage]);
     return sendMessageHandler;

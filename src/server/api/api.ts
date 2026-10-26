@@ -1,26 +1,30 @@
 import type { WebsocketRequestHandler } from "express-ws";
 import { Router } from "express";
 
-import { parseMessage } from "../../common/message/parse-message";
 import {
-    GameFinishedMessage,
-    GameEndMessage,
-    GameHoldMessage,
-    GameInterruptedMessage,
-    GameStartedMessage,
-    JoinQueue,
-    MoveMessage,
-    UpdateQueue,
-    SetChessMessage,
-} from "../../common/message/game-message";
-import {
-    DriveRobotMessage,
-    SetRobotVariableMessage,
-} from "../../common/message/robot-message";
+    parseMessage,
+    MessageType,
+    createGameInterruptedMessage,
+    createUpdateQueue,
+    createGameStartedMessage,
+    createDriveRobotMessage,
+    createSetRobotVariableMessage,
+    type GameFinishedMessage,
+    type GameEndMessage,
+    type GameHoldMessage,
+    type GameInterruptedMessage,
+    type GameStartedMessage,
+    type JoinQueue,
+    type MoveMessage,
+    type UpdateQueue,
+    type SetChessMessage,
+    type DriveRobotMessage,
+    type SetRobotVariableMessage,
+    type RegisterWebsocketMessage,
+} from "../../common/message/message";
 
 import { ClientType } from "../../common/client-types";
 import type { Difficulty } from "../../common/client-types";
-import { RegisterWebsocketMessage } from "../../common/message/message";
 import {
     clientManager,
     gameManager,
@@ -224,9 +228,7 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
                         clientManager.assignPlayer(newPlayer);
                         names.delete(newPlayer);
                         socketManager.sendToAll(
-                            new GameInterruptedMessage(
-                                GameInterruptedReason.ABORTED,
-                            ),
+                            createGameInterruptedMessage(GameInterruptedReason.ABORTED),
                         );
                     }
                     //else they were a spectator and don't need game notifications anymore
@@ -235,8 +237,8 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
                 }
 
                 //update the queue and reload all the pages
-                socketManager.sendToAll(new UpdateQueue([...names.values()]));
-                socketManager.sendToAll(new GameStartedMessage());
+                socketManager.sendToAll(createUpdateQueue([...names.values()]));
+                socketManager.sendToAll(createGameStartedMessage());
             }
         }, 5000);
     });
@@ -244,30 +246,30 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
     // if there is an actual message, forward it to appropriate handler
     ws.on("message", async (data) => {
         const message = parseMessage(data.toString());
-        console.log("Received message: " + message.toJson());
+        console.log("Received message: " + JSON.stringify(message));
 
         // take out that page value, add a delimeter
         // // add current page to the cookie id
         // const finalSocketId = pageValue.concat(req.cookies.id);
 
-        if (message instanceof RegisterWebsocketMessage) {
+        if (message.type === MessageType.REGISTER_WEBSOCKET) {
             console.log(`Register a new socket with request ${req.cookies.id}`);
 
             socketManager.registerSocket(req.cookies.id, ws);
         } else if (
-            message instanceof GameInterruptedMessage ||
-            message instanceof MoveMessage ||
-            message instanceof SetChessMessage ||
-            message instanceof GameHoldMessage ||
-            message instanceof GameFinishedMessage ||
-            message instanceof GameEndMessage
+            message.type === MessageType.GAME_INTERRUPTED ||
+            message.type === MessageType.MOVE ||
+            message.type === MessageType.SET_CHESS ||
+            message.type === MessageType.GAME_HELD ||
+            message.type === MessageType.GAME_FINISHED ||
+            message.type === MessageType.GAME_ENDED
         ) {
             await gameManager?.handleMessage(message, req.cookies.id);
-        } else if (message instanceof DriveRobotMessage) {
-            await doDriveRobot(message);
-        } else if (message instanceof SetRobotVariableMessage) {
-            await doSetRobotVariable(message);
-        } else if (message instanceof JoinQueue) {
+        } else if (message.type === MessageType.DRIVE_ROBOT) {
+            await doDriveRobot(message as DriveRobotMessage);
+        } else if (message.type === MessageType.SET_ROBOT_VARIABLE) {
+            await doSetRobotVariable(message as SetRobotVariableMessage);
+        } else if (message.type === MessageType.JOIN_QUEUE) {
             console.log("So we got the join message");
             // this was initially !isPlayer, shouldn't it be isPlayer?
             if (!clientManager.isPlayer(req.cookies.id)) {
@@ -275,7 +277,7 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
                     queue.insert(req.cookies.id, 0);
                 }
                 names.set(req.cookies.id, message.playerName);
-                socketManager.sendToAll(new UpdateQueue([...names.values()]));
+                socketManager.sendToAll(createUpdateQueue([...names.values()]));
             }
         }
     });
@@ -838,23 +840,24 @@ apiRouter.post("/force-center", async (req, res) => {
  * @returns boolean if successful
  */
 async function doDriveRobot(message: DriveRobotMessage): Promise<boolean> {
+    const { id, leftPower, rightPower } = message;
     // check if robot is registered
     if (!tcpServer) {
         console.warn("Attempted to drive robot without TCP server.");
         return false;
     }
-    if (!tcpServer.getConnectedIds().includes(message.id)) {
+    if (!tcpServer.getConnectedIds().includes(id)) {
         console.warn(
-            "attempted manual move for non-existent robot ID " + message.id,
+            "attempted manual move for non-existent robot ID " + id,
         );
         return false;
     } else {
-        const tunnel = tcpServer.getTunnelFromId(message.id);
+        const tunnel = tcpServer.getTunnelFromId(id);
 
         // check if robot is connected
         if (!tunnel.connected) {
             console.warn(
-                "attempted manual move for disconnected robot ID " + message.id,
+                "attempted manual move for disconnected robot ID " + id,
             );
             return false;
 
@@ -862,8 +865,8 @@ async function doDriveRobot(message: DriveRobotMessage): Promise<boolean> {
         } else {
             await tunnel.send({
                 type: PacketType.DRIVE_TANK,
-                left: message.leftPower,
-                right: message.rightPower,
+                left: leftPower,
+                right: rightPower,
             });
         }
     }
@@ -878,29 +881,30 @@ async function doDriveRobot(message: DriveRobotMessage): Promise<boolean> {
 async function doSetRobotVariable(
     message: SetRobotVariableMessage,
 ): Promise<boolean> {
+    const { id: robotId, variableName, variableValue } = message;
     if (!tcpServer) {
         console.warn("Attempted to set robot variable without TCP server.");
         return false;
     }
-    if (!tcpServer.getConnectedIds().includes(message.id)) {
+    if (!tcpServer.getConnectedIds().includes(robotId)) {
         console.warn(
-            "Attempted set variable for non-existent robot ID " + message.id,
+            "Attempted set variable for non-existent robot ID " + robotId,
         );
         return false;
     } else {
-        const tunnel = tcpServer.getTunnelFromId(message.id);
+        const tunnel = tcpServer.getTunnelFromId(robotId);
         if (!tunnel.connected) {
             console.warn(
                 "Attempted set robot variable for disconnected robot ID " +
-                    message.id,
+                    robotId,
             );
             return false;
         } else {
             await tunnel.send({
                 type: PacketType.SET_VAR,
-                var_id: parseInt(message.variableName),
+                var_id: parseInt(variableName),
                 var_type: "float",
-                var_val: message.variableValue,
+                var_val: variableValue,
             });
         }
     }

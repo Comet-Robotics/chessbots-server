@@ -35,7 +35,7 @@ export class ClientManager {
     public sendToHost(message: Message): boolean {
         const sockets = this.getHostSocket();
         if (sockets !== undefined) {
-            for (const socket of sockets) socket.send(message.toJson());
+            for (const socket of sockets) socket.send(JSON.stringify(message));
         }
         return sockets !== undefined;
     }
@@ -48,7 +48,7 @@ export class ClientManager {
     public sendToClient(message: Message): boolean {
         const sockets = this.getClientSocket();
         if (sockets !== undefined) {
-            for (const socket of sockets) socket.send(message.toJson());
+            for (const socket of sockets) socket.send(JSON.stringify(message));
         }
         return sockets !== undefined;
     }
@@ -64,7 +64,7 @@ export class ClientManager {
                 const potentialSocket = this.socketManager.getSockets(item);
                 if (potentialSocket !== null && potentialSocket !== undefined) {
                     for (const socket of potentialSocket) {
-                        socket.send(message.toJson());
+                        socket.send(JSON.stringify(message));
                     }
                 }
             }

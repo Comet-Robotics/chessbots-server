@@ -1,8 +1,8 @@
 import { GameHoldReason } from "../../common/game-end-reasons";
 import {
-    GameHoldMessage,
-    SetChessMessage,
-} from "../../common/message/game-message";
+    createGameHoldMessage,
+    createSetChessMessage,
+} from "../../common/message/message";
 import { GridIndices } from "../robot/grid-indices";
 import { Position } from "../robot/position";
 import { robotManager } from "../robot/robot-manager";
@@ -59,7 +59,7 @@ export function doRollBack() {
                 ]),
             ),
         );
-        socketManager.sendToAll(new SetChessMessage(oldSave!.oldPos));
+        socketManager.sendToAll(createSetChessMessage(oldSave!.oldPos));
     }
 }
 
@@ -74,7 +74,7 @@ export function pauseGame(clientSide: boolean) {
 
     setPaused(true);
     robotManager.stopAllRobots();
-    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_PAUSED));
+    socketManager.sendToAll(createGameHoldMessage(GameHoldReason.GAME_PAUSED));
 
     // set the person who paused it
     setPauser(clientSide ? "admin" : "server");
@@ -96,7 +96,7 @@ export function unpauseGame(clientSide: boolean) {
     }
     setPaused(false);
     doRollBack();
-    socketManager.sendToAll(new GameHoldMessage(GameHoldReason.GAME_UNPAUSED));
+    socketManager.sendToAll(createGameHoldMessage(GameHoldReason.GAME_UNPAUSED));
 
     console.log("Resuming Game!");
 

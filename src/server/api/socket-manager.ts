@@ -1,4 +1,3 @@
-import type WebSocket from "ws";
 import type { Message } from "../../common/message/message";
 
 /**
@@ -44,7 +43,7 @@ export class SocketManager {
     public sendToSocket(id: string, message: Message): boolean {
         const sockets = this.getSockets(id);
         if (sockets !== undefined) {
-            for (const socket of sockets) socket.send(message.toJson());
+            for (const socket of sockets) socket.send(JSON.stringify(message));
             return true;
         }
         return false;
@@ -60,7 +59,7 @@ export class SocketManager {
         console.log(`Current list of connections are: ${sockets.length}`);
         for (const socketSet of sockets) {
             for (const socket of socketSet) {
-                socket.send(message.toJson());
+                socket.send(JSON.stringify(message));
             }
         }
         return true;

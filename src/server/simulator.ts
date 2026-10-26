@@ -5,8 +5,8 @@ import type { Packet, PacketWithId } from "./utils/tcp-packet";
 import { PacketType } from "./utils/tcp-packet";
 import { Position } from "./robot/position";
 import path from "path";
-import type { StackFrame } from "../common/message/simulator-message";
-import { SimulatorUpdateMessage } from "../common/message/simulator-message";
+import type { StackFrame, SimulatedRobotLocation } from "../common/message/message";
+import { createSimulatorUpdateMessage } from "../common/message/message";
 import { socketManager } from "./api/managers";
 import { randomUUID } from "node:crypto";
 import { GridIndices } from "./robot/grid-indices";
@@ -199,7 +199,7 @@ export class VirtualBotTunnel extends BotTunnel {
                     this.emitActionComplete(packetId);
             }
 
-            const message = new SimulatorUpdateMessage(
+            const message = createSimulatorUpdateMessage(
                 this.robotId,
                 {
                     position: {
@@ -208,7 +208,7 @@ export class VirtualBotTunnel extends BotTunnel {
                     },
                     headingRadians: this.headingRadians,
                 },
-                { ...packet, packetId },
+                { ...packet, packetId } as any,
                 stack,
             );
             VirtualBotTunnel.messages.push({ ts: new Date(), message });
