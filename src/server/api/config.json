@@ -1,647 +1,159 @@
 {
-    "tcpServerPort": 3001,
+    "tcpPort": 3001,
     "bots": {
-        "80:65:99:4d:f3:e8": "robot-15",
-        "c0:4e:30:4b:68:76": "robot-19",
-        "80:65:99:4d:f3:9a": "robot-3",
-        "80:65:99:4e:07:b0": "robot-4",
-        "80:65:99:4e:07:9c": "robot-11",
-        "80:65:99:4e:07:ae": "robot-12",
-        "80:65:99:4e:70:48": "robot-2",
-        "80:65:99:4e:70:46": "robot-7",
-        "80:65:99:4e:70:4c": "robot-6",
-        "c0:4e:30:4b:66:98": "robot-1",
-        "80:65:99:4e:70:6a": "robot-5"
-    },
-
-    "robot-6": {
-        "attributes": {
-            "piece_type": "w_bishop"
-        },
-        "homeIndices": {
-            "x": 0,
-            "y": 10
-        },
-        "defaultIndices": {
-            "x": 7,
-            "y": 2
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-2": {
-        "attributes": {
-            "piece_type": "w_knight"
-        },
-        "homeIndices": {
-            "x": 0,
-            "y": 9
-        },
-        "defaultIndices": {
-            "x": 0,
-            "y": 9
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-5": {
-        "attributes": {
-            "piece_type": "w_king"
-        },
-        "homeIndices": {
-            "x": 3,
-            "y": 11
-        },
-        "defaultIndices": {
-            "x": 9,
-            "y": 2
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-12": {
-        "attributes": {
-            "piece_type": "b_king"
-        },
-        "homeIndices": {
-            "x": 2,
-            "y": 11
-        },
-        "defaultIndices": {
-            "x": 5,
-            "y": 3
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-11": {
-        "attributes": {
-            "piece_type": "b_king"
-        },
-        "homeIndices": {
-            "x": 2,
-            "y": 11
-        },
-        "defaultIndices": {
-            "x": 5,
-            "y": 3
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-
-    "robot-7": {
-        "attributes": {
-            "piece_type": "w_rook"
-        },
-        "homeIndices": {
-            "x": 2,
-            "y": 0
-        },
-        "defaultIndices": {
-            "x": 2,
-            "y": 2
-        },
-        "hexapawnIndices": {
-            "x": 2,
-            "y": 2
-        },
-
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-1": {
-        "attributes": {
-            "piece_type": "w_knight"
-        },
-        "homeIndices": {
-            "x": 3,
-            "y": 0
-        },
-        "defaultIndices": {
-            "x": 3,
-            "y": 2
-        },
-        "banquetIndices": {
-            "x": 0,
-            "y": 9
-        },
-        "hexapawnIndices": {
-            "x": 3,
-            "y": 2
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-3": {
-        "attributes": {
-            "piece_type": "w_bishop"
-        },
-        "homeIndices": {
-            "x": 4,
-            "y": 0
-        },
-        "defaultIndices": {
-            "x": 4,
-            "y": 2
-        },
-        "banquetIndices": {
-            "x": 0,
-            "y": 10
-        },
-        "hexapawnIndices": {
-            "x": 4,
-            "y": 2
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-4": {
-        "attributes": {
-            "piece_type": "w_queen"
-        },
-        "homeIndices": {
-            "x": 5,
-            "y": 0
-        },
-        "defaultIndices": {
-            "x": 5,
-            "y": 2
-        },
-        "hexapawnIndices": {
-            "x": 2,
-            "y": 6
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-8": {
-        "attributes": {
-            "piece_type": "w_king"
-        },
-        "homeIndices": {
-            "x": 6,
-            "y": 0
-        },
-        "defaultIndices": {
-            "x": 6,
-            "y": 2
-        },
-        "banquetIndices": {
-            "x": 3,
-            "y": 11
-        },
-        "hexapawnIndices": {
-            "x": 3,
-            "y": 6
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-10": {
-        "attributes": {
-            "piece_type": "w_bishop"
-        },
-        "homeIndices": {
-            "x": 7,
-            "y": 0
-        },
-        "defaultIndices": {
-            "x": 7,
-            "y": 2
-        },
-        "hexapawnIndices": {
-            "x": 4,
-            "y": 6
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-7": {
-        "attributes": {
-            "piece_type": "w_knight"
-        },
-        "homeIndices": {
-            "x": 8,
-            "y": 0
-        },
-        "defaultIndices": {
-            "x": 8,
-            "y": 2
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-8": {
-        "attributes": {
-            "piece_type": "w_rook"
-        },
-        "homeIndices": {
-            "x": 9,
-            "y": 0
-        },
-        "defaultIndices": {
-            "x": 9,
-            "y": 2
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-9": {
-        "attributes": {
-            "piece_type": "w_pawn"
-        },
-        "homeIndices": {
-            "x": 0,
-            "y": 2
-        },
-        "defaultIndices": {
-            "x": 2,
-            "y": 3
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-10": {
-        "attributes": {
-            "piece_type": "w_pawn"
-        },
-        "homeIndices": {
-            "x": 0,
-            "y": 3
-        },
-        "defaultIndices": {
-            "x": 3,
-            "y": 3
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-13": {
-        "attributes": {
-            "piece_type": "w_pawn"
-        },
-        "homeIndices": {
-            "x": 11,
-            "y": 5
-        },
-        "defaultIndices": {
-            "x": 6,
-            "y": 3
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-14": {
-        "attributes": {
-            "piece_type": "w_pawn"
-        },
-        "homeIndices": {
-            "x": 11,
-            "y": 4
-        },
-        "defaultIndices": {
-            "x": 7,
-            "y": 3
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-15": {
-        "attributes": {
-            "MOTOR_A_DRIVE_MULTIPLIER": 1.3,
-            "MOTOR_B_DRIVE_MULTIPLIER": 2,
-            "piece_type": "w_pawn"
-        },
-        "homeIndices": {
-            "x": 11,
-            "y": 3
-        },
-        "defaultIndices": {
-            "x": 8,
-            "y": 3
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-16": {
-        "attributes": {
-            "piece_type": "w_pawn"
-        },
-        "homeIndices": {
-            "x": 11,
-            "y": 2
-        },
-        "defaultIndices": {
-            "x": 9,
-            "y": 3
-        },
-        "startHeadingRadians": 1.5707963268
-    },
-    "robot-17": {
-        "attributes": {
-            "piece_type": "b_pawn"
-        },
-        "homeIndices": {
-            "x": 0,
-            "y": 9
-        },
-        "defaultIndices": {
-            "x": 2,
-            "y": 8
-        },
-        "banquetIndices": {
-            "x": 10,
-            "y": 11
-        },
-        "startHeadingRadians": 4.7123889804
-    },
-    "robot-18": {
-        "attributes": {
-            "piece_type": "b_pawn"
-        },
-        "homeIndices": {
-            "x": 0,
-            "y": 8
-        },
-        "defaultIndices": {
-            "x": 3,
-            "y": 8
-        },
-        "banquetIndices": {
-            "x": 11,
-            "y": 11
-        },
-        "startHeadingRadians": 4.7123889804
-    },
-    "robot-19": {
-        "attributes": {
-            "piece_type": "b_pawn"
-        },
-        "homeIndices": {
-            "x": 0,
-            "y": 7
-        },
-        "defaultIndices": {
-            "x": 4,
-            "y": 8
-        },
-        "startHeadingRadians": 4.7123889804
-    },
-    "robot-20": {
-        "attributes": {
-            "piece_type": "b_pawn"
-        },
-        "homeIndices": {
-            "x": 0,
-            "y": 6
-        },
-        "defaultIndices": {
-            "x": 5,
-            "y": 8
-        },
-        "startHeadingRadians": 4.7123889804
-    },
-    "robot-21": {
-        "attributes": {
-            "piece_type": "b_pawn"
-        },
-        "homeIndices": {
-            "x": 11,
-            "y": 6
-        },
-        "defaultIndices": {
-            "x": 6,
-            "y": 8
-        },
-        "startHeadingRadians": 4.7123889804
-    },
-    "robot-22": {
-        "attributes": {
-            "piece_type": "b_pawn"
-        },
-        "homeIndices": {
-            "x": 11,
-            "y": 7
-        },
-        "defaultIndices": {
-            "x": 7,
-            "y": 8
-        },
-        "startHeadingRadians": 4.7123889804
-    },
-    "robot-23": {
-        "attributes": {
-            "piece_type": "b_pawn"
-        },
-        "homeIndices": {
-            "x": 11,
-            "y": 8
-        },
-        "defaultIndices": {
-            "x": 8,
-            "y": 8
-        },
-        "startHeadingRadians": 4.7123889804
-    },
-    "robot-24": {
-        "attributes": {
-            "piece_type": "b_pawn"
-        },
-        "homeIndices": {
-            "x": 11,
-            "y": 9
-        },
-        "defaultIndices": {
-            "x": 9,
-            "y": 8
-        },
-        "startHeadingRadians": 4.7123889804
-    },
-    "robot-25": {
-        "attributes": {
-            "piece_type": "b_rook"
-        },
-        "homeIndices": {
-            "x": 2,
-            "y": 11
-        },
-        "defaultIndices": {
-            "x": 2,
-            "y": 9
-        },
-        "banquetIndices": {
-            "x": 10,
-            "y": 0
-        },
-        "startHeadingRadians": 4.7123889804
-    },
-    "robot-26": {
-        "attributes": {
-            "piece_type": "b_knight"
-        },
-        "homeIndices": {
-            "x": 3,
-            "y": 11
-        },
-        "defaultIndices": {
-            "x": 3,
-            "y": 9
-        },
-        "banquetIndices": {
-            "x": 11,
-            "y": 0
-        },
-        "startHeadingRadians": 4.7123889804
-    },
-    "robot-27": {
-        "attributes": {
-            "piece_type": "b_bishop"
-        },
-        "homeIndices": {
-            "x": 4,
-            "y": 11
-        },
-        "defaultIndices": {
-            "x": 4,
-            "y": 9
-        },
-        "banquetIndices": {
-            "x": 11,
-            "y": 1
-        },
-        "startHeadingRadians": 4.7123889804
-    },
-    "robot-28": {
-        "attributes": {
-            "piece_type": "b_queen"
-        },
-        "homeIndices": {
-            "x": 5,
-            "y": 11
-        },
-        "defaultIndices": {
-            "x": 5,
-            "y": 9
-        },
-        "startHeadingRadians": 4.7123889804
-    },
-    "robot-29": {
-        "attributes": {
-            "piece_type": "b_king"
-        },
-        "homeIndices": {
-            "x": 6,
-            "y": 11
-        },
-        "defaultIndices": {
-            "x": 6,
-            "y": 9
-        },
-        "banquetIndices": {
-            "x": 2,
-            "y": 11
-        },
-        "startHeadingRadians": 4.7123889804
-    },
-    "robot-30": {
-        "attributes": {
-            "piece_type": "b_bishop"
-        },
-        "homeIndices": {
-            "x": 7,
-            "y": 11
-        },
-        "defaultIndices": {
-            "x": 7,
-            "y": 9
-        },
-        "startHeadingRadians": 4.7123889804
-    },
-    "robot-31": {
-        "attributes": {
-            "piece_type": "b_knight"
-        },
-        "homeIndices": {
-            "x": 8,
-            "y": 11
-        },
-        "defaultIndices": {
-            "x": 8,
-            "y": 9
-        },
-        "startHeadingRadians": 4.7123889804
-    },
-    "robot-32": {
-        "attributes": {
-            "piece_type": "b_rook"
-        },
-        "homeIndices": {
-            "x": 9,
-            "y": 11
-        },
-        "defaultIndices": {
-            "x": 9,
-            "y": 9
-        },
-        "startHeadingRadians": 4.7123889804
-    },
-    "botConfigSchema": [
-        {
-            "name": "MOTOR_A_PIN1",
-            "type": "gpio",
-            "default_value": 33
-        },
-        {
-            "name": "MOTOR_A_PIN2",
-            "type": "gpio",
-            "default_value": 38
-        },
-        {
-            "name": "MOTOR_B_PIN1",
-            "type": "gpio",
-            "default_value": 39
-        },
-        {
-            "name": "MOTOR_B_PIN2",
-            "type": "gpio",
-            "default_value": 40
-        },
-        {
-            "name": "ENCODER_A_PIN1",
-            "type": "gpio",
-            "default_value": 18
-        },
-        {
-            "name": "ENCODER_A_PIN2",
-            "type": "gpio",
-            "default_value": 21
-        },
-        {
-            "name": "ENCODER_B_PIN1",
-            "type": "gpio",
-            "default_value": 16
-        },
-        {
-            "name": "ENCODER_B_PIN2",
-            "type": "gpio",
-            "default_value": 17
-        },
-        {
-            "name": "RELAY_IR_LED",
-            "type": "gpio",
-            "default_value": 15
-        },
-        {
-            "name": "PHOTODIODE_FRONT_LEFT",
-            "type": "gpio",
-            "default_value": 0,
-            "comment": "GPIO 1"
-        },
-        {
-            "name": "PHOTODIODE_FRONT_RIGHT",
-            "type": "gpio",
-            "default_value": 1,
-            "comment": "GPIO 2"
-        },
-        {
-            "name": "PHOTODIODE_BACK_LEFT",
-            "type": "gpio",
-            "default_value": 3,
-            "comment": "GPIO 4"
-        },
-        {
-            "name": "PHOTODIODE_BACK_RIGHT",
-            "type": "gpio",
-            "default_value": 5,
-            "comment": "GPIO 5"
-        },
-        {
-            "name": "WHEEL_DIAMETER_INCHES",
-            "type": "float",
-            "default_value": 4.375
+        "80:65:99:4d:f3:e8": {
+            "robot_id": "robot-15",
+            "piece": "w_pawn",
+            "start_pos": {
+                "x": 8,
+                "y": 3
+            },
+            "start_rot": 1.5707963268,
+            "home_pos": {
+                "x": 11,
+                "y": 3
+            },
+            "home_rot": 0
+        },
+        "c0:4e:30:4b:68:76": {
+            "robot_id": "robot-19",
+            "piece": "b_pawn",
+            "start_pos": {
+                "x": 4,
+                "y": 8
+            },
+            "start_rot": 4.7123889804,
+            "home_pos": {
+                "x": 0,
+                "y": 7
+            },
+            "home_rot": 0
+        },
+        "80:65:99:4d:f3:9a": {
+            "robot_id": "robot-3",
+            "piece": "w_bishop",
+            "start_pos": {
+                "x": 4,
+                "y": 2
+            },
+            "start_rot": 1.5707963268,
+            "home_pos": {
+                "x": 4,
+                "y": 0
+            },
+            "home_rot": 0
+        },
+        "80:65:99:4e:07:b0": {
+            "robot_id": "robot-4",
+            "piece": "w_queen",
+            "start_pos": {
+                "x": 5,
+                "y": 2
+            },
+            "start_rot": 1.5707963268,
+            "home_pos": {
+                "x": 5,
+                "y": 0
+            },
+            "home_rot": 0
+        },
+        "80:65:99:4e:07:9c": {
+            "robot_id": "robot-11",
+            "piece": "b_king",
+            "start_pos": {
+                "x": 5,
+                "y": 3
+            },
+            "start_rot": 1.5707963268,
+            "home_pos": {
+                "x": 2,
+                "y": 11
+            },
+            "home_rot": 0
+        },
+        "80:65:99:4e:07:ae": {
+            "robot_id": "robot-12",
+            "piece": "b_king",
+            "start_pos": {
+                "x": 5,
+                "y": 3
+            },
+            "start_rot": 1.5707963268,
+            "home_pos": {
+                "x": 2,
+                "y": 11
+            },
+            "home_rot": 0
+        },
+        "80:65:99:4e:70:48": {
+            "robot_id": "robot-2",
+            "piece": "w_knight",
+            "start_pos": {
+                "x": 0,
+                "y": 9
+            },
+            "start_rot": 1.5707963268,
+            "home_pos": {
+                "x": 0,
+                "y": 9
+            },
+            "home_rot": 0
+        },
+        "80:65:99:4e:70:46": {
+            "robot_id": "robot-7",
+            "piece": "w_knight",
+            "start_pos": {
+                "x": 8,
+                "y": 2
+            },
+            "start_rot": 1.5707963268,
+            "home_pos": {
+                "x": 8,
+                "y": 0
+            },
+            "home_rot": 0
+        },
+        "80:65:99:4e:70:4c": {
+            "robot_id": "robot-6",
+            "piece": "w_bishop",
+            "start_pos": {
+                "x": 7,
+                "y": 2
+            },
+            "start_rot": 1.5707963268,
+            "home_pos": {
+                "x": 0,
+                "y": 10
+            },
+            "home_rot": 0
+        },
+        "c0:4e:30:4b:66:98": {
+            "robot_id": "robot-1",
+            "piece": "w_knight",
+            "start_pos": {
+                "x": 3,
+                "y": 2
+            },
+            "start_rot": 1.5707963268,
+            "home_pos": {
+                "x": 3,
+                "y": 0
+            },
+            "home_rot": 0
+        },
+        "80:65:99:4e:70:6a": {
+            "robot_id": "robot-5",
+            "piece": "w_king",
+            "start_pos": {
+                "x": 9,
+                "y": 2
+            },
+            "start_rot": 1.5707963268,
+            "home_pos": {
+                "x": 3,
+                "y": 11
+            },
+            "home_rot": 0
         }
-    ]
+    }
 }

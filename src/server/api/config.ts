@@ -7,13 +7,13 @@ let piece_schema = z.enum([
     "w_rook",
     "w_pawn",
     "w_king",
-    "w_qween",
+    "w_queen",
     "b_bishop",
     "b_knight",
     "b_rook",
     "b_pawn",
     "b_king",
-    "b_qween"
+    "b_queen"
 ])
 
 let config_schema = z.object({
