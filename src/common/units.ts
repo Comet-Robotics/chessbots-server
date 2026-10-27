@@ -25,3 +25,13 @@ export function clampHeading(radians: number): number {
  * Used to convert between board grid coordinates and pixel coordinates.
  */
 export const GRID_CELL_PX = 60;
+
+export type Position = {   
+    x: number,
+    y: number,
+}
+
+export type GridPosition  = {
+    x: number,
+    y: number,
+}

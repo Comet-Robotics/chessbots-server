@@ -80,7 +80,7 @@ export class ChessEngine {
     isKingSideCastling(move: Move) {
         if (this.getPieceTypeFromSquare(move.from) !== KING) {
             return false;
-        } else if (this.chess.get(move.from).color === WHITE) {
+        } else if (this.getPieceColor(move.from) === WHITE) {
             return move.from === "e1" && move.to === "g1";
         } else {
             return move.from === "e8" && move.to === "g8";
@@ -96,7 +96,7 @@ export class ChessEngine {
     isEnPassant(move: Move) {
         if (
             move.from[0] !== move.to[0] &&
-            this.getPieceTypeFromSquare(move.from) === PieceType.PAWN
+            this.getPieceTypeFromSquare(move.from) === PAWN
         ) {
             return !this.hasPiece(move.to);
         } else {
