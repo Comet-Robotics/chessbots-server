@@ -1,6 +1,6 @@
 import { DEGREE } from "../../common/units";
 import { Robot, RobotId } from "./robot";
-import config from "../api/bot-server-config.json";
+import { config } from "../api/config";
 import {
     USE_BANQUET_INDICES,
     USE_HEXAPAWN_INDICES,
@@ -17,7 +17,7 @@ export class RobotManager {
     robots: Map<RobotId, Robot> = new Map();
     
     constructor() {}
-    
+
     addRobot(robot: Robot) {
         this.robots.set(robot.id, robot);
     }
@@ -113,19 +113,8 @@ export class RobotManager {
         return this.getRobot(robotId);
     }
 
-    updateRobot(robotId: string, indices: GridIndices) {
-        const indicesToIds = this.getIndicesToIds();
-        // if (indicesToIds.has(indices.toString())) {
-        //     indicesToIds.delete(indices.toString());
-        // }
-        for (const [i, r] of indicesToIds.entries()) {
-            if (robotId === r) indicesToIds.delete(i);
-        }
-        indicesToIds.set(indices.toString(), robotId);
-    }
-
     stopAllRobots() {
-        Array.from(this.idsToRobots.values()).forEach((robot) => {
+        this.robots.forEach((robot) => {
             robot.sendStopPacket();
         });
     }

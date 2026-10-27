@@ -20,7 +20,7 @@ let config_schema = z.object({
     tcpPort: z.int().lt(65536),
     bots: z.record(z.mac(), 
         z.object({
-            robot_id: z.string(),
+            robot_id: z.int().gt(0).lt(33),
             piece: piece_schema,
             start_pos: z.object({ x: z.int(), y: z.int() }),
             start_rot: z.number(),
