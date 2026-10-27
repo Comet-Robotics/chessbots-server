@@ -1,9 +1,9 @@
 import type { Reversible } from "./command";
 import { RobotCommand, timeoutRetry } from "./command";
 import { Position } from "../robot/position";
-import { GridIndices } from "../robot/grid-indices";
+import { GridIndices } from "../../common/grid-indices";
 import { robotManager } from "../robot/robot-manager";
-import { MAX_RETRIES } from "../utils/env";
+import { MAX_RETRIES } from "../env";
 import { type ReversibleRobotCommand } from "./move-piece";
 
 /**

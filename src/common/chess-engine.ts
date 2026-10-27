@@ -5,7 +5,7 @@ import { GameFinishedReason } from "./game-end-reasons";
 import type { Difficulty } from "./client-types";
 import type { Move } from "./game-types";
 import { PieceType, Side } from "./game-types";
-import { GridIndices } from "../server/robot/grid-indices";
+import { GridIndices } from "./grid-indices";
 import type { RobotManager } from "../server/robot/robot-manager";
 
 /**

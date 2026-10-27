@@ -7,30 +7,12 @@ import {
     createGameInterruptedMessage,
     createUpdateQueue,
     createGameStartedMessage,
-    createDriveRobotMessage,
-    createSetRobotVariableMessage,
-    type GameFinishedMessage,
-    type GameEndMessage,
-    type GameHoldMessage,
-    type GameInterruptedMessage,
-    type GameStartedMessage,
-    type JoinQueue,
-    type MoveMessage,
-    type UpdateQueue,
-    type SetChessMessage,
     type DriveRobotMessage,
     type SetRobotVariableMessage,
-    type RegisterWebsocketMessage,
-} from "../../common/message/message";
+} from "../../common/message";
 
 import { ClientType } from "../../common/client-types";
 import type { Difficulty } from "../../common/client-types";
-import {
-    clientManager,
-    gameManager,
-    setGameManager,
-    socketManager,
-} from "./managers";
 import {
     ComputerGameManager,
     HexapawnGameManager,
@@ -39,17 +21,12 @@ import {
 } from "./game-manager";
 import { ChessEngine } from "../../common/chess-engine";
 import { Side } from "../../common/game-types";
-import { START_ROBOTS_AT_DEFAULT, DO_SAVES } from "../utils/env";
-import { SaveManager } from "./save-manager";
-
-import { VirtualBotTunnel } from "../simulator";
+import { START_ROBOTS_AT_DEFAULT, DO_SAVES } from "../env";
 import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
-import { PacketType } from "../utils/tcp-packet";
-import { PriorityQueue } from "./queue";
+import { PacketType } from "./tunnel/tcp-packet";
 import { GameInterruptedReason } from "../../common/game-end-reasons";
 import { ShowfileSchema, TimelineEventTypes } from "../../common/show";
-import { SplinePointType } from "../../common/spline";
 import type { Command } from "../command/command";
 import {
     SequentialCommandGroup,
@@ -63,7 +40,7 @@ import {
     CenterCommand,
     RelativeRotateCommand,
 } from "../command/move-command";
-import { GridIndices } from "../robot/grid-indices";
+import { GridIndices } from "../../common/grid-indices";
 import {
     moveAllRobotsHomeToDefaultOptimized,
     moveAllRobotsToDefaultPositions,
@@ -71,7 +48,7 @@ import {
 } from "../robot/path-materializer";
 import type { PuzzleComponents } from "./puzzles";
 import { puzzles } from "./puzzles";
-import { tcpServer } from "./tcp-interface";
+import { tcpServer } from "./tunnel/tcp";
 import { robotManager } from "../robot/robot-manager";
 import { executor } from "../command/executor";
 import {
@@ -218,7 +195,7 @@ export const websocketHandler: WebsocketRequestHandler = (ws, req) => {
                     //remove the old host/client
                     clientType === ClientType.HOST ?
                         clientManager.removeHost()
-                    :   clientManager.removeClient();
+                        : clientManager.removeClient();
 
                     //if there exists someone to take their place
                     const newPlayer = queue.pop();
@@ -322,9 +299,9 @@ apiRouter.get("/client-information", async (req, res) => {
                 oldSave.host === req.cookies.id ?
                     oldSave.hostWhite ?
                         Side.WHITE
-                    :   Side.BLACK
-                : oldSave.hostWhite ? Side.BLACK
-                : Side.WHITE,
+                        : Side.BLACK
+                    : oldSave.hostWhite ? Side.BLACK
+                        : Side.WHITE,
                 oldSave.aiDifficulty,
                 oldSave.host !== req.cookies.id,
             );
@@ -896,7 +873,7 @@ async function doSetRobotVariable(
         if (!tunnel.connected) {
             console.warn(
                 "Attempted set robot variable for disconnected robot ID " +
-                    robotId,
+                robotId,
             );
             return false;
         } else {

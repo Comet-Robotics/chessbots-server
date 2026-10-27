@@ -2,8 +2,8 @@ import { GameHoldReason } from "../../common/game-end-reasons";
 import {
     createGameHoldMessage,
     createSetChessMessage,
-} from "../../common/message/message";
-import { GridIndices } from "../robot/grid-indices";
+} from "../../common/message";
+import { GridIndices } from "../../common/grid-indices";
 import { Position } from "../robot/position";
 import { robotManager } from "../robot/robot-manager";
 import { VirtualRobot } from "../simulator";

@@ -1,6 +1,6 @@
 import { gamePaused } from "../api/pauseHandler";
 import { robotManager } from "../robot/robot-manager";
-import { MAX_RETRIES, MOVE_TIMEOUT } from "../utils/env";
+import { MAX_RETRIES, MOVE_TIMEOUT } from "../env";
 
 /**
  * An command which operates on one or more robots.

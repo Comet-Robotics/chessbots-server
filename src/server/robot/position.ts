@@ -1,5 +1,5 @@
 import { Pair } from "../utils/pair";
-import type { GridIndices } from "./grid-indices";
+import type { GridIndices } from "../../common/grid-indices";
 
 /**
  * x,y positions

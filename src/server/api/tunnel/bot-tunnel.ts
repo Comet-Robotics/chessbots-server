@@ -3,7 +3,7 @@ import {
     jsonToPacket,
     type Packet,
     type PacketWithId,
-} from "../utils/tcp-packet";
+} from "./tcp-packet";
 
 export abstract class BotTunnel {
     connected: boolean = false;

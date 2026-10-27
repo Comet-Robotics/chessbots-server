@@ -1,12 +1,12 @@
 import { z } from "zod";
-import type { Move } from "../game-types";
-import type {
+import type { Move } from "./game-types";
+import {
     GameInterruptedReason,
     GameHoldReason,
     GameFinishedReason,
     GameEndReason,
-} from "../game-end-reasons";
-import type { PacketWithId } from "../../server/utils/tcp-packet";
+} from "./game-end-reasons";
+import type { PacketWithId } from "../server/api/tunnel/tcp-packet";
 
 /** Robot location in the simulator. */
 export type SimulatedRobotLocation = {

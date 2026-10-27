@@ -14,7 +14,7 @@ import {
     GameHoldReason,
     GameInterruptedReason,
 } from "../../common/game-end-reasons";
-import type { SendMessage } from "../../common/message/message";
+import type { SendMessage } from "../../common/message";
 import { Side } from "../../common/game-types";
 import type { Dispatch } from "react";
 import {

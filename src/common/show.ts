@@ -18,7 +18,7 @@ import {
     SplinePointType,
     StartPointSchema,
 } from "./spline";
-import { Uint32 } from "../server/utils/tcp-packet";
+import { Uint32 } from "../server/api/tunnel/tcp-packet";
 
 export const TimelineEventTypes = {
     GoToPointEvent: "goto_point",

@@ -1,5 +1,5 @@
 import { DEGREE } from "../../common/units";
-import { GridIndices } from "./grid-indices";
+import { GridIndices } from "../../common/grid-indices";
 import { Robot } from "./robot";
 import config from "../api/bot-server-config.json";
 import { virtualRobots } from "../simulator";
@@ -7,7 +7,7 @@ import {
     USE_BANQUET_INDICES,
     USE_HEXAPAWN_INDICES,
     USE_VIRTUAL_ROBOTS,
-} from "../utils/env";
+} from "../env";
 
 /**
  * Stores robots. Provides utilities for finding them by position.

@@ -1,8 +1,8 @@
 import { FULL_ROTATION, RADIAN, clampHeading } from "../../common/units";
 import { Position } from "./position";
-import type { GridIndices } from "./grid-indices";
-import { PacketType } from "../utils/tcp-packet";
-import { type BotTunnel } from "../api/bot-tunnel";
+import type { GridIndices } from "../../common/grid-indices";
+import { PacketType } from "../api/tunnel/tcp-packet";
+import { type BotTunnel } from "../api/tunnel/bot-tunnel";
 
 /**
  * Represents a physical robot.

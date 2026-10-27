@@ -13,7 +13,7 @@ import type {
 import { ChessboardWrapper } from "../chessboard/chessboard-wrapper";
 import { NavbarMenu } from "../game/navbar-menu";
 import { useSocket } from "../api";
-import type { MessageHandler } from "../../common/message/message";
+import type { MessageHandler } from "../../common/message";
 //import { GameEndDialog } from "../game/game-end-dialog";
 import { Outlet } from "react-router-dom";
 import { ChessEngine } from "../../common/chess-engine";

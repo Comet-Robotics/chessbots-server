@@ -9,8 +9,8 @@ import type { StackFrame, SimulatedRobotLocation } from "../common/message/messa
 import { createSimulatorUpdateMessage } from "../common/message/message";
 import { socketManager } from "./api/managers";
 import { randomUUID } from "node:crypto";
-import { GridIndices } from "./robot/grid-indices";
-import { BotTunnel, type RobotEventEmitter } from "./api/bot-tunnel";
+import { GridIndices } from "../common/grid-indices";
+import { BotTunnel, type RobotEventEmitter } from "./api/tunnel/bot-tunnel";
 import { USE_BANQUET_INDICES, USE_HEXAPAWN_INDICES } from "./utils/env";
 
 const srcDir = path.resolve(__dirname, "../");

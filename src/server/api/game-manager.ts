@@ -1,4 +1,4 @@
-import type { Message, SendMessage } from "../../common/message/message";
+import type { Message, SendMessage } from "../../common/message";
 import type { ChessEngine } from "../../common/chess-engine";
 import {
     createMoveMessage,
@@ -12,7 +12,7 @@ import {
     type GameInterruptedMessage,
     type GameFinishedMessage,
     MessageType,
-} from "../../common/message/message";
+} from "../../common/message";
 import type { SocketManager } from "./socket-manager";
 import type { ClientManager } from "./client-manager";
 import { ClientType } from "../../common/client-types";
@@ -32,7 +32,7 @@ import {
     materializePathHexapawn,
     moveAllRobotsFromBoardToHome,
 } from "../robot/path-materializer";
-import { DO_SAVES } from "../utils/env";
+import { DO_SAVES } from "../env";
 import { executor } from "../command/executor";
 import { robotManager } from "../robot/robot-manager";
 import { gamePaused, setPaused } from "./pauseHandler";

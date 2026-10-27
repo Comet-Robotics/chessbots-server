@@ -26,7 +26,6 @@
         "forceConsistentCasingInFileNames": true
     },
     "include": ["src"],
-    "files": ["src/server/js-chess-engine.d.ts"],
     "typedocOptions": {
         "entryPoints": ["src/"],
         "entryPointStrategy": "expand",

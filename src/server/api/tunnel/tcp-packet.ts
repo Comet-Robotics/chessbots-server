@@ -1,15 +1,3 @@
-// rewrite with zod
-
-import type { Static } from "runtypes";
-import {
-    Number as NumberType,
-    String,
-    Record,
-    Union,
-    Literal,
-    Dictionary,
-} from "runtypes";
-
 export enum PacketType {
     CLIENT_HELLO = "CLIENT_HELLO",
     SERVER_HELLO = "SERVER_HELLO",
@@ -26,8 +14,6 @@ export enum PacketType {
     ACTION_FAIL = "ACTION_FAIL",
     DRIVE_TANK = "DRIVE_TANK",
     ESTOP = "ESTOP",
-    DRIVE_CUBIC_SPLINE = "DRIVE_CUBIC_SPLINE",
-    DRIVE_QUADRATIC_SPLINE = "DRIVE_QUADRATIC_SPLINE",
     SPIN_RADIANS = "SPIN_RADIANS",
 }
 

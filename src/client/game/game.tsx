@@ -18,7 +18,7 @@ import { GameHoldReason } from "../../common/game-end-reasons";
 import { ChessboardWrapper } from "../chessboard/chessboard-wrapper";
 import { NavbarMenu } from "./navbar-menu";
 import { get, useEffectQuery, useSocket } from "../api";
-import type { MessageHandler } from "../../common/message/message";
+import type { MessageHandler } from "../../common/message";
 import { GameEndDialog } from "./game-end-dialog";
 import { Navigate, Outlet } from "react-router-dom";
 import { ChessEngine } from "../../common/chess-engine";

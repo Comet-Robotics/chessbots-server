@@ -14,7 +14,7 @@ import {
 import type { ReversibleRobotCommand } from "../command/move-piece";
 import { MovePiece } from "../command/move-piece";
 import { Position } from "./position";
-import { GridIndices } from "./grid-indices";
+import { GridIndices } from "../../common/grid-indices";
 import type { Robot } from "./robot";
 //import { error } from "console"; replaced with Error
 import { robotManager } from "./robot-manager";

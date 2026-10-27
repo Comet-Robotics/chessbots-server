@@ -1,6 +1,6 @@
 import type { Square } from "chess.js";
-import { Pair } from "../utils/pair";
-import type { Position } from "./position";
+import { Pair } from "../server/utils/pair";
+import type { Position } from "../server/robot/position";
 
 const FILE_LOOKUP = "abcdefgh";
 
