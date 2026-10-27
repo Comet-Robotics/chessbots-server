@@ -1,8 +1,8 @@
 import { FULL_ROTATION, RADIAN, clampHeading } from "../../common/units";
-import { Position } from "./position";
-import type { GridIndices } from "../../common/grid-indices";
 import { PacketType } from "../api/tunnel/tcp-packet";
 import { type BotTunnel } from "../api/tunnel/bot-tunnel";
+
+export type RobotId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19;
 
 /**
  * Represents a physical robot.
@@ -15,7 +15,7 @@ export class Robot {
     protected _pieceType: string;
 
     constructor(
-        public readonly id: string,
+        public readonly id: RobotId,
         /**
          * The location the robot lives in when its not in use.
          */

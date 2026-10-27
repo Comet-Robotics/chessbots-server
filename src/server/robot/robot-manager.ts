@@ -1,8 +1,6 @@
 import { DEGREE } from "../../common/units";
-import { GridIndices } from "../../common/grid-indices";
-import { Robot } from "./robot";
+import { Robot, RobotId } from "./robot";
 import config from "../api/bot-server-config.json";
-import { virtualRobots } from "../simulator";
 import {
     USE_BANQUET_INDICES,
     USE_HEXAPAWN_INDICES,
@@ -16,50 +14,31 @@ export class RobotManager {
     /**
      * Maps robot ids to robots.
      */
-    idsToRobots: Map<string, Robot> = new Map();
-
-    /**
-     * Maps robot locations to their ids.
-     */
-    getIndicesToIds(): Map<string, string> {
-        return Array.from(this.idsToRobots.values()).reduce((acc, robot) => {
-            const positionAsGridIndices = GridIndices.fromPosition(
-                robot.position,
-            );
-            acc.set(positionAsGridIndices.toString(), robot.id);
-            return acc;
-        }, new Map<string, string>());
-    }
-
-    constructor(robots: Robot[]) {
-        robots.forEach((robot) => this.addRobot(robot));
-    }
-
+    robots: Map<RobotId, Robot> = new Map();
+    
+    constructor() {}
+    
     addRobot(robot: Robot) {
-        this.idsToRobots.set(robot.id, robot);
+        this.robots.set(robot.id, robot);
     }
 
     //use this so on disconnect and reconnect we don't just have a bunch of bots in here that shouldn't exist cause they're disconnected
-    removeRobot(robotId: string) {
-        this.idsToRobots.delete(robotId);
+    removeRobot(robotId: RobotId) {
+        this.robots.delete(robotId);
     }
 
     /**
      * Retrieves a robot by id.
      * Throws if no robot is found.
      */
-    getRobot(robotId: string): Robot {
-        const robot = this.idsToRobots.get(robotId);
-        if (robot === undefined) {
-            throw new Error("Failed to find robot with id " + robotId);
-        }
-        return robot;
+    getRobot(robotId: RobotId): Robot | undefined {
+        return this.robots.get(robotId);
     }
 
     createRobotFromId(robotId: string) {
         const robotConfig = config[robotId];
         if (!robotConfig) {
-            throw new Error("Failed to find robot config for id " + robotId);
+            return;
         }
 
         const iIndex =
@@ -152,6 +131,4 @@ export class RobotManager {
     }
 }
 
-export const robotManager = new RobotManager(
-    USE_VIRTUAL_ROBOTS ? Array.from(virtualRobots.values()) : [],
-);
+export const robotManager = new RobotManager();

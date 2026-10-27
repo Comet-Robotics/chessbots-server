@@ -1,49 +1,4 @@
-import type { Square } from "chess.js";
-import type { Robot } from "../server/robot/robot";
-
-/**
- * Defines a specific piece.
- * Values are defined to be consistent with the chess.js library.
- */
-export enum PieceType {
-    PAWN = "p",
-    BISHOP = "b",
-    KNIGHT = "n",
-    ROOK = "r",
-    QUEEN = "q",
-    KING = "k",
-}
-
-/**
- * Defines playing with the white or black pieces.
- * Values are defined to be consistent with the chess.js library.
- */
-export enum Side {
-    WHITE = "w",
-    BLACK = "b",
-    SPECTATOR = "s",
-}
-
-/**
- * gets the opposite enum value of a side
- * @param side - a side
- * @returns the opposite of the input side
- */
-export function oppositeSide(side: Side) {
-    return side === Side.WHITE ? Side.BLACK : Side.WHITE;
-}
-
-/**
- * holds the piece side, type, robot, and square
- */
-export class Piece {
-    constructor(
-        public readonly side: Side,
-        public readonly pieceType: PieceType,
-        public readonly robot: Robot,
-        public square: Square,
-    ) {}
-}
+import type { Square, PieceSymbol } from "chess.js";
 
 /**
  * the movement shown as FROM one square TO another, and if it is a promotion
@@ -51,5 +6,10 @@ export class Piece {
 export interface Move {
     from: Square;
     to: Square;
-    promotion?: PieceType;
+    promotion?: PieceSymbol;
+}
+
+export type Location = {   
+    x: number,
+    y: number,
 }

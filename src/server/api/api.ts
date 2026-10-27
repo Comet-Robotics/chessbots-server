@@ -26,7 +26,6 @@ import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "./tunnel/tcp-packet";
 import { GameInterruptedReason } from "../../common/game-end-reasons";
-import { ShowfileSchema, TimelineEventTypes } from "../../common/show";
 import type { Command } from "../command/command";
 import {
     SequentialCommandGroup,
@@ -40,7 +39,6 @@ import {
     CenterCommand,
     RelativeRotateCommand,
 } from "../command/move-command";
-import { GridIndices } from "../../common/grid-indices";
 import {
     moveAllRobotsHomeToDefaultOptimized,
     moveAllRobotsToDefaultPositions,
