@@ -1,5 +1,5 @@
-import type { Square } from "chess.js";
-import { Chess } from "chess.js";
+import type { Color, PieceSymbol, Square } from "chess.js";
+import { Chess, KING, PAWN, QUEEN, WHITE } from "chess.js";
 import { aiMove } from "js-chess-engine";
 import { GameFinishedReason } from "./game-end-reasons";
 import type { Difficulty } from "./client-types";
@@ -78,9 +78,9 @@ export class ChessEngine {
      * @returns true if the move is a King Side Castle
      */
     isKingSideCastling(move: Move) {
-        if (this.getPieceTypeFromSquare(move.from) !== PieceType.KING) {
+        if (this.getPieceTypeFromSquare(move.from) !== KING) {
             return false;
-        } else if (this.chess.get(move.from).color === Side.WHITE) {
+        } else if (this.chess.get(move.from).color === WHITE) {
             return move.from === "e1" && move.to === "g1";
         } else {
             return move.from === "e8" && move.to === "g8";
@@ -122,9 +122,9 @@ export class ChessEngine {
      * @returns true if the move is a Queen Side Castle
      */
     isQueenSideCastling(move: Move) {
-        if (this.getPieceTypeFromSquare(move.from) !== PieceType.KING) {
+        if (this.getPieceTypeFromSquare(move.from) !== KING) {
             return false;
-        } else if (this.chess.get(move.from).color === Side.WHITE) {
+        } else if (this.getPieceColor(move.from) === WHITE) {
             return move.from === "e1" && move.to === "c1";
         } else {
             return move.from === "e8" && move.to === "c8";
@@ -160,13 +160,8 @@ export class ChessEngine {
      * @param square - The Square to check.
      * @returns The current piece on the square as a PieceType enum or undefined if there is no piece
      */
-    getPieceTypeFromSquare(square: Square): PieceType | undefined {
-        const piece = this.chess.get(square);
-        if (piece !== null) {
-            return piece.type as PieceType;
-        } else {
-            return undefined;
-        }
+    getPieceTypeFromSquare(square: Square): PieceSymbol | undefined {
+        return this.chess.get(square)?.type;
     }
 
     /**
@@ -174,13 +169,8 @@ export class ChessEngine {
      * @param square - The Square to check.
      * @returns The current side of the piece on the square or undefined if there is no piece on the square
      */
-    getPieceSide(square: Square): Side | undefined {
-        const piece = this.chess.get(square);
-        if (piece !== null) {
-            return piece.color as Side;
-        } else {
-            return undefined;
-        }
+    getPieceColor(square: Square): Color | undefined {
+        return this.chess.get(square)?.color;
     }
 
     /**
@@ -188,7 +178,7 @@ export class ChessEngine {
      * @param square - The Square to check.
      * @returns true if the square has a piece on it.
      */
-    hasPiece(square: Square) {
+    hasPiece(square: Square): boolean {
         return this.getPieceTypeFromSquare(square) !== undefined;
     }
 
@@ -197,8 +187,8 @@ export class ChessEngine {
      * @param move - The Move to check.
      * @returns The current piece on the square as a PieceType enum
      */
-    getPieceTypeFromMove(move: Move) {
-        return this.getPieceTypeFromSquare(move.from) as PieceType;
+    getPieceTypeFromMove(move: Move): PieceSymbol |  undefined {
+        return this.getPieceTypeFromSquare(move.from);
     }
 
     /**
@@ -236,12 +226,15 @@ export class ChessEngine {
      * Assumes that chess hasn't been updated yet
      */
     checkPromotion(from: Square, to: Square): boolean {
-        if (this.getPieceTypeFromSquare(from) !== PieceType.PAWN) {
+        if (this.getPieceTypeFromSquare(from) !== PAWN) {
             return false;
-        } else if (this.chess.get(from).color === Side.WHITE) {
-            return from[1] === "7" && to[1] === "8";
         }
-        return from[1] === "2" && to[1] === "1";
+        
+        if (this.getPieceColor(from) === WHITE) {
+            return to[1] === "8";
+        } else {
+            return to[1] === "1";
+        }
     }
 
     /**
@@ -262,7 +255,7 @@ export class ChessEngine {
             return {
                 from,
                 to,
-                promotion: PieceType.QUEEN,
+                promotion: QUEEN
             };
         }
         return { from, to };
@@ -279,7 +272,7 @@ export class ChessEngine {
 
         if (this.chess.isCheckmate()) {
             // If it's your turn, you lost
-            return this.chess.turn() === "w" ?
+            return this.chess.turn() === WHITE ?
                     GameFinishedReason.WHITE_CHECKMATED
                 :   GameFinishedReason.BLACK_CHECKMATED;
         } else if (this.chess.isStalemate()) {
