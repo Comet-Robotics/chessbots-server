@@ -1,4 +1,4 @@
-import { Move, type Square } from "chess.js";
+import type { Move, Square } from "../../common/chess";
 import { config } from "../api/config";
 
 export interface PuzzleComponents {

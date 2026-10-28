@@ -2,8 +2,7 @@ import { Button, H3, H6, Slider } from "@blueprintjs/core";
 import type { Dispatch } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Difficulty, GameType } from "../../common/client-types";
-import { Side } from "../../common/game-types";
+import { Difficulty, GameType, BLACK, Side, WHITE } from "../../common/chess";
 import { post } from "../api";
 import {
     buttonColor,
@@ -80,12 +79,12 @@ export function SetupGame(props: SetupGameProps) {
                 let selectedSide: Side;
                 if (desiredSide === DesiredSide.RANDOM) {
                     selectedSide =
-                        Math.random() < 0.5 ? Side.WHITE : Side.BLACK;
+                        Math.random() < 0.5 ? WHITE : BLACK;
                 } else {
                     selectedSide =
                         desiredSide === DesiredSide.WHITE ?
-                            Side.WHITE
-                        :   Side.BLACK;
+                            WHITE
+                        :   BLACK;
                 }
 
                 // pass the user choice to api

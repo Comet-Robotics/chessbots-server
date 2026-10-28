@@ -1,4 +1,4 @@
-import type { Square } from "chess.js";
+import type { Square } from "./chess";
 
 /**
  * The value of a degree in radians.

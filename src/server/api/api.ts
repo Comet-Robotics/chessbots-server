@@ -19,7 +19,7 @@ import {
     HumanGameManager,
     PuzzleGameManager,
 } from "./game-manager";
-import { ChessEngine } from "../../common/chess";
+import type { ChessEngine, Square } from "../../common/chess";
 import { Side } from "../../common/game-types";
 import { START_ROBOTS_AT_DEFAULT, DO_SAVES } from "../env";
 import { DEGREE } from "../../common/units";
@@ -53,7 +53,6 @@ import {
     setAllRobotsToDefaultPositions,
     unpauseGame,
 } from "./pauseHandler";
-import { type Square } from "chess.js";
 import type { GridPosition } from "../../common/units";
 import { gridPositionFromString, squareToGrid } from "../../common/units";
 

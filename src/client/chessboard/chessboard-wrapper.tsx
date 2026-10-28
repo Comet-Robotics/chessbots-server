@@ -1,8 +1,7 @@
 import { Chessboard } from "react-chessboard";
-import type { Square } from "chess.js";
+import { BLACK, WHITE, type ChessEngine, type Square } from "../../common/chess";
 import { useState } from "react";
 import { BoardContainer } from "./board-container";
-import type { ChessEngine } from "../../common/chess";
 import type { Move, PieceType } from "../../common/game-types";
 import { Side } from "../../common/game-types";
 import { customSquareRenderer } from "./custom-square-renderer";
@@ -87,10 +86,10 @@ export function ChessboardWrapper(props: ChessboardWrapperProps): JSX.Element {
 
     //set the side to their respective colors and orientations
     switch (props.side) {
-        case Side.WHITE:
+        case WHITE:
             if (orientation !== "white") setOrientation("white");
             break;
-        case Side.BLACK:
+        case BLACK:
             if (orientation !== "black") setOrientation("black");
             break;
         //choose spectator side based on which is closer

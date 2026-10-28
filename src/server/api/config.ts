@@ -1,10 +1,10 @@
 import { z } from "zod"
 import json_config from "./config.json"
-import { Color, PieceSymbol } from "chess.js"
+import type { Side, Piece } from "../../common/chess"
 
 export let piece_schema = z.object({
-    color: z.enum(["w", "b"]) satisfies z.ZodType<Color>,
-    symbol: z.enum(["p", "n", "b", "r", "q", "k"]) satisfies z.ZodType<PieceSymbol>
+    color: z.enum(["w", "b"]) satisfies z.ZodType<Side>,
+    symbol: z.enum(["p", "n", "b", "r", "q", "k"]) satisfies z.ZodType<Piece>
 })
 
 export type RobotId = z.infer<typeof robot_id_schema>

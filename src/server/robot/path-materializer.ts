@@ -1,4 +1,3 @@
-import { type Move } from "../../common/game-types";
 import {
     type Command,
     ParallelCommandGroup,
@@ -17,7 +16,7 @@ import type { Robot } from "./robot";
 //import { error } from "console"; replaced with Error
 import { robotManager } from "./robot-manager";
 import { gameManager } from "../api/managers";
-import {,
+import {
     positionFromGridPosition,
     gridPositionFromPosition,
 } from "../../common/units";
@@ -110,7 +109,7 @@ function calcCollisionType(gridMove: GridMove): CollisionType {
 
 function addToCollisions(collisions: RobotId[], x: number, y: number) {
     const square: GridPosition = { i: x, j: y };
-    if (robotManager.isRobotAtPos(square)) {
+    if (robotManager.isRobotAtGridPos(square)) {
         const robotId = robotManager.getRobotAtGridPos(square)!.id;
         // if it's a piece that already returned and thus is harmless, don't do anything, otherwise push it
         if (alreadyHomePieces.has(robotId)) {
@@ -202,13 +201,13 @@ function detectCollisions(
 
                 // Above or below the tile, depends on direction
                 const square1: GridPosition = { i: Math.round(midx), j: Math.round(midy + ny) };
-                if (robotManager.isRobotAtIndices(square1)) {
+                if (robotManager.isRobotAtGridPos(square1)) {
                     const id = robotManager.getRobotAtGridPos(square1)!.id;
                     collisions.push(id);
                 }
                 // Left or right of tile, depends on direction
                 const square2: GridPosition = { i: Math.round(midx + nx), j: Math.round(midy) };
-                if (robotManager.isRobotAtIndices(square2)) {
+                if (robotManager.isRobotAtGridPos(square2)) {
                     const piece: string =
                         robotManager.getRobotAtGridPos(square2)!.id;
                     collisions.push(piece);
@@ -231,16 +230,16 @@ function detectCollisions(
             // Same sign horse moves share this square. Will always be 1 diagonal
             // of moving piece
             const square1: GridPosition = { i: Math.round(from.i + nx), j: Math.round(from.j + ny) };
-            if (robotManager.isRobotAtIndices(square1)) {
-                const piece: string =
+            if (robotManager.isRobotAtGridPos(square1)) {
+                const piece: RobotId =
                     robotManager.getRobotAtGridPos(square1).id;
                 collisions.push(piece);
             }
             // Same initial direction horse moves share this square. Will be directly
             // adjacent to moving piece.
             const square2: GridPosition = { i: Math.round(from.i + sx), j: Math.round(from.j + sy) };
-            if (robotManager.isRobotAtIndices(square2)) {
-                const piece: string =
+            if (robotManager.isRobotAtGridPos(square2)) {
+                const piece: RobotId =
                     robotManager.getRobotAtGridPos(square2).id;
                 collisions.push(piece);
             }
@@ -251,7 +250,7 @@ function detectCollisions(
 }
 
 function findShimmyLocation(
-    pieceId: string,
+    pieceId: RobotId,
     move: GridMove,
     collisionType: CollisionType,
 ): { x: number; y: number } {
@@ -320,7 +319,7 @@ function findShimmyLocation(
 }
 
 function constructDriveCommand(
-    pieceId: string,
+    pieceId: RobotId,
     endLocation: { x: number; y: number },
     startLocation: { x: number; y: number } | null,
 ): DriveCommand {
@@ -333,7 +332,7 @@ function constructDriveCommand(
 }
 
 function constructRotateCommand(
-    pieceId: string,
+    pieceId: RobotId,
     location: { x: number; y: number },
     startLocation: { x: number; y: number } | null,
 ): ReversibleRobotCommand {
@@ -643,7 +642,7 @@ function returnToHomeHexapawn(
     }
 }
 
-function returnToHome(from: GridPosition, id: string): SequentialCommandGroup {
+function returnToHome(from: GridPosition, id: RobotId): SequentialCommandGroup {
     //const capturedPiece: GridPosition = squareToGrid(from);
     const home: GridPosition = robotManager.getRobot(id).homeIndices;
     const fastestMoveToDeadzone = moveToDeadZone(from);

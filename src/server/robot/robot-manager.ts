@@ -46,11 +46,16 @@ export class RobotManager {
      * Retrieves a robot by id.
      * Throws if no robot is found.
      */
-    getRobot(robotId: RobotId): Robot | undefined {
-        return this.robots.get(robotId);
+    getRobot(robotId: RobotId): Robot {
+        let robot = this.robots.get(robotId);
+        if (!robot) {
+            console.error(`Failed to find robot ${robotId}`)
+        }
+
+        return robot!;
     }
 
-    isRobotAtPos(pos: GridPosition): boolean {
+    isRobotAtGridPos(pos: GridPosition): boolean {
         return this.getRobotAtGridPos(pos) != undefined
     }
 

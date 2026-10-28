@@ -1,7 +1,7 @@
 import { FULL_ROTATION, RADIAN, clampHeading, positionFromGridPosition } from "../../common/units";
 import { type BotTunnel } from "../api/tunnel/bot-tunnel";
 import type { GridPosition, Position } from "../../common/units";
-import { PieceSymbol } from "chess.js";
+import type { Piece } from "../../common/chess";
 import { config, RobotConfig, RobotId } from "../api/config";
 
 /**
@@ -47,7 +47,7 @@ export class Robot {
         this._heading = heading;
     }
 
-    public get pieceType(): PieceSymbol {
+    public get pieceType(): Piece {
         return this.config.piece.symbol;
     }
 
