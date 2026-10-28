@@ -2,7 +2,7 @@ import { z } from "zod"
 import json_config from "./config.json"
 import type { Side, Piece } from "../../common/chess"
 
-export let piece_schema = z.object({
+let piece_schema = z.object({
     color: z.enum(["w", "b"]) satisfies z.ZodType<Side>,
     symbol: z.enum(["p", "n", "b", "r", "q", "k"]) satisfies z.ZodType<Piece>
 })

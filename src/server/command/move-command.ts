@@ -12,7 +12,7 @@ import { RobotId } from "../api/config";
 /**
  * Represents a rotation.
  */
-export abstract class RotateCommand extends RobotCommand {
+abstract class RotateCommand extends RobotCommand {
     constructor(
         robotId: RobotId,
         public headingRadians: number,

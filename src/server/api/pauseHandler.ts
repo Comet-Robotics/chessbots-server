@@ -11,13 +11,13 @@ import type { GridPosition } from "../../common/units";
 import { positionFromGridPosition, gridPositionFromString } from "../../common/units";
 
 export let gamePaused = false;
-export let pauser: string = "none";
+let pauser: string = "none";
 
 export function setPaused(pauseFlag: boolean) {
     gamePaused = pauseFlag;
 }
 
-export function setPauser(name: string) {
+function setPauser(name: string) {
     pauser = name;
 }
 
@@ -43,7 +43,7 @@ export function setAllRobotsToDefaultPositions(
 }
 
 //function to actually do the rollback that tommy made
-export function doRollBack() {
+function doRollBack() {
     const ids = clientManager.getIds();
     if (ids) {
         const oldSave = SaveManager.loadGame(ids[0]);

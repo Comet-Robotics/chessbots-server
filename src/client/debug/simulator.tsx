@@ -361,7 +361,7 @@ function LogEntry(props: { message: SimulatorUpdateMessage; ts: Date }) {
  * @param props - the robot position and id
  * @returns the robot icon scaled to the board
  */
-export const Robot = forwardRef<
+const Robot = forwardRef<
     HTMLDivElement,
     {
         pos: SimulatedRobotLocation;

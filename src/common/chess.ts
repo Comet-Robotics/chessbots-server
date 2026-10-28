@@ -1,4 +1,4 @@
-import type { Color, Move as ChessJsMove, PieceSymbol, Square as ChessJsSquare } from "chess.js";
+import type { Color, Move as ChessJsMove, PieceSymbol, Square } from "chess.js";
 import { Chess, KING, PAWN, QUEEN, WHITE, BLACK } from "chess.js";
 import { GameFinishedReason } from "./game-end-reasons";
 import type { RobotManager } from "../server/robot/robot-manager";
@@ -7,7 +7,7 @@ import { RobotId } from "../server/api/config";
 export type Move = Pick<ChessJsMove, "from" | "to" | "promotion">
 export type Piece = PieceSymbol;
 export type Side = Color;
-export type Square = ChessJsSquare;
+export { Square };
 
 // Re-export constants used in the codebase
 export { KING, PAWN, QUEEN, WHITE, BLACK };

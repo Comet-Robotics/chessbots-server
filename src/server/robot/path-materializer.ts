@@ -23,7 +23,7 @@ import {
 import type { GridPosition } from "../../common/units";
 import { RobotId } from "../api/config";
 
-export interface GridMove {
+interface GridMove {
     from: GridPosition;
     to: GridPosition;
     distance?: number;
@@ -461,7 +461,7 @@ function constructFinalCommand(
 
 // Takes in a move, and generates the commands required to get the main piece to it's destination
 // If there are pieces in the way, it shimmy's them out, and move them back after main piece passes
-export function moveMainPiece(
+function moveMainPiece(
     move: GridMove,
     noReverse: boolean = false,
     movingRobotId?: string,
@@ -809,7 +809,7 @@ export function moveAllRobotsToDefaultPositionsHexapawn(
  * Convenience function for regular games that uses the robot's default indices from config
  * @returns A SequentialCommandGroup containing all robot movements to their config default positions
  */
-export function moveAllRobotsToConfigDefaultPositions(): SequentialCommandGroup {
+function moveAllRobotsToConfigDefaultPositions(): SequentialCommandGroup {
     const defaultPositions = new Map<string, GridPosition>();
 
     // Build the map from robot config default positions
