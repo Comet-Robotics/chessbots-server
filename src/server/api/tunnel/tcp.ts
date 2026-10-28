@@ -1,3 +1,8 @@
+import { RobotManager } from "../../robot/robot-manager";
+import { config } from "../config";
+import { BotTunnel } from "./bot-tunnel";
+import { RealBotTunnel } from "./real-tunnel";
+
 /**
  * Handles tcp tunnels and maintains a list of connections
  */
@@ -17,7 +22,7 @@ export class TCPServer {
     ) {
         this.server = net.createServer();
         this.server.on("connection", this.handleConnection.bind(this));
-        this.server.listen(config["tcpServerPort"], "0.0.0.0", () => {
+        this.server.listen(config.tcpPort, "0.0.0.0", () => {
             console.log(
                 "TCP bot server listening to %j",
                 this.server.address(),
@@ -43,22 +48,12 @@ export class TCPServer {
             ((mac: string) => {
                 // add the new robot to the array if it isn't in bots config
                 console.log("Adding robot with mac", mac, "to arr");
-                let id: string;
                 if (!(mac in config["bots"])) {
-                    id = `unknown-robot-${randomUUID()}`;
-                    console.log(
-                        "Address not found in config! Assigning random ID: " +
-                            id,
-                    );
-                    config["bots"][mac] = id;
-                } else {
-                    id = config["bots"][mac];
+                    console.error(`MAC address ${mac} not found in config, ignoring`);
+                    return;
+                } 
 
-                    if (!(id in this.robotManager.idsToRobots)) {
-                        this.robotManager.createRobotFromId(id);
-                    }
-                    console.log("Found address ID: " + id);
-                }
+                this.robotManager.createRobot(mac);                
 
                 // if there was disconnected bot beforehand, remove it. If no more bots disconnected, send signal to unpause game
                 if (id !== undefined && disconnectedBots.has(id)) {
@@ -70,7 +65,7 @@ export class TCPServer {
                 tunnel.id = id;
                 tunnel.address = mac;
                 this.connections[id] = tunnel;
-                this.robotManager.createRobotFromId(id).setTunnel(tunnel);
+                this.robotManager.createRobot(mac).setTunnel(tunnel);
             }).bind(this),
         );
 
@@ -99,5 +94,4 @@ export class TCPServer {
     }
 }
 
-export const tcpServer: TCPServer | null =
-    USE_VIRTUAL_ROBOTS ? null : new TCPServer(robotManager);
+export const tcpServer: TCPServer | null = USE_VIRTUAL_ROBOTS ? null : new TCPServer(robotManager);

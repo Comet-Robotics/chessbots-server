@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { ChessEngine } from "../../common/chess-engine";
+import { ChessEngine } from "../../common/chess";
 import type { Square } from "chess.js";
 import { Side } from "../../common/game-types";
 

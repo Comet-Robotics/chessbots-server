@@ -38,51 +38,6 @@ export type GridPosition = {
     j: number;
 }
 
-/** Helper to create a Position */
-export function createPosition(x: number, y: number): Position {
-    return { x, y };
-}
-
-/** Helper to create a GridPosition */
-export function createGridPosition(i: number, j: number): GridPosition {
-    return { i, j };
-}
-
-/** Position arithmetic */
-export function positionAdd(a: Position, b: Position): Position {
-    return { x: a.x + b.x, y: a.y + b.y };
-}
-
-export function positionSub(a: Position, b: Position): Position {
-    return { x: a.x - b.x, y: a.y - b.y };
-}
-
-export function positionNeg(a: Position): Position {
-    return { x: -a.x, y: -a.y };
-}
-
-/** GridPosition arithmetic */
-export function gridPositionAddTuple(
-    pos: GridPosition,
-    tuple: [number, number],
-): GridPosition {
-    return { i: pos.i + tuple[0], j: pos.j + tuple[1] };
-}
-
-export function gridPositionEquals(a: GridPosition, b: GridPosition): boolean {
-    return a.i === b.i && a.j === b.j;
-}
-
-/**
- * Converts a chess square (e.g. "a1") to a GridPosition.
- * Files a-h map to columns 1-8, ranks 1-8 map to rows 1-8.
- */
-export function squareToGrid(square: Square): GridPosition {
-    const fileIndex = square.charCodeAt(0) - 96; // 'a' -> 1, ..., 'h' -> 8
-    const rankIndex = parseInt(square[1], 10);
-    return { i: fileIndex, j: rankIndex };
-}
-
 /**
  * Converts a pixel Position to a GridPosition by rounding.
  */

@@ -1,6 +1,7 @@
 import { gamePaused } from "../api/pauseHandler";
 import { robotManager } from "../robot/robot-manager";
 import { MAX_RETRIES, MOVE_TIMEOUT } from "../env";
+import { RobotId } from "../api/config";
 
 /**
  * An command which operates on one or more robots.
@@ -89,10 +90,14 @@ export abstract class CommandBase implements Command {
  */
 export abstract class RobotCommand extends CommandBase {
     commandIsCompleted = false;
-    constructor(public readonly robotId: string) {
+    constructor(public readonly robotId: RobotId) {
         super();
         // TO DISCUSS: idk if its possible for a robot object to change between adding it as a requrement and executing the command but if it is, adding the robot object as a requirement semi defeats the purpose of using robot ids everywhere
         const robot = robotManager.getRobot(robotId);
+        if (!robot) {
+            return;
+        }
+
         this.addRequirements([robot]);
     }
 }

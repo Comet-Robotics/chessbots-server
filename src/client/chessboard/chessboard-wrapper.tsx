@@ -2,7 +2,7 @@ import { Chessboard } from "react-chessboard";
 import type { Square } from "chess.js";
 import { useState } from "react";
 import { BoardContainer } from "./board-container";
-import type { ChessEngine } from "../../common/chess-engine";
+import type { ChessEngine } from "../../common/chess";
 import type { Move, PieceType } from "../../common/game-types";
 import { Side } from "../../common/game-types";
 import { customSquareRenderer } from "./custom-square-renderer";

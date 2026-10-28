@@ -2,7 +2,7 @@
     "tcpPort": 3001,
     "bots": {
         "80:65:99:4d:f3:e8": {
-            "robot_id": "robot-15",
+            "id": "robot-15",
             "piece": "w_pawn",
             "start_pos": {
                 "x": 8,
@@ -16,7 +16,7 @@
             "home_rot": 0
         },
         "c0:4e:30:4b:68:76": {
-            "robot_id": "robot-19",
+            "id": "robot-19",
             "piece": "b_pawn",
             "start_pos": {
                 "x": 4,
@@ -30,7 +30,7 @@
             "home_rot": 0
         },
         "80:65:99:4d:f3:9a": {
-            "robot_id": "robot-3",
+            "id": "robot-3",
             "piece": "w_bishop",
             "start_pos": {
                 "x": 4,
@@ -44,7 +44,7 @@
             "home_rot": 0
         },
         "80:65:99:4e:07:b0": {
-            "robot_id": "robot-4",
+            "id": "robot-4",
             "piece": "w_queen",
             "start_pos": {
                 "x": 5,
@@ -58,7 +58,7 @@
             "home_rot": 0
         },
         "80:65:99:4e:07:9c": {
-            "robot_id": "robot-11",
+            "id": "robot-11",
             "piece": "b_king",
             "start_pos": {
                 "x": 5,
@@ -72,7 +72,7 @@
             "home_rot": 0
         },
         "80:65:99:4e:07:ae": {
-            "robot_id": "robot-12",
+            "id": "robot-12",
             "piece": "b_king",
             "start_pos": {
                 "x": 5,
@@ -86,7 +86,7 @@
             "home_rot": 0
         },
         "80:65:99:4e:70:48": {
-            "robot_id": "robot-2",
+            "id": "robot-2",
             "piece": "w_knight",
             "start_pos": {
                 "x": 0,
@@ -100,7 +100,7 @@
             "home_rot": 0
         },
         "80:65:99:4e:70:46": {
-            "robot_id": "robot-7",
+            "id": "robot-7",
             "piece": "w_knight",
             "start_pos": {
                 "x": 8,
@@ -114,7 +114,7 @@
             "home_rot": 0
         },
         "80:65:99:4e:70:4c": {
-            "robot_id": "robot-6",
+            "id": "robot-6",
             "piece": "w_bishop",
             "start_pos": {
                 "x": 7,
@@ -128,7 +128,7 @@
             "home_rot": 0
         },
         "c0:4e:30:4b:66:98": {
-            "robot_id": "robot-1",
+            "id": "robot-1",
             "piece": "w_knight",
             "start_pos": {
                 "x": 3,
@@ -142,7 +142,7 @@
             "home_rot": 0
         },
         "80:65:99:4e:70:6a": {
-            "robot_id": "robot-5",
+            "id": "robot-5",
             "piece": "w_king",
             "start_pos": {
                 "x": 9,

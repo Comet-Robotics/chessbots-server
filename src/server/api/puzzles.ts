@@ -1,6 +1,5 @@
-import { type Square } from "chess.js";
-import { type Move } from "../../common/game-types";
-import config from "./bot-server-config.json";
+import { Move, type Square } from "chess.js";
+import { config } from "../api/config";
 
 export interface PuzzleComponents {
     fen: string;
@@ -155,7 +154,34 @@ export const puzzles: Record<string, PuzzleComponents> = {
     "Puzzle 3": {
         fen: "8/8/8/8/2Prk1p1/2K5/8/5R2 w - - 0 1",
         moves: [
-            { from: "f1", to: "e1" },
+            {
+                from: "f1", to: "e1",
+                color: "b",
+                piece: "b",
+                flags: "",
+                san: "",
+                lan: "",
+                before: "",
+                after: "",
+                isCapture: function (): boolean {
+                    throw new Error("Function not implemented.");
+                },
+                isPromotion: function (): boolean {
+                    throw new Error("Function not implemented.");
+                },
+                isEnPassant: function (): boolean {
+                    throw new Error("Function not implemented.");
+                },
+                isKingsideCastle: function (): boolean {
+                    throw new Error("Function not implemented.");
+                },
+                isQueensideCastle: function (): boolean {
+                    throw new Error("Function not implemented.");
+                },
+                isBigPawn: function (): boolean {
+                    throw new Error("Function not implemented.");
+                }
+            },
             { from: "e4", to: "f3" },
             { from: "c3", to: "d4" },
         ],

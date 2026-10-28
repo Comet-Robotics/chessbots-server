@@ -7,13 +7,14 @@ import {
     gridPositionFromPosition,
     positionAdd,
 } from "../../common/units";
+import { RobotId } from "../api/config";
 
 /**
  * Represents a rotation.
  */
 export abstract class RotateCommand extends RobotCommand {
     constructor(
-        robotId: string,
+        robotId: RobotId,
         public headingRadians: number,
     ) {
         super(robotId);
@@ -105,7 +106,7 @@ export class ReversibleAbsoluteRotateCommand
     private previousHeadingRadians: number | undefined;
 
     constructor(
-        robotId: string,
+        robotId: RobotId,
         protected headingSupplier: () => number,
     ) {
         super(robotId);
@@ -113,7 +114,11 @@ export class ReversibleAbsoluteRotateCommand
 
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
-        this.previousHeadingRadians = robot.headingRadians;
+        if (!robot) {
+            return;
+        }
+        
+        this.previousHeadingRadians = robot?.heading;
         return this.commandIsCompleted ?
                 Promise.resolve()
             :   (timeoutRetry(
@@ -141,10 +146,14 @@ export class ReversibleAbsoluteRotateCommand
 export class RotateToStartCommand extends RobotCommand {
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
+        if (!robot) {
+            return;
+        }
+        
         return this.commandIsCompleted ?
                 Promise.resolve()
             :   (timeoutRetry(
-                    robot.absoluteRotate(robot.startHeadingRadians).then(() => {
+                    robot.absoluteRotate(robot?.config.start_rot).then(() => {
                         this.commandIsCompleted = true;
                     }),
                     MAX_RETRIES,
@@ -157,7 +166,7 @@ export class RotateToStartCommand extends RobotCommand {
 
 export class DriveCubicSplineCommand extends RobotCommand {
     constructor(
-        robotId: string,
+        robotId: RobotId,
         public startPosition: { x: number; y: number },
         public endPosition: { x: number; y: number },
         public controlPositionA: { x: number; y: number },
@@ -193,7 +202,7 @@ export class DriveCubicSplineCommand extends RobotCommand {
 
 export class SpinRadiansCommand extends RobotCommand {
     constructor(
-        robotId: string,
+        robotId: RobotId,
         public radians: number,
         public timeDeltaMs: number,
     ) {
@@ -219,7 +228,7 @@ export class SpinRadiansCommand extends RobotCommand {
 
 export class DriveQuadraticSplineCommand extends RobotCommand {
     constructor(
-        robotId: string,
+        robotId: RobotId,
         public startPosition: { x: number; y: number },
         public endPosition: { x: number; y: number },
         public controlPosition: { x: number; y: number },
@@ -279,7 +288,7 @@ export class DriveCommand
     implements Reversible<DriveCommand>
 {
     constructor(
-        robotId: string,
+        robotId: RobotId,
         public tileDistance: number,
     ) {
         super(robotId);
@@ -324,7 +333,7 @@ export class DriveCommand
  */
 export abstract class MoveCommand extends RobotCommand {
     constructor(
-        robotId: string,
+        robotId: RobotId,
         protected position: { x: number; y: number },
     ) {
         super(robotId);
@@ -394,7 +403,7 @@ export class DriveTicksCommand
     implements Reversible<DriveTicksCommand>
 {
     constructor(
-        robotId: string,
+        robotId: RobotId,
         public ticksDistance: number,
     ) {
         super(robotId);
@@ -431,7 +440,7 @@ export class ReversibleAbsoluteMoveCommand
     private previousPosition: { x: number; y: number } | undefined;
 
     constructor(
-        robotId: string,
+        robotId: RobotId,
         protected positionSupplier: () => { x: number; y: number },
     ) {
         super(robotId);

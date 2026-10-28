@@ -21,7 +21,7 @@ import { get, useEffectQuery, useSocket } from "../api";
 import type { MessageHandler } from "../../common/message";
 import { GameEndDialog } from "./game-end-dialog";
 import { Navigate, Outlet } from "react-router-dom";
-import { ChessEngine } from "../../common/chess-engine";
+import { ChessEngine } from "../../common/chess";
 import type { Move } from "../../common/game-types";
 import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { AcceptDrawDialog, OfferDrawDialog } from "./draw-dialog";

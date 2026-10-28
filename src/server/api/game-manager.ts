@@ -1,5 +1,5 @@
 import type { Message, SendMessage } from "../../common/message";
-import type { ChessEngine } from "../../common/chess-engine";
+import type { ChessEngine } from "../../common/chess";
 import {
     createMoveMessage,
     createGameHoldMessage,

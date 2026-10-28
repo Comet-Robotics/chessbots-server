@@ -1,6 +1,7 @@
 import { type EventEmitter } from "@posva/event-emitter";
 import {
     jsonToPacket,
+    PacketType,
     type Packet,
     type PacketWithId,
 } from "./tcp-packet";
@@ -121,12 +122,51 @@ export abstract class BotTunnel {
     }
 
     abstract processPacket(packet: PacketWithId);
+    
     /**
      * send packets to robot. promise resolves when the robot acknowledges that the action is complete
      * @param packet - packet to send
      * @returns - the packet id
      */
     abstract send(packet: Packet): Promise<string>;
+
+    /**
+     * Send a packet to the robot indicating angle to turn. Returns a promise that finishes when the
+     * robot finishes the action.
+     *
+     * @param deltaHeadingRadians - A relative heading to turn by, in radians. May be positive or negative.
+     */
+    public async sendTurnPacket(delta: number): Promise<void> {
+        await this.send({
+            type: PacketType.TURN_BY_ANGLE,
+            deltaHeadingRadians: delta,
+        });
+    }
+
+    /**
+     * Send a packet to the robot indicating distance to drive. Returns a promise that finishes when the
+     * robot finishes the action.
+     *
+     * @param tileDistance - The distance to drive forward or backwards by. 1 is defined as the length of a tile.
+     */
+    public async sendDrivePacket(tileDistance: number): Promise<void> {
+        await this.send({
+            type: PacketType.DRIVE_TILES,
+            tileDistance,
+        });
+    }
+
+    public async sendCenterPacket(): Promise<void> {
+        await this.send({
+            type: PacketType.CENTER_SEND,
+        });
+    }
+
+    public async sendStopPacket(): Promise<void> {
+        await this.send({
+            type: PacketType.ESTOP,
+        });
+    }
 }
 
 export type RobotEventEmitter = EventEmitter<{

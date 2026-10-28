@@ -1,5 +1,4 @@
 import * as net from "node:net";
-import config from "../bot-server-config.json";
 import {
     type Packet,
     type PacketWithId,
@@ -18,6 +17,8 @@ import {
 } from "../../env";
 import { BotTunnel, type RobotEventEmitter } from "./bot-tunnel";
 import { pauseGame, unpauseGame } from "../pauseHandler";
+import { config } from "../config";
+import { sleep } from "../../../common/misc";
 
 /**
  * The tunnel for handling communications to the robots
@@ -69,12 +70,12 @@ export class RealBotTunnel extends BotTunnel {
     async runPings() {
         let countFailures: number = 0;
         for (;;) {
-            await waitTime(PING_INTERVAL);
+            await sleep(PING_INTERVAL);
             if (this.connected) {
                 // console.log("SENDING PING!")
                 await this.send({ type: PacketType.PING_SEND });
                 //wait for a bit to receive result of the ping
-                await waitTime(PING_TIMEOUT);
+                await sleep(PING_TIMEOUT);
 
                 if (this.pingReceived) {
                     // console.log("PING RECEIVED!")
@@ -219,8 +220,7 @@ export class RealBotTunnel extends BotTunnel {
 
         // Where a bot has a specific config changed, like a different encoder multiplier or pin location
         const overrides =
-            (config[config.bots[mac]] ?? { attributes: {} })["attributes"] ??
-            {};
+            (config[config.bots[mac]] ?? { attributes: {} })["attributes"] ?? {};
 
         for (const i of config.botConfigSchema) {
             if (i.name in overrides) {

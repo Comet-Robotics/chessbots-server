@@ -17,12 +17,12 @@ import type { Robot } from "./robot";
 //import { error } from "console"; replaced with Error
 import { robotManager } from "./robot-manager";
 import { gameManager } from "../api/managers";
-import {
-    squareToGrid,
+import {,
     positionFromGridPosition,
     gridPositionFromPosition,
 } from "../../common/units";
 import type { GridPosition } from "../../common/units";
+import { RobotId } from "../api/config";
 
 export interface GridMove {
     from: GridPosition;
@@ -108,15 +108,16 @@ function calcCollisionType(gridMove: GridMove): CollisionType {
     }
 }
 
-function addToCollisions(collisions: string[], x: number, y: number) {
+function addToCollisions(collisions: RobotId[], x: number, y: number) {
     const square: GridPosition = { i: x, j: y };
-    if (robotManager.isRobotAtIndices(square)) {
-        const robotId: string = robotManager.getRobotAtIndices(square).id;
+    if (robotManager.isRobotAtPos(square)) {
+        const robotId = robotManager.getRobotAtGridPos(square)!.id;
         // if it's a piece that already returned and thus is harmless, don't do anything, otherwise push it
         if (alreadyHomePieces.has(robotId)) {
             console.log(`The id was ${robotId}, and it's already home!`);
             return;
         }
+
         collisions.push(robotId);
     }
 }
@@ -127,7 +128,7 @@ function detectCollisions(
 ): string[] {
     const from = gridMove.from;
     const to = gridMove.to;
-    const collisions: string[] = [];
+    const collisions: RobotId[] = [];
     const direction: [number, number] = directionToEdge(to);
     switch (collisionType) {
         // Horizontal
@@ -202,15 +203,14 @@ function detectCollisions(
                 // Above or below the tile, depends on direction
                 const square1: GridPosition = { i: Math.round(midx), j: Math.round(midy + ny) };
                 if (robotManager.isRobotAtIndices(square1)) {
-                    const piece: string =
-                        robotManager.getRobotAtIndices(square1).id;
-                    collisions.push(piece);
+                    const id = robotManager.getRobotAtGridPos(square1)!.id;
+                    collisions.push(id);
                 }
                 // Left or right of tile, depends on direction
                 const square2: GridPosition = { i: Math.round(midx + nx), j: Math.round(midy) };
                 if (robotManager.isRobotAtIndices(square2)) {
                     const piece: string =
-                        robotManager.getRobotAtIndices(square2).id;
+                        robotManager.getRobotAtGridPos(square2)!.id;
                     collisions.push(piece);
                 }
             }
@@ -233,7 +233,7 @@ function detectCollisions(
             const square1: GridPosition = { i: Math.round(from.i + nx), j: Math.round(from.j + ny) };
             if (robotManager.isRobotAtIndices(square1)) {
                 const piece: string =
-                    robotManager.getRobotAtIndices(square1).id;
+                    robotManager.getRobotAtGridPos(square1).id;
                 collisions.push(piece);
             }
             // Same initial direction horse moves share this square. Will be directly
@@ -241,7 +241,7 @@ function detectCollisions(
             const square2: GridPosition = { i: Math.round(from.i + sx), j: Math.round(from.j + sy) };
             if (robotManager.isRobotAtIndices(square2)) {
                 const piece: string =
-                    robotManager.getRobotAtIndices(square2).id;
+                    robotManager.getRobotAtGridPos(square2).id;
                 collisions.push(piece);
             }
             break;
@@ -356,7 +356,7 @@ function constructFinalCommand(
     movingRobotId?: string,
 ): MovePiece {
     const from = move.from;
-    const mainPiece = movingRobotId ?? robotManager.getRobotAtIndices(from).id;
+    const mainPiece = movingRobotId ?? robotManager.getRobotAtGridPos(from).id;
     const dirToEdge = directionToEdge(from);
 
     if (mainPiece !== undefined) {
@@ -1173,9 +1173,9 @@ export function materializePath(move: Move): Command {
             move,
             robotManager,
         );
-        if (capturePiece !== undefined) {
+        if (capturePiece != undefined) {
             const captureSquare = gridPositionFromPosition(
-                robotManager.getRobot(capturePiece).position,
+                robotManager.getRobot(capturePiece)!.position,
             );
 
             const captureCommand = returnToHome(captureSquare, capturePiece);
@@ -1194,9 +1194,9 @@ export function materializePath(move: Move): Command {
         let rookMove3;
         let rookPiece;
         if (moveToGridMove(move).from.j === 2) {
-            rookPiece = robotManager.getRobotAtIndices({ i: 2, j: 2 });
+            rookPiece = robotManager.getRobotAtGridPos({ i: 2, j: 2 });
             kingMove = new AbsoluteMoveCommand(
-                robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
+                robotManager.getRobotAtGridPos(moveToGridMove(move).from).id,
                 positionFromGridPosition({ i: 4, j: 2 }),
             );
             rookMove1 = new AbsoluteMoveCommand(
@@ -1212,9 +1212,9 @@ export function materializePath(move: Move): Command {
                 positionFromGridPosition({ i: 5, j: 2 }),
             );
         } else {
-            rookPiece = robotManager.getRobotAtIndices({ i: 2, j: 9 });
+            rookPiece = robotManager.getRobotAtGridPos({ i: 2, j: 9 });
             kingMove = new AbsoluteMoveCommand(
-                robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
+                robotManager.getRobotAtGridPos(moveToGridMove(move).from).id,
                 positionFromGridPosition({ i: 4, j: 9 }),
             );
             rookMove1 = new AbsoluteMoveCommand(
@@ -1242,9 +1242,9 @@ export function materializePath(move: Move): Command {
         let rookMove3;
         let rookPiece;
         if (moveToGridMove(move).from.j === 2) {
-            rookPiece = robotManager.getRobotAtIndices({ i: 9, j: 2 });
+            rookPiece = robotManager.getRobotAtGridPos({ i: 9, j: 2 });
             kingMove = new AbsoluteMoveCommand(
-                robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
+                robotManager.getRobotAtGridPos(moveToGridMove(move).from).id,
                 positionFromGridPosition({ i: 8, j: 2 }),
             );
             rookMove1 = new AbsoluteMoveCommand(
@@ -1262,9 +1262,9 @@ export function materializePath(move: Move): Command {
         }
         // black side castling
         else {
-            rookPiece = robotManager.getRobotAtIndices({ i: 9, j: 9 });
+            rookPiece = robotManager.getRobotAtGridPos({ i: 9, j: 9 });
             kingMove = new AbsoluteMoveCommand(
-                robotManager.getRobotAtIndices(moveToGridMove(move).from).id,
+                robotManager.getRobotAtGridPos(moveToGridMove(move).from).id,
                 positionFromGridPosition({ i: 8, j: 9 }),
             );
             rookMove1 = new AbsoluteMoveCommand(
