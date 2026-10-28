@@ -22,7 +22,6 @@ import {
 import { ChessEngine } from "../../common/chess-engine";
 import { Side } from "../../common/game-types";
 import { START_ROBOTS_AT_DEFAULT, DO_SAVES } from "../env";
-import { Position } from "../robot/position";
 import { DEGREE } from "../../common/units";
 import { PacketType } from "./tunnel/tcp-packet";
 import { GameInterruptedReason } from "../../common/game-end-reasons";
@@ -55,6 +54,8 @@ import {
     unpauseGame,
 } from "./pauseHandler";
 import { type Square } from "chess.js";
+import type { GridPosition } from "../../common/units";
+import { gridPositionFromString, squareToGrid } from "../../common/units";
 
 /**
  * Helper function to move all robots from their home positions to their default positions
@@ -62,7 +63,7 @@ import { type Square } from "chess.js";
  */
 async function setupDefaultRobotPositions(
     isMoving: boolean = true,
-    defaultPositionsMap?: Map<string, GridIndices>,
+    defaultPositionsMap?: Map<string, GridPosition>,
 ): Promise<void> {
     if (defaultPositionsMap) {
         if (isMoving) {
@@ -84,7 +85,7 @@ async function setupDefaultRobotPositions(
 
 async function setupDefaultRobotPositionsHexapawn(
     isMoving: boolean = true,
-    defaultPositionsMap?: Map<string, GridIndices>,
+    defaultPositionsMap?: Map<string, GridPosition>,
 ): Promise<void> {
     if (defaultPositionsMap) {
         if (isMoving) {
@@ -317,14 +318,11 @@ apiRouter.get("/client-information", async (req, res) => {
                 ),
             );
         }
-        const robotPos = new Map(
-            oldSave!.robotPos?.map<[string, GridIndices]>((obj) => [
+        const robotPos = new Map<string, GridPosition>(
+            oldSave!.robotPos?.map<[string, GridPosition]>((obj) => [
                 obj[1],
-                new GridIndices(
-                    parseInt(obj[0].split(", ")[0]),
-                    parseInt(obj[0].split(", ")[1]),
-                ),
-            ]),
+                gridPositionFromString(obj[0]),
+            ]) || [],
         );
         console.log(robotPos);
         setAllRobotsToDefaultPositions(robotPos);
@@ -435,8 +433,8 @@ apiRouter.post("/start-hexapawn-game", async (req, res) => {
     canReloadQueue = true;
     const side = req.query.side as Side;
 
-    // Convert puzzle.robotDefaultPositions from Record<string, string> to Map<string, GridIndices>
-    const defaultPositionsMap = new Map<string, GridIndices>();
+    // Convert puzzle.robotDefaultPositions from Record<string, string> to Map<string, GridPosition>
+    const defaultPositionsMap = new Map<string, GridPosition>();
     for (const [robotId, startSquare] of Object.entries({
         "robot-1": "a2",
         "robot-2": "b2",
@@ -447,11 +445,11 @@ apiRouter.post("/start-hexapawn-game", async (req, res) => {
     })) {
         const robot = robotManager.getRobot(robotId);
         if (robot) {
-            // Convert square string to GridIndices using squareToGrid
-            const gridIndices = GridIndices.squareToGrid(startSquare as Square);
-            defaultPositionsMap.set(robotId, gridIndices);
+            // Convert square string to GridPosition using squareToGrid
+            const gridPos = squareToGrid(startSquare as Square);
+            defaultPositionsMap.set(robotId, gridPos);
             console.log(
-                `Robot ${robotId} will move to square ${startSquare} (${gridIndices.toString()})`,
+                `Robot ${robotId} will move to square ${startSquare} (${gridPos.i}, ${gridPos.j})`,
             );
         } else {
             return res.status(400).send({
@@ -494,18 +492,18 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
     );
 
     if (puzzle.robotDefaultPositions) {
-        // Convert puzzle.robotDefaultPositions from Record<string, string> to Map<string, GridIndices>
-        const defaultPositionsMap = new Map<string, GridIndices>();
+        // Convert puzzle.robotDefaultPositions from Record<string, string> to Map<string, GridPosition>
+        const defaultPositionsMap = new Map<string, GridPosition>();
         for (const [robotId, startSquare] of Object.entries(
             puzzle.robotDefaultPositions,
         )) {
             const robot = robotManager.getRobot(robotId);
             if (robot) {
-                // Convert square string to GridIndices using squareToGrid
-                const gridIndices = GridIndices.squareToGrid(startSquare);
-                defaultPositionsMap.set(robotId, gridIndices);
+                // Convert square string to GridPosition using squareToGrid
+                const gridPos = squareToGrid(startSquare as Square);
+                defaultPositionsMap.set(robotId, gridPos);
                 console.log(
-                    `Robot ${robotId} will move to square ${startSquare} (${gridIndices.toString()})`,
+                    `Robot ${robotId} will move to square ${startSquare} (${gridPos.i}, ${gridPos.j})`,
                 );
             } else {
                 return res.status(400).send({
@@ -735,7 +733,7 @@ apiRouter.get("/get-simulator-robot-state", (_, res) => {
     const robotState = Object.fromEntries(
         robotsEntries.map(([id, robot]) => {
             const headingRadians = robot.headingRadians;
-            const position = new Position(robot.position.x, robot.position.y);
+            const position = { x: robot.position.x, y: robot.position.y };
 
             // const tunnel = robot.getTunnel();
             // if (tunnel instanceof VirtualBotTunnel) {

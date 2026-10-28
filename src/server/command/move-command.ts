@@ -1,10 +1,12 @@
 import type { Reversible } from "./command";
 import { RobotCommand, timeoutRetry } from "./command";
-import { Position } from "../robot/position";
-import { GridIndices } from "../../common/grid-indices";
 import { robotManager } from "../robot/robot-manager";
 import { MAX_RETRIES } from "../env";
 import { type ReversibleRobotCommand } from "./move-piece";
+import {
+    gridPositionFromPosition,
+    positionAdd,
+} from "../../common/units";
 
 /**
  * Represents a rotation.
@@ -288,13 +290,13 @@ export class DriveCommand
         const currentPosition = robot.position;
         const newPositionX = this.tileDistance * Math.cos(robot.headingRadians);
         const newPositionY = this.tileDistance * Math.sin(robot.headingRadians);
-        robot.position = new Position(
-            newPositionX + currentPosition.x,
-            newPositionY + currentPosition.y,
-        );
+        robot.position = {
+            x: newPositionX + currentPosition.x,
+            y: newPositionY + currentPosition.y,
+        };
         robotManager.updateRobot(
             this.robotId,
-            GridIndices.fromPosition(robot.position),
+            gridPositionFromPosition(robot.position),
         );
         return this.commandIsCompleted ?
                 Promise.resolve()
@@ -323,7 +325,7 @@ export class DriveCommand
 export abstract class MoveCommand extends RobotCommand {
     constructor(
         robotId: string,
-        protected position: Position,
+        protected position: { x: number; y: number },
     ) {
         super(robotId);
     }
@@ -341,7 +343,7 @@ export class RelativeMoveCommand
         const robot = robotManager.getRobot(this.robotId);
         robotManager.updateRobot(
             this.robotId,
-            GridIndices.fromPosition(robot.position.add(this.position)),
+            gridPositionFromPosition(positionAdd(robot.position, this.position)),
         );
         return this.commandIsCompleted ?
                 Promise.resolve()
@@ -357,7 +359,7 @@ export class RelativeMoveCommand
     }
 
     public reverse(): RelativeMoveCommand {
-        return new RelativeMoveCommand(this.robotId, this.position.neg());
+        return new RelativeMoveCommand(this.robotId, { x: -this.position.x, y: -this.position.y });
     }
 }
 
@@ -369,7 +371,7 @@ export class AbsoluteMoveCommand extends MoveCommand {
         const robot = robotManager.getRobot(this.robotId);
         robotManager.updateRobot(
             this.robotId,
-            GridIndices.fromPosition(this.position),
+            gridPositionFromPosition(this.position),
         );
         return this.commandIsCompleted ?
                 Promise.resolve()
@@ -426,11 +428,11 @@ export class ReversibleAbsoluteMoveCommand
     extends RobotCommand
     implements Reversible<ReversibleAbsoluteMoveCommand>
 {
-    private previousPosition: Position | undefined;
+    private previousPosition: { x: number; y: number } | undefined;
 
     constructor(
         robotId: string,
-        protected positionSupplier: () => Position,
+        protected positionSupplier: () => { x: number; y: number },
     ) {
         super(robotId);
     }
@@ -438,13 +440,12 @@ export class ReversibleAbsoluteMoveCommand
     public async execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
         this.previousPosition = robot.position;
+        const delta = positionSub(this.positionSupplier(), robot.position);
         return this.commandIsCompleted ?
                 Promise.resolve()
             :   (timeoutRetry(
                     robot
-                        .relativeMove(
-                            this.positionSupplier().sub(robot.position),
-                        )
+                        .relativeMove(delta)
                         .then(() => {
                             this.commandIsCompleted = true;
                         }),

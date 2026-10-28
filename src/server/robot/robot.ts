@@ -1,6 +1,7 @@
-import { FULL_ROTATION, RADIAN, clampHeading } from "../../common/units";
+import { FULL_ROTATION, RADIAN, clampHeading, positionFromGridPosition, positionAdd, positionSub } from "../../common/units";
 import { PacketType } from "../api/tunnel/tcp-packet";
 import { type BotTunnel } from "../api/tunnel/bot-tunnel";
+import type { GridPosition } from "../../common/units";
 
 export type RobotId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19;
 
@@ -10,7 +11,7 @@ export type RobotId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14
  */
 export class Robot {
     private _headingRadians: number;
-    private _position: Position;
+    private _position: { x: number; y: number };
     protected tunnel: BotTunnel | null;
     protected _pieceType: string;
 
@@ -19,11 +20,11 @@ export class Robot {
         /**
          * The location the robot lives in when its not in use.
          */
-        public readonly homeIndices: GridIndices,
+        public readonly homeIndices: GridPosition,
         /**
          * The location the robot should be in at the beginning of a regular chess.
          */
-        public readonly defaultIndices: GridIndices,
+        public readonly defaultIndices: GridPosition,
         public readonly startHeadingRadians: number = 0,
         public readonly thePieceType: string,
         position?: Position,
@@ -35,16 +36,16 @@ export class Robot {
             throw new Error("startHeadingRadians must be a number");
         }
         this._headingRadians = startHeadingRadians;
-        this._position = position ?? Position.fromGridIndices(homeIndices);
+        this._position = position ?? positionFromGridPosition(homeIndices);
         this.tunnel = null;
         this._pieceType = thePieceType;
     }
 
-    public get position(): Position {
+    public get position(): { x: number; y: number } {
         return this._position;
     }
 
-    public set position(coords: Position) {
+    public set position(coords: { x: number; y: number }) {
         this._position = coords;
     }
 
@@ -95,7 +96,7 @@ export class Robot {
      * Turns and drives the robot to `this.position + deltaPosition`.
      * @param deltaPosition - The amount to offset the current position by.
      */
-    public async relativeMove(deltaPosition: Position): Promise<void> {
+    public async relativeMove(deltaPosition: { x: number; y: number }): Promise<void> {
         // NOTE: the implementation of this is wrong. it doesn't work properly but it is not needed for now so just ignoring. if someone wants to use this in the future, we can fix it but we probably won't need it in the future anyway (or at least that is what Dylan says)
         const distance = Math.hypot(deltaPosition.x, deltaPosition.y);
         const angle = clampHeading(
@@ -104,7 +105,7 @@ export class Robot {
         const promise = this.absoluteRotate(angle).then(() => {
             return this.sendDrivePacket(distance);
         });
-        this.position = this.position.add(deltaPosition);
+        this.position = positionAdd(this.position, deltaPosition);
         console.log(this.position);
         return promise;
     }

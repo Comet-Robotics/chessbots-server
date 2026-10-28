@@ -3,12 +3,12 @@ import {
     createGameHoldMessage,
     createSetChessMessage,
 } from "../../common/message";
-import { GridIndices } from "../../common/grid-indices";
-import { Position } from "../robot/position";
 import { robotManager } from "../robot/robot-manager";
 import { VirtualRobot } from "../simulator";
 import { clientManager, gameManager, socketManager } from "./managers";
 import { SaveManager } from "./save-manager";
+import type { GridPosition } from "../../common/units";
+import { positionFromGridPosition, gridPositionFromString } from "../../common/units";
 
 export let gamePaused = false;
 export let pauser: string = "none";
@@ -23,18 +23,18 @@ export function setPauser(name: string) {
 
 //have to put this method here, cause if we put it in api.ts where it initially was, we have dependency cycle.
 export function setAllRobotsToDefaultPositions(
-    defaultPositionsMap?: Map<string, GridIndices>,
+    defaultPositionsMap?: Map<string, GridPosition>,
 ): void {
     if (defaultPositionsMap) {
         for (const [robotId, indices] of defaultPositionsMap.entries()) {
             const robot = robotManager.getRobot(robotId);
-            robot.position = Position.fromGridIndices(indices);
+            robot.position = positionFromGridPosition(indices);
             if (robot instanceof VirtualRobot)
                 robot.updateTunnelPosition(robot.position);
         }
     } else {
         for (const robot of robotManager.idsToRobots.values()) {
-            robot.position = Position.fromGridIndices(robot.defaultIndices);
+            robot.position = positionFromGridPosition(robot.defaultIndices);
             if (robot instanceof VirtualRobot)
                 robot.updateTunnelPosition(robot.position);
             robotManager.updateRobot(robot.id, robot.defaultIndices);
@@ -49,14 +49,11 @@ export function doRollBack() {
         const oldSave = SaveManager.loadGame(ids[0]);
         gameManager?.chess.loadFen(oldSave!.oldPos);
         setAllRobotsToDefaultPositions(
-            new Map(
-                oldSave!.oldRobotPos?.map<[string, GridIndices]>((obj) => [
+            new Map<string, GridPosition>(
+                oldSave!.oldRobotPos?.map<[string, GridPosition]>((obj) => [
                     obj[1],
-                    new GridIndices(
-                        parseInt(obj[0].split(", ")[0]),
-                        parseInt(obj[0].split(", ")[1]),
-                    ),
-                ]),
+                    gridPositionFromString(obj[0]),
+                ]) || [],
             ),
         );
         socketManager.sendToAll(createSetChessMessage(oldSave!.oldPos));

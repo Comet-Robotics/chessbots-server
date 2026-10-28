@@ -5,6 +5,7 @@ import { GameFinishedReason } from "./game-end-reasons";
 import type { Difficulty } from "./client-types";
 import type { Move } from "./game-types";
 import type { RobotManager } from "../server/robot/robot-manager";
+import { squareToGrid } from "./units";
 
 /**
  * Creates the engine to manage chess game
@@ -142,14 +143,12 @@ export class ChessEngine {
         robotManager: RobotManager,
     ): string | undefined {
         if (this.isEnPassant(move)) {
-            return robotManager.getRobotAtIndices(
-                new GridIndices(
-                    GridIndices.squareToGrid(move.to).i,
-                    GridIndices.squareToGrid(move.from).j,
-                ),
-            ).id;
+            return robotManager.getRobotAtIndices({
+                i: squareToGrid(move.to).i,
+                j: squareToGrid(move.from).j,
+            }).id;
         } else if (this.isRegularCapture(move)) {
-            const to: GridIndices = GridIndices.squareToGrid(move.to);
+            const to = squareToGrid(move.to);
             return robotManager.getRobotAtIndices(to).id;
         }
         return undefined;

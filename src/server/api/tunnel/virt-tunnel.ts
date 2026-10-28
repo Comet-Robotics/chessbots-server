@@ -3,15 +3,14 @@ import { Robot } from "./robot/robot";
 import config from "./api/bot-server-config.json";
 import type { Packet, PacketWithId } from "./utils/tcp-packet";
 import { PacketType } from "./utils/tcp-packet";
-import { Position } from "./robot/position";
 import path from "path";
 import type { StackFrame, SimulatedRobotLocation } from "../common/message/message";
 import { createSimulatorUpdateMessage } from "../common/message/message";
 import { socketManager } from "./api/managers";
 import { randomUUID } from "node:crypto";
-import { GridIndices } from "../common/grid-indices";
 import { BotTunnel, type RobotEventEmitter } from "./api/tunnel/bot-tunnel";
 import { USE_BANQUET_INDICES, USE_HEXAPAWN_INDICES } from "./utils/env";
+import type { GridPosition } from "../../common/units";
 
 const srcDir = path.resolve(__dirname, "../");
 
@@ -81,7 +80,7 @@ export class VirtualBotTunnel extends BotTunnel {
     constructor(
         private robotId: string,
         private headingRadians: number,
-        private position: Position,
+        private position: { x: number; y: number },
     ) {
         super();
 
@@ -90,7 +89,7 @@ export class VirtualBotTunnel extends BotTunnel {
         this.emitter = new EventEmitter();
     }
 
-    public updatePosition(newPosition: Position): void {
+    public updatePosition(newPosition: { x: number; y: number }): void {
         this.position = newPosition;
     }
 
@@ -179,10 +178,10 @@ export class VirtualBotTunnel extends BotTunnel {
                     const deltaY = distance * Math.sin(this.headingRadians);
 
                     //needed cause stupid
-                    const newPosition = new Position(
-                        Math.round((this.position.x + deltaX) * 10) / 10,
-                        Math.round((this.position.y + deltaY) * 10) / 10,
-                    );
+                    const newPosition = {
+                        x: Math.round((this.position.x + deltaX) * 10) / 10,
+                        y: Math.round((this.position.y + deltaY) * 10) / 10,
+                    };
 
                     console.log(
                         `Robot ${this.robotId} moved to ${newPosition.x}, ${newPosition.y} from ${this.position.x}, ${this.position.y}`,
@@ -223,8 +222,8 @@ export class VirtualBotTunnel extends BotTunnel {
 export class VirtualRobot extends Robot {
     constructor(
         id: string,
-        homeIndices: GridIndices,
-        defaultIndices: GridIndices,
+        homeIndices: GridPosition,
+        defaultIndices: GridPosition,
         headingRadians: number,
         pieceType: string,
     ) {
@@ -234,7 +233,7 @@ export class VirtualRobot extends Robot {
 
     public setTunnel(_: BotTunnel): void {}
 
-    public updateTunnelPosition(newPosition: Position): void {
+    public updateTunnelPosition(newPosition: { x: number; y: number }): void {
         if (this.tunnel instanceof VirtualBotTunnel) {
             this.tunnel.updatePosition(newPosition);
         }
@@ -285,11 +284,11 @@ function createVirtualRobots() {
                 id,
                 new VirtualRobot(
                     id,
-                    new GridIndices(iIndex, jIndex),
-                    new GridIndices(
-                        realRobotConfig.defaultIndices.x,
-                        realRobotConfig.defaultIndices.y,
-                    ),
+                    { i: iIndex, j: jIndex },
+                    {
+                        i: realRobotConfig.defaultIndices.x,
+                        j: realRobotConfig.defaultIndices.y,
+                    },
                     realRobotConfig.startHeadingRadians,
                     realRobotConfig.attributes.piece_type,
                 ),

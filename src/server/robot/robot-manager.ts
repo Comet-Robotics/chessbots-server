@@ -6,6 +6,7 @@ import {
     USE_HEXAPAWN_INDICES,
     USE_VIRTUAL_ROBOTS,
 } from "../env";
+import type { GridPosition } from "../../common/units";
 
 /**
  * Stores robots. Provides utilities for finding them by position.
@@ -14,12 +15,29 @@ export class RobotManager {
     /**
      * Maps robot ids to robots.
      */
-    robots: Map<RobotId, Robot> = new Map();
+    robots: Map<string, Robot> = new Map();
+    
+    /**
+     * Alias for robots (for backward compatibility).
+     */
+    get idsToRobots(): Map<string, Robot> {
+        return this.robots;
+    }
     
     constructor() {}
 
     addRobot(robot: Robot) {
         this.robots.set(robot.id, robot);
+    }
+
+    /**
+     * Updates a robot's stored position to a new grid position.
+     */
+    updateRobot(robotId: string, newPos: GridPosition): void {
+        const robot = this.robots.get(robotId);
+        if (robot) {
+            robot.position = { x: newPos.i, y: newPos.j };
+        }
     }
 
     //use this so on disconnect and reconnect we don't just have a bunch of bots in here that shouldn't exist cause they're disconnected
@@ -72,11 +90,11 @@ export class RobotManager {
 
         const robot = new Robot(
             robotId,
-            new GridIndices(iIndex, jIndex),
-            new GridIndices(
-                robotConfig?.defaultIndices.x,
-                robotConfig?.defaultIndices.y,
-            ),
+            { i: iIndex, j: jIndex },
+            {
+                i: robotConfig?.defaultIndices.x,
+                j: robotConfig?.defaultIndices.y,
+            },
             robotConfig?.startHeadingRadians * DEGREE,
             robotConfig?.attributes.piece_type,
         );
@@ -88,29 +106,29 @@ export class RobotManager {
     /**
      * Returns `true` if a Robot is at the specified position, and `false` otherwise.
      */
-    isRobotAtIndices(indices: GridIndices): boolean {
+    isRobotAtIndices(indices: GridPosition): boolean {
         const indicesToIds = this.getIndicesToIds();
-        return indicesToIds.has(indices.toString());
+        return indicesToIds.has(indices.i + ", " + indices.j);
     }
 
     /**
      * Retrieves a robot at `indices`.
      * Throws if no robot is found.
      */
-    getRobotAtIndices(indices: GridIndices): Robot {
+    getRobotAtIndices(indices: GridPosition): Robot {
         const indicesToIds = this.getIndicesToIds();
-        const robotId = indicesToIds.get(indices.toString());
+        const robotId = indicesToIds.get(indices.i + ", " + indices.j);
         const theKeys = indicesToIds.keys();
         const keyArr = [...theKeys];
         console.log(
-            `Indices is ${indices.toString()}, current id's are,`,
+            `Indices is ${indices.i}, ${indices.j}, current id's are,`,
             keyArr,
         );
 
         if (robotId === undefined) {
-            throw new Error("Failed to find robot at indices " + indices);
+            throw new Error("Failed to find robot at indices " + indices.i + ", " + indices.j);
         }
-        return this.getRobot(robotId);
+        return this.robots.get(robotId) as Robot;
     }
 
     stopAllRobots() {
