@@ -1,9 +1,11 @@
 import { Router } from "express";
-import { ChessEngine, Side } from "../../common/chess";
-import { GridPosition } from "../../common/units";
+import { BLACK, ChessEngine, Difficulty, Side, Square, WHITE } from "../../common/chess";
+import { GridPosition, gridPositionFromSquare, gridPositionFromString } from "../../common/units";
 import { robotManager } from "../robot/robot-manager";
-import { PuzzleGameManager } from "../game/game-manager";
+import { ComputerGameManager, HumanGameManager, PuzzleGameManager } from "../game/game-manager";
 import { Hono } from "hono";
+import { CenterCommand, DriveCommand, RelativeRotateCommand } from "../command/move-command";
+import { setAllRobotsToDefaultPositions } from "../game/pauseHandler";
 
 export const apiRouter = Hono();
 
@@ -43,10 +45,10 @@ apiRouter.get("/client-information", async (req, res) => {
                 socketManager,
                 oldSave.host === req.cookies.id ?
                     oldSave.hostWhite ?
-                        Side.WHITE
-                        : Side.BLACK
-                    : oldSave.hostWhite ? Side.BLACK
-                        : Side.WHITE,
+                        WHITE
+                        : BLACK
+                    : oldSave.hostWhite ? BLACK
+                        : WHITE,
                 oldSave.aiDifficulty,
                 oldSave.host !== req.cookies.id,
             );
@@ -58,7 +60,7 @@ apiRouter.get("/client-information", async (req, res) => {
                 new HumanGameManager(
                     new ChessEngine(false, oldSave.game),
                     socketManager,
-                    oldSave.hostWhite ? Side.WHITE : Side.BLACK,
+                    oldSave.hostWhite ? WHITE : BLACK,
                     clientManager,
                     oldSave.host !== req.cookies.id,
                 ),
@@ -107,7 +109,6 @@ apiRouter.get("/game-state", (req, res) => {
  */
 apiRouter.post("/start-computer-game", async (req, res) => {
     console.log("start comp game");
-    canReloadQueue = true;
     const side = req.query.side as Side;
     const difficulty = parseInt(req.query.difficulty as string) as Difficulty;
 
@@ -213,7 +214,7 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
             const robot = robotManager.getRobot(robotId);
             if (robot) {
                 // Convert square string to GridPosition using squareToGrid
-                const gridPos = squareToGrid(startSquare as Square);
+                const gridPos = gridPositionFromSquare(startSquare as Square);
                 defaultPositionsMap.set(robotId, gridPos);
                 console.log(
                     `Robot ${robotId} will move to square ${startSquare} (${gridPos.i}, ${gridPos.j})`,
@@ -238,6 +239,7 @@ apiRouter.post("/start-puzzle-game", async (req, res) => {
             "Should have the default positions set up, but the config is missing.",
         );
     }
+
     setGameManager(
         new PuzzleGameManager(
             new ChessEngine(true),
@@ -480,7 +482,7 @@ apiRouter.get("/unpause-game", async (_, res) => {
 
 apiRouter.post("/force-move", async (req, res) => {
     const command = new DriveCommand(
-        req.query.robotId as string,
+        req.query.robotId,
         Number(req.query.dist as string),
     );
     return executor.execute(command).then(() => {
@@ -491,7 +493,7 @@ apiRouter.post("/force-move", async (req, res) => {
 apiRouter.post("/force-turn", async (req, res) => {
     console.log(req.query);
     const command = new RelativeRotateCommand(
-        req.query.robotId as string,
+        req.query.robotId,
         Number(req.query.rad as string),
     );
 
@@ -502,7 +504,7 @@ apiRouter.post("/force-turn", async (req, res) => {
 
 apiRouter.post("/force-center", async (req, res) => {
     console.log(req.query);
-    const command = new CenterCommand(req.query.robotId as string);
+    const command = new CenterCommand(req.query.robotId);
     executor.execute(command);
     return res.send({ message: "success" });
 });
