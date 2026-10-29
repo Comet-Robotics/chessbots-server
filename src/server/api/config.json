@@ -2,158 +2,169 @@
     "tcpPort": 3001,
     "bots": {
         "80:65:99:4d:f3:e8": {
-            "id": "robot-15",
-            "piece": "w_pawn",
+            "id": 15,
+            "piece": {
+                "color": "w",
+                "symbol": "p"
+            },
             "start_pos": {
                 "x": 8,
                 "y": 3
             },
             "start_rot": 1.5707963268,
-            "home_pos": {
-                "x": 11,
-                "y": 3
-            },
-            "home_rot": 0
+            "vanilla_home_pos": "a2",
+            "hexapawn_home_pos": "a3",
+            "puzzle_home_pos": "a2"
         },
         "c0:4e:30:4b:68:76": {
-            "id": "robot-19",
-            "piece": "b_pawn",
+            "id": 19,
+            "piece": {
+                "color": "b",
+                "symbol": "p"
+            },
             "start_pos": {
                 "x": 4,
                 "y": 8
             },
             "start_rot": 4.7123889804,
-            "home_pos": {
-                "x": 0,
-                "y": 7
-            },
-            "home_rot": 0
+            "vanilla_home_pos": "a7",
+            "hexapawn_home_pos": "a6",
+            "puzzle_home_pos": "a7"
         },
         "80:65:99:4d:f3:9a": {
-            "id": "robot-3",
-            "piece": "w_bishop",
+            "id": 3,
+            "piece": {
+                "color": "w",
+                "symbol": "b"
+            },
             "start_pos": {
                 "x": 4,
                 "y": 2
             },
             "start_rot": 1.5707963268,
-            "home_pos": {
-                "x": 4,
-                "y": 0
-            },
-            "home_rot": 0
+            "vanilla_home_pos": "e3",
+            "hexapawn_home_pos": "e3",
+            "puzzle_home_pos": "e3"
         },
         "80:65:99:4e:07:b0": {
-            "id": "robot-4",
-            "piece": "w_queen",
+            "id": 4,
+            "piece": {
+                "color": "w",
+                "symbol": "q"
+            },
             "start_pos": {
                 "x": 5,
                 "y": 2
             },
             "start_rot": 1.5707963268,
-            "home_pos": {
-                "x": 5,
-                "y": 0
-            },
-            "home_rot": 0
+            "vanilla_home_pos": "f3",
+            "hexapawn_home_pos": "c7",
+            "puzzle_home_pos": "f3"
         },
         "80:65:99:4e:07:9c": {
-            "id": "robot-11",
-            "piece": "b_king",
+            "id": 11,
+            "piece": {
+                "color": "b",
+                "symbol": "k"
+            },
             "start_pos": {
                 "x": 5,
                 "y": 3
             },
             "start_rot": 1.5707963268,
-            "home_pos": {
-                "x": 2,
-                "y": 11
-            },
-            "home_rot": 0
+            "vanilla_home_pos": "f4",
+            "hexapawn_home_pos": "f4",
+            "puzzle_home_pos": "f4"
         },
         "80:65:99:4e:07:ae": {
-            "id": "robot-12",
-            "piece": "b_king",
+            "id": 12,
+            "piece": {
+                "color": "b",
+                "symbol": "k"
+            },
             "start_pos": {
                 "x": 5,
                 "y": 3
             },
             "start_rot": 1.5707963268,
-            "home_pos": {
-                "x": 2,
-                "y": 11
-            },
-            "home_rot": 0
+            "vanilla_home_pos": "f4",
+            "hexapawn_home_pos": "f4",
+            "puzzle_home_pos": "f4"
         },
         "80:65:99:4e:70:48": {
-            "id": "robot-2",
-            "piece": "w_knight",
+            "id": 2,
+            "piece": {
+                "color": "w",
+                "symbol": "n"
+            },
             "start_pos": {
                 "x": 0,
                 "y": 9
             },
             "start_rot": 1.5707963268,
-            "home_pos": {
-                "x": 0,
-                "y": 9
-            },
-            "home_rot": 0
+            "vanilla_home_pos": "b1",
+            "hexapawn_home_pos": "b3",
+            "puzzle_home_pos": "b1"
         },
         "80:65:99:4e:70:46": {
-            "id": "robot-7",
-            "piece": "w_knight",
+            "id": 7,
+            "piece": {
+                "color": "w",
+                "symbol": "n"
+            },
             "start_pos": {
                 "x": 8,
                 "y": 2
             },
             "start_rot": 1.5707963268,
-            "home_pos": {
-                "x": 8,
-                "y": 0
-            },
-            "home_rot": 0
+            "vanilla_home_pos": "g1",
+            "hexapawn_home_pos": "c3",
+            "puzzle_home_pos": "g1"
         },
         "80:65:99:4e:70:4c": {
-            "id": "robot-6",
-            "piece": "w_bishop",
+            "id": 6,
+            "piece": {
+                "color": "w",
+                "symbol": "b"
+            },
             "start_pos": {
                 "x": 7,
                 "y": 2
             },
             "start_rot": 1.5707963268,
-            "home_pos": {
-                "x": 0,
-                "y": 10
-            },
-            "home_rot": 0
+            "vanilla_home_pos": "h3",
+            "hexapawn_home_pos": "h3",
+            "puzzle_home_pos": "h3"
         },
         "c0:4e:30:4b:66:98": {
-            "id": "robot-1",
-            "piece": "w_knight",
+            "id": 1,
+            "piece": {
+                "color": "w",
+                "symbol": "n"
+            },
             "start_pos": {
                 "x": 3,
                 "y": 2
             },
             "start_rot": 1.5707963268,
-            "home_pos": {
-                "x": 3,
-                "y": 0
-            },
-            "home_rot": 0
+            "vanilla_home_pos": "d3",
+            "hexapawn_home_pos": "d3",
+            "puzzle_home_pos": "d3"
         },
         "80:65:99:4e:70:6a": {
-            "id": "robot-5",
-            "piece": "w_king",
+            "id": 5,
+            "piece": {
+                "color": "w",
+                "symbol": "k"
+            },
             "start_pos": {
                 "x": 9,
                 "y": 2
             },
             "start_rot": 1.5707963268,
-            "home_pos": {
-                "x": 3,
-                "y": 11
-            },
-            "home_rot": 0
+            "vanilla_home_pos": "e1",
+            "hexapawn_home_pos": "e7",
+            "puzzle_home_pos": "e1"
         }
     }
 }
