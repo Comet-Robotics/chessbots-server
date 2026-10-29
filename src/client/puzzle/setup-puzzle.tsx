@@ -3,7 +3,7 @@ import { SelectPuzzle } from "./select-puzzle";
 import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { get, useEffectQuery } from "../api";
 import { Navigate } from "react-router-dom";
-import type { PuzzleComponents } from "../../server/api/puzzles";
+import type { PuzzleComponents } from "../../server/game/puzzles";
 
 export function SetupPuzzle() {
     const [selectedPuzzle, setSelectedPuzzle] = useState<string | undefined>();

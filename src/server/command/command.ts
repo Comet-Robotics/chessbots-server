@@ -1,4 +1,4 @@
-import { gamePaused } from "../api/pauseHandler";
+import { gamePaused } from "../game/pauseHandler";
 import { robotManager } from "../robot/robot-manager";
 import { MAX_RETRIES, MOVE_TIMEOUT } from "../env";
 import { RobotId } from "../api/config";

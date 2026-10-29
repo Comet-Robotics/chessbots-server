@@ -19,12 +19,22 @@ export class RobotManager {
 
     constructor() {}
 
-    createRobot(mac: string) {
-
+    createRobot(mac: string): RobotId {
+        config.bots[mac]
     }
     
     addRobot(robot: Robot) {
         this.robots.set(robot.id, robot);
+    }
+
+    connectedRobots(): RobotId[] {
+        return this.robots.keys().filter(
+            (robotId) => this.isConnected(robotId)
+        ).toArray()
+    }
+    
+    isConnected(robot: RobotId): boolean {
+        return this.robots.get(robot)?.connected() ?? false
     }
 
     /**

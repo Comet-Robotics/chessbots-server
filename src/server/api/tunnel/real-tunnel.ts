@@ -6,7 +6,6 @@ import {
     packetToJson,
     PacketType,
 } from "./tcp-packet";
-import { EventEmitter } from "@posva/event-emitter";
 import { randomUUID } from "node:crypto";
 import { robotManager, type RobotManager } from "../../robot/robot-manager";
 import {
@@ -16,8 +15,8 @@ import {
     USE_VIRTUAL_ROBOTS,
 } from "../../env";
 import { BotTunnel, type RobotEventEmitter } from "./bot-tunnel";
-import { pauseGame, unpauseGame } from "../pauseHandler";
-import { config } from "../config";
+import { pauseGame, unpauseGame } from "../../game/pauseHandler";
+import { config, RobotId } from "../config";
 import { sleep } from "../../../common/misc";
 
 /**
@@ -25,7 +24,7 @@ import { sleep } from "../../../common/misc";
  */
 export class RealBotTunnel extends BotTunnel {
     address: string | undefined;
-    id: string | undefined;
+    id: RobotId | undefined;
     emitter: RobotEventEmitter;
     pingReceived: boolean;
 
@@ -72,34 +71,18 @@ export class RealBotTunnel extends BotTunnel {
         for (;;) {
             await sleep(PING_INTERVAL);
             if (this.connected) {
-                // console.log("SENDING PING!")
                 await this.send({ type: PacketType.PING_SEND });
-                //wait for a bit to receive result of the ping
                 await sleep(PING_TIMEOUT);
 
                 if (this.pingReceived) {
-                    // console.log("PING RECEIVED!")
                     this.pingReceived = false;
                     countFailures = 0;
                 } else {
-                    // console.log("PING NOT RECEIVED!")
                     countFailures++;
-                    if (countFailures === MAX_PING_FAIL) {
-                        console.log("AAA A BOT DISCONNECTED! ABORT! ABORT!");
+                    if (countFailures >= MAX_PING_FAIL) {
+                        this.connected = false;
 
-                        if (this.id !== undefined) {
-                            robotManager.removeRobot(this.id);
-                            disconnectedBots.add(this.id);
-                        }
-
-                        //send the pause signal.
                         pauseGame(false);
-
-                        // this.emitter.emit("actionComplete", {
-                        //     success: true,
-                        //     packetId,
-                        // });
-
                         this.connected = false;
                     }
                 }

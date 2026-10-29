@@ -55,6 +55,10 @@ export class Robot {
         return this.config;
     }
 
+    public connected(): boolean {
+        return this.tunnel?.connected ?? false
+    }
+
     /**
      * @param delta_heading - A relative heading to turn by, in radians.
      */

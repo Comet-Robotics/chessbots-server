@@ -13,8 +13,8 @@ import {
     type GameFinishedMessage,
     MessageType,
 } from "../../common/message";
-import type { SocketManager } from "./socket-manager";
-import type { ClientManager } from "./client-manager";
+import type { SocketManager } from "../api/socket-manager";
+import type { ClientManager } from "../api/client-manager";
 import { ClientType } from "../../common/client-types";
 import type { Move } from "../../common/game-types";
 import { Side, oppositeSide } from "../../common/game-types";

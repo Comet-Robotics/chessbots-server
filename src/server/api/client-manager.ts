@@ -142,12 +142,3 @@ export class ClientManager {
         }
     }
 }
-
-/**
- * a function to create a client manager from a socket manager, not currently used in code
- * @param socketManager - manages the client sockets
- * @returns a new client manager
- */
-export function makeClientManager(socketManager: SocketManager): ClientManager {
-    return new ClientManager(socketManager);
-}

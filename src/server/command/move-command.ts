@@ -5,7 +5,6 @@ import { MAX_RETRIES } from "../env";
 import { type ReversibleRobotCommand } from "./move-piece";
 import {
     gridPositionFromPosition,
-    positionAdd,
 } from "../../common/units";
 import { RobotId } from "../api/config";
 

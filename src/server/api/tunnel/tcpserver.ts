@@ -8,17 +8,8 @@ import { RealBotTunnel } from "./real-tunnel";
  */
 export class TCPServer {
     private server: net.Server;
-
-    /**
-     * creates a tcp server on port from server config and registers passed in ids with their corresponding bot tunnels
-     *
-     * when a robot connects, bind it to the server
-     *
-     * @param connections - bot connections in a id:BotTunnel array
-     */
     constructor(
         private robotManager: RobotManager,
-        private connections: { [id: string]: BotTunnel } = {},
     ) {
         this.server = net.createServer();
         this.server.on("connection", this.handleConnection.bind(this));
@@ -38,8 +29,7 @@ export class TCPServer {
      * @param socket - the incoming connection socket information
      */
     private handleConnection(socket: net.Socket) {
-        const remoteAddress = socket.remoteAddress + ":" + socket.remotePort;
-        console.log("New client connection from %s", remoteAddress);
+        console.log(`New client connection from ${socket.remoteAddress}:${socket.remotePort}`);
         socket.setNoDelay(true);
 
         // create a new bot tunnel for the connection
@@ -47,23 +37,16 @@ export class TCPServer {
             socket,
             ((mac: string) => {
                 // add the new robot to the array if it isn't in bots config
-                console.log("Adding robot with mac", mac, "to arr");
+                console.log(`Adding robot with mac ${mac}, to arr`);
                 if (!(mac in config["bots"])) {
                     console.error(`MAC address ${mac} not found in config, ignoring`);
                     return;
                 } 
 
-                this.robotManager.createRobot(mac);                
-
-                // if there was disconnected bot beforehand, remove it. If no more bots disconnected, send signal to unpause game
-                if (id !== undefined && disconnectedBots.has(id)) {
-                    disconnectedBots.delete(id);
-                    if (disconnectedBots.size === 0) {
-                        unpauseGame(false);
-                    }
-                }
-                tunnel.id = id;
+                let robotId = this.robotManager.createRobot(mac);                
+                tunnel.id = robotId;
                 tunnel.address = mac;
+
                 this.connections[id] = tunnel;
                 this.robotManager.createRobot(mac).setTunnel(tunnel);
             }).bind(this),
@@ -73,24 +56,6 @@ export class TCPServer {
         socket.on("data", tunnel.onData.bind(tunnel));
         socket.once("close", tunnel.onClose.bind(tunnel));
         socket.on("error", tunnel.onError.bind(tunnel));
-    }
-
-    /**
-     * get the robot tunnel based on the robot id string
-     * @param id - id string
-     * @returns - tcp tunnel
-     */
-    public getTunnelFromId(id: string): BotTunnel {
-        console.log("Getting tunnel for id", id);
-        return this.connections[id];
-    }
-
-    /**
-     * get a list of connected ids
-     * @returns - list of id keys
-     */
-    public getConnectedIds(): string[] {
-        return Object.keys(this.connections);
     }
 }
 
