@@ -1,10 +1,6 @@
-import type { Message, SendMessage } from "../../common/message";
-import type { ChessEngine } from "../../common/chess";
+import type { Message } from "../../common/message";
+import { BLACK, ClientType, oppositeSide, WHITE, type ChessEngine } from "../../common/chess";
 import {
-    createMoveMessage,
-    createGameHoldMessage,
-    createGameEndMessage,
-    createSetChessMessage,
     type MoveMessage,
     type GameHoldMessage,
     type GameEndMessage,
@@ -12,12 +8,11 @@ import {
     type GameInterruptedMessage,
     type GameFinishedMessage,
     MessageType,
+    GameStartedMessageSchema,
 } from "../../common/message";
 import type { SocketManager } from "../api/socket-manager";
 import type { ClientManager } from "../api/client-manager";
-import { ClientType } from "../../common/client-types";
-import type { Move } from "../../common/game-types";
-import { Side, oppositeSide } from "../../common/game-types";
+import type { Move, Side } from "../../common/chess";
 import type {
     GameEndReason,
     GameEndReason as GameInterruptedReason,
@@ -26,7 +21,6 @@ import {
     GameFinishedReason,
     GameHoldReason,
 } from "../../common/game-end-reasons";
-import { SaveManager } from "./save-manager";
 import {
     materializePath,
     materializePathHexapawn,
@@ -35,14 +29,12 @@ import {
 import { DO_SAVES } from "../env";
 import { executor } from "../command/executor";
 import { robotManager } from "../robot/robot-manager";
-import { gamePaused, setPaused } from "./pauseHandler";
 
 type GameState = {
     type?: "puzzle" | "human" | "computer";
-    side: Side;
     position: string;
     gameEndReason: GameEndReason | undefined;
-    pause: boolean;
+    paused: boolean;
     tooltip?: string;
     aiDifficulty?: number;
     difficulty?: number;
@@ -51,9 +43,11 @@ type GameState = {
 /**
  * The manager for game communication
  */
-export abstract class GameManager {
+export class GameManager {
     protected gameInterruptedReason: GameInterruptedReason | undefined =
         undefined;
+
+    paused: boolean = false;
 
     constructor(
         public chess: ChessEngine,
@@ -66,7 +60,7 @@ export abstract class GameManager {
         protected reverse: boolean,
         protected tooltip?: string,
     ) {
-        socketManager.sendToAll(createGameStartedMessage());
+        socketManager.sendToAll();
     }
 
     /** check if game ended */
@@ -86,21 +80,12 @@ export abstract class GameManager {
      * A method which is invoked whenever a game first connects.
      * Should respond with the game's side, position, and whether the game is finished.
      */
-    public getGameState(clientType: ClientType): GameState {
-        let side: Side;
-        if (clientType === ClientType.HOST) {
-            side = this.reverse ? oppositeSide(this.hostSide) : this.hostSide;
-        } else if (clientType === ClientType.CLIENT) {
-            side = this.reverse ? this.hostSide : oppositeSide(this.hostSide);
-        } else {
-            side = Side.SPECTATOR;
-        }
+    public getGameState(): GameState {
         return {
-            side,
             position: this.chess.pgn,
             gameEndReason: this.getGameEndReason(),
             tooltip: this.tooltip,
-            pause: gamePaused,
+            paused: this.paused,
         };
     }
 
@@ -161,20 +146,19 @@ export class HumanGameManager extends GameManager {
             this.clientManager,
         );
         const ids = this.clientManager.getIds();
-        const currentSave = SaveManager.loadGame(id);
+        // const currentSave = SaveManager.loadGame(id);
         // update the internal chess object if it is a move massage and game not paused
         console.log("up to here");
-        if (message.type === MessageType.MOVE && !gamePaused && "move" in message) {
+        if (message.type === MessageType.MOVE && !this.paused && "move" in message) {
             const moveMsg = message as MoveMessage;
             // Call path materializer and send to bots
             const command = materializePath(moveMsg.move);
 
             this.chess.makeMove(moveMsg.move);
 
-            console.log("running executor");
             // console.dir(command, { depth: null });
             await executor.execute(command).catch((reason) => {
-                setPaused(true);
+                this.paused = true;
                 console.log(reason);
                 this.chess.undo();
                 this.socketManager.sendToAll(
@@ -182,31 +166,30 @@ export class HumanGameManager extends GameManager {
                 );
                 return;
             });
-            console.log("executor done");
 
-            if (ids && DO_SAVES) {
-                if (currentSave?.host === ids[0]) {
-                    SaveManager.saveGame(
-                        ids[0],
-                        ids[1],
-                        this.hostSide,
-                        -1,
-                        this.chess.pgn,
-                        this.chess.fen,
-                        robotManager.getIndicesToIds(),
-                    );
-                } else {
-                    SaveManager.saveGame(
-                        ids[1],
-                        ids[0],
-                        oppositeSide(this.hostSide),
-                        -1,
-                        this.chess.pgn,
-                        this.chess.fen,
-                        robotManager.getIndicesToIds(),
-                    );
-                }
-            }
+            // if (ids && DO_SAVES) {
+            //     if (currentSave?.host === ids[0]) {
+            //         SaveManager.saveGame(
+            //             ids[0],
+            //             ids[1],
+            //             this.hostSide,
+            //             -1,
+            //             this.chess.pgn,
+            //             this.chess.fen,
+            //             robotManager.getIndicesToIds(),
+            //         );
+            //     } else {
+            //         SaveManager.saveGame(
+            //             ids[1],
+            //             ids[0],
+            //             oppositeSide(this.hostSide),
+            //             -1,
+            //             this.chess.pgn,
+            //             this.chess.fen,
+            //             robotManager.getIndicesToIds(),
+            //         );
+            //     }
+            // }
             sendToOpponent(message);
             sendToSpectators(message);
 
@@ -221,18 +204,18 @@ export class HumanGameManager extends GameManager {
             sendToSpectators(message);
 
             //end the game in save manager
-            if (ids) {
-                if (currentSave?.host === ids[0])
-                    SaveManager.endGame(ids[0], ids[1]);
-                else SaveManager.endGame(ids[1], ids[0]);
-            }
+            // if (ids) {
+            //     if (currentSave?.host === ids[0])
+            //         SaveManager.endGame(ids[0], ids[1]);
+            //     else SaveManager.endGame(ids[1], ids[0]);
+            // }
         } else if (message.type === MessageType.GAME_FINISHED) {
             // propagate back to both sockets
-            if (ids) {
-                if (currentSave?.host === ids[0])
-                    SaveManager.endGame(ids[0], ids[1]);
-                else SaveManager.endGame(ids[1], ids[0]);
-            }
+            // if (ids) {
+            //     if (currentSave?.host === ids[0])
+            //         SaveManager.endGame(ids[0], ids[1]);
+            //     else SaveManager.endGame(ids[1], ids[0]);
+            // }
         } else if (message.type === MessageType.GAME_HELD) {
             const holdMsg = message as GameHoldMessage;
             if (holdMsg.reason === GameHoldReason.DRAW_CONFIRMATION)
@@ -245,11 +228,11 @@ export class HumanGameManager extends GameManager {
                 sendToSpectators(message);
             }
         } else if (this.isGameEnded()) {
-            if (ids) {
-                if (currentSave?.host === ids[0])
-                    SaveManager.endGame(ids[0], ids[1]);
-                else SaveManager.endGame(ids[1], ids[0]);
-            }
+            // if (ids) {
+            //     if (currentSave?.host === ids[0])
+            //         SaveManager.endGame(ids[0], ids[1]);
+            //     else SaveManager.endGame(ids[1], ids[0]);
+            // }
         }
     }
 }
@@ -273,8 +256,9 @@ export class ComputerGameManager extends GameManager {
     ) {
         super(chess, socketManager, hostSide, reverse, undefined);
         this.aiFirstMove =
-            (chess.pgn === "" && this.hostSide === Side.BLACK) ||
-            (chess.pgn !== "" && this.hostSide === chess.getLastMove()?.color);
+            (chess.pgn === "" && this.hostSide === BLACK) 
+            // ||
+            // (chess.pgn !== "" && this.hostSide === chess.getLastMove()?.);
     }
 
     public async makeFirstMove() {
@@ -301,7 +285,7 @@ export class ComputerGameManager extends GameManager {
      * @returns when the game ends
      */
     public async handleMessage(message: Message, id: string): Promise<void> {
-        if (message.type === MessageType.MOVE && !gamePaused && "move" in message) {
+        if (message.type === MessageType.MOVE && !this.paused && "move" in message) {
             const moveMsg = message as MoveMessage;
             // Call path materializer and send to bots for human move
             const command = materializePath(moveMsg.move);
@@ -310,7 +294,7 @@ export class ComputerGameManager extends GameManager {
             this.chess.makeMove(moveMsg.move);
 
             await executor.execute(command).catch((reason) => {
-                setPaused(true);
+                this.paused = true;
                 console.log(reason);
                 this.chess.undo();
                 this.socketManager.sendToAll(
@@ -319,22 +303,22 @@ export class ComputerGameManager extends GameManager {
                 return;
             });
 
-            if (DO_SAVES) {
-                SaveManager.saveGame(
-                    id,
-                    "ai",
-                    this.hostSide,
-                    this.difficulty,
-                    this.chess.pgn,
-                    this.chess.fen,
-                    robotManager.getIndicesToIds(),
-                );
-            }
+            // if (DO_SAVES) {
+            //     SaveManager.saveGame(
+            //         id,
+            //         "ai",
+            //         this.hostSide,
+            //         this.difficulty,
+            //         this.chess.pgn,
+            //         this.chess.fen,
+            //         robotManager.getIndicesToIds(),
+            //     );
+            // }
 
-            if (this.chess.isGameFinished()) {
-                SaveManager.endGame(id, "ai");
-                return;
-            }
+            // if (this.chess.isGameFinished()) {
+            //     SaveManager.endGame(id, "ai");
+            //     return;
+            // }
 
             // Ensure MINIMUM_DELAY before responding
             // previous code didn't wait for robots and caused issues where you could move and make robots collide
@@ -342,21 +326,21 @@ export class ComputerGameManager extends GameManager {
             await this.executeRobotMovement(move); // wait for robots to finish moving
             this.socketManager.sendToAll(createMoveMessage(move)); // send move to clients after robots finish moving
             if (this.isGameEnded()) {
-                SaveManager.endGame(id, "ai");
+                // SaveManager.endGame(id, "ai");
             }
         } else if (message.type === MessageType.GAME_INTERRUPTED) {
             this.gameInterruptedReason = (message as GameInterruptedMessage).reason;
-            SaveManager.endGame(id, "ai");
+            // SaveManager.endGame(id, "ai");
             await this.cleanupGame(false);
             // Reflect end game reason back to client
             this.socketManager.sendToAll(message);
         }
     }
 
-    public getGameState(clientType: ClientType): GameState {
+    public getGameState(): GameState {
         return {
             type: "computer",
-            ...super.getGameState(clientType),
+            ...super.getGameState(),
             aiDifficulty: this.difficulty,
         };
     }
@@ -377,7 +361,7 @@ export class PuzzleGameManager extends GameManager {
         super(
             chess,
             socketManager,
-            fen.split(" ")[1] === "w" ? Side.WHITE : Side.BLACK,
+            fen.split(" ")[1] === "w" ? WHITE : BLACK,
             false,
             tooltip,
         );
@@ -399,7 +383,7 @@ export class PuzzleGameManager extends GameManager {
             if (
                 this.moves[this.moveNumber].from === moveMsg.move.from &&
                 this.moves[this.moveNumber].to === moveMsg.move.to &&
-                !gamePaused
+                !this.paused
             ) {
                 const command = materializePath(moveMsg.move);
 
@@ -410,7 +394,7 @@ export class PuzzleGameManager extends GameManager {
                 console.log("running executor");
                 console.dir(command, { depth: null });
                 await executor.execute(command).catch((reason) => {
-                    setPaused(true);
+                    this.paused = true;
                     console.log(reason);
                     this.chess.undo();
                     this.socketManager.sendToAll(
@@ -431,7 +415,7 @@ export class PuzzleGameManager extends GameManager {
                     console.log("running executor");
                     console.dir(command, { depth: null });
                     await executor.execute(command).catch((reason) => {
-                        setPaused(true);
+                        this.paused = true;
                         console.log(reason);
                         this.chess.undo();
                         this.socketManager.sendToAll(
@@ -488,10 +472,10 @@ export class PuzzleGameManager extends GameManager {
         return super.getGameEndReason();
     }
 
-    public getGameState(clientType: ClientType): GameState {
+    public getGameState(): GameState {
         return {
             type: "puzzle",
-            ...super.getGameState(clientType),
+            ...super.getGameState(),
             difficulty: this.difficulty,
         };
     }
@@ -545,9 +529,9 @@ export class HexapawnGameManager extends GameManager {
             this.clientManager,
         );
         const ids = this.clientManager.getIds();
-        const currentSave = SaveManager.loadGame(id);
+        // const currentSave = SaveManager.loadGame(id);
         // update the internal chess object if it is a move massage and game not paused
-        if (message.type === MessageType.MOVE && !gamePaused && "move" in message) {
+        if (message.type === MessageType.MOVE && !this.paused && "move" in message) {
             const moveMsg = message as MoveMessage;
             // Call path materializer and send to bots
             const command = materializePathHexapawn(moveMsg.move);
@@ -557,7 +541,7 @@ export class HexapawnGameManager extends GameManager {
             console.log("running executor");
             // console.dir(command, { depth: null });
             await executor.execute(command).catch((reason) => {
-                setPaused(true);
+                this.paused = true;
                 console.log(reason);
                 this.chess.undo();
                 this.socketManager.sendToAll(
@@ -567,29 +551,29 @@ export class HexapawnGameManager extends GameManager {
             });
             console.log("executor done");
 
-            if (ids && DO_SAVES) {
-                if (currentSave?.host === ids[0]) {
-                    SaveManager.saveGame(
-                        ids[0],
-                        ids[1],
-                        this.hostSide,
-                        -1,
-                        this.chess.pgn,
-                        this.chess.fen,
-                        robotManager.getIndicesToIds(),
-                    );
-                } else {
-                    SaveManager.saveGame(
-                        ids[1],
-                        ids[0],
-                        oppositeSide(this.hostSide),
-                        -1,
-                        this.chess.pgn,
-                        this.chess.fen,
-                        robotManager.getIndicesToIds(),
-                    );
-                }
-            }
+            // if (ids && DO_SAVES) {
+            //     if (currentSave?.host === ids[0]) {
+            //         SaveManager.saveGame(
+            //             ids[0],
+            //             ids[1],
+            //             this.hostSide,
+            //             -1,
+            //             this.chess.pgn,
+            //             this.chess.fen,
+            //             robotManager.getIndicesToIds(),
+            //         );
+            //     } else {
+            //         SaveManager.saveGame(
+            //             ids[1],
+            //             ids[0],
+            //             oppositeSide(this.hostSide),
+            //             -1,
+            //             this.chess.pgn,
+            //             this.chess.fen,
+            //             robotManager.getIndicesToIds(),
+            //         );
+            //     }
+            // }
             sendToOpponent(message);
             sendToSpectators(message);
 
@@ -603,18 +587,18 @@ export class HexapawnGameManager extends GameManager {
             sendToSpectators(message);
 
             //end the game in save manager
-            if (ids) {
-                if (currentSave?.host === ids[0])
-                    SaveManager.endGame(ids[0], ids[1]);
-                else SaveManager.endGame(ids[1], ids[0]);
-            }
+            // if (ids) {
+            //     if (currentSave?.host === ids[0])
+            //         SaveManager.endGame(ids[0], ids[1]);
+            //     else SaveManager.endGame(ids[1], ids[0]);
+            // }
         } else if (message.type === MessageType.GAME_FINISHED) {
             // propagate back to both sockets
-            if (ids) {
-                if (currentSave?.host === ids[0])
-                    SaveManager.endGame(ids[0], ids[1]);
-                else SaveManager.endGame(ids[1], ids[0]);
-            }
+            // if (ids) {
+            //     if (currentSave?.host === ids[0])
+            //         SaveManager.endGame(ids[0], ids[1]);
+            //     else SaveManager.endGame(ids[1], ids[0]);
+            // }
         } else if (message.type === MessageType.GAME_HELD) {
             const holdMsg = message as GameHoldMessage;
             if (holdMsg.reason === GameHoldReason.DRAW_CONFIRMATION)
@@ -629,11 +613,11 @@ export class HexapawnGameManager extends GameManager {
         }
 
         if (this.isGameEnded()) {
-            if (ids) {
-                if (currentSave?.host === ids[0])
-                    SaveManager.endGame(ids[0], ids[1]);
-                else SaveManager.endGame(ids[1], ids[0]);
-            }
+            // if (ids) {
+            //     if (currentSave?.host === ids[0])
+            //         SaveManager.endGame(ids[0], ids[1]);
+            //     else SaveManager.endGame(ids[1], ids[0]);
+            // }
 
             //send a finished message
             const gameEnd = this.getGameEndReason();
@@ -729,10 +713,10 @@ export class HexapawnGameManager extends GameManager {
         }
     }
 
-    public getGameState(clientType: ClientType): GameState {
+    public getGameState(): GameState {
         return {
             type: "puzzle",
-            ...super.getGameState(clientType),
+            ...super.getGameState(),
         };
     }
 }

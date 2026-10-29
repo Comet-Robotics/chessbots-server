@@ -1,6 +1,6 @@
 import type { WebSocket } from "ws";
 import type { SocketManager } from "./socket-manager";
-import { ClientType } from "../../common/client-types";
+import { ClientType } from "../../common/chess";
 import type { Message } from "../../common/message";
 
 /**

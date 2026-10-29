@@ -3,12 +3,19 @@ import express from "express";
 // eslint-disable-next-line import/default
 import ViteExpress from "vite-express";
 import cookieParser from "cookie-parser";
-import { apiRouter, websocketHandler } from "./api/api";
+import { websocketHandler } from "./api/api";
 import expressWebSocket from "express-ws";
-import { clientManager } from "./api/managers";
+import { ClientManager } from "./api/client-manager";
 import launchEditorMiddleware from "launch-editor-middleware";
 import { randomUUID } from "node:crypto";
 import { GameManager } from "./game/game-manager";
+import { SocketManager } from "./api/socket-manager";
+import { WHITE } from "chess.js";
+import { ChessEngine } from "../common/chess";
+
+export const socketManager = new SocketManager({})
+export const clientManager = new ClientManager(socketManager)
+export const gameManager = new GameManager(new ChessEngine(), socketManager, WHITE, false)
 
 const app = expressWebSocket(express()).app;
 

@@ -4,8 +4,7 @@ import type { PropsWithChildren } from "react";
 import { useState } from "react";
 import type { Transform } from "./board-transform";
 import { computeChessboardTransform } from "./board-transform";
-import { Side } from "../../common/game-types";
-import { bgColor } from "../check-dark-mode";
+import { Side } from "../../common/chess";
 
 interface BoardContainerProps extends PropsWithChildren {
     side: Side;
@@ -38,7 +37,7 @@ export function BoardContainer(props: BoardContainerProps) {
                     style={{
                         ...transform,
                         transform:
-                            props.side === Side.SPECTATOR ?
+                            props.side === SPECTATOR ?
                                 "rotate(" + (props.rotation % 180) + "deg)"
                             :   "",
                     }}

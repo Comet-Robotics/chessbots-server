@@ -25,6 +25,7 @@ import {
 import type { GridPosition } from "../../common/units";
 import { RobotId } from "../api/config";
 import { Move } from "../../common/chess";
+import { gameManager } from "../main";
 
 type GridMove = {
     from: GridPosition;

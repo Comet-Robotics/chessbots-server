@@ -1,8 +1,7 @@
 import type { Color, Move as ChessJsMove, PieceSymbol, Square } from "chess.js";
 import { Chess, KING, PAWN, QUEEN, WHITE, BLACK } from "chess.js";
 import { GameFinishedReason } from "./game-end-reasons";
-import type { RobotManager } from "../server/robot/robot-manager";
-import { RobotId } from "../server/api/config";
+import { z } from "zod/v4";
 
 export type Move = Pick<ChessJsMove, "from" | "to" | "promotion">
 export type Piece = PieceSymbol;
@@ -11,6 +10,29 @@ export { Square };
 
 // Re-export constants used in the codebase
 export { KING, PAWN, QUEEN, WHITE, BLACK };
+
+
+export let color_schema = z.enum(['w', 'b']) satisfies z.ZodType<Side>
+export let piece_schema = z.enum(['p', 'n', 'b', 'r', 'q', 'k']) satisfies z.ZodType<Piece>
+
+export let square_schema = z.enum([
+    'a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8',
+    'a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7',
+    'a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6',
+    'a5', 'b5', 'c5', 'd5', 'e5', 'f5', 'g5', 'h5',
+    'a4', 'b4', 'c4', 'd4', 'e4', 'f4', 'g4', 'h4',
+    'a3', 'b3', 'c3', 'd3', 'e3', 'f3', 'g3', 'h3',
+    'a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2',
+    'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'
+]) satisfies z.ZodType<Square>
+
+export function oppositeSide(side: Side): Side { 
+    if (side == "b") {
+        return "w"
+    } else {
+        return "b"
+    }
+}
 
 /**
  * Defines a type of session.
@@ -64,11 +86,11 @@ export class ChessEngine {
      * Copies the chess engine, optionally with an extra move on the copy.
      * @param move - A move to make.
      */
-    copy(move?: SimpleMove): ChessEngine {
+    copy(move?: Move): ChessEngine {
         const copy = new ChessEngine(this.isPuzzle, this.pgn);
         copy.loadPgn(this.pgn);
         if (move !== undefined) {
-            copy.makeSimpleMove(move);
+            copy.makeMove(move);
         }
         return copy;
     }
@@ -84,9 +106,9 @@ export class ChessEngine {
     }
 
     /** undo a move */
-    undo(): SimpleMove {
+    undo(): Move {
         const undo = this.chess.undo();
-        return { from: undo?.from, to: undo?.to } as SimpleMove;
+        return { from: undo?.from, to: undo?.to } as Move;
     }
 
     /** load a board from history (FEN) */
@@ -100,7 +122,7 @@ export class ChessEngine {
     }
 
     /** get the last move made */
-    getLastSimpleMove() {
+    getLastMove(): Move | undefined {
         const moves = this.chess.history({ verbose: true });
         return moves.length > 0 ? moves[moves.length - 1] : undefined;
     }
@@ -108,10 +130,10 @@ export class ChessEngine {
     /**
      * Determines if a move is a King Side Castle.
      * Assumes that chess hasn't been updated yet
-     * @param move - The SimpleMove to analyze.
+     * @param move - The Move to analyze.
      * @returns true if the move is a King Side Castle
      */
-    isKingSideCastling(move: SimpleMove) {
+    isKingSideCastling(move: Move): boolean {
         if (this.getPieceTypeFromSquare(move.from) !== KING) {
             return false;
         } else if (this.getPieceColor(move.from) === WHITE) {
@@ -124,10 +146,10 @@ export class ChessEngine {
     /**
      * Determines if a move is an En Passant Capture.
      * Assumes that chess hasn't been updated yet
-     * @param move - The SimpleMove to analyze.
+     * @param move - The Move to analyze.
      * @returns true if the move is an En Passant Capture
      */
-    isEnPassant(move: SimpleMove) {
+    isEnPassant(move: Move): boolean {
         if (
             move.from[0] !== move.to[0] &&
             this.getPieceTypeFromSquare(move.from) === PAWN
@@ -142,20 +164,20 @@ export class ChessEngine {
      * Determines if a move results in a capture
      * with no special shenanigans.
      * Assumes that chess hasn't been updated yet
-     * @param move - The SimpleMove to analyze.
+     * @param move - The Move to analyze.
      * @returns true if the move is a Capture
      */
-    isRegularCapture(move: SimpleMove) {
+    isRegularCapture(move: Move): boolean {
         return this.hasPiece(move.to);
     }
 
     /**
      * Determines if a move is a Queen Side Castle.
      * Assumes that chess hasn't been updated yet
-     * @param move - The SimpleMove to analyze.
+     * @param move - The Move to analyze.
      * @returns true if the move is a Queen Side Castle
      */
-    isQueenSideCastling(move: SimpleMove) {
+    isQueenSideCastling(move: Move):boolean {
         if (this.getPieceTypeFromSquare(move.from) !== KING) {
             return false;
         } else if (this.getPieceColor(move.from) === WHITE) {
@@ -166,26 +188,26 @@ export class ChessEngine {
     }
 
     /**
-     * Returns the robot id of the moving piece in a SimpleMove.
+     * Returns the robot id of the moving piece in a Move.
      * Assumes that chess hasn't been updated yet
-     * @param move - The SimpleMove to check.
+     * @param move - The Move to check.
      * @returns The current piece on the square as a it's robot id as a string
      */
-    getCapturedPieceId(
-        move: SimpleMove,
-        robotManager: RobotManager,
-    ): RobotId | undefined {
-        if (this.isEnPassant(move)) {
-            return robotManager.getRobotAtGridPos({
-                x: squareToGrid(move.to).i,
-                y: squareToGrid(move.from).j,
-            }).id;
-        } else if (this.isRegularCapture(move)) {
-            const to = squareToGrid(move.to);
-            return robotManager.getRobotAtGridPos(to).id;
-        }
-        return undefined;
-    }
+    // getCapturedPieceId(
+    //     move: Move,
+    //     robotManager: RobotManager,
+    // ): RobotId | undefined {
+    //     if (this.isEnPassant(move)) {
+    //         return robotManager.getRobotAtGridPos({
+    //             x: squareToGrid(move.to).i,
+    //             y: squareToGrid(move.from).j,
+    //         }).id;
+    //     } else if (this.isRegularCapture(move)) {
+    //         const to = squareToGrid(move.to);
+    //         return robotManager.getRobotAtGridPos(to).id;
+    //     }
+    //     return undefined;
+    // }
 
     /**
      * Returns the piece on a square or undefined
@@ -215,20 +237,11 @@ export class ChessEngine {
     }
 
     /**
-     * Takes in a SimpleMove argument and returns the piece on the square
-     * @param move - The SimpleMove to check.
-     * @returns The current piece on the square as a PieceType enum
-     */
-    getPieceTypeFromSimpleMove(move: SimpleMove): PieceSymbol |  undefined {
-        return this.getPieceTypeFromSquare(move.from);
-    }
-
-    /**
      * gets ALL legal moves from the provided square
      * @param square - from square
      * @returns - possible to squares
      */
-    getLegalSimpleMoves(square?: Square) {
+    getLegalMoves(square?: Square) {
         return this.chess.moves({
             square,
             verbose: true,
@@ -241,14 +254,14 @@ export class ChessEngine {
      * @returns - possible to squares
      */
     getLegalSquares(square?: Square): Square[] {
-        return this.getLegalSimpleMoves(square).map((move) => move.to);
+        return this.getLegalMoves(square).map((move) => move.to);
     }
 
     /**
      * Makes a move on the chessboard.
      * @returns the move that was made.
      */
-    makeSimpleMove(move: SimpleMove): SimpleMove {
+    makeMove(move: Move): Move {
         this.chess.move(move);
         return move;
     }
@@ -274,7 +287,7 @@ export class ChessEngine {
      * @param difficulty - a value from 0 to 4 for the ai
      * @returns - the move made
      */
-    calculateAiSimpleMove(difficulty: Difficulty): SimpleMove {
+    calculateAiMove(difficulty: Difficulty): Move {
         // result is an object e.g. { "A1": "A2" }
         const result = aiMove(this.fen, difficulty);
         // val is an array e.g. ["A1", "A2"]

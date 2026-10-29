@@ -48,7 +48,7 @@ export class Robot {
     }
 
     public get pieceType(): Piece {
-        return this.config.piece.symbol;
+        return this.config.piece;
     }
 
     public get getConfig() {
