@@ -8,6 +8,7 @@ import expressWebSocket from "express-ws";
 import { clientManager } from "./api/managers";
 import launchEditorMiddleware from "launch-editor-middleware";
 import { randomUUID } from "node:crypto";
+import { GameManager } from "./game/game-manager";
 
 const app = expressWebSocket(express()).app;
 

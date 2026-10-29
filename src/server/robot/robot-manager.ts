@@ -1,11 +1,6 @@
-import { DEGREE, gridPositionFromPosition } from "../../common/units";
+import { gridPositionFromPosition } from "../../common/units";
 import { Robot } from "./robot";
 import { config, RobotId } from "../api/config";
-import {
-    USE_BANQUET_INDICES,
-    USE_HEXAPAWN_INDICES,
-    USE_VIRTUAL_ROBOTS,
-} from "../env";
 import type { GridPosition } from "../../common/units";
 
 /**
@@ -20,7 +15,8 @@ export class RobotManager {
     constructor() {}
 
     createRobot(mac: string): RobotId {
-        config.bots[mac]
+        // Way more than this
+        return config.bots[mac].id
     }
     
     addRobot(robot: Robot) {
@@ -43,7 +39,7 @@ export class RobotManager {
     updateRobot(robotId: RobotId, newPos: GridPosition) {
         const robot = this.robots.get(robotId);
         if (robot) {
-            robot.position = { x: newPos.i, y: newPos.j };
+            robot.position = { x: newPos.x, y: newPos.y };
         }
     }
 

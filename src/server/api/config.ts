@@ -21,7 +21,6 @@ let square_schema = z.enum([
     'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'
 ]) satisfies z.ZodType<Square>
 
-
 let robot_id_schema =  z.literal(
     [
         1, 2, 3, 4, 5, 6, 7, 8,
@@ -37,11 +36,10 @@ let robot_schema = z.object({
 
     start_pos: z.object({ x: z.int(), y: z.int() }),
     start_rot: z.number(),
-    home_pos: z.object({ x: z.int(), y: z.int() }),
-    home_rot: z.number(),
 
     vanilla_home_pos: square_schema,
-    hexapawn_home_pos: square_schema
+    hexapawn_home_pos: square_schema,
+    puzzle_home_pos: square_schema
 })
 
 let config_schema = z.object({

@@ -177,8 +177,8 @@ export class ChessEngine {
     ): RobotId | undefined {
         if (this.isEnPassant(move)) {
             return robotManager.getRobotAtGridPos({
-                i: squareToGrid(move.to).i,
-                j: squareToGrid(move.from).j,
+                x: squareToGrid(move.to).i,
+                y: squareToGrid(move.from).j,
             }).id;
         } else if (this.isRegularCapture(move)) {
             const to = squareToGrid(move.to);

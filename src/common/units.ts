@@ -34,29 +34,40 @@ export type Position = {
 }
 
 export type GridPosition = {
-    i: number;
-    j: number;
+    x: number;
+    y: number;
 }
 
-/**
- * Converts a pixel Position to a GridPosition by rounding.
- */
-export function gridPositionFromPosition(pos: Position): GridPosition {
-    return { i: Math.round(pos.x), j: Math.round(pos.y) };
+export function positionFromSquare(square: Square): Position {
+    throw Error;
 }
 
 /**
  * Converts a GridPosition to a pixel Position by adding 0.5 center offset.
  */
 export function positionFromGridPosition(gp: GridPosition): Position {
-    return { x: gp.i + 0.5, y: gp.j + 0.5 };
+    return { x: gp.x + 0.5, y: gp.y + 0.5 };
 }
+
+/**
+ * Converts a pixel Position to a GridPosition by rounding.
+ */
+export function gridPositionFromPosition(pos: Position): GridPosition {
+    return { x: Math.round(pos.x), y: Math.round(pos.y) };
+}
+
+export function gridPositionFromSquare(square: Square): GridPosition {
+    throw Error;
+    // return { i: Math.round(pos.x), j: Math.round(pos.y) };
+}
+
+
 
 /**
  * Converts a GridPosition to a string representation "i, j".
  */
 export function gridPositionToString(pos: GridPosition): string {
-    return `${pos.i}, ${pos.j}`;
+    return `${pos.x}, ${pos.y}`;
 }
 
 /**
@@ -64,5 +75,5 @@ export function gridPositionToString(pos: GridPosition): string {
  */
 export function gridPositionFromString(str: string): GridPosition {
     const parts = str.split(", ");
-    return { i: parseInt(parts[0], 10), j: parseInt(parts[1], 10) };
+    return { x: parseInt(parts[0], 10), y: parseInt(parts[1], 10) };
 }
