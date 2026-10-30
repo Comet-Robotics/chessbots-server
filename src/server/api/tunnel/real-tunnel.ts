@@ -5,7 +5,7 @@ import {
     SERVER_PROTOCOL_VERSION,
     packetToJson,
     PacketType,
-} from "./tcp-packet";
+} from "./packet";
 import { randomUUID } from "node:crypto";
 import { robotManager, type RobotManager } from "../../robot/robot-manager";
 import {
@@ -15,7 +15,6 @@ import {
     USE_VIRTUAL_ROBOTS,
 } from "../../env";
 import { BotTunnel, type RobotEventEmitter } from "./bot-tunnel";
-import { pauseGame, unpauseGame } from "../../game/pauseHandler";
 import { config, RobotId } from "../config";
 import { sleep } from "../../../common/misc";
 
@@ -80,9 +79,6 @@ export class RealBotTunnel extends BotTunnel {
                 } else {
                     countFailures++;
                     if (countFailures >= MAX_PING_FAIL) {
-                        this.connected = false;
-
-                        pauseGame(false);
                         this.connected = false;
                     }
                 }
@@ -197,29 +193,10 @@ export class RealBotTunnel extends BotTunnel {
     }
 
     makeHello(mac: string): Packet {
-        // Map of config nodes to send over
-        // n: name, v: value
-        const configEntries = {};
-
-        // Where a bot has a specific config changed, like a different encoder multiplier or pin location
-        const overrides =
-            (config[config.bots[mac]] ?? { attributes: {} })["attributes"] ?? {};
-
-        for (const i of config.botConfigSchema) {
-            if (i.name in overrides) {
-                configEntries[i.name] = overrides[i.name];
-            }
-        }
-
-        const ret: Packet = {
+        return {
             type: PacketType.SERVER_HELLO,
             protocol: SERVER_PROTOCOL_VERSION,
-            config: configEntries,
-        };
-
-        console.error(JSON.stringify(ret));
-
-        return ret;
+        };;
     }
 
     sendCenter() {

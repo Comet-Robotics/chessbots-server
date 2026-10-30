@@ -43,7 +43,7 @@ type GameState = {
 /**
  * The manager for game communication
  */
-export class GameManager {
+export abstract class GameManager {
     protected gameInterruptedReason: GameInterruptedReason | undefined =
         undefined;
 
@@ -63,6 +63,14 @@ export class GameManager {
         socketManager.sendToAll();
     }
 
+    public pause() {
+        this.paused = true;
+    }
+    
+    public unpause() {
+        this.paused = false;
+    }
+    
     /** check if game ended */
     public isGameEnded(): boolean {
         return (

@@ -1,8 +1,8 @@
 import { EventEmitter } from "@posva/event-emitter";
 import { Robot } from "./robot/robot";
 import config from "./api/bot-server-config.json";
-import type { Packet, PacketWithId } from "./utils/tcp-packet";
-import { PacketType } from "./utils/tcp-packet";
+import type { Packet, PacketWithId } from "./packet";
+import { PacketType } from "./packet";
 import path from "path";
 import type { StackFrame, SimulatedRobotLocation } from "../common/message/message";
 import { createSimulatorUpdateMessage } from "../common/message/message";

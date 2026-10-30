@@ -1,15 +1,6 @@
 import type { Move, Square } from "../../common/chess";
 import { config } from "../api/config";
 
-export interface PuzzleComponents {
-    fen: string;
-    moves: Move[];
-    rating: number;
-    tooltip: string;
-    // the key is a physical robot id. value is the square where the robot should be at the start of the game.
-    robotDefaultPositions: Record<string, Square>;
-}
-
 // i actually hate typescript bro
 interface BotValue {
     attributes?: {
@@ -156,31 +147,6 @@ export const puzzles: Record<string, PuzzleComponents> = {
         moves: [
             {
                 from: "f1", to: "e1",
-                color: "b",
-                piece: "b",
-                flags: "",
-                san: "",
-                lan: "",
-                before: "",
-                after: "",
-                isCapture: function (): boolean {
-                    throw new Error("Function not implemented.");
-                },
-                isPromotion: function (): boolean {
-                    throw new Error("Function not implemented.");
-                },
-                isEnPassant: function (): boolean {
-                    throw new Error("Function not implemented.");
-                },
-                isKingsideCastle: function (): boolean {
-                    throw new Error("Function not implemented.");
-                },
-                isQueensideCastle: function (): boolean {
-                    throw new Error("Function not implemented.");
-                },
-                isBigPawn: function (): boolean {
-                    throw new Error("Function not implemented.");
-                }
             },
             { from: "e4", to: "f3" },
             { from: "c3", to: "d4" },

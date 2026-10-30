@@ -1,10 +1,4 @@
-import { type EventEmitter } from "@posva/event-emitter";
-import {
-    jsonToPacket,
-    PacketType,
-    type Packet,
-    type PacketWithId,
-} from "./tcp-packet";
+import { deserializePacket, PacketType, type Packet, type PacketWithId } from "./packet";
 
 export abstract class BotTunnel {
     connected: boolean = false;
@@ -101,41 +95,17 @@ export abstract class BotTunnel {
         } else {
             this.dataBuffer = undefined;
         }
-
-        console.log("Current String: ");
-        console.log(str);
-
-        try {
-            const packet = jsonToPacket(str);
+        
+        const packet = deserializePacket(str);
+        if (packet) {
             this.processPacket(packet);
-        } catch (e) {
-            console.warn("Received invalid packet with error", e);
-        }
-
-        // Handle next message if the data buffer has another one
-        if (
-            this.dataBuffer !== undefined &&
-            this.dataBuffer.indexOf(";") !== -1
-        ) {
-            await this.handleQueue();
         }
     }
 
     abstract processPacket(packet: PacketWithId);
-    
-    /**
-     * send packets to robot. promise resolves when the robot acknowledges that the action is complete
-     * @param packet - packet to send
-     * @returns - the packet id
-     */
+
     abstract send(packet: Packet): Promise<string>;
 
-    /**
-     * Send a packet to the robot indicating angle to turn. Returns a promise that finishes when the
-     * robot finishes the action.
-     *
-     * @param deltaHeadingRadians - A relative heading to turn by, in radians. May be positive or negative.
-     */
     public async sendTurnPacket(delta: number): Promise<void> {
         await this.send({
             type: PacketType.TURN_BY_ANGLE,
@@ -143,12 +113,6 @@ export abstract class BotTunnel {
         });
     }
 
-    /**
-     * Send a packet to the robot indicating distance to drive. Returns a promise that finishes when the
-     * robot finishes the action.
-     *
-     * @param tileDistance - The distance to drive forward or backwards by. 1 is defined as the length of a tile.
-     */
     public async sendDrivePacket(tileDistance: number): Promise<void> {
         await this.send({
             type: PacketType.DRIVE_TILES,
@@ -168,11 +132,3 @@ export abstract class BotTunnel {
         });
     }
 }
-
-export type RobotEventEmitter = EventEmitter<{
-    actionComplete: {
-        success: boolean;
-        packetId: string;
-        reason?: string;
-    };
-}>;

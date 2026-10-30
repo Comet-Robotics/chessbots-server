@@ -1,9 +1,8 @@
 import type { Color, Move as ChessJsMove, PieceSymbol, Square } from "chess.js";
-import { Chess, KING, PAWN, QUEEN, WHITE, BLACK } from "chess.js";
+import { Chess, KING, PAWN, QUEEN, WHITE, BLACK, validateFen } from "chess.js";
 import { GameFinishedReason } from "./game-end-reasons";
 import { z } from "zod/v4";
 
-export type Move = Pick<ChessJsMove, "from" | "to" | "promotion">
 export type Piece = PieceSymbol;
 export type Side = Color;
 export { Square };
@@ -11,11 +10,9 @@ export { Square };
 // Re-export constants used in the codebase
 export { KING, PAWN, QUEEN, WHITE, BLACK };
 
-
-export let color_schema = z.enum(['w', 'b']) satisfies z.ZodType<Side>
-export let piece_schema = z.enum(['p', 'n', 'b', 'r', 'q', 'k']) satisfies z.ZodType<Piece>
-
-export let square_schema = z.enum([
+export const color_schema = z.enum(['w', 'b']) satisfies z.ZodType<Side>
+export const piece_schema = z.enum(['p', 'n', 'b', 'r', 'q', 'k']) satisfies z.ZodType<Piece>
+export const square_schema = z.enum([
     'a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8',
     'a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7',
     'a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6',
@@ -25,6 +22,22 @@ export let square_schema = z.enum([
     'a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2',
     'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'
 ]) satisfies z.ZodType<Square>
+
+export const move_schema = z.object({
+    from: square_schema,
+    to: square_schema,
+    promotion: piece_schema.optional()
+}) satisfies z.ZodType<Pick<ChessJsMove, "from" | "to" | "promotion">>
+
+export const puzzle_schema = z.object({
+    fen: z.string().refine((s) => validateFen(s).ok),
+    moves: z.array(z.object(move_schema)),
+    rating: z.number(),
+    tooltip: z.string().optional(),
+})
+
+export type Move = z.infer<typeof move_schema>
+export type Puzzle = z.infer<typeof puzzle_schema>
 
 export function oppositeSide(side: Side): Side { 
     if (side == "b") {

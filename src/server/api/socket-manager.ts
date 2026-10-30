@@ -1,14 +1,17 @@
+import { WebSocket } from "ws";
 import type { Message } from "../../common/message";
+import { WSContext } from "hono/ws";
+import { WebSocketLike } from "@hono/node-server";
 
 /**
  * A class which maps player client ids to their corresponding websocket (if any).
  */
 export class SocketManager {
-    constructor(private sockets: Record<string, Set<WebSocket>>) {}
+    constructor(private sockets: Record<string, Set<WSContext<WebSocketLike>>>) {}
 
-    public registerSocket(id: string, socket: WebSocket): void {
+    public registerSocket(id: string, socket: WSContext<WebSocketLike>): void {
         if (this.sockets[id] === null || this.sockets[id] === undefined) {
-            this.sockets[id] = new Set<WebSocket>();
+            this.sockets[id] = new Set<WSContext<WebSocketLike>>();
         }
         console.log(`Id is: ${id}`);
         this.sockets[id].add(socket);
@@ -18,7 +21,7 @@ export class SocketManager {
      * deletes the socket at the provided id
      * @param id - id to be deleted
      */
-    public handleSocketClosed(id: string, socket: WebSocket): void {
+    public handleSocketClosed(id: string, socket: WSContext<WebSocketLike>): void {
         // find if the socket exists and is in the set for that user
         if (this.sockets[id] && this.sockets[id].has(socket)) {
             // if so, KILL IT!
@@ -31,7 +34,7 @@ export class SocketManager {
      * gets the socket at the provided id, which may be multiple if they have multiple tabs open
      * @param id - id of the desired socket
      */
-    public getSockets(id: string): Set<WebSocket> | undefined {
+    public getSockets(id: string): Set<WSContext<WebSocketLike>> | undefined {
         if (this.sockets[id]) return this.sockets[id];
         return undefined;
     }
