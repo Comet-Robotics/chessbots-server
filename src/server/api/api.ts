@@ -38,7 +38,11 @@ import {
 } from "./game-manager";
 import { ChessEngine } from "../../common/chess-engine";
 import { Side } from "../../common/game-types";
-import { START_ROBOTS_AT_DEFAULT, DO_SAVES, CHESSBOTS_PASSWORD } from "../utils/env";
+import {
+    START_ROBOTS_AT_DEFAULT,
+    DO_SAVES,
+    CHESSBOTS_PASSWORD,
+} from "../utils/env";
 import { SaveManager } from "./save-manager";
 
 import { VirtualBotTunnel, VirtualRobot } from "../simulator";
@@ -81,7 +85,6 @@ import {
 } from "./pauseHandler";
 import { type Square } from "chess.js";
 
-
 const queue = new PriorityQueue<string>();
 //hashmap mapping cookie ids to user names
 const names = new Map<string, string>();
@@ -96,12 +99,11 @@ async function hashPassword(password) {
     const hash = await crypto.subtle.digest("SHA-256", data);
 
     hashedPassword = Array.from(new Uint8Array(hash))
-        .map(b => b.toString(16).padStart(2, "0"))
+        .map((b) => b.toString(16).padStart(2, "0"))
         .join("");
 }
 
 hashPassword(CHESSBOTS_PASSWORD);
-
 
 /**
  * An endpoint used to establish a websocket connection with the server.
@@ -869,20 +871,19 @@ apiRouter.get("/unpause-game", async (_, res) => {
 // when someone tries to sign in as an admin
 apiRouter.post("/login-admin", async (req, res) => {
     const inputPassword = req.query["password"];
-    
-    if(inputPassword === CHESSBOTS_PASSWORD)
-    {
-        return res.send({success: true, username: hashedPassword})
+
+    if (inputPassword === CHESSBOTS_PASSWORD) {
+        return res.send({ success: true, username: hashedPassword });
     }
-    return res.send({success: false});
+    return res.send({ success: false });
 });
 
 apiRouter.post("/check-admin", async (req, res) => {
-    const sentUser = req.query["username"]
+    const sentUser = req.query["username"];
     console.log(hashedPassword);
     console.log(sentUser);
-    return res.send({success: sentUser === hashedPassword})
-})
+    return res.send({ success: sentUser === hashedPassword });
+});
 
 apiRouter.post("/force-move", async (req, res) => {
     const command = new DriveCommand(

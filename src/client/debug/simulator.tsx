@@ -60,19 +60,19 @@ export function Simulator() {
             case "SET_ALL_ROBOTS":
                 return action.payload;
             case "UPDATE_ROBOT":
-                return {
-                    ...state,
-                    [action.payload.robotId]: action.payload.state,
-                };
+                const returnedState = { ...state };
+                returnedState[action.payload.robotId] = action.payload.state;
+
+                return returnedState;
             default:
                 return state;
         }
     };
 
+    type MessageLog = { message: SimulatorUpdateMessage; ts: Date };
+
     const [robotState, dispatch] = useReducer(robotStateReducer, {});
-    const [messageLog, setMessageLog] = useState<
-        { message: SimulatorUpdateMessage; ts: Date }[]
-    >([]);
+    const [messageLog, setMessageLog] = useState<MessageLog[]>([]);
 
     // update the simulator when a message comes in
     useSocket((message) => {
@@ -83,6 +83,9 @@ export function Simulator() {
                 payload: { robotId: message.robotId, state: message.location },
             });
             setMessageLog((log) => [...log, { message, ts: new Date() }]);
+        } else {
+            console.log("got unknown type! Message:");
+            console.log(message);
         }
     });
 
