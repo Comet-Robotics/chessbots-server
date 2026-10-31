@@ -1,7 +1,4 @@
-// @ts-expect-error: chessbots client is a CommonJS module, but this library is a ES Module, so we need to tell TypeScript that it's okay
 import { encode as cborEncode } from "cbor-x";
-
-// @ts-expect-error: chessbots client is a CommonJS module, but this library is a ES Module, so we need to tell TypeScript that it's okay
 import { fileOpen, fileSave } from "browser-fs-access";
 
 import { diff } from "deep-object-diff";

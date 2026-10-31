@@ -1,6 +1,5 @@
 import {
     Button,
-    ButtonGroup,
     H3,
     NonIdealState,
     Spinner,
@@ -13,14 +12,6 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { ClientType, GameType } from "../../common/client-types";
 import { SetupPuzzle } from "../puzzle/setup-puzzle";
 import { get, useEffectQuery } from "../api";
-import {
-    allSettings,
-    buttonColor,
-    setUserSetting,
-    getUserSetting,
-    textColor,
-} from "../check-dark-mode";
-import "../colors.css";
 
 enum SetupType {
     MAIN = "main",
@@ -117,7 +108,6 @@ function SetupMain(props: SetupMainProps) {
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.COMPUTER)}
-                className={buttonColor()}
             />
             <Button
                 large
@@ -125,7 +115,6 @@ function SetupMain(props: SetupMainProps) {
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.HUMAN)}
-                className={buttonColor()}
             />
             <Button
                 large
@@ -133,7 +122,6 @@ function SetupMain(props: SetupMainProps) {
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.PUZZLE)}
-                className={buttonColor()}
             />
             <Button
                 large
@@ -141,9 +129,8 @@ function SetupMain(props: SetupMainProps) {
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.HEXAPAWN)}
-                className={buttonColor()}
             />
-            <ThemeButtons />
+
         </>
     );
 
@@ -160,7 +147,7 @@ function SetupMain(props: SetupMainProps) {
                     justifyContent: "space-around",
                 }}
             >
-                <H3 className={textColor()}>Welcome to Chess Bot!</H3>
+                <H3>Welcome to Chess Bot!</H3>
 
                 {actions}
             </div>
@@ -168,23 +155,4 @@ function SetupMain(props: SetupMainProps) {
     );
 }
 
-export function ThemeButtons(): JSX.Element {
-    return (
-        <>
-            <h3 className={textColor()}>Display Settings:</h3>
-            <ButtonGroup variant="outlined">
-                {allSettings.map((item, idx) => (
-                    <Button
-                        key={item[0]}
-                        textClassName={textColor()}
-                        //changed for better visibility
-                        icon={item[1]}
-                        text={item[0]}
-                        active={getUserSetting() === idx}
-                        onClick={() => setUserSetting(idx)}
-                    />
-                ))}
-            </ButtonGroup>
-        </>
-    );
-}
+

@@ -17,13 +17,6 @@ import {
 import type { SendMessage } from "../../common/message";
 import { Side } from "../../common/game-types";
 import type { Dispatch } from "react";
-import {
-    bgColor,
-    textColor,
-    darkModeIcon,
-    toggleUserSetting,
-} from "../check-dark-mode";
-import "../colors.css";
 
 interface NavbarMenuProps {
     sendMessage: SendMessage;
@@ -107,9 +100,9 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
             />;
 
     return (
-        <Navbar className={bgColor()}>
+        <Navbar>
             <NavbarGroup>
-                <NavbarHeading className={textColor()}>ChessBot</NavbarHeading>
+                <NavbarHeading>ChessBot</NavbarHeading>
                 <NavbarDivider />
                 {resignButton}
                 {drawButton}
@@ -118,11 +111,6 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
                 {difficultyButton}
                 {aiDifficultyButton}
                 {rotateButton}
-                <Button
-                    icon={darkModeIcon()}
-                    variant="minimal"
-                    onClick={toggleUserSetting}
-                />
                 <Button icon="cog" minimal onClick={() => navigate("/debug")} />
             </NavbarGroup>
         </Navbar>

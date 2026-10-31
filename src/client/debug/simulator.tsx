@@ -18,16 +18,6 @@ import type {
 import { SimulatorUpdateMessage } from "../../common/message/simulator-message";
 import "./simulator.scss";
 import { clampHeading, GRID_CELL_PX } from "../../common/units";
-import {
-    bgColor,
-    darkModeIcon,
-    innerRobotColor,
-    robotColor,
-    simBorderColor,
-    simRingCellColor,
-    textColor,
-    toggleUserSetting,
-} from "../check-dark-mode";
 
 const tileSize = GRID_CELL_PX;
 export const robotSize = tileSize / 2;
@@ -125,7 +115,7 @@ export function Simulator() {
      * add all the robots on top of the board
      */
     return (
-        <Card className={bgColor()}>
+        <Card>
             <Button
                 variant="minimal"
                 style={{ float: "right" }}
@@ -138,12 +128,6 @@ export function Simulator() {
                 icon="cog"
                 onClick={() => navigate("/debug")}
             />
-            <Button
-                variant="minimal"
-                style={{ float: "right" }}
-                icon={darkModeIcon()}
-                onClick={toggleUserSetting}
-            />
             <div
                 style={{
                     display: "flex",
@@ -152,7 +136,7 @@ export function Simulator() {
                     alignItems: "center",
                 }}
             >
-                <H1 className={textColor()}>Robot Simulator</H1>
+                <H1>Robot Simulator</H1>
                 <Button icon="refresh" onClick={fetchRobotState}>
                     Refresh
                 </Button>
@@ -241,9 +225,9 @@ export function RobotGrid({
                         style={{
                             borderWidth: "1px",
                             borderStyle: "solid",
-                            borderColor: simBorderColor(),
+                            borderColor: "#ccc",
                             backgroundColor:
-                                !isCenterCell ? simRingCellColor() : (
+                                !isCenterCell ? "#f0f0f0" : (
                                     "transparent"
                                 ),
                         }}
@@ -383,7 +367,6 @@ const Robot = forwardRef<
         >
             <Tooltip content={`${robotId}: ${JSON.stringify(pos)}`}>
                 <div
-                    className={robotColor(onTopOfRobots.length)}
                     style={{
                         transform: `rotate(-${clampHeading(pos.headingRadians)}rad)`,
                         borderRadius: "50%",
@@ -397,7 +380,6 @@ const Robot = forwardRef<
                     }}
                 >
                     <div
-                        className={innerRobotColor()}
                         style={{
                             width: robotSize / 4,
                             height: robotSize / 4,

@@ -5,8 +5,6 @@ import type { PropsWithChildren, ReactNode } from "react";
 import { ChessEngine } from "../../common/chess";
 import { Side } from "../../common/game-types";
 import { Sidebar } from "./sidebar";
-import { bgColor } from "../check-dark-mode";
-import "../colors.css";
 
 interface SetupBaseProps extends PropsWithChildren {
     actions?: ReactNode;
@@ -40,7 +38,7 @@ export function SetupBase(props: SetupBaseProps): JSX.Element {
                     usePortal={false}
                     enforceFocus={false}
                 >
-                    <div className={bgColor() + " " + "roundedBorder"}>
+                    <div className="roundedBorder">
                         <DialogBody>{props.children}</DialogBody>
                         <DialogFooter minimal actions={props.actions} />
                     </div>

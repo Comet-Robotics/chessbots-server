@@ -1,13 +1,11 @@
 import { useState } from "react";
-import type { SendMessage } from "../../common/message";
+import { MessageType, type MessageSender } from "../../common/message";
 import { Button, FormGroup, InputGroup, NumericInput } from "@blueprintjs/core";
-import { SetRobotVariableMessage } from "../../common/message/robot-message";
-import { buttonColor, textColor } from "../check-dark-mode";
-import "../colors.css";
+import { RobotId } from "../../server/api/config";
 
 interface SetRobotVariableProps {
-    robotId: string;
-    sendMessage: SendMessage;
+    robotId: RobotId;
+    sendMessage: MessageSender;
 }
 
 /**
@@ -15,13 +13,13 @@ interface SetRobotVariableProps {
  * @param props - function for setting the variable
  * @returns - setup form
  */
-export function SetRobotVariable(props: SetRobotVariableProps): JSX.Element {
+export function SetRobotVariable(props: SetRobotVariableProps) {
     const [variableName, setVariableName] = useState("");
     const [variableValue, setVariableValue] = useState("");
     return (
         <>
             <FormGroup
-                label={<p className={textColor()}>Variable Name</p>}
+                label="Variable Name"
                 labelFor="variable-name"
             >
                 <InputGroup
@@ -34,7 +32,7 @@ export function SetRobotVariable(props: SetRobotVariableProps): JSX.Element {
                 />
             </FormGroup>
             <FormGroup
-                label={<p className={textColor()}>Variable Value</p>}
+                label="Variable Value"
                 labelFor="variable-value"
             >
                 <NumericInput
@@ -48,19 +46,17 @@ export function SetRobotVariable(props: SetRobotVariableProps): JSX.Element {
                 />
             </FormGroup>
             <Button
-                className={buttonColor()}
                 disabled={variableName === ""}
                 text="Submit"
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => {
-                    props.sendMessage(
-                        new SetRobotVariableMessage(
-                            props.robotId,
-                            variableName,
-                            parseFloat(variableValue),
-                        ),
-                    );
+                    props.sendMessage({
+                        type: MessageType.SET_ROBOT_VARIABLE,
+                        id: props.robotId,
+                        variableName,
+                        variableValue: Number(variableValue)
+                    });
                 }}
             />
         </>

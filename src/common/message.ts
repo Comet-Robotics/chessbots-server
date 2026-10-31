@@ -6,6 +6,7 @@ import {
     GameFinishedReason,
     GameEndReason,
 } from "./game-end-reasons";
+import { robot_id_schema } from "../server/api/config";
 
 /** Robot location in the simulator. */
 export type SimulatedRobotLocation = {
@@ -113,7 +114,7 @@ export const DriveRobotMessageSchema = z.object({
 
 export const SetRobotVariableMessageSchema = z.object({
     type: z.literal(MessageType.SET_ROBOT_VARIABLE),
-    id: z.string(),
+    id: robot_id_schema,
     variableName: z.string(),
     variableValue: z.number(),
 });
@@ -178,92 +179,6 @@ export type SetRobotVariableMessage = z.infer<typeof SetRobotVariableMessageSche
 export type SimulatorUpdateMessage = z.infer<typeof SimulatorUpdateMessageSchema>;
 export type Message = z.infer<typeof MessageSchema>;
 
-// /**
-//  * Helper: build a message object.
-//  */
-function msg(type: MessageType, extra: Record<string, unknown> = {}): Record<string, unknown> {
-    return { type, ...extra };
-}
-
-// // --- Convenience constructors ---
-
-export function createRegisterWebsocketMessage(): RegisterWebsocketMessage {
-    return msg(MessageType.REGISTER_WEBSOCKET) as RegisterWebsocketMessage;
-}
-
-export function createPositionMessage(pgn: string): PositionMessage {
-    return msg(MessageType.POSITION, { pgn }) as PositionMessage;
-}
-
-export function createMoveMessage(move: Move): MoveMessage {
-    return msg(MessageType.MOVE, { move }) as MoveMessage;
-}
-
-export function createSetChessMessage(chess: string): SetChessMessage {
-    return msg(MessageType.SET_CHESS, { chess }) as SetChessMessage;
-}
-
-export function createGameStartedMessage(): GameStartedMessage {
-    return msg(MessageType.GAME_STARTED) as GameStartedMessage;
-}
-
-export function createGameInterruptedMessage(reason: GameInterruptedReason): GameInterruptedMessage {
-    return msg(MessageType.GAME_INTERRUPTED, { reason }) as GameInterruptedMessage;
-}
-
-export function createGameFinishedMessage(reason: GameFinishedReason): GameFinishedMessage {
-    return msg(MessageType.GAME_FINISHED, { reason }) as GameFinishedMessage;
-}
-
-export function createGameHoldMessage(reason: GameHoldReason): GameHoldMessage {
-    return msg(MessageType.GAME_HELD, { reason }) as GameHoldMessage;
-}
-
-export function createGameEndMessage(reason: GameEndReason): GameEndMessage {
-    return msg(MessageType.GAME_ENDED, { reason }) as GameEndMessage;
-}
-
-export function createJoinQueue(playerName: string): JoinQueue {
-    return msg(MessageType.JOIN_QUEUE, { playerName }) as JoinQueue;
-}
-
-export function createUpdateQueue(updatedPlayerList: string[]): UpdateQueue {
-    return msg(MessageType.UPDATE_QUEUE, { updatedPlayerList }) as UpdateQueue;
-}
-
-export function createDriveRobotMessage(
-    id: string,
-    leftPower: number,
-    rightPower: number,
-): DriveRobotMessage {
-    return msg(MessageType.DRIVE_ROBOT, { id, leftPower, rightPower }) as DriveRobotMessage;
-}
-
-export function createSetRobotVariableMessage(
-    id: string,
-    variableName: string,
-    variableValue: number,
-): SetRobotVariableMessage {
-    return msg(MessageType.SET_ROBOT_VARIABLE, { id, variableName, variableValue }) as SetRobotVariableMessage;
-}
-
-export function createSimulatorUpdateMessage(
-    robotId: string,
-    location: SimulatedRobotLocation,
-    packet: any, // fix this any
-    stackTrace?: StackFrame[],
-): SimulatorUpdateMessage {
-    return msg(MessageType.SIMULATOR_UPDATE, {
-        robotId,
-        location: {
-            position: { x: location.position.x, y: location.position.y },
-            headingRadians: location.headingRadians,
-        },
-        packet,
-        stackTrace,
-    }) as SimulatorUpdateMessage;
-}
-
 // --- Serialization / Deserialization ---
 
 /**
@@ -289,7 +204,7 @@ export function parseMessage(text: string): Message {
 // // --- Type aliases for the public API ---
 
 // /** A function which can be used to send a message somewhere. */
-// export type SendMessage = (message: Message) => void;
+export type MessageSender = (message: Message) => void;
 
 // /** A function which receives messages and should do stuff with them. */
-// export type MessageHandler = (message: Message) => void;
+export type MessageHandler = (message: Message) => void;

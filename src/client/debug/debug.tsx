@@ -8,8 +8,6 @@ import { DriveRobot } from "./drive-robot";
 import { SetRobotVariable } from "./set-robot-variable";
 import "./debug.scss";
 
-import "../colors.css";
-
 /**
  * A debug menu which can be used to manually control individual robots.
  */

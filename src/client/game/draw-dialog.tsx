@@ -6,28 +6,20 @@ import {
     DialogFooter,
 } from "@blueprintjs/core";
 import { useState } from "react";
-import type { SendMessage } from "../../common/message";
-import {
-    GameHoldMessage,
-    GameInterruptedMessage,
-} from "../../common/message/game-message";
+import { MessageSender, MessageType, type Message } from "../../common/message";
 import {
     GameHoldReason,
     GameInterruptedReason,
 } from "../../common/game-end-reasons";
-import { bgColor, buttonColor, textColor } from "../check-dark-mode";
-import "../colors.css";
 
-interface DrawDialogProps {
-    sendMessage: SendMessage;
-}
+
 
 /**
  * allows the player to offer a draw to the other people
  * @param props - function for sending messages
  * @returns - draw dialog
  */
-export function OfferDrawDialog(props: DrawDialogProps) {
+export function OfferDrawDialog(sendMessage: MessageSender) {
     const [isOpen, setIsOpen] = useState(true);
     const actions = (
         <>
@@ -35,29 +27,28 @@ export function OfferDrawDialog(props: DrawDialogProps) {
                 text="Yes"
                 rightIcon="arrow-up"
                 intent="primary"
-                className={buttonColor()}
                 onClick={() => {
-                    props.sendMessage(
-                        new GameHoldMessage(GameHoldReason.DRAW_OFFERED),
-                    );
+                    sendMessage({
+                        type: MessageType.GAME_HELD,
+                        reason: GameHoldReason.DRAW_OFFERED,
+                    });
                 }}
             />
             <Button
                 text="No"
                 rightIcon="arrow-down"
                 intent="primary"
-                className={buttonColor()}
                 onClick={() => {
-                    props.sendMessage(
-                        new GameHoldMessage(GameHoldReason.DRAW_DENIED),
-                    );
+                    sendMessage({
+                        type: MessageType.GAME_HELD,
+                        reason: GameHoldReason.DRAW_DENIED,
+                    });
                 }}
             />
         </>
     );
     return (
         <Dialog
-            className={bgColor()}
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
             canOutsideClickClose={false}
@@ -65,7 +56,7 @@ export function OfferDrawDialog(props: DrawDialogProps) {
         >
             <DialogBody>
                 <NonIdealState>
-                    <h4 className={textColor()}>Offer draw?</h4>
+                    <h4>Offer draw?</h4>
                 </NonIdealState>
             </DialogBody>
             <DialogFooter minimal actions={actions} />
@@ -78,7 +69,7 @@ export function OfferDrawDialog(props: DrawDialogProps) {
  * @param props - function for sending messages
  * @returns - draw accept dialog
  */
-export function AcceptDrawDialog(props: DrawDialogProps) {
+export function AcceptDrawDialog(sendMessage: MessageSender) {
     const [isOpen, setIsOpen] = useState(true);
     const actions = (
         <>
@@ -86,24 +77,22 @@ export function AcceptDrawDialog(props: DrawDialogProps) {
                 text="Yes"
                 rightIcon="arrow-up"
                 intent="primary"
-                className={buttonColor()}
                 onClick={() => {
-                    props.sendMessage(
-                        new GameInterruptedMessage(
-                            GameInterruptedReason.DRAW_ACCEPTED,
-                        ),
-                    );
+                    sendMessage({
+                        type: MessageType.GAME_INTERRUPTED,
+                        reason: GameInterruptedReason.DRAW_ACCEPTED,
+                    });
                 }}
             />
             <Button
                 text="No"
                 rightIcon="arrow-down"
                 intent="primary"
-                className={buttonColor()}
                 onClick={() => {
-                    props.sendMessage(
-                        new GameHoldMessage(GameHoldReason.DRAW_DENIED),
-                    );
+                    sendMessage({
+                        type: MessageType.GAME_HELD,
+                        reason: GameHoldReason.DRAW_DENIED,
+                    });
                 }}
             />
         </>

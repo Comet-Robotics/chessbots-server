@@ -26,8 +26,6 @@ import type { Move } from "../../common/game-types";
 import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { AcceptDrawDialog, OfferDrawDialog } from "./draw-dialog";
 import { Sidebar } from "../setup/sidebar";
-import { bgColor } from "../check-dark-mode";
-import "../colors.css";
 import { NotificationDialog, PauseDialog } from "./admin-dialogs";
 import { PuzzleTipBox } from "../PuzzleTipBox";
 
@@ -210,7 +208,7 @@ export function Game(): JSX.Element {
 
             <Sidebar top={50} />
             <div className="main-dialog">
-                <div id="body-container" className={bgColor()}>
+                <div id="body-container">
                     <ChessboardWrapper
                         side={side}
                         chess={chess}

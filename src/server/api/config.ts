@@ -5,7 +5,7 @@ import { type Side, type Piece, type Square, piece_schema, square_schema, color_
 export type RobotId = z.infer<typeof robot_id_schema>
 export type RobotConfig = z.infer<typeof robot_schema>
 
-let robot_id_schema =  z.literal(
+export const robot_id_schema =  z.literal(
     [
         1, 2, 3, 4, 5, 6, 7, 8,
         9, 10, 11, 12, 13, 14, 15, 16,

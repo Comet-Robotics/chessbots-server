@@ -4,13 +4,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Difficulty, GameType, BLACK, Side, WHITE } from "../../common/chess";
 import { post } from "../api";
-import {
-    buttonColor,
-    textColor,
-    sliderColor,
-    textBoxColor,
-} from "../check-dark-mode";
-import "../colors.css";
 /** User's desired side, b/w/random */
 enum DesiredSide {
     WHITE = "white",
@@ -70,7 +63,6 @@ export function SetupGame(props: SetupGameProps) {
     // handles passing user choices to the api
     const submit = (
         <Button
-            className={buttonColor()}
             text="Play"
             icon="arrow-right"
             intent="primary"
@@ -120,7 +112,7 @@ export function SetupGame(props: SetupGameProps) {
                 justifyContent: "space-around",
             }}
         >
-            <H3 className={textColor()}>{title}</H3>
+            <H3>{title}</H3>
             {options}
             {submit}
         </div>
@@ -141,10 +133,9 @@ interface DifficultySliderProps {
 function DifficultySlider(props: DifficultySliderProps) {
     return (
         <>
-            <H6 className={textColor()}>Difficulty</H6>
+            <H6>Difficulty</H6>
             <div style={{ width: "75%" }}>
                 <Slider
-                    className={textColor() + " " + sliderColor()}
                     intent="primary"
                     value={props.difficulty}
                     onChange={props.onDifficultyChange}
@@ -181,9 +172,8 @@ interface SelectSideProps {
 function SelectSide(props: SelectSideProps) {
     return (
         <>
-            <H6 className={textColor()}>Desired Side</H6>
+            <H6>Desired Side</H6>
             <select
-                className={textBoxColor() + " " + textColor()}
                 value={props.desiredSide}
                 onChange={(e) =>
                     props.onDesiredSideChange(e.target.value as DesiredSide)

@@ -3,7 +3,6 @@ import { forwardRef } from "react";
 import { motion } from "framer-motion";
 import { Tooltip } from "@blueprintjs/core";
 import { robotSize } from "../debug/simulator"; // Reuse size
-import { robotColor, innerRobotColor } from "../check-dark-mode";
 import type { Coords } from "../../common/spline";
 
 // Simple representation for display, doesn't need full simulation data
@@ -40,7 +39,6 @@ export const MotionRobot = forwardRef<HTMLDivElement, MotionRobotProps>(
         return (
             <motion.div
                 ref={ref}
-                className=""
                 style={{
                     position: "absolute",
                     // Set width/height for proper layout before transforms
@@ -61,7 +59,6 @@ export const MotionRobot = forwardRef<HTMLDivElement, MotionRobotProps>(
             >
                 <Tooltip content={`${robotId}`}>
                     <div
-                        className={robotColor(onTopOfRobotsCount)} // Use simplified collision color
                         style={{
                             // Rotation is handled by motion.div's rotate style property
                             // transform: `rotate(-${clampHeading(pos.headingRadians)}rad)`, <-- No longer here
@@ -76,7 +73,6 @@ export const MotionRobot = forwardRef<HTMLDivElement, MotionRobotProps>(
                         }}
                     >
                         <div
-                            className={innerRobotColor()}
                             style={{
                                 width: robotSize / 4,
                                 height: robotSize / 4,
