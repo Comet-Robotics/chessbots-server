@@ -4,7 +4,7 @@ import type { PropsWithChildren } from "react";
 import { useState } from "react";
 import type { Transform } from "./board-transform";
 import { computeChessboardTransform } from "./board-transform";
-import { Side } from "../../common/chess";
+import { Side, SPECTATOR } from "../../common/chess";
 
 interface BoardContainerProps extends PropsWithChildren {
     side: Side;
@@ -31,7 +31,7 @@ export function BoardContainer(props: BoardContainerProps) {
     // returns the resizable container
     return (
         <ResizeSensor onResize={handleResize}>
-            <div id="chess-container" className={bgColor()}>
+            <div id="chess-container">
                 <div
                     id="chessboard"
                     style={{

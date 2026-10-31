@@ -4,11 +4,12 @@ import { GameFinishedReason } from "./game-end-reasons";
 import { z } from "zod/v4";
 
 export type Piece = PieceSymbol;
-export type Side = Color;
+export type Side = Color | typeof SPECTATOR
 export { Square };
 
 // Re-export constants used in the codebase
 export { KING, PAWN, QUEEN, WHITE, BLACK };
+export const SPECTATOR = "s"
 
 export const color_schema = z.enum(['w', 'b']) satisfies z.ZodType<Side>
 export const piece_schema = z.enum(['p', 'n', 'b', 'r', 'q', 'k']) satisfies z.ZodType<Piece>
