@@ -1,14 +1,14 @@
 import type { Message } from "../../common/message";
-import { BLACK, ClientType, oppositeSide, WHITE, type ChessEngine } from "../../common/chess";
+import { BLACK, WHITE, type ChessEngine } from "../../common/chess";
 import {
     type MoveMessage,
     type GameHoldMessage,
-    type GameEndMessage,
-    type SetChessMessage,
+    // type GameEndMessage,
+    // type SetChessMessage,
     type GameInterruptedMessage,
-    type GameFinishedMessage,
+    // type GameFinishedMessage,
     MessageType,
-    GameStartedMessageSchema,
+    // GameStartedMessageSchema,
 } from "../../common/message";
 import type { SocketManager } from "../api/socket-manager";
 import type { ClientManager } from "../api/client-manager";
@@ -26,9 +26,9 @@ import {
     materializePathHexapawn,
     moveAllRobotsFromBoardToHome,
 } from "../robot/path-materializer";
-import { DO_SAVES } from "../env";
+// import { DO_SAVES } from "../env";
 import { executor } from "../command/executor";
-import { robotManager } from "../robot/robot-manager";
+// import { robotManager } from "../robot/robot-manager";
 
 type GameState = {
     type?: "puzzle" | "human" | "computer";
@@ -43,7 +43,7 @@ type GameState = {
 /**
  * The manager for game communication
  */
-export abstract class GameManager {
+export class GameManager {
     protected gameInterruptedReason: GameInterruptedReason | undefined =
         undefined;
 
@@ -60,7 +60,9 @@ export abstract class GameManager {
         protected reverse: boolean,
         protected tooltip?: string,
     ) {
-        socketManager.sendToAll();
+        socketManager.sendToAll({
+            type: MessageType.GAME_STARTED,
+        });
     }
 
     public pause() {
@@ -97,7 +99,9 @@ export abstract class GameManager {
         };
     }
 
-    public abstract handleMessage(message: Message, id: string): Promise<void>;
+    public handleMessage(message: Message, id: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {})
+    };
 
     public async cleanupGame(isHexapawn: boolean): Promise<void> {
         const command = moveAllRobotsFromBoardToHome(isHexapawn);
@@ -125,34 +129,9 @@ export class HumanGameManager extends GameManager {
      * @param id - id of the sender
      */
     public async handleMessage(message: Message, id: string): Promise<void> {
-        // console.log("handling message");
-
         // check which type the id is
         const clientType = this.clientManager.getClientType(id);
-        let sendToPlayer: SendMessage;
-        let sendToOpponent: SendMessage;
 
-        // decide whether the host is the player or the opponent
-        if (clientType === ClientType.HOST) {
-            sendToPlayer = this.clientManager.sendToHost.bind(
-                this.clientManager,
-            );
-            sendToOpponent = this.clientManager.sendToClient.bind(
-                this.clientManager,
-            );
-        } else {
-            sendToPlayer = this.clientManager.sendToClient.bind(
-                this.clientManager,
-            );
-            sendToOpponent = this.clientManager.sendToHost.bind(
-                this.clientManager,
-            );
-        }
-
-        //bind all spectators
-        const sendToSpectators = this.clientManager.sendToSpectators.bind(
-            this.clientManager,
-        );
         const ids = this.clientManager.getIds();
         // const currentSave = SaveManager.loadGame(id);
         // update the internal chess object if it is a move massage and game not paused
@@ -169,9 +148,10 @@ export class HumanGameManager extends GameManager {
                 this.paused = true;
                 console.log(reason);
                 this.chess.undo();
-                this.socketManager.sendToAll(
-                    createGameHoldMessage(GameHoldReason.GAME_PAUSED),
-                );
+                this.socketManager.sendToAll({
+                    type: MessageType.GAME_HELD,
+                    reason: GameHoldReason.GAME_PAUSED,
+                });
                 return;
             });
 
@@ -198,8 +178,10 @@ export class HumanGameManager extends GameManager {
             //         );
             //     }
             // }
-            sendToOpponent(message);
-            sendToSpectators(message);
+            this.socketManager.sendToAll({
+                type: MessageType.GAME_HELD,
+                reason: GameHoldReason.GAME_UNPAUSED,
+            });
 
             // end the game if it is interrupted
         } else if (message.type === MessageType.GAME_INTERRUPTED) {
@@ -207,9 +189,7 @@ export class HumanGameManager extends GameManager {
             this.gameInterruptedReason = reason;
             await this.cleanupGame(false);
             // propagate back to both sockets
-            sendToPlayer(message);
-            sendToOpponent(message);
-            sendToSpectators(message);
+            this.socketManager.sendToAll(message)
 
             //end the game in save manager
             // if (ids) {
@@ -226,14 +206,12 @@ export class HumanGameManager extends GameManager {
             // }
         } else if (message.type === MessageType.GAME_HELD) {
             const holdMsg = message as GameHoldMessage;
-            if (holdMsg.reason === GameHoldReason.DRAW_CONFIRMATION)
-                sendToPlayer(message);
-            else if (holdMsg.reason === GameHoldReason.DRAW_OFFERED) {
-                sendToOpponent(message);
+            if (holdMsg.reason === GameHoldReason.DRAW_CONFIRMATION) {
+                this.socketManager.sendToSocket("UNFUIINSED", message);
+            } else if (holdMsg.reason === GameHoldReason.DRAW_OFFERED) {
+                this.socketManager.sendToSocket("UNFUIINSED", message);
             } else {
-                sendToPlayer(message);
-                sendToOpponent(message);
-                sendToSpectators(message);
+                this.socketManager.sendToAll(message)
             }
         } else if (this.isGameEnded()) {
             // if (ids) {
@@ -272,7 +250,11 @@ export class ComputerGameManager extends GameManager {
     public async makeFirstMove() {
         if (this.aiFirstMove) {
             const move = this.chess.calculateAiMove(this.difficulty);
-            this.socketManager.sendToAll(createMoveMessage(move));
+            this.socketManager.sendToAll({
+                type: MessageType.MOVE,
+                move: move
+            });
+
             await this.executeRobotMovement(move);
         }
     }
@@ -295,19 +277,21 @@ export class ComputerGameManager extends GameManager {
     public async handleMessage(message: Message, id: string): Promise<void> {
         if (message.type === MessageType.MOVE && !this.paused && "move" in message) {
             const moveMsg = message as MoveMessage;
+
             // Call path materializer and send to bots for human move
             const command = materializePath(moveMsg.move);
 
-            this.socketManager.sendToAll(createMoveMessage(moveMsg.move));
+            this.socketManager.sendToAll(message);
             this.chess.makeMove(moveMsg.move);
 
             await executor.execute(command).catch((reason) => {
                 this.paused = true;
                 console.log(reason);
                 this.chess.undo();
-                this.socketManager.sendToAll(
-                    createGameHoldMessage(GameHoldReason.GAME_PAUSED),
-                );
+                this.socketManager.sendToAll({
+                    type: MessageType.GAME_HELD,
+                    reason: GameHoldReason.GAME_PAUSED
+                });
                 return;
             });
 
@@ -331,13 +315,17 @@ export class ComputerGameManager extends GameManager {
             // Ensure MINIMUM_DELAY before responding
             // previous code didn't wait for robots and caused issues where you could move and make robots collide
             const move = this.chess.calculateAiMove(this.difficulty);
+            
             await this.executeRobotMovement(move); // wait for robots to finish moving
-            this.socketManager.sendToAll(createMoveMessage(move)); // send move to clients after robots finish moving
+            this.socketManager.sendToAll({
+                type: MessageType.MOVE,
+                move: move
+            });
+
             if (this.isGameEnded()) {
                 // SaveManager.endGame(id, "ai");
             }
         } else if (message.type === MessageType.GAME_INTERRUPTED) {
-            this.gameInterruptedReason = (message as GameInterruptedMessage).reason;
             // SaveManager.endGame(id, "ai");
             await this.cleanupGame(false);
             // Reflect end game reason back to client
@@ -395,7 +383,11 @@ export class PuzzleGameManager extends GameManager {
             ) {
                 const command = materializePath(moveMsg.move);
 
-                this.socketManager.sendToAll(createMoveMessage(moveMsg.move));
+                this.socketManager.sendToAll({
+                    type: MessageType.MOVE,
+                    move: moveMsg.move
+                });
+
                 this.chess.makeMove(moveMsg.move);
                 this.moveNumber++;
 
@@ -405,11 +397,14 @@ export class PuzzleGameManager extends GameManager {
                     this.paused = true;
                     console.log(reason);
                     this.chess.undo();
-                    this.socketManager.sendToAll(
-                        createGameHoldMessage(GameHoldReason.GAME_PAUSED),
-                    );
+                    this.socketManager.sendToAll({
+                        type: MessageType.GAME_HELD,
+                        reason: GameHoldReason.GAME_PAUSED
+                    });
+
                     return;
                 });
+
                 console.log("executor done");
 
                 //if there is another move, make it
@@ -426,16 +421,19 @@ export class PuzzleGameManager extends GameManager {
                         this.paused = true;
                         console.log(reason);
                         this.chess.undo();
-                        this.socketManager.sendToAll(
-                            createGameHoldMessage(GameHoldReason.GAME_PAUSED),
-                        );
+                        this.socketManager.sendToAll({
+                            type: MessageType.GAME_HELD,
+                            reason: GameHoldReason.GAME_PAUSED
+                        });
                         return;
                     });
                     console.log("executor done");
                     setTimeout(() => {
-                        this.socketManager.sendToAll(
-                            createMoveMessage(this.moves[this.moveNumber]),
-                        );
+                        this.socketManager.sendToAll({
+                            type: MessageType.MOVE,
+                            move: this.moves[this.moveNumber],
+                        });
+
                         this.moveNumber++;
                     }, this.MINIMUM_DELAY);
                 } else {
@@ -443,19 +441,21 @@ export class PuzzleGameManager extends GameManager {
                 }
             }
 
-            //send an undo message
             else {
-                this.socketManager.sendToAll(
-                    createSetChessMessage(this.chess.fen),
-                );
+                this.socketManager.sendToAll({
+                    type: MessageType.SET_CHESS,
+                    chess: this.chess.fen
+                });
             }
 
-            //send a finished message
             if (this.isGameEnded()) {
                 const gameEnd = this.getGameEndReason();
                 await this.cleanupGame(false);
                 if (gameEnd) {
-                    this.socketManager.sendToAll(createGameEndMessage(gameEnd));
+                    this.socketManager.sendToAll({
+                        type: MessageType.GAME_ENDED,
+                        reason: gameEnd
+                    });
                 }
             }
         } else if (
@@ -508,30 +508,6 @@ export class HexapawnGameManager extends GameManager {
     }
 
     public async handleMessage(message: Message, id: string): Promise<void> {
-        // console.log("handling message");
-
-        // check which type the id is
-        const clientType = this.clientManager.getClientType(id);
-        let sendToPlayer: SendMessage;
-        let sendToOpponent: SendMessage;
-
-        // decide whether the host is the player or the opponent
-        if (clientType === ClientType.HOST) {
-            sendToPlayer = this.clientManager.sendToHost.bind(
-                this.clientManager,
-            );
-            sendToOpponent = this.clientManager.sendToClient.bind(
-                this.clientManager,
-            );
-        } else {
-            sendToPlayer = this.clientManager.sendToClient.bind(
-                this.clientManager,
-            );
-            sendToOpponent = this.clientManager.sendToHost.bind(
-                this.clientManager,
-            );
-        }
-
         //bind all spectators
         const sendToSpectators = this.clientManager.sendToSpectators.bind(
             this.clientManager,
@@ -552,9 +528,10 @@ export class HexapawnGameManager extends GameManager {
                 this.paused = true;
                 console.log(reason);
                 this.chess.undo();
-                this.socketManager.sendToAll(
-                    createGameHoldMessage(GameHoldReason.GAME_PAUSED),
-                );
+                this.socketManager.sendToAll({
+                    type: MessageType.GAME_HELD,
+                    reason: GameHoldReason.GAME_PAUSED
+                });
                 return;
             });
             console.log("executor done");
@@ -590,9 +567,7 @@ export class HexapawnGameManager extends GameManager {
             const reason = (message as GameInterruptedMessage).reason;
             this.gameInterruptedReason = reason;
             // propagate back to both sockets
-            sendToPlayer(message);
-            sendToOpponent(message);
-            sendToSpectators(message);
+            this.socketManager.sendToAll(message);
 
             //end the game in save manager
             // if (ids) {
@@ -614,9 +589,7 @@ export class HexapawnGameManager extends GameManager {
             else if (holdMsg.reason === GameHoldReason.DRAW_OFFERED) {
                 sendToOpponent(message);
             } else {
-                sendToPlayer(message);
-                sendToOpponent(message);
-                sendToSpectators(message);
+                this.socketManager.sendToAll(message);
             }
         }
 
@@ -632,7 +605,10 @@ export class HexapawnGameManager extends GameManager {
             console.log("Game ended! time to raise hell!");
             await this.cleanupGame(true);
             if (gameEnd) {
-                this.socketManager.sendToAll(createGameEndMessage(gameEnd));
+                this.socketManager.sendToAll({
+                    type: MessageType.GAME_ENDED,
+                    reason: gameEnd
+                });
             }
         }
     }

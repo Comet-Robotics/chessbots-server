@@ -3,8 +3,8 @@ import {
     type Packet,
     type PacketWithId,
     SERVER_PROTOCOL_VERSION,
-    packetToJson,
     PacketType,
+    serializePacket,
 } from "./packet";
 import { randomUUID } from "node:crypto";
 import { robotManager, type RobotManager } from "../../robot/robot-manager";
@@ -14,7 +14,7 @@ import {
     PING_TIMEOUT,
     USE_VIRTUAL_ROBOTS,
 } from "../../env";
-import { BotTunnel, type RobotEventEmitter } from "./bot-tunnel";
+import { BotTunnel } from "./bot-tunnel";
 import { config, RobotId } from "../config";
 import { sleep } from "../../../common/misc";
 
@@ -24,7 +24,6 @@ import { sleep } from "../../../common/misc";
 export class RealBotTunnel extends BotTunnel {
     address: string | undefined;
     id: RobotId | undefined;
-    emitter: RobotEventEmitter;
     pingReceived: boolean;
 
     /**
@@ -38,7 +37,6 @@ export class RealBotTunnel extends BotTunnel {
         private onHandshake: (packetContent: string) => void,
     ) {
         super();
-        this.emitter = new EventEmitter();
         this.pingReceived = false;
     }
 
@@ -112,25 +110,22 @@ export class RealBotTunnel extends BotTunnel {
             }
             // emit a action complete for further processing
             case PacketType.ACTION_SUCCESS: {
-                this.emitter.emit("actionComplete", {
-                    success: true,
-                    packetId,
-                });
+                // this.emitter.emit("actionComplete", {
+                //     success: true,
+                //     packetId,
+                // });
                 break;
             }
             // emit a action fail for further processing
             case PacketType.ACTION_FAIL: {
-                this.emitter.emit("actionComplete", {
-                    success: false,
-                    reason: packet.reason,
-                    packetId,
-                });
+                // this.emitter.emit("actionComplete", {
+                //     success: false,
+                //     reason: packet.reason,
+                //     packetId,
+                // });
                 break;
             }
 
-            case PacketType.QUERY_RESPONSE: {
-                console.log(packet);
-            }
             //checks if we are receiving from the bot a response for a ping the server sent.
             //if we are, then we can set pingReceived to true.
             // case PacketType.PING_RESPONSE: {
@@ -146,7 +141,7 @@ export class RealBotTunnel extends BotTunnel {
     async send(packet: Packet): Promise<string> {
         const packetId = randomUUID();
 
-        const str = packetToJson(packet, packetId);
+        const str = serializePacket(packet, packetId);
         const msg = str + ";";
 
         // If the connection isn't active, there is no robot
@@ -176,16 +171,16 @@ export class RealBotTunnel extends BotTunnel {
                 this.socket!.write(msg);
                 res(packetId);
             } else {
-                const removeListener = this.emitter.on(
-                    "actionComplete",
-                    (args) => {
-                        if (args.packetId !== packetId) return;
-                        removeListener();
-                        console.log("action complete", args);
-                        if (args.success) res(args.packetId);
-                        else rej(args.reason);
-                    },
-                );
+                // const removeListener = this.emitter.on(
+                //     "actionComplete",
+                //     (args) => {
+                //         if (args.packetId !== packetId) return;
+                //         removeListener();
+                //         console.log("action complete", args);
+                //         if (args.success) res(args.packetId);
+                //         else rej(args.reason);
+                //     },
+                // );
 
                 this.socket!.write(msg);
             }

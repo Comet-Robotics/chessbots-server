@@ -2,6 +2,7 @@ import { gridPositionFromPosition } from "../../common/units";
 import { Robot } from "./robot";
 import { config, RobotId } from "../api/config";
 import type { GridPosition } from "../../common/units";
+import { PacketType } from "../api/tunnel/packet";
 
 /**
  * Stores robots. Provides utilities for finding them by position.
@@ -70,7 +71,7 @@ export class RobotManager {
      * Throws if no robot is found.
      */
     getRobotAtGridPos(pos: GridPosition): Robot | undefined {
-        this.robots.forEach((robot, id) => {
+        this.robots.forEach((robot, _id) => {
             if (gridPositionFromPosition(robot.position) == pos) {
                 return robot
             }
@@ -81,7 +82,9 @@ export class RobotManager {
 
     stopAllRobots() {
         this.robots.forEach((robot) => {
-            robot.sendStopPacket();
+            robot.send({
+                type: PacketType.ESTOP
+            });
         });
     }
 }

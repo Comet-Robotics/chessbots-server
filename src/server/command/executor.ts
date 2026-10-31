@@ -1,4 +1,4 @@
-import { gamePaused } from "../game/pauseHandler";
+import { gameManager } from "../main";
 import type { Command } from "./command";
 
 /**
@@ -43,7 +43,7 @@ export class CommandExecutor {
     public async execute(command: Command): Promise<void> {
         this.checkRequirements(command);
         this.runningCommands.push(command);
-        if (!gamePaused) {
+        if (!gameManager.paused) {
             return command.execute().finally(() => {
                 this.oldCommands.unshift(command);
                 const index = this.runningCommands.indexOf(command);

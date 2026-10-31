@@ -3,6 +3,7 @@ import { type BotTunnel } from "../api/tunnel/bot-tunnel";
 import type {  Position } from "../../common/units";
 import type { Piece } from "../../common/chess";
 import { config, RobotConfig, RobotId } from "../api/config";
+import { Packet } from "../api/tunnel/packet";
 
 /**
  * Represents a physical robot.
@@ -72,5 +73,9 @@ export class Robot {
 
     public setTunnel(tunnel: BotTunnel) {
         this.tunnel = tunnel;
+    }
+
+    public send(packet: Packet) {
+        
     }
 }

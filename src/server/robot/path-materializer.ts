@@ -324,16 +324,15 @@ function findShimmyLocation(
 }
 
 function constructDriveCommand(
-    pieceId: RobotId,
+    robot: RobotId,
     endLocation: { x: number; y: number },
     startLocation: { x: number; y: number } | null,
 ): DriveCommand {
-    const robot = robotManager.getRobot(pieceId);
     const offset = startLocation ? 
         { x: endLocation.x - startLocation.x, y: endLocation.y - startLocation.y } :
         endLocation;
     const distance = Math.hypot(offset.x, offset.y);
-    return new DriveCommand(pieceId, distance);
+    return new DriveCommand(robot, distance);
 }
 
 function constructRotateCommand(

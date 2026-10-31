@@ -2,7 +2,7 @@ import { RobotManager } from "../../robot/robot-manager";
 import { config } from "../config";
 import { BotTunnel } from "./bot-tunnel";
 import { RealBotTunnel } from "./real-tunnel";
-
+import net from "node:net" 
 /**
  * Handles tcp tunnels and maintains a list of connections
  */
@@ -41,14 +41,12 @@ export class TCPServer {
                 if (!(mac in config["bots"])) {
                     console.error(`MAC address ${mac} not found in config, ignoring`);
                     return;
-                } 
+                }
 
                 let robotId = this.robotManager.createRobot(mac);                
                 tunnel.id = robotId;
                 tunnel.address = mac;
-
-                this.connections[id] = tunnel;
-                this.robotManager.createRobot(mac).setTunnel(tunnel);
+                this.robotManager.getRobot(robotId).setTunnel(tunnel);
             }).bind(this),
         );
 
@@ -59,4 +57,4 @@ export class TCPServer {
     }
 }
 
-export const tcpServer: TCPServer | null = USE_VIRTUAL_ROBOTS ? null : new TCPServer(robotManager);
+// export const tcpServer: TCPServer | null = USE_VIRTUAL_ROBOTS ? null : new TCPServer(robotManager);

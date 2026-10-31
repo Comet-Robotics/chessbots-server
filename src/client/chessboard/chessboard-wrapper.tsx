@@ -1,12 +1,11 @@
 import { Chessboard } from "react-chessboard";
 import { BLACK, WHITE, type ChessEngine, type Square } from "../../common/chess";
-import { useState } from "react";
+import { JSX, useState } from "react";
 import { BoardContainer } from "./board-container";
-import type { Move, PieceType } from "../../common/game-types";
-import { Side } from "../../common/game-types";
+import type { Move, Piece } from "../../common/chess";
+import { Side } from "../../common/chess";
 import { customSquareRenderer } from "./custom-square-renderer";
 import { CustomSquareContext } from "./custom-square-context";
-import type { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 
 /**
  * an interface of relevant properties for chessboard
@@ -56,7 +55,7 @@ export function ChessboardWrapper(props: ChessboardWrapperProps): JSX.Element {
         Square | undefined
     >();
 
-    const [orientation, setOrientation] = useState<BoardOrientation>("white");
+    const [orientation, setOrientation] = useState<Side>(WHITE);
 
     // Maps squares to style objects
     let legalSquares: string[] = [];
@@ -70,99 +69,53 @@ export function ChessboardWrapper(props: ChessboardWrapperProps): JSX.Element {
     const isLegalMove = (from: Square, to: Square): boolean => {
         return (
             chess.getLegalSquares(from).includes(to) &&
-            chess.getPieceSide(from) === side
+            chess.getPieceColor(from) === side
         );
     };
 
-    /**
-     * make to move passed in and unset lastClickedSquare
-     *
-     * @param move - the move made
-     */
-    const doMove = (move: Move): void => {
-        onMove(move);
-        setLastClickedSquare(undefined);
-    };
 
-    //set the side to their respective colors and orientations
-    switch (props.side) {
-        case WHITE:
-            if (orientation !== "white") setOrientation("white");
-            break;
-        case BLACK:
-            if (orientation !== "black") setOrientation("black");
-            break;
-        //choose spectator side based on which is closer
-        default:
-            if (props.rotation % 360 < 180) {
-                if (orientation !== "black") {
-                    setOrientation("black");
-                }
-            } else {
-                if (orientation !== "white") {
-                    setOrientation("white");
-                }
-            }
-    }
+    const options = {
+                    boardOrientation: orientation == WHITE ? "white" : "black",
+                    position: chess.fen,
 
-    // Don't render while width isn't set
-    let chessboard: JSX.Element | null = null;
-    if (width !== undefined) {
-        chessboard = (
-            <Chessboard
-                // set up the board
-                boardOrientation={side === Side.WHITE ? "white" : "black"}
-                boardWidth={width}
-                position={chess.fen}
-                // do a promotion check
-                onPromotionCheck={(from: Square, to: Square) => {
-                    const promoting = chess.checkPromotion(from, to);
-                    setIsPromoting(promoting);
-                    return promoting;
-                }}
-                showPromotionDialog={manualPromotionSquare !== undefined}
-                promotionToSquare={manualPromotionSquare}
-                // handle dragging and dropping pieces
-                onPieceDrop={(
-                    from: Square,
-                    to: Square,
-                    pieceAndSide: string,
-                ): boolean => {
-                    const piece: PieceType =
-                        pieceAndSide[1].toLowerCase() as PieceType;
-                    if (isLegalMove(from, to)) {
-                        if (manualPromotionSquare !== undefined) {
-                            doMove({
-                                // `from` is undefined in manual promotion flow
-                                from: lastClickedSquare!,
-                                // `to: manualPromotionSquare` is also valid
-                                to,
-                                promotion: piece,
-                            });
-                            setManualPromotionSquare(undefined);
-                        } else {
-                            doMove({
-                                from,
-                                to,
-                                // Include piece only if promoting
-                                promotion: isPromoting ? piece : undefined,
-                            });
+                    // handle dragging and dropping pieces
+                    onPieceDrop: ((
+                        from: Square,
+                        to: Square,
+                        pieceAndSide: string,
+                    ): boolean => {
+                        const piece: Piece =
+                            pieceAndSide[1].toLowerCase() as Piece;
+                        if (isLegalMove(from, to)) {
+                            if (manualPromotionSquare !== undefined) {
+                                doMove({
+                                    // `from` is undefined in manual promotion flow
+                                    from: lastClickedSquare!,
+                                    // `to: manualPromotionSquare` is also valid
+                                    to,
+                                    promotion: piece,
+                                });
+                                setManualPromotionSquare(undefined);
+                            } else {
+                                doMove({
+                                    from,
+                                    to,
+                                    // Include piece only if promoting
+                                    promotion: isPromoting ? piece : undefined,
+                                });
+                            }
+
+                            // Reset state
+                            setIsPromoting(false);
+                            return true;
                         }
+                        return false;
+                    }),
 
-                        // Reset state
-                        setIsPromoting(false);
-                        return true;
-                    }
-                    return false;
-                }}
-                // when you start dragging, unset clicked square
-                onPieceDragBegin={(_, square: Square) => {
-                    if (square !== lastClickedSquare) {
-                        setLastClickedSquare(undefined);
-                    }
-                }}
+
+
                 // handle square clicking
-                onSquareClick={(square: Square) => {
+                onSquareClick: ((square: Square) => {
                     setManualPromotionSquare(undefined);
 
                     // Protects the type of lastClickedSquare, and is true when the clicked square is legal
@@ -190,14 +143,36 @@ export function ChessboardWrapper(props: ChessboardWrapperProps): JSX.Element {
                         // Select clicked square
                         setLastClickedSquare(square);
                     }
-                }}
-                isDraggablePiece={({ piece }) => {
-                    // piece is color and piece type, e.g. "wP"
+                }),
+
+                canDragPiece: ({ piece }) => {
                     return piece[0] === side;
-                }}
-                arePremovesAllowed={false}
-                customSquare={customSquareRenderer}
-            />
+                },
+
+                squareRenderer: customSquareRenderer
+            }
+
+
+
+
+
+
+
+    /**
+     * make to move passed in and unset lastClickedSquare
+     *
+     * @param move - the move made
+     */
+    const doMove = (move: Move): void => {
+        onMove(move);
+        setLastClickedSquare(undefined);
+    };
+
+    // Don't render while width isn't set
+    let chessboard: JSX.Element | null = null;
+    if (width !== undefined) {
+        chessboard = (
+            <Chessboard options={options}/>
         );
     }
 

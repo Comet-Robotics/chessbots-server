@@ -30,8 +30,9 @@ export const move_schema = z.object({
 }) satisfies z.ZodType<Pick<ChessJsMove, "from" | "to" | "promotion">>
 
 export const puzzle_schema = z.object({
+    name: z.string(),
     fen: z.string().refine((s) => validateFen(s).ok),
-    moves: z.array(z.object(move_schema)),
+    moves: z.array(move_schema),
     rating: z.number(),
     tooltip: z.string().optional(),
 })

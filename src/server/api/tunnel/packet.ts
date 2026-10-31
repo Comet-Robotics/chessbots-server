@@ -50,37 +50,49 @@ export const DriveTilesSchema = z.object({
     tileDistance: z.number(),
 });
 
+export const ClientHelloSchema = z.object({
+    type: z.literal(PacketType.CLIENT_HELLO),
+    macAddress: z.mac()
+});
+
+export const ActionSuccessSchema = z.object({
+    type: z.literal(PacketType.ACTION_SUCCESS),
+    tileDistance: z.number(),
+});
+
+export const ActionFailSchema = z.object({
+    type: z.literal(PacketType.ACTION_FAIL),
+    reason: z.string()
+});
+
 
 export const EstopSchema = z.object({
     type: z.literal(PacketType.ESTOP),
 });
 
 export const PacketSchema = z.discriminatedUnion("type", [
-    // ClientHelloSchema,
+    ClientHelloSchema,
     ServerHelloSchema,
     CenterSendSchema,
     PingSendSchema,
-    // PingResponseSchema,
+    PingResponseSchema,
     TurnByAngleSchema,
     DriveTilesSchema,
-    // ActionSuccessSchema,
-    // ActionFailSchema,
-    // DriveTankSchema,
+    ActionSuccessSchema,
+    ActionFailSchema,
     EstopSchema,
 ])
 
 // --- TypeScript types ---
-// export type ClientHello = z.infer<typeof ClientHelloSchema>;
+export type ClientHello = z.infer<typeof ClientHelloSchema>;
 export type ServerHello = z.infer<typeof ServerHelloSchema>;
 export type PingSend = z.infer<typeof PingSendSchema>;
 export type CenterSend = z.infer<typeof CenterSendSchema>;
 export type PingResponse = z.infer<typeof PingResponseSchema>;
 export type TurnByAngle = z.infer<typeof TurnByAngleSchema>;
 export type DriveTiles = z.infer<typeof DriveTilesSchema>;
-// export type ActionSuccess = z.infer<typeof ActionSuccessSchema>;
-// export type ActionFail = z.infer<typeof ActionFailSchema>;
-// export type DriveTank = z.infer<typeof DriveTankSchema>;
-// export type DriveCubicSpline = z.infer<typeof DriveCubicSplineSchema>;
+export type ActionSuccess = z.infer<typeof ActionSuccessSchema>;
+export type ActionFail = z.infer<typeof ActionFailSchema>;
 export type Estop = z.infer<typeof EstopSchema>;
 
 export type Packet = z.infer<typeof PacketSchema>;

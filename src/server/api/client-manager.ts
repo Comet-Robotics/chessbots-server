@@ -2,6 +2,8 @@ import type { WebSocket } from "ws";
 import type { SocketManager } from "./socket-manager";
 import { ClientType } from "../../common/chess";
 import type { Message } from "../../common/message";
+import { WebSocketLike } from "@hono/node-server";
+import { WSContext } from "hono/ws";
 
 /**
  * A class which maps player client ids to their corresponding websocket (if any).
@@ -20,7 +22,7 @@ export class ClientManager {
      * get the host's socket
      * @returns the host socket
      */
-    public getHostSocket(): Set<WebSocket> | undefined {
+    public getHostSocket(): Set<WSContext<WebSocketLike>> | undefined {
         if (this.hostId !== undefined) {
             return this.socketManager.getSockets(this.hostId);
         }
@@ -77,7 +79,7 @@ export class ClientManager {
      * get the client socket
      * @returns the socket of the client
      */
-    public getClientSocket(): Set<WebSocket> | undefined {
+    public getClientSocket(): Set<WSContext<WebSocketLike>> | undefined {
         if (this.clientId !== undefined) {
             return this.socketManager.getSockets(this.clientId);
         }
