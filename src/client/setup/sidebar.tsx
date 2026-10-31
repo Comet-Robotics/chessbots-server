@@ -1,15 +1,7 @@
 import { Button, NonIdealState } from "@blueprintjs/core";
-import type { Dispatch } from "react";
+import type { Dispatch, JSX } from "react";
 import { useState } from "react";
-import type { MessageHandler } from "../../common/message";
-import { JoinQueue, UpdateQueue } from "../../common/message/game-message";
 import { get, useEffectQuery, useSocket } from "../api";
-import {
-    bgColor,
-    buttonColor,
-    textBoxColor,
-    textColor,
-} from "../check-dark-mode";
 
 function getMessageHandler(setQueue: Dispatch<string[]>): MessageHandler {
     return (message) => {
@@ -68,23 +60,22 @@ export function Sidebar(props: sidebarProps): JSX.Element {
 
     return (
         <div
-            className={"sidebar flex-container " + bgColor()}
+            className={"sidebar flex-container"}
             style={{ paddingTop: props.top }}
         >
-            <h3 className={textColor()}>Player Queue</h3>
+            <h3>Player Queue</h3>
             <ul style={{ listStyle: "decimal" }}>
                 {queue.map(function (data) {
                     return (
-                        <li className={textColor()} key={data}>
+                        <li key={data}>
                             {data}
                         </li>
                     );
                 })}
             </ul>
             <div className={"button-container"}>
-                <label className={textColor()}>Name:</label>
+                <label>Name:</label>
                 <input
-                    className={textBoxColor() + " " + textColor()}
                     value={name}
                     maxLength={30}
                     onChange={(e) => setName(e.target.value)}
@@ -94,9 +85,7 @@ export function Sidebar(props: sidebarProps): JSX.Element {
                     style={{ textAlign: "start" }}
                     onClick={async () => {
                         sendMessage(new JoinQueue(name));
-                    }}
-                    className={buttonColor()}
-                >
+                    }}                >
                     Join queue
                 </Button>
             </div>

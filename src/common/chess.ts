@@ -2,6 +2,9 @@ import type { Color, Move as ChessJsMove, PieceSymbol, Square } from "chess.js";
 import { Chess, KING, PAWN, QUEEN, WHITE, BLACK, validateFen } from "chess.js";
 import { GameFinishedReason } from "./game-end-reasons";
 import { z } from "zod/v4";
+import { gridPositionFromSquare } from "./units";
+import { RobotManager } from "../server/robot/robot-manager";
+import { RobotId } from "../server/api/config";
 
 export type Piece = PieceSymbol;
 export type Side = Color | typeof SPECTATOR
@@ -208,21 +211,18 @@ export class ChessEngine {
      * @param move - The Move to check.
      * @returns The current piece on the square as a it's robot id as a string
      */
-    // getCapturedPieceId(
-    //     move: Move,
-    //     robotManager: RobotManager,
-    // ): RobotId | undefined {
-    //     if (this.isEnPassant(move)) {
-    //         return robotManager.getRobotAtGridPos({
-    //             x: squareToGrid(move.to).i,
-    //             y: squareToGrid(move.from).j,
-    //         }).id;
-    //     } else if (this.isRegularCapture(move)) {
-    //         const to = squareToGrid(move.to);
-    //         return robotManager.getRobotAtGridPos(to).id;
-    //     }
-    //     return undefined;
-    // }
+    getCapturedPieceId(
+        move: Move,
+        robotManager: RobotManager,
+    ): RobotId | undefined {
+        if (this.isEnPassant(move)) {
+            return robotManager.getRobotAtGridPos(gridPositionFromSquare(move.to))?.id
+        } else if (this.isRegularCapture(move)) {
+            const to = gridPositionFromSquare(move.to);
+            return robotManager.getRobotAtGridPos(to)?.id;
+        }
+        return undefined;
+    }
 
     /**
      * Returns the piece on a square or undefined

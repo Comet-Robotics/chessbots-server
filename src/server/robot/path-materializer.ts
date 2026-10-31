@@ -6,7 +6,6 @@ import {
 import {
     AbsoluteMoveCommand,
 } from "../command/command";
-import type { ReversibleRobotCommand } from "../command/move-piece";
 import { MovePiece } from "../command/move-piece";
 import type { Robot } from "./robot";
 //import { error } from "console"; replaced with Error
@@ -322,7 +321,7 @@ function findShimmyLocation(
 function constructFinalCommand(
     move: GridMove,
     driveCommands: Command[],
-    rotateCommands: ReversibleRobotCommand[],
+    rotateCommands: Command[],
     collisionType: CollisionType,
     numCollisions: number,
     noReverse: boolean = false,
@@ -434,7 +433,7 @@ function moveMainPiece(
     movingRobotId?: RobotId,
 ): MovePiece {
     const driveCommands: Command[] = [];
-    const rotateCommands: ReversibleRobotCommand[] = [];
+    const rotateCommands: Command[] = [];
     const collisionType = calcCollisionType(move);
     console.log("Move is: ");
     console.log(move);

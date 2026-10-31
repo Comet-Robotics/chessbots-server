@@ -1,4 +1,4 @@
-import type { CustomSquareProps } from "react-chessboard/dist/chessboard/types";
+import type { CustomSquareProps } from "react-chessboard";
 import type { ReactElement } from "react";
 import { forwardRef, useContext } from "react";
 import {

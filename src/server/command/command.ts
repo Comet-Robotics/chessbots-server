@@ -47,6 +47,7 @@ export abstract class Command {
     }
 }
 
+// Useful for reversing command that don't have a reasonable reversal (like centering)
 export class NoopCommand extends Command {
     public inner_execute(): Promise<void> { return Promise.resolve() }
     public reverse(): Command { return this }
