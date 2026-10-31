@@ -60,22 +60,11 @@ export class Robot {
         return this.tunnel?.connected ?? false
     }
 
-    /**
-     * @param delta_heading - A relative heading to turn by, in radians.
-     */
-    public async relativeRotate(delta_heading: number): Promise<void> {
-        this._heading = clampHeading(
-            this._heading + delta_heading,
-        );
-
-        return this.tunnel?.sendTurnPacket(delta_heading);
-    }
-
     public setTunnel(tunnel: BotTunnel) {
         this.tunnel = tunnel;
     }
 
-    public send(packet: Packet) {
-        
+    public async send(packet: Packet): Promise<void> {
+        await this.tunnel?.send(packet)
     }
 }

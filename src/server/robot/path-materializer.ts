@@ -3,13 +3,9 @@ import {
     ParallelCommandGroup,
     SequentialCommandGroup,
 } from "../command/command";
-import type { MoveCommand } from "../command/move-command";
 import {
     AbsoluteMoveCommand,
-    DriveCommand,
-    ReversibleAbsoluteRotateCommand,
-    RotateToStartCommand,
-} from "../command/move-command";
+} from "../command/command";
 import type { ReversibleRobotCommand } from "../command/move-piece";
 import { MovePiece } from "../command/move-piece";
 import type { Robot } from "./robot";
@@ -22,7 +18,7 @@ import {
     gridPositionFromSquare,
     positionFromSquare,
 } from "../../common/units";
-import type { GridPosition } from "../../common/units";
+import type { GridPosition, Position } from "../../common/units";
 import { RobotId } from "../api/config";
 import { Move } from "../../common/chess";
 import { gameManager } from "../main";
@@ -298,20 +294,20 @@ function findShimmyLocation(
             const distHypot = Math.hypot(signedDistX, signedDistY);
             const normalX: number = signedDistX / distHypot;
             const normalY: number = signedDistY / distHypot;
-            const orth1: { x: number; y: number } = { x: -normalY, y: normalX };
-            const orth2: { x: number; y: number } = { x: normalY, y: -normalX };
-            const orthPos1: { x: number; y: number } = {
+            const orth1: Position = { x: -normalY, y: normalX };
+            const orth2: Position = { x: normalY, y: -normalX };
+            const orthPos1: Position = {
                 x: orth1.x + move.to.x,
                 y: orth1.y + move.to.y,
             };
-            const orthPos2: { x: number; y: number } = {
+            const orthPos2: Position = {
                 x: orth2.x + move.to.x,
                 y: orth2.y + move.to.y,
             };
 
             // distance calculations :)
-            const val1: { x: number; y: number } = { x: shimmyPos.x - orthPos1.x, y: shimmyPos.y - orthPos1.y };
-            const val2: { x: number; y: number } = { x: shimmyPos.x - orthPos2.x, y: shimmyPos.y - orthPos2.y };
+            const val1: Position = { x: shimmyPos.x - orthPos1.x, y: shimmyPos.y - orthPos1.y };
+            const val2: Position = { x: shimmyPos.x - orthPos2.x, y: shimmyPos.y - orthPos2.y };
             const dist1: number = Math.hypot(val1.x, val1.y);
             const dist2: number = Math.hypot(val2.x, val2.y);
 
@@ -323,35 +319,9 @@ function findShimmyLocation(
     return { x: 0, y: 0 };
 }
 
-function constructDriveCommand(
-    robot: RobotId,
-    endLocation: { x: number; y: number },
-    startLocation: { x: number; y: number } | null,
-): DriveCommand {
-    const offset = startLocation ? 
-        { x: endLocation.x - startLocation.x, y: endLocation.y - startLocation.y } :
-        endLocation;
-    const distance = Math.hypot(offset.x, offset.y);
-    return new DriveCommand(robot, distance);
-}
-
-function constructRotateCommand(
-    pieceId: RobotId,
-    location: { x: number; y: number },
-    startLocation: { x: number; y: number } | null,
-): ReversibleRobotCommand {
-    const robot = robotManager.getRobot(pieceId);
-    const offset = startLocation ?
-        { x: location.x - startLocation.x, y: location.y - startLocation.y } :
-        location;
-    const angle = Math.atan2(offset.y, offset.x);
-    console.log("rotate cmd construct", robot.position, offset, angle);
-    return new ReversibleAbsoluteRotateCommand(pieceId, () => angle);
-}
-
 function constructFinalCommand(
     move: GridMove,
-    driveCommands: DriveCommand[],
+    driveCommands: Command[],
     rotateCommands: ReversibleRobotCommand[],
     collisionType: CollisionType,
     numCollisions: number,
@@ -367,16 +337,16 @@ function constructFinalCommand(
         const to = move.to;
         if (collisionType === CollisionType.HORIZONTAL && numCollisions > 1) {
             const y = dirToEdge[1] * 0.5;
-            const pos1: { x: number; y: number } = { x: from.x + 0.5, y: from.y + y + 0.5 };
-            const pos2: { x: number; y: number } = { x: to.x + 0.5, y: from.y + y + 0.5 };
-            const pos3: { x: number; y: number } = { x: to.x + 0.5, y: to.y + 0.5 };
+            const pos1: Position = { x: from.x + 0.5, y: from.y + y + 0.5 };
+            const pos2: Position = { x: to.x + 0.5, y: from.y + y + 0.5 };
+            const pos3: Position = { x: to.x + 0.5, y: to.y + 0.5 };
             console.log("from, to ========", from, " ", to);
-            const mainDrive1 = constructDriveCommand(mainPiece, pos1, null);
-            const mainDrive2 = constructDriveCommand(mainPiece, pos2, pos1);
-            const mainDrive3 = constructDriveCommand(mainPiece, pos3, pos2);
-            const mainTurn1 = constructRotateCommand(mainPiece, pos1, null);
-            const mainTurn2 = constructRotateCommand(mainPiece, pos2, pos1);
-            const mainTurn3 = constructRotateCommand(mainPiece, pos3, pos2);
+            const mainDrive1 = new AbsoluteMoveCommand(mainPiece, pos1, 0);
+            const mainDrive2 = new AbsoluteMoveCommand(mainPiece, pos2, 0);
+            const mainDrive3 = new AbsoluteMoveCommand(mainPiece, pos3, 0);
+            // const mainTurn1 = constructRotateCommand(mainPiece, pos1, null);
+            // const mainTurn2 = constructRotateCommand(mainPiece, pos2, pos1);
+            // const mainTurn3 = constructRotateCommand(mainPiece, pos3, pos2);
             const setupCommands: SequentialCommandGroup[] = [];
 
             for (let x = 0; x < rotateCommands.length; x++) {
@@ -387,14 +357,12 @@ function constructFinalCommand(
                     ]),
                 );
             }
-            setupCommands.push(new SequentialCommandGroup([mainTurn1]));
+            // setupCommands.push(new SequentialCommandGroup([mainTurn1]));
 
             const mainDrive: SequentialCommandGroup =
                 new SequentialCommandGroup([
                     mainDrive1,
-                    mainTurn2,
                     mainDrive2,
-                    mainTurn3,
                     mainDrive3,
                 ]);
             return new MovePiece(setupCommands, mainDrive, noReverse);
@@ -407,12 +375,9 @@ function constructFinalCommand(
             const pos2: { x: number; y: number } = { x: from.x + x + 0.5, y: to.y + 0.5 };
             const pos3: { x: number; y: number } = { x: to.x + 0.5, y: to.y + 0.5 };
             console.log("from, to ========", from, " ", to);
-            const mainDrive1 = constructDriveCommand(mainPiece, pos1, null);
-            const mainDrive2 = constructDriveCommand(mainPiece, pos2, pos1);
-            const mainDrive3 = constructDriveCommand(mainPiece, pos3, pos2);
-            const mainTurn1 = constructRotateCommand(mainPiece, pos1, null);
-            const mainTurn2 = constructRotateCommand(mainPiece, pos2, pos1);
-            const mainTurn3 = constructRotateCommand(mainPiece, pos3, pos2);
+            const mainDrive1 = new AbsoluteMoveCommand(mainPiece, pos1, 0);
+            const mainDrive2 = new AbsoluteMoveCommand(mainPiece, pos2, 0);
+            const mainDrive3 = new AbsoluteMoveCommand(mainPiece, pos3, 0);
             const setupCommands: SequentialCommandGroup[] = [];
 
             for (let x = 0; x < rotateCommands.length; x++) {
@@ -423,14 +388,12 @@ function constructFinalCommand(
                     ]),
                 );
             }
-            setupCommands.push(new SequentialCommandGroup([mainTurn1]));
+            // setupCommands.push(new SequentialCommandGroup([mainTurn1]));
 
             const mainDrive: SequentialCommandGroup =
                 new SequentialCommandGroup([
                     mainDrive1,
-                    mainTurn2,
                     mainDrive2,
-                    mainTurn3,
                     mainDrive3,
                 ]);
             return new MovePiece(setupCommands, mainDrive, noReverse);
@@ -438,8 +401,8 @@ function constructFinalCommand(
             const pos: { x: number; y: number } = { x: to.x + 0.5, y: to.y + 0.5 };
             const startPos =
                 movingRobotId ? { x: from.x + 0.5, y: from.y + 0.5 } : null;
-            const mainDrive = constructDriveCommand(mainPiece, pos, startPos);
-            const mainTurn = constructRotateCommand(mainPiece, pos, startPos);
+            const mainDrive = new AbsoluteMoveCommand(mainPiece, pos, 0);
+            const mainTurn = new AbsoluteMoveCommand(mainPiece, pos, 0);
             const setupCommands: SequentialCommandGroup[] = [];
 
             for (let x = 0; x < rotateCommands.length; x++) {
@@ -470,7 +433,7 @@ function moveMainPiece(
     noReverse: boolean = false,
     movingRobotId?: RobotId,
 ): MovePiece {
-    const driveCommands: DriveCommand[] = [];
+    const driveCommands: Command[] = [];
     const rotateCommands: ReversibleRobotCommand[] = [];
     const collisionType = calcCollisionType(move);
     console.log("Move is: ");
@@ -481,8 +444,8 @@ function moveMainPiece(
     for (let i = 0; i < collisions.length; i++) {
         const pieceId = collisions[i];
         const location = findShimmyLocation(pieceId, move, collisionType);
-        driveCommands.push(constructDriveCommand(pieceId, location, null));
-        rotateCommands.push(constructRotateCommand(pieceId, location, null));
+        driveCommands.push(new AbsoluteMoveCommand(pieceId, location, 0));
+        // rotateCommands.push(constructRotateCommand(pieceId, location, null));
     }
     return constructFinalCommand(
         move,
@@ -700,13 +663,14 @@ function returnToHome(from: GridPosition, id: RobotId): SequentialCommandGroup {
     );
 
     let i = startInArray;
-    const moveCommands: MoveCommand[] = [];
+    const moveCommands: Command[] = [];
     while (i !== endInArray) {
         if (arrayOfCornersIndicies.includes(i)) {
             moveCommands.push(
                 new AbsoluteMoveCommand(
                     id,
                     { x: arrayOfDeadzone[i].x + 0.5, y: arrayOfDeadzone[i].y + 0.5 },
+                    0
                 ),
             );
         }
@@ -719,12 +683,13 @@ function returnToHome(from: GridPosition, id: RobotId): SequentialCommandGroup {
             new AbsoluteMoveCommand(
                 id,
                 { x: arrayOfDeadzone[endInArray].x + 0.5, y: arrayOfDeadzone[endInArray].y + 0.5 },
+                0
             ),
         );
     }
 
     moveCommands.push(
-        new AbsoluteMoveCommand(id, { x: home.x + 0.5, y: home.y + 0.5 }),
+        new AbsoluteMoveCommand(id, { x: home.x + 0.5, y: home.y + 0.5 }, 0),
     );
 
     const goHome: SequentialCommandGroup = new SequentialCommandGroup([
@@ -796,6 +761,7 @@ export function moveAllRobotsToDefaultPositionsHexapawn(
                 new AbsoluteMoveCommand(
                     robot.id,
                     positionFromGridPosition(defaultPositions.get(robotId)!),
+                    0
                 ),
             );
         } catch (error) {
@@ -850,6 +816,7 @@ export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
             new AbsoluteMoveCommand(
                 robotId,
                 { x: target.x + 0.5, y: target.y + 0.5 },
+                0
             ),
         );
     }
@@ -910,6 +877,7 @@ export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
                 new AbsoluteMoveCommand(
                     pawn.id,
                     { x: dzStart.x + 0.5, y: dzStart.y + 0.5 },
+                    0
                 ),
             );
             // 2) Travel along the same edge in the deadzone to align with target row (no corner traversal)
@@ -920,6 +888,7 @@ export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
                     new AbsoluteMoveCommand(
                         pawn.id,
                         { x: ringAlign.x + 0.5, y: ringAlign.y + 0.5 },
+                        0
                     ),
                 );
             }
@@ -928,6 +897,7 @@ export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
                 new AbsoluteMoveCommand(
                     pawn.id,
                     { x: pawn.def.x + 0.5, y: pawn.def.y + 0.5 },
+                    0
                 ),
             );
             batchSeqs.push(new SequentialCommandGroup(seq));
@@ -945,20 +915,20 @@ export function moveAllRobotsHomeToDefaultOptimized(): SequentialCommandGroup {
         }
     }
 
-    //rotate all robots on default squares to face the center of the board
-    const finalRotations: Command[] = [];
+    // //rotate all robots on default squares to face the center of the board
+    // const finalRotations: Command[] = [];
 
-    for (const [robotId, _def] of mainPieceTargets) {
-        finalRotations.push(new RotateToStartCommand(robotId));
-    }
-    for (const [robotId, _def] of pawnTargets) {
-        finalRotations.push(new RotateToStartCommand(robotId));
-    }
+    // for (const [robotId, _def] of mainPieceTargets) {
+    //     finalRotations.push(new RotateToStartCommand(robotId));
+    // }
+    // for (const [robotId, _def] of pawnTargets) {
+    //     finalRotations.push(new RotateToStartCommand(robotId));
+    // }
 
     return new SequentialCommandGroup([
         new ParallelCommandGroup(mainMoves),
         ...pawnBatches,
-        new ParallelCommandGroup(finalRotations),
+        // new ParallelCommandGroup(finalRotations),
     ]);
 }
 
@@ -1047,6 +1017,7 @@ function generateRobotPathToDefault(
         new AbsoluteMoveCommand(
             robot.id,
             positionFromGridPosition(deadzonePos),
+            0
         ),
     );
 
@@ -1063,7 +1034,7 @@ function generateRobotPathToDefault(
 
     // Drop down to the correct position on the board
     commands.push(
-        new AbsoluteMoveCommand(robot.id, positionFromGridPosition(defaultPos)),
+        new AbsoluteMoveCommand(robot.id, positionFromGridPosition(defaultPos), 0),
     );
 
     return commands;
@@ -1104,6 +1075,7 @@ function generateDeadzonePath(
             new AbsoluteMoveCommand(
                 robotId,
                 { x: targetPos.x + 0.5, y: targetPos.y + 0.5 },
+                0
             ),
         );
 
@@ -1200,36 +1172,44 @@ export function materializePath(move: Move): Command {
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtGridPos(moveToGridMove(move).from)!.id,
                 positionFromGridPosition({ x: 4, y: 2 }),
+                0
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,
                 positionFromGridPosition({ x: 2, y: 1 }),
+                0
             );
             rookMove2 = new AbsoluteMoveCommand(
                 rookPiece.id,
                 positionFromGridPosition({ x: 5, y: 1 }),
+                0
             );
             rookMove3 = new AbsoluteMoveCommand(
                 rookPiece.id,
                 positionFromGridPosition({ x: 5, y: 2 }),
+                0
             );
         } else {
             rookPiece = robotManager.getRobotAtGridPos({ x: 2, y: 9 });
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtGridPos(moveToGridMove(move).from)!.id,
                 positionFromGridPosition({ x: 4, y: 9 }),
+                0
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,
                 positionFromGridPosition({ x: 2, y: 10 }),
+                0
             );
             rookMove2 = new AbsoluteMoveCommand(
                 rookPiece.id,
                 positionFromGridPosition({ x: 5, y: 10 }),
+                0
             );
             rookMove3 = new AbsoluteMoveCommand(
                 rookPiece.id,
                 positionFromGridPosition({ x: 5, y: 9 }),
+                0
             );
         }
         return new SequentialCommandGroup([
@@ -1248,18 +1228,22 @@ export function materializePath(move: Move): Command {
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtGridPos(moveToGridMove(move).from)!.id,
                 positionFromGridPosition({ x: 8, y: 2 }),
+                0
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,
                 positionFromGridPosition({ x: 9, y: 1 }),
+                0
             );
             rookMove2 = new AbsoluteMoveCommand(
                 rookPiece.id,
                 positionFromGridPosition({ x: 7, y: 1 }),
+                0
             );
             rookMove3 = new AbsoluteMoveCommand(
                 rookPiece.id,
                 positionFromGridPosition({ x: 7, y: 2 }),
+                0
             );
         }
         // black side castling
@@ -1268,18 +1252,22 @@ export function materializePath(move: Move): Command {
             kingMove = new AbsoluteMoveCommand(
                 robotManager.getRobotAtGridPos(moveToGridMove(move).from)!.id,
                 positionFromGridPosition({ x: 8, y: 9 }),
+                0
             );
             rookMove1 = new AbsoluteMoveCommand(
                 rookPiece.id,
                 positionFromGridPosition({ x: 9, y: 10 }),
+                0
             );
             rookMove2 = new AbsoluteMoveCommand(
                 rookPiece.id,
                 positionFromGridPosition({ x: 7, y: 10 }),
+                0
             );
             rookMove3 = new AbsoluteMoveCommand(
                 rookPiece.id,
                 positionFromGridPosition({ x: 7, y: 9 }),
+                0
             );
         }
         return new SequentialCommandGroup([

@@ -13,14 +13,18 @@ export enum PacketType {
     SET_VAR = "SET_VAR",
     TURN_BY_ANGLE = "TURN_BY_ANGLE",
     DRIVE_TILES = "DRIVE_TILES",
-    DRIVE_TICKS = "DRIVE_TICKS",
+    
+    SET_ABSOLUTE = "SET_ABSOLUTE",
+    DRIVE_ABSOLUTE = "DRIVE_ABSOLUTE",
+
+    // DRIVE_TICKS = "DRIVE_TICKS",
     ACTION_SUCCESS = "ACTION_SUCCESS",
     ACTION_FAIL = "ACTION_FAIL",
-    DRIVE_TANK = "DRIVE_TANK",
-    DRIVE_CUBIC_SPLINE = "DRIVE_CUBIC_SPLINE",
-    DRIVE_QUADRATIC_SPLINE = "DRIVE_QUADRATIC_SPLINE",
+    // DRIVE_TANK = "DRIVE_TANK",
+    // DRIVE_CUBIC_SPLINE = "DRIVE_CUBIC_SPLINE",
+    // DRIVE_QUADRATIC_SPLINE = "DRIVE_QUADRATIC_SPLINE",
     ESTOP = "ESTOP",
-    SPIN_RADIANS = "SPIN_RADIANS",
+    // SPIN_RADIANS = "SPIN_RADIANS",
 }
 
 export const ServerHelloSchema = z.object({
@@ -50,6 +54,20 @@ export const DriveTilesSchema = z.object({
     tileDistance: z.number(),
 });
 
+export const SetAbsoluteSchema = z.object({
+    type: z.literal(PacketType.DRIVE_ABSOLUTE),
+    x: z.number(),
+    y: z.number(),
+    rot: z.number()
+});
+
+export const DriveAbsoluteSchema = z.object({
+    type: z.literal(PacketType.DRIVE_ABSOLUTE),
+    x: z.number(),
+    y: z.number(),
+    rot: z.number()
+});
+
 export const ClientHelloSchema = z.object({
     type: z.literal(PacketType.CLIENT_HELLO),
     macAddress: z.mac()
@@ -65,7 +83,6 @@ export const ActionFailSchema = z.object({
     reason: z.string()
 });
 
-
 export const EstopSchema = z.object({
     type: z.literal(PacketType.ESTOP),
 });
@@ -78,6 +95,8 @@ export const PacketSchema = z.discriminatedUnion("type", [
     PingResponseSchema,
     TurnByAngleSchema,
     DriveTilesSchema,
+    DriveAbsoluteSchema,
+    SetAbsoluteSchema,
     ActionSuccessSchema,
     ActionFailSchema,
     EstopSchema,

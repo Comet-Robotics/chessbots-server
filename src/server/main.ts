@@ -8,9 +8,9 @@ import { WebSocketServer } from "ws";
 import { getCookie } from "hono/cookie";
 import { robotManager } from "./robot/robot-manager";
 import { puzzles } from "./game/puzzles";
-import { CenterCommand, DriveCommand, RelativeRotateCommand } from "./command/move-command";
 import { RobotId } from "./api/config";
 import { executor } from "./command/executor";
+import { CenterCommand } from "./command/command";
 
 export const socketManager = new SocketManager({})
 export const clientManager = new ClientManager(socketManager)
@@ -184,30 +184,30 @@ app.get("/api/pause-game", (c) => {
     return c.body(null, 200);
 });
 
-app.post("/api/force-move", async (c) => {
-  const { robotId, dist } = c.req.query()
+// app.post("/api/force-move", async (c) => {
+//   const { robotId, dist } = c.req.query()
 
-    const command = new DriveCommand(
-        Number(robotId) as RobotId,
-        Number(dist as string),
-    );
+//     const command = new DriveCommand(
+//         Number(robotId) as RobotId,
+//         Number(dist as string),
+//     );
     
-    return executor.execute(command).then(() => {
-        return c.json({ message: "success" });
-    });
-});
+//     return executor.execute(command).then(() => {
+//         return c.json({ message: "success" });
+//     });
+// });
 
-app.post("/api/force-turn", async (c) => {
-    const { robotId, rad } = c.req.query();
-    const command = new RelativeRotateCommand(
-        Number(robotId) as RobotId,
-        Number(rad),
-    );
+// app.post("/api/force-turn", async (c) => {
+//     const { robotId, rad } = c.req.query();
+//     const command = new RelativeRotateCommand(
+//         Number(robotId) as RobotId,
+//         Number(rad),
+//     );
 
-    return executor.execute(command).then(() => {
-        return c.json({ message: "success" });
-    });
-});
+//     return executor.execute(command).then(() => {
+//         return c.json({ message: "success" });
+//     });
+// });
 
 app.post("/api/force-center", async (c) => {
     const { robotId } = c.req.query();
