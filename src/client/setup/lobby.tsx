@@ -1,10 +1,9 @@
 import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { SetupBase } from "./setup-base";
 import { useNavigate, Navigate } from "react-router-dom";
-import { GameStartedMessage } from "../../common/message/game-message";
 import { useSocket, useEffectQuery, get } from "../api";
-import { ClientType } from "../../common/client-types";
-import { ThemeButtons } from "./setup";
+import { MessageType } from "../../common/message";
+import { ClientType } from "../../common/chess";
 
 /**
  * check for an active game and waits for one or forwards to setup
@@ -19,7 +18,7 @@ export function Lobby() {
 
     // use a socket to wait for game started
     useSocket((message) => {
-        if (message instanceof GameStartedMessage) {
+        if (message.type == MessageType.GAME_STARTED ) {
             navigate("/game");
         }
     });
@@ -60,7 +59,6 @@ export function Lobby() {
                             justifyContent: "space-around",
                         }}
                     >
-                        <ThemeButtons />
                     </div>
                 </>
             </SetupBase>

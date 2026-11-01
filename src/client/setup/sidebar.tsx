@@ -2,6 +2,7 @@ import { Button, NonIdealState } from "@blueprintjs/core";
 import type { Dispatch, JSX } from "react";
 import { useState } from "react";
 import { get, useEffectQuery, useSocket } from "../api";
+import { MessageHandler } from "../../common/message";
 
 function getMessageHandler(setQueue: Dispatch<string[]>): MessageHandler {
     return (message) => {
@@ -85,7 +86,7 @@ export function Sidebar(props: sidebarProps): JSX.Element {
                     style={{ textAlign: "start" }}
                     onClick={async () => {
                         sendMessage(new JoinQueue(name));
-                    }}                >
+                    }}>
                     Join queue
                 </Button>
             </div>

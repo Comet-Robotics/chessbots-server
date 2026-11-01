@@ -3,33 +3,37 @@ import type { ItemRenderer } from "@blueprintjs/select";
 import { Select } from "@blueprintjs/select";
 import { post } from "../api";
 import { useNavigate } from "react-router-dom";
-import type { PuzzleComponents } from "../../server/game/puzzles";
+import { useState } from "react";
+import { puzzles } from "../../server/game/puzzles";
+import { Puzzle } from "../../common/chess";
 
-const renderPuzzleOptions: ItemRenderer<string> = (
-    puzzleNumber,
+let [selectedPuzzle, setSelectedPuzzle] = useState(0);
+
+const renderPuzzleOptions: ItemRenderer<number> = (
+    puzzleId,
     { modifiers, handleFocus, handleClick },
 ) => {
+    const puzzle = puzzles[puzzleId];
+
     return (
         <MenuItem
-            key={puzzleNumber}
+            key={puzzle.name}
             active={modifiers.active}
             roleStructure="listoption"
-            text={puzzleNumber}
+            text={puzzle.name}
             onFocus={handleFocus}
             onClick={handleClick}
         />
     );
 };
 
-interface SelectPuzzleProps {
-    puzzles: Record<string, PuzzleComponents>;
-    selectedPuzzle: string | undefined;
-    onPuzzleSelected: (puzzle: string) => void;
+type SelectPuzzleProps = {
+    onPuzzleSelected: (puzzle: number) => void;
 }
 
 export function SelectPuzzle(props: SelectPuzzleProps) {
     const navigate = useNavigate();
-    const hasSelection = props.selectedPuzzle !== undefined;
+    const hasSelection = selectedPuzzle !== undefined;
 
     const submit = (
         <Button
@@ -37,15 +41,11 @@ export function SelectPuzzle(props: SelectPuzzleProps) {
             icon="arrow-right"
             intent="primary"
             onClick={async () => {
-                if (props.selectedPuzzle && props.puzzles) {
-                    //convert puzzle to map and send to start puzzles
-                    const puzzle = props.puzzles as Record<
-                        string,
-                        PuzzleComponents
-                    >;
+                if (selectedPuzzle) {
                     const promise = post("/start-puzzle-game", {
-                        puzzle: JSON.stringify(puzzle[props.selectedPuzzle]),
+                        puzzle: String(selectedPuzzle)
                     });
+
                     promise.then(() => {
                         navigate("/game");
                     });
@@ -53,10 +53,11 @@ export function SelectPuzzle(props: SelectPuzzleProps) {
             }}
         />
     );
+
     return (
         <>
-            <Select<string>
-                items={[...Object.keys(props.puzzles)]}
+            <Select<number>
+                items={[...Array(puzzles.length).keys()]}
                 itemRenderer={renderPuzzleOptions}
                 onItemSelect={props.onPuzzleSelected}
                 filterable={false}
@@ -65,7 +66,7 @@ export function SelectPuzzle(props: SelectPuzzleProps) {
                 <Button
                     text={
                         hasSelection ?
-                            props.selectedPuzzle
+                            puzzles[selectedPuzzle].name
                         :   "Select a puzzle..."
                     }
                     endIcon="double-caret-vertical"

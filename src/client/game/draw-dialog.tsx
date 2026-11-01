@@ -6,11 +6,7 @@ import {
     DialogFooter,
 } from "@blueprintjs/core";
 import { useState } from "react";
-import { MessageSender, MessageType, type Message } from "../../common/message";
-import {
-    GameHoldReason,
-    GameInterruptedReason,
-} from "../../common/game-end-reasons";
+import { GameHoldReason, GameInterruptedReason, MessageSender, MessageType, type Message } from "../../common/message";
 
 
 
@@ -19,7 +15,7 @@ import {
  * @param props - function for sending messages
  * @returns - draw dialog
  */
-export function OfferDrawDialog(sendMessage: MessageSender) {
+export function OfferDrawDialog(props: { sendMessage: MessageSender }) {
     const [isOpen, setIsOpen] = useState(true);
     const actions = (
         <>
@@ -28,7 +24,7 @@ export function OfferDrawDialog(sendMessage: MessageSender) {
                 rightIcon="arrow-up"
                 intent="primary"
                 onClick={() => {
-                    sendMessage({
+                    props.sendMessage({
                         type: MessageType.GAME_HELD,
                         reason: GameHoldReason.DRAW_OFFERED,
                     });
@@ -39,7 +35,7 @@ export function OfferDrawDialog(sendMessage: MessageSender) {
                 rightIcon="arrow-down"
                 intent="primary"
                 onClick={() => {
-                    sendMessage({
+                    props.sendMessage({
                         type: MessageType.GAME_HELD,
                         reason: GameHoldReason.DRAW_DENIED,
                     });
@@ -69,7 +65,7 @@ export function OfferDrawDialog(sendMessage: MessageSender) {
  * @param props - function for sending messages
  * @returns - draw accept dialog
  */
-export function AcceptDrawDialog(sendMessage: MessageSender) {
+export function AcceptDrawDialog(props: { sendMessage: MessageSender }) {
     const [isOpen, setIsOpen] = useState(true);
     const actions = (
         <>
@@ -78,7 +74,7 @@ export function AcceptDrawDialog(sendMessage: MessageSender) {
                 rightIcon="arrow-up"
                 intent="primary"
                 onClick={() => {
-                    sendMessage({
+                    props.sendMessage({
                         type: MessageType.GAME_INTERRUPTED,
                         reason: GameInterruptedReason.DRAW_ACCEPTED,
                     });
@@ -89,7 +85,7 @@ export function AcceptDrawDialog(sendMessage: MessageSender) {
                 rightIcon="arrow-down"
                 intent="primary"
                 onClick={() => {
-                    sendMessage({
+                    props.sendMessage({
                         type: MessageType.GAME_HELD,
                         reason: GameHoldReason.DRAW_DENIED,
                     });

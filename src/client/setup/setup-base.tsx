@@ -2,8 +2,7 @@ import { Dialog, DialogBody, DialogFooter } from "@blueprintjs/core";
 import { Outlet } from "react-router-dom";
 import { ChessboardWrapper } from "../chessboard/chessboard-wrapper";
 import type { PropsWithChildren, ReactNode } from "react";
-import { ChessEngine } from "../../common/chess";
-import { Side } from "../../common/game-types";
+import { ChessEngine, WHITE } from "../../common/chess";
 import { Sidebar } from "./sidebar";
 
 interface SetupBaseProps extends PropsWithChildren {
@@ -14,16 +13,15 @@ interface SetupBaseProps extends PropsWithChildren {
  * Create the background chessboard and applies a dialog on top
  *
  * @param props - any dialogs that need to be shown on screen
- * @returns the background element with a dialog
  */
-export function SetupBase(props: SetupBaseProps): JSX.Element {
+export function SetupBase(props: SetupBaseProps) {
     return (
         <>
             <div className="main-dialog">
                 <Outlet />
                 <ChessboardWrapper
                     chess={new ChessEngine()}
-                    side={Side.WHITE}
+                    side={WHITE}
                     onMove={() => {}}
                     rotation={0}
                 />

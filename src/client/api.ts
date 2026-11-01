@@ -1,11 +1,13 @@
 import useWebSocket from "react-use-websocket";
 import type {
-    Message
+    Message,
+    MessageHandler,
+    MessageSender
 } from "../common/message";
-import { createRegisterWebsocketMessage } from "../common/message";
 import { useId, useMemo } from "react";
-import { parseMessage } from "../common/message";
+import { MessageType, parseMessage } from "../common/message";
 import { useQuery } from "@tanstack/react-query";
+import { json } from "zod";
 
 /**
  * A wrapper around `useQuery` which causes the wrapped query to be trigged once each time the page renders.
@@ -45,12 +47,17 @@ const WEBSOCKET_URL = `${WS_PROTOCOL}://${new URL(window.location.href).host}/ws
 export function useSocket(
     onMessage?: MessageHandler,
     onOpen?: () => void,
-): SendMessage {
+): MessageSender {
     // handle sending a message and opening it
     const { sendMessage } = useWebSocket(WEBSOCKET_URL, {
         onOpen: () => {
             console.log("Connection established");
-            sendMessage(JSON.stringify(createRegisterWebsocketMessage()));
+            sendMessage(
+                JSON.stringify({
+                    type: MessageType.REGISTER_WEBSOCKET
+                })
+            );
+            
             if (onOpen !== undefined) {
                 onOpen();
             }

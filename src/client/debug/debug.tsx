@@ -7,14 +7,15 @@ import { SelectRobot } from "./select-robot";
 import { DriveRobot } from "./drive-robot";
 import { SetRobotVariable } from "./set-robot-variable";
 import "./debug.scss";
+import { RobotId } from "../../server/api/config";
 
 /**
  * A debug menu which can be used to manually control individual robots.
  */
 export function Debug() {
-    const [robotIds, setRobotIds] = useState<string[] | undefined>();
+    const [robotIds, setRobotIds] = useState<RobotId[] | undefined>();
     const [selectedRobotId, setSelectedRobotId] = useState<
-        string | undefined
+        RobotId | undefined
     >();
 
     // helper functions

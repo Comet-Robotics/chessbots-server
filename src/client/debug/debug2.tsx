@@ -1,24 +1,12 @@
 import type { Dispatch } from "react";
 import { useEffect, useState } from "react";
-
-import {
-    GameInterruptedMessage,
-    MoveMessage,
-} from "../../common/message/game-message";
-import type {
-    GameEndReason,
-    GameInterruptedReason,
-} from "../../common/game-end-reasons";
-
 import { ChessboardWrapper } from "../chessboard/chessboard-wrapper";
 import { NavbarMenu } from "../game/navbar-menu";
 import { useSocket } from "../api";
-import type { MessageHandler } from "../../common/message";
+import { GameEndReason, MessageType, type GameInterruptedReason, type MessageHandler } from "../../common/message";
 //import { GameEndDialog } from "../game/game-end-dialog";
 import { Outlet } from "react-router-dom";
-import { ChessEngine } from "../../common/chess";
-import type { Move } from "../../common/game-types";
-import { PieceType, Side } from "../../common/game-types";
+import { ChessEngine, Move, WHITE } from "../../common/chess";
 //import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { GameEndDialog } from "../game/game-end-dialog";
 // import { debugPath } from "../../server/robot/path-materializer";
@@ -29,16 +17,16 @@ function getMessageHandler(
     setGameInterruptedReason: Dispatch<GameInterruptedReason>,
 ): MessageHandler {
     return (message) => {
-        if (message instanceof MoveMessage) {
+        if (message.type ==MessageType.MOVE) {
             // Must be a new instance of ChessEngine to trigger UI redraw
             setChess(chess.copy(message.move));
-        } else if (message instanceof GameInterruptedMessage) {
+        } else if (message.type == MessageType.GAME_INTERRUPTED) {
             setGameInterruptedReason(message.reason);
         }
     };
 }
 
-export function Debug2(): JSX.Element {
+export function Debug2() {
     const [chess, setChess] = useState(new ChessEngine());
     const [gameInterruptedReason, setGameInterruptedReason] =
         useState<GameInterruptedReason>();
@@ -54,7 +42,7 @@ export function Debug2(): JSX.Element {
         setChess(holder);
     }, []);
 
-    const side = Side.WHITE;
+    const side = WHITE;
 
     let gameEndReason: GameEndReason | undefined = undefined;
     const gameFinishedReason = chess.getGameFinishedReason();
@@ -71,11 +59,10 @@ export function Debug2(): JSX.Element {
 
     const handleMove = (move: Move): void => {
         setChess(chess.copy(move));
-        sendMessage(new MoveMessage(move));
-
-        if (chess.getPieceTypeFromMove(move) === PieceType.QUEEN) {
-            // debugPath(move).execute();
-        }
+        sendMessage({
+            type: MessageType.MOVE,
+            move
+        });
     };
 
     return (

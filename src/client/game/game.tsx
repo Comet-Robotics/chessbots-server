@@ -1,28 +1,16 @@
 import type { Dispatch } from "react";
 import { useState } from "react";
 
-import {
-    GameEndMessage,
-    GameFinishedMessage,
-    GameHoldMessage,
-    GameInterruptedMessage,
-    SetChessMessage,
-    MoveMessage,
-} from "../../common/message/game-message";
-import type {
-    GameEndReason,
-    GameInterruptedReason,
-} from "../../common/game-end-reasons";
-import { GameHoldReason } from "../../common/game-end-reasons";
+import { GameHoldReason, Message, MessageType } from "../../common/message";
 
 import { ChessboardWrapper } from "../chessboard/chessboard-wrapper";
 import { NavbarMenu } from "./navbar-menu";
 import { get, useEffectQuery, useSocket } from "../api";
-import type { MessageHandler } from "../../common/message";
+import type { GameEndReason, GameInterruptedReason, MessageHandler } from "../../common/message";
 import { GameEndDialog } from "./game-end-dialog";
 import { Navigate, Outlet } from "react-router-dom";
 import { ChessEngine } from "../../common/chess";
-import type { Move } from "../../common/game-types";
+import type { Move } from "../../common/chess";
 import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { AcceptDrawDialog, OfferDrawDialog } from "./draw-dialog";
 import { Sidebar } from "../setup/sidebar";
@@ -44,13 +32,13 @@ function getMessageHandler(
     setPaused: Dispatch<boolean>,
 ): MessageHandler {
     return (message) => {
-        if (message instanceof MoveMessage) {
+        if (message.type == MessageType.MOVE) {
             // Must be a new instance of ChessEngine to trigger UI redraw
             // short wait so the pieces don't teleport into place
             setTimeout(() => {
                 setChess(chess.copy(message.move));
             }, 500);
-        } else if (message instanceof SetChessMessage) {
+        } else if (message.type == MessageType.SET_CHESS) {
             const fen = message.chess;
             if (fen) {
                 setTimeout(() => {
@@ -58,15 +46,16 @@ function getMessageHandler(
                     setChess(chess.copy());
                 }, 500);
             }
-        } else if (message instanceof GameInterruptedMessage) {
+        } else if (message.type == MessageType.GAME_INTERRUPTED) {
             setGameInterruptedReason(message.reason);
-        } else if (message instanceof GameEndMessage) {
+        } else if (message.type == MessageType.GAME_ENDED) {
             setGameEndedReason(message.reason);
-        } else if (message instanceof GameHoldMessage) {
+        } else if (message.type == MessageType.GAME_HELD) {
             setGameHoldReason(message.reason);
-            if (message.reason === GameHoldReason.GAME_PAUSED) {
+
+            if (message.reason == GameHoldReason.GAME_PAUSED) {
                 setPaused(true);
-            } else if (message.reason === GameHoldReason.GAME_UNPAUSED) {
+            } else if (message.reason == GameHoldReason.GAME_UNPAUSED) {
                 setPaused(false);
             }
         }
@@ -77,7 +66,7 @@ function getMessageHandler(
  *
  * @returns chessboard wrapper with current side and message handler
  */
-export function Game(): JSX.Element {
+export function Game() {
     const [chess, setChess] = useState(new ChessEngine());
     const [gameInterruptedReason, setGameInterruptedReason] =
         useState<GameInterruptedReason>();
@@ -146,7 +135,10 @@ export function Game(): JSX.Element {
     if (gameEndedReason !== undefined) {
         gameEndReason = gameEndedReason;
     } else if (gameFinishedReason !== undefined) {
-        sendMessage(new GameFinishedMessage(gameFinishedReason));
+        sendMessage({
+            type: MessageType.GAME_FINISHED,
+            reason: gameFinishedReason
+        });
         gameEndReason = gameFinishedReason;
     } else if (gameInterruptedReason !== undefined) {
         gameEndReason = gameInterruptedReason;
@@ -186,7 +178,11 @@ export function Game(): JSX.Element {
         !paused ?
             (move: Move): void => {
                 setChess(chess.copy(move));
-                sendMessage(new MoveMessage(move));
+                sendMessage({
+                    type: MessageType.MOVE,
+                    move
+                });
+                
                 window.location.reload();
             }
         :   () => {}; //send a do-nothing function if game is paused

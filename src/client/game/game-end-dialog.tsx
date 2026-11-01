@@ -8,16 +8,14 @@ import {
     NonIdealStateIconSize,
 } from "@blueprintjs/core";
 import { useNavigate } from "react-router-dom";
-import type { GameEndReason } from "../../common/game-end-reasons";
-import {
-    GameFinishedReason,
-    GameInterruptedReason,
-} from "../../common/game-end-reasons";
-import { useState } from "react";
-import { Side } from "../../common/game-types";
-import { post } from "../api";
 
-interface GameEndDialogProps {
+import { useState } from "react";
+import { Side, WHITE } from "../../common/chess";
+import { post } from "../api";
+import { type } from "node:os";
+import { GameEndReason, GameFinishedReason, GameInterruptedReason } from "../../common/message";
+
+type GameEndDialogProps = {
     reason: GameEndReason;
     side: Side;
 }
@@ -94,8 +92,8 @@ function gameOverIcon(reason: GameEndReason, side: Side) {
         reason === GameFinishedReason.PUZZLE_SOLVED;
 
     // checks which side is asking and assigns win/lost accordingly
-    const won = side === Side.WHITE ? whiteWon : blackWon;
-    const lost = side === Side.WHITE ? blackWon : whiteWon;
+    const won = side === WHITE ? whiteWon : blackWon;
+    const lost = side === WHITE ? blackWon : whiteWon;
     // const draw = !blackWon && !whiteWon;
 
     // return the correct icon and intent

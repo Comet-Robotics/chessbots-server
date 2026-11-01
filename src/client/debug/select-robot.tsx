@@ -1,6 +1,7 @@
 import { Button, MenuItem } from "@blueprintjs/core";
 import type { ItemRenderer } from "@blueprintjs/select";
 import { Select } from "@blueprintjs/select";
+import { RobotId } from "../../server/api/config";
 
 /**
  * Creates a robot menu item
@@ -9,7 +10,7 @@ import { Select } from "@blueprintjs/select";
  * @param param1 - handlers for active, focus, and click
  * @returns a menu item for the robot id
  */
-const renderRobotIds: ItemRenderer<string> = (
+const renderRobotIds: ItemRenderer<RobotId> = (
     robotId,
     { modifiers, handleFocus, handleClick },
 ) => {
@@ -29,9 +30,9 @@ const renderRobotIds: ItemRenderer<string> = (
  * Ids, selected id, and on robot selected function
  */
 interface SelectRobotProps {
-    robotIds: string[];
-    selectedRobotId: string | undefined;
-    onRobotIdSelected: (robotId: string) => void;
+    robotIds: RobotId[];
+    selectedRobotId: RobotId | undefined;
+    onRobotIdSelected: (robotId: RobotId) => void;
 }
 
 /**
@@ -45,7 +46,7 @@ export function SelectRobot(props: SelectRobotProps) {
 
     return (
         // get all the robot ids in the list for selection
-        <Select<string>
+        <Select<RobotId>
             items={props.robotIds}
             itemRenderer={renderRobotIds}
             onItemSelect={props.onRobotIdSelected}

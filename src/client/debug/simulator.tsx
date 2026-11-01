@@ -11,11 +11,6 @@ import type { CSSProperties, PropsWithChildren } from "react";
 import { forwardRef, useEffect, useReducer, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { get, useSocket } from "../api";
-import type {
-    SimulatedRobotLocation,
-    StackFrame,
-} from "../../common/message/simulator-message";
-import { SimulatorUpdateMessage } from "../../common/message/simulator-message";
 import "./simulator.scss";
 import { clampHeading, GRID_CELL_PX } from "../../common/units";
 

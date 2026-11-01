@@ -7,7 +7,6 @@ import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
 import { StrictMode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BeginCheckRefresh } from "./begin-check-refresh";
 export const queryClient = new QueryClient();
 
 FocusStyleManager.onlyShowFocusOnTabs();
@@ -16,8 +15,6 @@ FocusStyleManager.onlyShowFocusOnTabs();
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <>
         <StrictMode>
-            {/* Call the refresh function */}
-            <BeginCheckRefresh />
             <div id="app-container">
                 <BlueprintProvider>
                     <QueryClientProvider client={queryClient}>

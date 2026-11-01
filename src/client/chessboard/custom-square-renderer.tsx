@@ -43,7 +43,7 @@ export const customSquareRenderer = forwardRef<
         lastClickedSquare !== undefined &&
         lastClickedSquare === props.square &&
         chess.hasPiece(props.square) &&
-        chess.getPieceSide(props.square) === side
+        chess.getPieceColor(props.square) === side
     ) {
         clickedPieceHighlight = (
             <ClickedPiece

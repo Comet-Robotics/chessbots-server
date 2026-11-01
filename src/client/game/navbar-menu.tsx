@@ -6,20 +6,13 @@ import {
     NavbarHeading,
 } from "@blueprintjs/core";
 import { useNavigate } from "react-router-dom";
-import {
-    GameHoldMessage,
-    GameInterruptedMessage,
-} from "../../common/message/game-message";
-import {
-    GameHoldReason,
-    GameInterruptedReason,
-} from "../../common/game-end-reasons";
-import type { SendMessage } from "../../common/message";
-import { Side } from "../../common/game-types";
+
+import { GameHoldReason, GameInterruptedReason, MessageType, type Message, type MessageSender } from "../../common/message";
+import { Side, SPECTATOR, WHITE } from "../../common/chess";
 import type { Dispatch } from "react";
 
 interface NavbarMenuProps {
-    sendMessage: SendMessage;
+    sendMessage: MessageSender;
     side: Side;
     difficulty?: string;
     aiDifficulty?: number;
@@ -32,7 +25,7 @@ interface NavbarMenuProps {
  * @param props - message handler for abort/resign
  * @returns the navbar element with all the buttons
  */
-export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
+export function NavbarMenu(props: NavbarMenuProps) {
     // Store react router state for game
     const navigate = useNavigate();
     const difficultyButton =
@@ -52,7 +45,7 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
 
     /** create navbar rotate button */
     const rotateButton =
-        props.side === Side.SPECTATOR ?
+        props.side === SPECTATOR ?
             <Button
                 variant="minimal"
                 text="Rotate"
@@ -66,7 +59,7 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
         :   undefined;
 
     const resignButton =
-        props.side === Side.SPECTATOR ?
+        props.side === SPECTATOR ?
             undefined
         :   <Button
                 icon="flag"
@@ -74,18 +67,15 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
                 text="Resign"
                 intent="danger"
                 onClick={async () => {
-                    props.sendMessage(
-                        new GameInterruptedMessage(
-                            props.side === Side.WHITE ?
-                                GameInterruptedReason.WHITE_RESIGNED
-                            :   GameInterruptedReason.BLACK_RESIGNED,
-                        ),
-                    );
+                    props.sendMessage({
+                        type: MessageType.GAME_INTERRUPTED,
+                        reason: props.side === WHITE ? GameInterruptedReason.WHITE_RESIGNED : GameInterruptedReason.BLACK_RESIGNED
+                    })
                 }}
             />;
 
     const drawButton =
-        props.side === Side.SPECTATOR ?
+        props.side === SPECTATOR ?
             undefined
         :   <Button
                 icon="pause"
@@ -93,9 +83,10 @@ export function NavbarMenu(props: NavbarMenuProps): JSX.Element {
                 text="Draw"
                 intent="danger"
                 onClick={async () => {
-                    props.sendMessage(
-                        new GameHoldMessage(GameHoldReason.DRAW_CONFIRMATION),
-                    );
+                    props.sendMessage({
+                        type: MessageType.GAME_HELD,
+                        reason: GameHoldReason.DRAW_CONFIRMATION
+                    });
                 }}
             />;
 

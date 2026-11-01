@@ -5,13 +5,13 @@ import {
     Spinner,
 } from "@blueprintjs/core";
 import { SetupBase } from "./setup-base";
-import type { Dispatch } from "react";
+import type { Dispatch, JSX } from "react";
 import { useState } from "react";
 import { SetupGame } from "./setup-game";
 import { Navigate, useNavigate } from "react-router-dom";
-import { ClientType, GameType } from "../../common/client-types";
-import { SetupPuzzle } from "../puzzle/setup-puzzle";
 import { get, useEffectQuery } from "../api";
+import { ClientType, GameType } from "../../common/chess";
+import { SelectPuzzle } from "../game/select-puzzle";
 
 enum SetupType {
     MAIN = "main",
@@ -65,7 +65,7 @@ export function Setup(): JSX.Element {
                     />
                 :   null}
                 {setupType === SetupType.PUZZLE ?
-                    <SetupPuzzle />
+                    <SelectPuzzle/>
                 :   null}
             </SetupBase>
         );

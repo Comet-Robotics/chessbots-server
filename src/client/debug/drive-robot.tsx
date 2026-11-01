@@ -1,14 +1,15 @@
 import { Button, useHotkeys } from "@blueprintjs/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { DriveRobotMessage } from "../../common/message/robot-message";
-import type { SendMessage } from "../../common/message";
+import { Message, MessageSender, MessageType } from "../../common/message";
 import { Joystick } from "react-joystick-component";
 import type { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
 import { DriveSlider } from "./drive-slider";
+import { RobotId } from "../../server/api/config";
+import { randomUUID } from "node:crypto";
 
 interface DriveRobotProps {
-    robotId: string;
-    sendMessage: SendMessage;
+    robotId: RobotId;
+    sendMessage: MessageSender;
 }
 
 const ROBOT_MSG_THROTTLE_MS = 50;
@@ -35,9 +36,13 @@ export function DriveRobot(props: DriveRobotProps) {
         ) {
             return;
         }
-        props.sendMessage(
-            new DriveRobotMessage(props.robotId, power.left, power.right),
-        );
+        props.sendMessage({
+            type: MessageType.DRIVE_ROBOT,
+            id: randomUUID(),
+            leftPower: power.left,
+            rightPower: power.right
+        });
+        
         setPrev({ left: power.left, right: power.right });
     }, [props, power.left, power.right, prev]);
 
