@@ -1,10 +1,53 @@
 import type { Color, Move as ChessJsMove, PieceSymbol, Square } from "chess.js";
 import { Chess, KING, PAWN, QUEEN, WHITE, BLACK, validateFen } from "chess.js";
-import { GameFinishedReason } from "./game-end-reasons";
 import { z } from "zod/v4";
 import { gridPositionFromSquare } from "./units";
 import { RobotManager } from "../server/robot/robot-manager";
 import { RobotId } from "../server/api/config";
+import { aiMove } from "js-chess-engine";
+
+export type GameEndReason = GameCompletedReason | GameInterruptedReason;
+
+/**
+ * map possible end reasons to their string versions
+ */
+export enum GameCompletedReason {
+    /**
+     * White is checkmated.
+     */
+    WHITE_CHECKMATED = "white-checkmated",
+    /**
+     * Black is checkmated.
+     */
+    BLACK_CHECKMATED = "black-checkmated",
+    STALEMATE = "stalemate",
+    THREEFOLD_REPETITION = "threefold-repetition",
+    INSUFFICIENT_MATERIAL = "insufficient-material",
+    FIFTY_MOVES = "fifty-moves",
+    PUZZLE_SOLVED = "puzzle-solved",
+}
+
+/**
+ * A reason for a game to be stopped outside the normal flow of moves.
+ */
+export enum GameInterruptedReason {
+    WHITE_RESIGNED = "white-resigned",
+    BLACK_RESIGNED = "black-resigned",
+    DRAW_ACCEPTED = "draw-accepted",
+    ABORTED = "aborted",
+}
+
+/**
+ * a reason for the game to pause temporarily, but not end the game
+ */
+export enum GameHoldReason {
+    DRAW_OFFERED = "draw-offered",
+    DRAW_CONFIRMATION = "draw-confirmation",
+    DRAW_DENIED = "draw-denied",
+    GAME_PAUSED = "game-paused",
+    GAME_UNPAUSED = "game-unpaused",
+}
+
 
 export type Piece = PieceSymbol;
 export type Side = Color | typeof SPECTATOR
@@ -325,7 +368,7 @@ export class ChessEngine {
      * checks if and how the game has ended
      * @returns - a game finished reason from the enum
      */
-    getGameFinishedReason(): GameFinishedReason | undefined {
+    getGameFinishedReason(): GameCompletedReason | undefined {
         if (this.isPuzzle) {
             return undefined;
         }
@@ -333,16 +376,16 @@ export class ChessEngine {
         if (this.chess.isCheckmate()) {
             // If it's your turn, you lost
             return this.chess.turn() === WHITE ?
-                    GameFinishedReason.WHITE_CHECKMATED
-                :   GameFinishedReason.BLACK_CHECKMATED;
+                    GameCompletedReason.WHITE_CHECKMATED
+                :   GameCompletedReason.BLACK_CHECKMATED;
         } else if (this.chess.isStalemate()) {
-            return GameFinishedReason.STALEMATE;
+            return GameCompletedReason.STALEMATE;
         } else if (this.chess.isThreefoldRepetition()) {
-            return GameFinishedReason.THREEFOLD_REPETITION;
+            return GameCompletedReason.THREEFOLD_REPETITION;
         } else if (this.chess.isDraw()) {
             return this.chess.isInsufficientMaterial() ?
-                    GameFinishedReason.INSUFFICIENT_MATERIAL
-                :   GameFinishedReason.FIFTY_MOVES;
+                    GameCompletedReason.INSUFFICIENT_MATERIAL
+                :   GameCompletedReason.FIFTY_MOVES;
         }
         return undefined;
     }

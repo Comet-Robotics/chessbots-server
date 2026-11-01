@@ -2,12 +2,12 @@ import { z } from "zod";
 import { piece_schema, square_schema, type Move } from "./chess";
 import { robot_id_schema } from "../server/api/config";
 
-export type GameEndReason = GameFinishedReason | GameInterruptedReason;
+export type GameEndReason = GameCompletedReason | GameInterruptedReason;
 
 /**
  * map possible end reasons to their string versions
  */
-export enum GameFinishedReason {
+export enum GameCompletedReason {
     /**
      * White is checkmated.
      */
@@ -81,7 +81,7 @@ export enum MessageType {
 
 // --- Zod Schemas ---
 
-const GameFinishedReasonSchema = z.enum(GameFinishedReason);
+const GameFinishedReasonSchema = z.enum(GameCompletedReason);
 const GameInterruptedReasonSchema = z.enum(GameInterruptedReason);
 const GameHoldReasonSchema = z.enum(GameHoldReason);
 

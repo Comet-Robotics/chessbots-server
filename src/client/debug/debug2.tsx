@@ -6,7 +6,7 @@ import { useSocket } from "../api";
 import { GameEndReason, MessageType, type GameInterruptedReason, type MessageHandler } from "../../common/message";
 //import { GameEndDialog } from "../game/game-end-dialog";
 import { Outlet } from "react-router-dom";
-import { ChessEngine, Move, WHITE } from "../../common/chess";
+import { ChessEngine, GameCompletedReason, Move, WHITE } from "../../common/chess";
 //import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { GameEndDialog } from "../game/game-end-dialog";
 // import { debugPath } from "../../server/robot/path-materializer";

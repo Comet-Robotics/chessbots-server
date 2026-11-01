@@ -11,14 +11,19 @@ import { puzzles } from "./game/puzzles";
 import { RobotId } from "./api/config";
 import { executor } from "./command/executor";
 import { CenterCommand } from "./command/command";
+import { serve } from "@hono/node-server";
 
-export const socketManager = new SocketManager({})
-export const clientManager = new ClientManager(socketManager)
-export const gameManager = new GameManager(new ChessEngine(), socketManager, WHITE, false)
+export let socketManager = new SocketManager({})
+export let clientManager = new ClientManager(socketManager)
+export let gameManager = new GameManager(new ChessEngine(), socketManager, WHITE, false)
+
+function setGameManager(m: GameManager) {
+    gameManager = m
+}
 
 // const wss = new WebSocketServer({ noServer: true })
 const app = new Hono();
-
+serve(app)
 app.use((c, next) => {
     let id = getCookie(c, "id");
     if (id) {

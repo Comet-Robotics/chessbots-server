@@ -1,4 +1,4 @@
-import type { Message } from "../../common/message";
+import type { GameEndReason, GameInterruptedReason, Message } from "../../common/message";
 import { BLACK, WHITE, type ChessEngine } from "../../common/chess";
 import {
     type MoveMessage,
@@ -8,19 +8,13 @@ import {
     type GameInterruptedMessage,
     // type GameFinishedMessage,
     MessageType,
+    GameHoldReason,
+    GameCompletedReason,
     // GameStartedMessageSchema,
 } from "../../common/message";
 import type { SocketManager } from "../api/socket-manager";
 import type { ClientManager } from "../api/client-manager";
 import type { Move, Side } from "../../common/chess";
-import type {
-    GameEndReason,
-    GameEndReason as GameInterruptedReason,
-} from "../../common/game-end-reasons";
-import {
-    GameFinishedReason,
-    GameHoldReason,
-} from "../../common/game-end-reasons";
 import {
     materializePath,
     materializePathHexapawn,
@@ -44,7 +38,7 @@ type GameState = {
  * The manager for game communication
  */
 export class GameManager {
-    protected gameInterruptedReason: GameInterruptedReason | undefined =
+    protected gameInterruptedReason: GameInterruptedReason | GameCompletedReason | undefined =
         undefined;
 
     paused: boolean = false;
@@ -475,7 +469,7 @@ export class PuzzleGameManager extends GameManager {
 
     public getGameEndReason(): GameEndReason | undefined {
         if (this.moveNumber >= this.moves.length) {
-            return GameFinishedReason.PUZZLE_SOLVED;
+            return GameCompletedReason.PUZZLE_SOLVED;
         }
         return super.getGameEndReason();
     }
@@ -559,7 +553,9 @@ export class HexapawnGameManager extends GameManager {
             //         );
             //     }
             // }
-            sendToOpponent(message);
+            this.socketManager.sendToSocket("oponnent", message);
+            this.socketManager.sendToSocket("spectator", message);
+
             sendToSpectators(message);
 
             // end the game if it is interrupted
@@ -585,9 +581,9 @@ export class HexapawnGameManager extends GameManager {
         } else if (message.type === MessageType.GAME_HELD) {
             const holdMsg = message as GameHoldMessage;
             if (holdMsg.reason === GameHoldReason.DRAW_CONFIRMATION)
-                sendToPlayer(message);
+                this.socketManager.sendToSocket("player", message);
             else if (holdMsg.reason === GameHoldReason.DRAW_OFFERED) {
-                sendToOpponent(message);
+                this.socketManager.sendToSocket("oponnent", message);
             } else {
                 this.socketManager.sendToAll(message);
             }
@@ -685,15 +681,15 @@ export class HexapawnGameManager extends GameManager {
     public getGameEndReason(): GameEndReason | undefined {
         if (this.isGameEnded()) {
             if (this.chess.fen.split("/")[4].includes("P")) {
-                return GameFinishedReason.BLACK_CHECKMATED;
+                return GameCompletedReason.BLACK_CHECKMATED;
             } else if (this.chess.fen.split("/")[6].includes("p")) {
-                return GameFinishedReason.WHITE_CHECKMATED;
+                return GameCompletedReason.WHITE_CHECKMATED;
             } else if (super.getGameEndReason()) {
                 return super.getGameEndReason();
             }
             return this.chess.fen.split(" ")[2] === "w" ?
-                    GameFinishedReason.WHITE_CHECKMATED
-                :   GameFinishedReason.BLACK_CHECKMATED;
+                    GameCompletedReason.WHITE_CHECKMATED
+                :   GameCompletedReason.BLACK_CHECKMATED;
         }
     }
 

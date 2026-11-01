@@ -1,4 +1,4 @@
-import { Chessboard } from "react-chessboard";
+import { Chessboard, ChessboardOptions, PieceDropHandlerArgs } from "react-chessboard";
 import { BLACK, WHITE, type ChessEngine, type Square } from "../../common/chess";
 import { JSX, useState } from "react";
 import { BoardContainer } from "./board-container";
@@ -74,89 +74,88 @@ export function ChessboardWrapper(props: ChessboardWrapperProps): JSX.Element {
     };
 
 
-    const options = {
-                    boardOrientation: orientation == WHITE ? "white" : "black",
-                    position: chess.fen,
+    const options: ChessboardOptions = {
+        boardOrientation: orientation == WHITE ? "white" : "black",
+        position: chess.fen,
 
-                    // handle dragging and dropping pieces
-                    onPieceDrop: ((
-                        from: Square,
-                        to: Square,
-                        pieceAndSide: string,
-                    ): boolean => {
-                        const piece: Piece =
-                            pieceAndSide[1].toLowerCase() as Piece;
-                        if (isLegalMove(from, to)) {
-                            if (manualPromotionSquare !== undefined) {
-                                doMove({
-                                    // `from` is undefined in manual promotion flow
-                                    from: lastClickedSquare!,
-                                    // `to: manualPromotionSquare` is also valid
-                                    to,
-                                    promotion: piece,
-                                });
-                                setManualPromotionSquare(undefined);
-                            } else {
-                                doMove({
-                                    from,
-                                    to,
-                                    // Include piece only if promoting
-                                    promotion: isPromoting ? piece : undefined,
-                                });
-                            }
-
-                            // Reset state
-                            setIsPromoting(false);
-                            return true;
-                        }
-                        return false;
-                    }),
+        // handle dragging and dropping pieces
+        onPieceDrop: (({
+            piece: reactPiece,
+            sourceSquare,
+            targetSquare
+        }: PieceDropHandlerArgs): boolean => {
+            const piece = reactPiece.pieceType.charAt(1).toLowerCase() as Piece;
+            const from = sourceSquare as Square;
+            const to = targetSquare as Square;
 
 
-
-                // handle square clicking
-                onSquareClick: ((square: Square) => {
+            if (isLegalMove(from, to)) {
+                if (manualPromotionSquare !== undefined) {
+                    doMove({
+                        // `from` is undefined in manual promotion flow
+                        from: lastClickedSquare!,
+                        // `to: manualPromotionSquare` is also valid
+                        to,
+                        promotion: piece,
+                    });
                     setManualPromotionSquare(undefined);
+                } else {
+                    doMove({
+                        from,
+                        to,
+                        // Include piece only if promoting
+                        promotion: isPromoting ? piece : undefined,
+                    });
+                }
 
-                    // Protects the type of lastClickedSquare, and is true when the clicked square is legal
-                    const isSquareLegalMove =
-                        lastClickedSquare !== undefined &&
-                        isLegalMove(lastClickedSquare, square);
-
-                    // check if the square is legal
-                    if (isSquareLegalMove) {
-                        if (chess.checkPromotion(lastClickedSquare, square)) {
-                            // Manually show promotion dialog
-                            setManualPromotionSquare(square);
-                        } else {
-                            // make the move normally
-                            doMove({
-                                from: lastClickedSquare,
-                                to: square,
-                            });
-                        }
-                        // Square is clicked again
-                    } else if (lastClickedSquare === square) {
-                        // Deselect square
-                        setLastClickedSquare(undefined);
-                    } else {
-                        // Select clicked square
-                        setLastClickedSquare(square);
-                    }
-                }),
-
-                canDragPiece: ({ piece }) => {
-                    return piece[0] === side;
-                },
-
-                squareRenderer: customSquareRenderer
+                // Reset state
+                setIsPromoting(false);
+                return true;
             }
+            return false;
+        }),
 
 
 
+        // handle square clicking
+        onSquareClick: (({ square: reactSquare }) => {
+            const square = reactSquare as Square
+            
+            setManualPromotionSquare(undefined);
 
+            // Protects the type of lastClickedSquare, and is true when the clicked square is legal
+            const isSquareLegalMove =
+                lastClickedSquare !== undefined &&
+                isLegalMove(lastClickedSquare, square);
 
+            // check if the square is legal
+            if (isSquareLegalMove) {
+                if (chess.checkPromotion(lastClickedSquare, square)) {
+                    // Manually show promotion dialog
+                    setManualPromotionSquare(square);
+                } else {
+                    // make the move normally
+                    doMove({
+                        from: lastClickedSquare,
+                        to: square,
+                    });
+                }
+                // Square is clicked again
+            } else if (lastClickedSquare === square) {
+                // Deselect square
+                setLastClickedSquare(undefined);
+            } else {
+                // Select clicked square
+                setLastClickedSquare(square);
+            }
+        }),
 
+        canDragPiece: ({ piece }) => {
+            return piece[0] === side;
+        },
+
+        squareRenderer: customSquareRenderer
+    }
 
     /**
      * make to move passed in and unset lastClickedSquare

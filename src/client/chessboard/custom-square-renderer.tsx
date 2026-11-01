@@ -1,4 +1,4 @@
-import type { CustomSquareProps } from "react-chessboard";
+import type { SquareHandlerArgs, SquareRenderer } from "react-chessboard";
 import type { ReactElement } from "react";
 import { forwardRef, useContext } from "react";
 import {
@@ -8,15 +8,19 @@ import {
     ClickedPiece,
 } from "./svg-components";
 import { CustomSquareContext } from "./custom-square-context";
+import { Square } from "chess.js";
 
 /**
  * A renderer for the square dots and piece highlighting
  * @param props - the square, its style, and any children
  */
-export const customSquareRenderer = forwardRef<
-    HTMLDivElement,
-    CustomSquareProps
->((props, ref) => {
+export const customSquareRenderer: SquareRenderer = ({
+        piece,
+        square: reactSquare,
+        children
+    }) => {
+    const square = reactSquare as Square
+    
     const { legalSquares, chess, lastClickedSquare, side } =
         useContext(CustomSquareContext);
 
@@ -28,12 +32,12 @@ export const customSquareRenderer = forwardRef<
     const lastMove = chess.getLastMove();
     if (
         lastMove !== undefined &&
-        (lastMove.from === props.square || lastMove.to === props.square)
+        (lastMove.from === square || lastMove.to === square)
     ) {
         lastMoveHighlight = (
             <SquareHighlight
-                height={props.style.height}
-                width={props.style.width}
+                height="100%"
+                width="100%"
             />
         );
     }
@@ -41,27 +45,27 @@ export const customSquareRenderer = forwardRef<
     // highlight clicked pieces
     if (
         lastClickedSquare !== undefined &&
-        lastClickedSquare === props.square &&
-        chess.hasPiece(props.square) &&
-        chess.getPieceColor(props.square) === side
+        lastClickedSquare === square &&
+        chess.hasPiece(square) &&
+        chess.getPieceColor(square) === side
     ) {
         clickedPieceHighlight = (
             <ClickedPiece
-                height={props.style.height}
-                width={props.style.width}
+                height="100%"
+                width="100%"
             />
         );
     }
 
     // highlight legal squares and capture opportunities
-    if (legalSquares.includes(props.square)) {
+    if (legalSquares.includes(square)) {
         // Square should be highlighted
-        if (chess.hasPiece(props.square)) {
+        if (chess.hasPiece(square)) {
             // Square has a piece on it
             selectElement = (
                 <OutsideCorners
-                    height={props.style.height}
-                    width={props.style.width}
+                    height="100%"
+                    width="100%"
                 />
             );
         } else {
@@ -72,11 +76,11 @@ export const customSquareRenderer = forwardRef<
 
     // return all the highlights inside a div
     return (
-        <div style={props.style} ref={ref}>
+        <div>
             {clickedPieceHighlight}
             {lastMoveHighlight}
             {selectElement}
-            {props.children}
+            {children}
         </div>
     );
-});
+};

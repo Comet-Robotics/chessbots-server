@@ -21,9 +21,11 @@
     },
     "dependencies": {
         "@hono/node-server": "^2.1.5",
+        "@hono/vite-dev-server": "^0.26.1",
         "cbor-x": "^1.6.8",
         "chess.js": "^1.4.0",
         "hono": "^4.13.14",
+        "js-chess-engine": "^2.4.6",
         "typescript": "^6.0.3",
         "vite-express": "^0.22.1",
         "ws": "^8.22.0",

@@ -1,4 +1,14 @@
-let hotkeys = () => {
+export type HotkeyCallbacks = {
+    saveShowfile: () => void,
+    openShowfile: () => void,
+    undo: () => void,
+    redo: () => void,
+    togglePlaying: () => void,
+    getLayerIndexFromEventId: (string) => void,
+    addBulkEventsToSelectedLayer: (any) => void
+}
+
+export let hotkeys = (callbacks: HotkeyCallbacks) => {
     return [
         {
             combo: "mod+s",
@@ -7,7 +17,7 @@ let hotkeys = () => {
             label: "Save",
             onKeyDown: (e) => {
                 e.preventDefault();
-                saveShowfile();
+                callbacks.saveShowfile();
             },
         },
         {
@@ -17,7 +27,7 @@ let hotkeys = () => {
             label: "Open...",
             onKeyDown: (e) => {
                 e.preventDefault();
-                openShowfile();
+                callbacks.openShowfile();
             },
         },
         {
@@ -27,7 +37,7 @@ let hotkeys = () => {
             label: "Undo",
             onKeyDown: (e) => {
                 e.preventDefault();
-                undo();
+                callbacks.undo();
             },
         },
         {
@@ -37,7 +47,7 @@ let hotkeys = () => {
             label: "Redo",
             onKeyDown: (e) => {
                 e.preventDefault();
-                redo();
+                callbacks.redo();
             },
         },
         {
@@ -47,7 +57,7 @@ let hotkeys = () => {
             label: "Play/Pause",
             onKeyDown: (e) => {
                 e.preventDefault();
-                togglePlaying();
+                callbacks.togglePlaying();
             },
         },
         {
@@ -93,7 +103,7 @@ let hotkeys = () => {
 
                 console.log("WOO");
 
-                const layerIndex = getLayerIndexFromEventId(startEventId);
+                const layerIndex = callbacks.getLayerIndexFromEventId(startEventId);
                 if (layerIndex === -1) {
                     console.warn("Layer not found");
                     return;
@@ -161,7 +171,7 @@ let hotkeys = () => {
                     event.id = crypto.randomUUID();
                 }
 
-                addBulkEventsToSelectedLayer(checkResult.value);
+                callbacks.addBulkEventsToSelectedLayer(checkResult.value);
             },
         },
     ]
