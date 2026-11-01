@@ -7,7 +7,8 @@ export default defineConfig({
     plugins: [ 
         react(),     
         devServer({
-            entry: 'src/server/index.ts', // The file path of your application.
-        }), 
-    ],
+            entry: 'src/server/main.ts', // The file path of your application.
+            exclude: [/^(?!\/api\/).*/],
+        }),
+    ]
 });

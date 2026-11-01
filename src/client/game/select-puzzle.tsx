@@ -7,8 +7,6 @@ import { useState } from "react";
 import { puzzles } from "../../server/game/puzzles";
 import { Puzzle } from "../../common/chess";
 
-let [selectedPuzzle, setSelectedPuzzle] = useState(0);
-
 const renderPuzzleOptions: ItemRenderer<number> = (
     puzzleId,
     { modifiers, handleFocus, handleClick },
@@ -32,6 +30,8 @@ type SelectPuzzleProps = {
 }
 
 export function SelectPuzzle(props: SelectPuzzleProps) {
+    let [selectedPuzzle, setSelectedPuzzle] = useState(0);
+
     const navigate = useNavigate();
     const hasSelection = selectedPuzzle !== undefined;
 

@@ -37,8 +37,8 @@ export const router = createBrowserRouter([
         path: "/game",
         element: <Game />,
     },
-    {
-        path: "/editor",
-        element: <Editor />,
-    },
+    // {
+    //     path: "/editor",
+    //     element: <Editor />,
+    // },
 ]);

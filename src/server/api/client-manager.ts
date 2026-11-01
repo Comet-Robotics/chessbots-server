@@ -18,6 +18,9 @@ export class ClientManager {
         private spectatorIds: Set<string> = new Set([]),
     ) {}
 
+    public registerUser(uuid: string) {
+        
+    }
     /**
      * get the host's socket
      * @returns the host socket

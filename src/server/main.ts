@@ -5,13 +5,16 @@ import { WHITE } from "chess.js";
 import { ChessEngine, Side } from "../common/chess";
 import { Hono } from "hono";
 import { WebSocketServer } from "ws";
-import { getCookie } from "hono/cookie";
+import { getCookie, setCookie } from "hono/cookie";
 import { robotManager } from "./robot/robot-manager";
 import { puzzles } from "./game/puzzles";
 import { RobotId } from "./api/config";
 import { executor } from "./command/executor";
 import { CenterCommand } from "./command/command";
 import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
+import { randomUUID, UUID } from "node:crypto";
+import z from "zod";
 
 export let socketManager = new SocketManager({})
 export let clientManager = new ClientManager(socketManager)
@@ -22,12 +25,17 @@ function setGameManager(m: GameManager) {
 }
 
 // const wss = new WebSocketServer({ noServer: true })
-const app = new Hono();
-serve(app)
+const app = new Hono<{ Variables: { uuid: string } }>();
+
 app.use((c, next) => {
-    let id = getCookie(c, "id");
-    if (id) {
-        clientManager.assignPlayer(id);
+    let id = z.safeParse(z.uuidv4(), getCookie(c, "uuid"));
+    if (id.success) {
+        c.set('uuid', id.data)
+    } else {
+        let uuid =  randomUUID()
+        clientManager.registerUser(uuid)
+        setCookie(c, "uuid", uuid);
+        c.set('uuid', uuid)
     }
 
     return next();
@@ -57,13 +65,10 @@ app.get("/api/get-name", (c) => {
  */
 
 app.get("/api/client-information", async (c) => {
-    let id = getCookie(c, "id");
-    if (!id) {
-        return c.status(400)
-    }
+    let id = c.get("uuid");
 
     const clientType = clientManager.getClientType(id);
-    
+
     /**
      * Note the client currently redirects to home from the game over screen
      * So removing the isGameEnded check here results in an infinite loop
@@ -221,8 +226,11 @@ app.post("/api/force-center", async (c) => {
     return c.json({ message: "success" });
 });
 
+// This will only be reached in prod, with dev vite intercepts the request
+app.use("*", serveStatic({ root: "../client/dist" }));
 
-
+serve(app)
+export default app;
 // ================== WebSocket ====================
 
 // app.get("/api/ws", 

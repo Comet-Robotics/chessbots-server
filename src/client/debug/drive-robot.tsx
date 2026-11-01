@@ -5,7 +5,6 @@ import { Joystick } from "react-joystick-component";
 import type { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
 import { DriveSlider } from "./drive-slider";
 import { RobotId } from "../../server/api/config";
-import { randomUUID } from "node:crypto";
 
 interface DriveRobotProps {
     robotId: RobotId;
@@ -38,7 +37,7 @@ export function DriveRobot(props: DriveRobotProps) {
         }
         props.sendMessage({
             type: MessageType.DRIVE_ROBOT,
-            id: randomUUID(),
+            id: "custom-drive-command",
             leftPower: power.left,
             rightPower: power.right
         });

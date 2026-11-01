@@ -3,10 +3,8 @@
     "bots": {
         "80:65:99:4d:f3:e8": {
             "id": 15,
-            "piece": {
-                "color": "w",
-                "symbol": "p"
-            },
+            "color": "w",
+            "piece": "p",
             "start_pos": {
                 "x": 8,
                 "y": 3
@@ -18,10 +16,8 @@
         },
         "c0:4e:30:4b:68:76": {
             "id": 19,
-            "piece": {
-                "color": "b",
-                "symbol": "p"
-            },
+            "color": "b",
+            "piece": "p",
             "start_pos": {
                 "x": 4,
                 "y": 8
@@ -33,10 +29,8 @@
         },
         "80:65:99:4d:f3:9a": {
             "id": 3,
-            "piece": {
-                "color": "w",
-                "symbol": "b"
-            },
+            "color": "w",
+            "piece": "b",
             "start_pos": {
                 "x": 4,
                 "y": 2
@@ -48,10 +42,8 @@
         },
         "80:65:99:4e:07:b0": {
             "id": 4,
-            "piece": {
-                "color": "w",
-                "symbol": "q"
-            },
+            "color": "w",
+            "piece": "q",
             "start_pos": {
                 "x": 5,
                 "y": 2
@@ -63,10 +55,8 @@
         },
         "80:65:99:4e:07:9c": {
             "id": 11,
-            "piece": {
-                "color": "b",
-                "symbol": "k"
-            },
+            "color": "b",
+            "piece": "k",
             "start_pos": {
                 "x": 5,
                 "y": 3
@@ -78,10 +68,8 @@
         },
         "80:65:99:4e:07:ae": {
             "id": 12,
-            "piece": {
-                "color": "b",
-                "symbol": "k"
-            },
+            "color": "b",
+            "piece": "k",
             "start_pos": {
                 "x": 5,
                 "y": 3
@@ -93,10 +81,8 @@
         },
         "80:65:99:4e:70:48": {
             "id": 2,
-            "piece": {
-                "color": "w",
-                "symbol": "n"
-            },
+            "color": "w",
+            "piece": "n",
             "start_pos": {
                 "x": 0,
                 "y": 9
@@ -108,10 +94,8 @@
         },
         "80:65:99:4e:70:46": {
             "id": 7,
-            "piece": {
-                "color": "w",
-                "symbol": "n"
-            },
+            "color": "w",
+            "piece": "n",
             "start_pos": {
                 "x": 8,
                 "y": 2
@@ -123,10 +107,8 @@
         },
         "80:65:99:4e:70:4c": {
             "id": 6,
-            "piece": {
-                "color": "w",
-                "symbol": "b"
-            },
+            "color": "w",
+            "piece": "b",
             "start_pos": {
                 "x": 7,
                 "y": 2
@@ -138,10 +120,8 @@
         },
         "c0:4e:30:4b:66:98": {
             "id": 1,
-            "piece": {
-                "color": "w",
-                "symbol": "n"
-            },
+            "color": "w",
+            "piece": "n",
             "start_pos": {
                 "x": 3,
                 "y": 2
@@ -153,10 +133,8 @@
         },
         "80:65:99:4e:70:6a": {
             "id": 5,
-            "piece": {
-                "color": "w",
-                "symbol": "k"
-            },
+            "color": "w",
+            "piece": "k",
             "start_pos": {
                 "x": 9,
                 "y": 2
