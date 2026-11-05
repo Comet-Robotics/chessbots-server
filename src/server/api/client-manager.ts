@@ -21,28 +21,25 @@ export class ClientManager {
     public registerUser(uuid: string) {
         
     }
+
+    public getSocket(id: string) {
+        return this.socketManager.getSocket(id)
+    }
+    
     /**
      * get the host's socket
      * @returns the host socket
      */
-    public getHostSocket(): Set<WSContext<WebSocketLike>> | undefined {
-        if (this.hostId !== undefined) {
-            return this.socketManager.getSockets(this.hostId);
-        }
-        return undefined;
-    }
-
     /**
      * finds the host and sends a message
      * @param message - the message to be sent
      * @returns if the socket was found
      */
-    public sendToHost(message: Message): boolean {
-        const sockets = this.getHostSocket();
-        if (sockets !== undefined) {
-            for (const socket of sockets) socket.send(JSON.stringify(message));
+    public sendToHost(message: Message) {
+        if (this.hostId) {
+            this.getSocket(this.hostId)?.send(message);
         }
-        return sockets !== undefined;
+        
     }
 
     /**
@@ -66,7 +63,7 @@ export class ClientManager {
     public sendToSpectators(message: Message): boolean {
         if (this.spectatorIds.size !== 0) {
             for (const item of this.spectatorIds) {
-                const potentialSocket = this.socketManager.getSockets(item);
+                const potentialSocket = this.socketManager.getSocket(item);
                 if (potentialSocket !== null && potentialSocket !== undefined) {
                     for (const socket of potentialSocket) {
                         socket.send(JSON.stringify(message));
@@ -78,16 +75,6 @@ export class ClientManager {
         return false;
     }
 
-    /**
-     * get the client socket
-     * @returns the socket of the client
-     */
-    public getClientSocket(): Set<WSContext<WebSocketLike>> | undefined {
-        if (this.clientId !== undefined) {
-            return this.socketManager.getSockets(this.clientId);
-        }
-        return undefined;
-    }
 
     /**
      * @param id - the cookie id of the request
