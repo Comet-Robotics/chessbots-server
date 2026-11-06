@@ -16,6 +16,7 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { randomUUID, UUID } from "node:crypto";
 import z from "zod";
 import { MessageSchema, MessageType } from "../common/message";
+import { logger } from "hono/logger";
 
 export let socketManager = new SocketManager()
 export let clientManager = new ClientManager(socketManager)
@@ -27,6 +28,12 @@ function setGameManager(m: GameManager) {
 
 // const wss = new WebSocketServer({ noServer: true })
 const app = new Hono<{ Variables: { uuid: string } }>();
+
+app.use("*", logger());
+app.onError((err, c) => {
+  console.error("hono error:", err);
+  return c.text("error", 500);
+});
 
 app.use((c, next) => {
     let id = z.safeParse(z.uuidv4(), getCookie(c, "uuid"));
@@ -264,7 +271,13 @@ app.get("/api/ws",
 );
 
 // This will only be reached in prod, with dev vite intercepts the request
-app.use("*", serveStatic({ root: "../client/dist" }));
+app.use("*", serveStatic({ root: "./dist" }));
 
-serve(app)
-export default app;
+serve({
+    fetch: app.fetch,
+    websocket: {
+        server: new WebSocketServer({ noServer: true })
+    }
+})
+
+// export default app;

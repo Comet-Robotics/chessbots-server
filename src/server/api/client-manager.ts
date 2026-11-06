@@ -37,7 +37,7 @@ export class ClientManager {
      */
     public sendToHost(message: Message) {
         if (this.hostId) {
-            this.getSocket(this.hostId)?.send(message);
+            this.getSocket(this.hostId)?.send(JSON.stringify(message));
         }
         
     }
@@ -48,11 +48,13 @@ export class ClientManager {
      * @returns if the socket was found
      */
     public sendToClient(message: Message): boolean {
-        const sockets = this.getClientSocket();
-        if (sockets !== undefined) {
-            for (const socket of sockets) socket.send(JSON.stringify(message));
+        const socket = this.getSocket("client");
+        if (!socket) {
+            return false;
         }
-        return sockets !== undefined;
+
+        socket.send(JSON.stringify(message));
+        return true;
     }
 
     /**

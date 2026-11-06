@@ -15,7 +15,7 @@ import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { AcceptDrawDialog, OfferDrawDialog } from "./draw-dialog";
 import { Sidebar } from "../setup/sidebar";
 import { NotificationDialog, PauseDialog } from "./admin-dialogs";
-import { PuzzleTipBox } from "../PuzzleTipBox";
+import { PuzzleTipBox } from "./PuzzleTipBox";
 
 /**
  * Creates a MessageHandler function to handle move messages and game interruptions.

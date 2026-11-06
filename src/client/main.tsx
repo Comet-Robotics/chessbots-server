@@ -4,7 +4,7 @@ import "./index.scss";
 
 import { FocusStyleManager, BlueprintProvider } from "@blueprintjs/core";
 import { RouterProvider } from "react-router-dom";
-import { router } from "./router";
+import routes from "./router";
 import { StrictMode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 export const queryClient = new QueryClient();
@@ -18,7 +18,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
             <div id="app-container">
                 <BlueprintProvider>
                     <QueryClientProvider client={queryClient}>
-                        <RouterProvider router={router} />
+                        <RouterProvider router={routes} />
                     </QueryClientProvider>
                 </BlueprintProvider>
             </div>

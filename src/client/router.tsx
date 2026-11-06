@@ -8,7 +8,7 @@ import { Debug2 } from "./debug/debug2";
 import { Simulator } from "./debug/simulator";
 import { Editor } from "./editor/editor";
 
-export const router = createBrowserRouter([
+export default createBrowserRouter([
     {
         path: "/home",
         element: <Home />,
