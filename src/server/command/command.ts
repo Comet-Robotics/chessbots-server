@@ -1,5 +1,4 @@
 import { robotManager } from "../robot/robot-manager";
-import { MAX_RETRIES, MOVE_TIMEOUT } from "../env";
 import { RobotId } from "../api/config";
 import { gameManager } from "../main";
 import { gridPositionFromPosition, Position } from "../../common/units";
@@ -24,7 +23,7 @@ export abstract class Command {
     depth: number = 1;
 
     execute(): Promise<void> {
-        if (!this.completed && !gameManager.paused) {
+        if (!this.completed && !gameManager?.paused) {
             return this.inner_execute()
         } else {
             return Promise.resolve()

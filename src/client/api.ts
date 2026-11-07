@@ -65,7 +65,7 @@ export function useSocket(
             const message = parseMessage(msg.data.toString());
             console.log("Handle message: " + JSON.stringify(message));
 
-            if (onMessage !== undefined) {
+            if (onMessage !== undefined && message !== undefined) {
                 onMessage(message);
             }
         },
