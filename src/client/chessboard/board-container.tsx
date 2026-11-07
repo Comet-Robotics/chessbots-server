@@ -6,7 +6,7 @@ import type { Transform } from "./board-transform";
 import { computeChessboardTransform } from "./board-transform";
 import { Side, SPECTATOR } from "../../common/chess";
 
-interface BoardContainerProps extends PropsWithChildren {
+interface BoardContainerProps  {
     side: Side;
     onWidthChange: (width: number) => void;
     rotation: number;
@@ -17,7 +17,7 @@ interface BoardContainerProps extends PropsWithChildren {
  * @param props - side, width handler, rotation, and inner elements
  * @returns a resizable container with a chessboard inside
  */
-export function BoardContainer(props: BoardContainerProps) {
+export function BoardContainer(props: PropsWithChildren<BoardContainerProps>) {
     const [transform, setTransform] = useState<Transform | undefined>();
 
     /** compute hight/width on change and set the board transform */

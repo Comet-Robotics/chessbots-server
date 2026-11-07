@@ -207,7 +207,6 @@ export function Game() {
                         side={side}
                         chess={chess}
                         onMove={handleMove}
-                        rotation={rotation ? rotation : 0}
                     />
                     {gameEndDialog}
                     {gameOfferDialog}

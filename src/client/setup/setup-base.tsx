@@ -5,7 +5,7 @@ import type { PropsWithChildren, ReactNode } from "react";
 import { ChessEngine, WHITE } from "../../common/chess";
 import { Sidebar } from "./sidebar";
 
-interface SetupBaseProps extends PropsWithChildren {
+interface SetupBaseProps {
     actions?: ReactNode;
 }
 
@@ -14,7 +14,7 @@ interface SetupBaseProps extends PropsWithChildren {
  *
  * @param props - any dialogs that need to be shown on screen
  */
-export function SetupBase(props: SetupBaseProps) {
+export function SetupBase(props: PropsWithChildren<SetupBaseProps>) {
     return (
         <>
             <div className="main-dialog">
@@ -23,7 +23,6 @@ export function SetupBase(props: SetupBaseProps) {
                     chess={new ChessEngine()}
                     side={WHITE}
                     onMove={() => {}}
-                    rotation={0}
                 />
                 <Dialog
                     style={{

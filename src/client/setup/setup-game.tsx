@@ -5,13 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { Difficulty, GameType, BLACK, Side, WHITE } from "../../common/chess";
 import { post } from "../api";
 import { DifficultySlider } from "./difficulty-slider";
-import { SelectSide } from "./select-side";
+import { SelectSide, DesiredSide } from "./select-side";
 /** User's desired side, b/w/random */
-enum DesiredSide {
-    WHITE = "white",
-    BLACK = "black",
-    RANDOM = "random",
-}
+
 
 interface SetupGameProps {
     gameType: GameType;

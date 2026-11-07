@@ -280,7 +280,7 @@ export class ComputerGameManager extends GameManager {
         const moveMsg = message as MoveMessage;
 
         // Call path materializer and send to bots for human move
-        const command = materializePath(moveMsg.move);
+        //const command = materializePath(moveMsg.move);
 
         this.clientManager.sendToAll(message);
         this.chess.makeMove(moveMsg.move);

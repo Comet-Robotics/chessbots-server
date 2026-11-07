@@ -3,10 +3,11 @@ import type { Dispatch, JSX } from "react";
 import { useState } from "react";
 import { get, useEffectQuery, useSocket } from "../api";
 import { MessageHandler } from "../../common/message";
+import { MessageType } from "../../common/message";
 
 function getMessageHandler(setQueue: Dispatch<string[]>): MessageHandler {
     return (message) => {
-        if (message instanceof UpdateQueue) {
+        if (message.type == MessageType.UPDATE_QUEUE) {
             setQueue(message.updatedPlayerList.slice());
         }
     };
@@ -37,7 +38,7 @@ export function Sidebar(props: sidebarProps): JSX.Element {
         },
         true,
     );
-
+/*
     const names = useEffectQuery(
         "get-name",
         async () => {
@@ -58,7 +59,7 @@ export function Sidebar(props: sidebarProps): JSX.Element {
     } else if (isError) {
         console.log(isError);
     }
-
+*/
     return (
         <div
             className={"sidebar flex-container"}
@@ -85,7 +86,7 @@ export function Sidebar(props: sidebarProps): JSX.Element {
                     type="submit"
                     style={{ textAlign: "start" }}
                     onClick={async () => {
-                        sendMessage(new JoinQueue(name));
+                        sendMessage({type:MessageType.JOIN_QUEUE, playerName:name});
                     }}>
                     Join queue
                 </Button>

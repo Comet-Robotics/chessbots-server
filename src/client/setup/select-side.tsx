@@ -1,7 +1,17 @@
+import { H6 } from "@blueprintjs/core";
+import type { Dispatch } from "react";
+
+export enum DesiredSide {
+    WHITE = "white",
+    BLACK = "black",
+    RANDOM = "random",
+}
 interface SelectSideProps {
     desiredSide: DesiredSide;
     onDesiredSideChange: Dispatch<DesiredSide>;
 }
+
+
 
 export function SelectSide(props: SelectSideProps) {
     return (

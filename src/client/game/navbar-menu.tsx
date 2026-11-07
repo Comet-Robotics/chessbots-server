@@ -16,7 +16,6 @@ interface NavbarMenuProps {
     side: Side;
     difficulty?: string;
     aiDifficulty?: number;
-    setRotation: Dispatch<React.SetStateAction<number>>; //set state type
 }
 
 /**
@@ -44,6 +43,7 @@ export function NavbarMenu(props: NavbarMenuProps) {
         :   null;
 
     /** create navbar rotate button */
+    /*
     const rotateButton =
         props.side === SPECTATOR ?
             <Button
@@ -58,6 +58,7 @@ export function NavbarMenu(props: NavbarMenuProps) {
             />
         :   undefined;
 
+        */
     const resignButton =
         props.side === SPECTATOR ?
             undefined
@@ -101,7 +102,6 @@ export function NavbarMenu(props: NavbarMenuProps) {
             <NavbarGroup align="right">
                 {difficultyButton}
                 {aiDifficultyButton}
-                {rotateButton}
                 <Button icon="cog" minimal onClick={() => navigate("/debug")} />
             </NavbarGroup>
         </Navbar>

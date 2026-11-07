@@ -1,5 +1,6 @@
 import { H6, Slider } from "@blueprintjs/core";
 import { Difficulty } from "../../common/chess";
+import type { Dispatch } from "react";
 
 interface DifficultySliderProps {
     difficulty: Difficulty;

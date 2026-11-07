@@ -56,7 +56,7 @@ export function Setup(): JSX.Element {
     if (data.clientType === ClientType.HOST) {
         return (
             <SetupBase>
-                {setupType === SetupType.MAIN ?
+                {!setupType?
                     <SetupMain onPageChange={setSetupType} />
                 :   null}
                 {(
@@ -83,32 +83,6 @@ export function Setup(): JSX.Element {
     }
 }
 
-            <div className="main-dialog">
-                <Outlet />
-                <ChessboardWrapper
-                    chess={new ChessEngine()}
-                    side={WHITE}
-                    onMove={() => {}}
-                    rotation={0}
-                />
-                <Dialog
-                    style={{
-                        backgroundColor: "transparent",
-                        boxShadow: "none",
-                    }}
-                    isOpen
-                    canEscapeKeyClose={false}
-                    canOutsideClickClose={false}
-                    usePortal={false}
-                    enforceFocus={false}
-                >
-                    <div className="roundedBorder">
-                        <DialogBody>{props.children}</DialogBody>
-                        <DialogFooter minimal actions={props.actions} />
-                    </div>
-                </Dialog>
-            </div>
-            <Sidebar />
 
 /**
  * Triggers a state change in setup type

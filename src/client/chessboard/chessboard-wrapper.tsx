@@ -134,7 +134,6 @@ export function ChessboardWrapper(props: ChessboardWrapperProps) {
         <BoardContainer
             side={side}
             onWidthChange={setWidth}
-            rotation={props.rotation}
         >
             <CustomSquareContext.Provider
                 value={{ legalSquares: [], chess, lastClickedSquare, side }}

@@ -111,7 +111,7 @@ app.post("/api/start-computer-game", async (c) => {
     // create a new computer game manager
     const cgm = new ComputerGameManager(
         new ChessEngine(),
-        socketManager,
+        clientManager,
         side as Side,
         Number(difficulty),
         false,
@@ -140,9 +140,8 @@ app.post("/api/start-human-game", async (c) => {
     setGameManager(
         new HumanGameManager(
             new ChessEngine(),
-            socketManager,
-            side,
             clientManager,
+            side,
             false,
         ),
     );
@@ -165,7 +164,7 @@ app.post("/api/start-puzzle-game", async (c) => {
     setGameManager(
         new PuzzleGameManager(
             new ChessEngine(true),
-            socketManager,
+            clientManager,
             fen,
             "",
             moves,
