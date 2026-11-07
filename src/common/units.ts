@@ -39,7 +39,9 @@ export type GridPosition = {
 }
 
 export function positionFromSquare(square: Square): Position {
-    throw Error;
+    let lettermap = new Map([['a', 0], ['b', 1], ['c', 2], ['d', 3], ['e', 4], ['f', 5], ['g', 6], ['h', 7], ['i', 8]])
+    
+    return { x: lettermap.get(square.charAt(0))!, y: Number(square.charAt(1)) }
 }
 
 /**
@@ -57,8 +59,8 @@ export function gridPositionFromPosition(pos: Position): GridPosition {
 }
 
 export function gridPositionFromSquare(square: Square): GridPosition {
-    throw Error;
-    // return { i: Math.round(pos.x), j: Math.round(pos.y) };
+    let position = positionFromSquare(square);
+    return gridPositionFromPosition(position)
 }
 
 

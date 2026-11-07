@@ -2,7 +2,6 @@ import { Button, MenuItem } from "@blueprintjs/core";
 import type { ItemRenderer } from "@blueprintjs/select";
 import { Select } from "@blueprintjs/select";
 import { post } from "../api";
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { puzzles } from "../../server/game/puzzles";
 import { Puzzle } from "../../common/chess";
@@ -26,53 +25,32 @@ const renderPuzzleOptions: ItemRenderer<number> = (
 };
 
 type SelectPuzzleProps = {
-    onPuzzleSelected: (puzzle: number) => void;
+    playPuzzle: (puzzle: number) => void;
 }
 
 export function SelectPuzzle(props: SelectPuzzleProps) {
     let [selectedPuzzle, setSelectedPuzzle] = useState(0);
-
-    const navigate = useNavigate();
-    const hasSelection = selectedPuzzle !== undefined;
-
-    const submit = (
-        <Button
-            text="Play"
-            icon="arrow-right"
-            intent="primary"
-            onClick={async () => {
-                if (selectedPuzzle) {
-                    const promise = post("/start-puzzle-game", {
-                        puzzle: String(selectedPuzzle)
-                    });
-
-                    promise.then(() => {
-                        navigate("/game");
-                    });
-                }
-            }}
-        />
-    );
-
     return (
         <>
             <Select<number>
                 items={[...Array(puzzles.length).keys()]}
                 itemRenderer={renderPuzzleOptions}
-                onItemSelect={props.onPuzzleSelected}
+                onItemSelect={setSelectedPuzzle}
                 filterable={false}
                 popoverProps={{ minimal: true }}
             >
                 <Button
-                    text={
-                        hasSelection ?
-                            puzzles[selectedPuzzle].name
-                        :   "Select a puzzle..."
-                    }
+                    text={puzzles[selectedPuzzle].name}
                     endIcon="double-caret-vertical"
                 />
             </Select>
-            {submit}
+            
+            <Button
+                text="Play"
+                icon="arrow-right"
+                intent="primary"
+                onClick={props.playPuzzle(selectedPuzzle)}
+            />
         </>
     );
 }

@@ -1,84 +1,44 @@
 import { Chessboard, ChessboardOptions, PieceDropHandlerArgs } from "react-chessboard";
-import { BLACK, WHITE, type ChessEngine, type Square } from "../../common/chess";
+import { BLACK, QUEEN, WHITE, type ChessEngine, type Square } from "../../common/chess";
 import { JSX, useState } from "react";
 import { BoardContainer } from "./board-container";
 import type { Move, Piece } from "../../common/chess";
 import { Side } from "../../common/chess";
 import { customSquareRenderer } from "./custom-square-renderer";
 import { CustomSquareContext } from "./custom-square-context";
+import { move } from "js-chess-engine";
 
-/**
- * an interface of relevant properties for chessboard
- */
-interface ChessboardWrapperProps {
-    /**
-     * The chess.js instance displayed by this class.
-     */
+type ChessboardWrapperProps = {
     chess: ChessEngine;
-    /**
-     * The side of the current player.
-     */
     side: Side;
-    /**
-     * The rotation of the current player.
-     */
-    rotation: number;
+
     /**
      * A callback function this component invokes whenever a move is made.
      */
     onMove: (move: Move) => void;
 }
 
-/**
- * Creates a chessboard that uses our custom properties inside a board container
- *
- * These include width, moves, promotions, piece dragging, square highlighting, and
- * @param props - chess(ChessEngine), side, onMove
- * @returns JSX.Element chessboard
- */
-export function ChessboardWrapper(props: ChessboardWrapperProps): JSX.Element {
+export function ChessboardWrapper(props: ChessboardWrapperProps) {
     const { chess, side, onMove } = props;
 
     /**
      * The width of the chessboard in pixels.
      */
-    const [width, setWidth] = useState<number | undefined>();
-
+    const [width, setWidth] = useState<number>(0);
     const [lastClickedSquare, setLastClickedSquare] = useState<
         Square | undefined
     >();
 
-    // promotion states
-    const [isPromoting, setIsPromoting] = useState(false);
-
-    const [manualPromotionSquare, setManualPromotionSquare] = useState<
-        Square | undefined
-    >();
+    const [showingPromotionDialog, setShowingPromotionDialog] = useState<
+        boolean
+    >(false);
 
     const [orientation, setOrientation] = useState<Side>(WHITE);
-
-    // Maps squares to style objects
-    let legalSquares: string[] = [];
-    if (lastClickedSquare !== undefined) {
-        legalSquares = chess.getLegalSquares(lastClickedSquare);
-    }
-
-    /**
-     * Returns true if a move is legal, and false otherwise.
-     */
-    const isLegalMove = (from: Square, to: Square): boolean => {
-        return (
-            chess.getLegalSquares(from).includes(to) &&
-            chess.getPieceColor(from) === side
-        );
-    };
-
 
     const options: ChessboardOptions = {
         boardOrientation: orientation == WHITE ? "white" : "black",
         position: chess.fen,
 
-        // handle dragging and dropping pieces
         onPieceDrop: (({
             piece: reactPiece,
             sourceSquare,
@@ -88,28 +48,27 @@ export function ChessboardWrapper(props: ChessboardWrapperProps): JSX.Element {
             const from = sourceSquare as Square;
             const to = targetSquare as Square;
 
-
-            if (isLegalMove(from, to)) {
-                if (manualPromotionSquare !== undefined) {
+            if (chess.getLegalSquares(from).includes(to)) {
+                const promoting = chess.checkPromotion(from, to);
+                
+                if (showingPromotionDialog !== undefined) {
                     doMove({
                         // `from` is undefined in manual promotion flow
-                        from: lastClickedSquare!,
+                        from,
                         // `to: manualPromotionSquare` is also valid
                         to,
-                        promotion: piece,
+                        promotion: promoting ? QUEEN : undefined,
                     });
-                    setManualPromotionSquare(undefined);
+                    setShowingPromotionDialog(undefined);
                 } else {
+                    
                     doMove({
                         from,
                         to,
                         // Include piece only if promoting
-                        promotion: isPromoting ? piece : undefined,
+                        promotion: promoting ? QUEEN : undefined,
                     });
                 }
-
-                // Reset state
-                setIsPromoting(false);
                 return true;
             }
             return false;
@@ -121,18 +80,12 @@ export function ChessboardWrapper(props: ChessboardWrapperProps): JSX.Element {
         onSquareClick: (({ square: reactSquare }) => {
             const square = reactSquare as Square
             
-            setManualPromotionSquare(undefined);
-
-            // Protects the type of lastClickedSquare, and is true when the clicked square is legal
-            const isSquareLegalMove =
-                lastClickedSquare !== undefined &&
-                isLegalMove(lastClickedSquare, square);
+            setShowingPromotionDialog(undefined);
 
             // check if the square is legal
-            if (isSquareLegalMove) {
+            if (chess.getLegalSquares(lastClickedSquare).includes(square)) {
                 if (chess.checkPromotion(lastClickedSquare, square)) {
-                    // Manually show promotion dialog
-                    setManualPromotionSquare(square);
+                    setShowingPromotionDialog(true);
                 } else {
                     // make the move normally
                     doMove({
@@ -163,13 +116,14 @@ export function ChessboardWrapper(props: ChessboardWrapperProps): JSX.Element {
      * @param move - the move made
      */
     const doMove = (move: Move): void => {
+        console.log("doMoveCalled: ", move)
         onMove(move);
         setLastClickedSquare(undefined);
     };
 
     // Don't render while width isn't set
     let chessboard: JSX.Element | null = null;
-    if (width !== undefined) {
+    if (width !== undefined && !Number.isNaN(width)) {
         chessboard = (
             <Chessboard options={options}/>
         );
@@ -183,7 +137,7 @@ export function ChessboardWrapper(props: ChessboardWrapperProps): JSX.Element {
             rotation={props.rotation}
         >
             <CustomSquareContext.Provider
-                value={{ legalSquares, chess, lastClickedSquare, side }}
+                value={{ legalSquares: [], chess, lastClickedSquare, side }}
             >
                 {chessboard}
             </CustomSquareContext.Provider>

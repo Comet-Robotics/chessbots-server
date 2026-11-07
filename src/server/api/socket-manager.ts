@@ -20,7 +20,7 @@ export class SocketManager {
      * deletes the socket at the provided id
      * @param id - id to be deleted
      */
-    public handleSocketClosed(id: string): void {
+    handleSocketClosed(id: string): void {
        this.sockets.delete(id)
     }
 
@@ -28,7 +28,7 @@ export class SocketManager {
      * gets the socket at the provided id, which may be multiple if they have multiple tabs open
      * @param id - id of the desired socket
      */
-    public getSocket(id: string): WSContext<WebSocketLike> | undefined {
+    getSocket(id: string): WSContext<WebSocketLike> | undefined {
         return this.sockets[id];
     }
 
@@ -42,6 +42,7 @@ export class SocketManager {
             return false
         }
 
+        console.log("Sending to connection id ", id, " message: ", message)
         socket.send(JSON.stringify(message));
 
         return true;
@@ -52,14 +53,9 @@ export class SocketManager {
      * @param message - message to be sent
      * @returns isSuccessful
      */
-    public sendToAll(message: Message): boolean {
-        const sockets = Object.values(this.sockets);
-        console.log(`Current list of connections are: ${sockets.length}`);
-        for (const socketSet of sockets) {
-            for (const socket of socketSet) {
-                socket.send(JSON.stringify(message));
-            }
+    public sendToAll(message: Message) {
+        for (const id of this.sockets.keys()) {
+            this.sendToSocket(id, message);
         }
-        return true;
     }
 }

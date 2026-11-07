@@ -637,7 +637,7 @@ function returnToHome(from: GridPosition, id: RobotId): SequentialCommandGroup {
         }
     }
     if (!finalDestination) {
-        throw new Error("WHERE THE HELL ARE YOU GOING"); // real
+        // throw new Error("WHERE THE HELL ARE YOU GOING"); // real
     }
     const startInArray = findGridPositionInArray(
         arrayOfDeadzone,
@@ -725,7 +725,7 @@ export function moveAllRobotsToDefaultPositions(
             const robot = robotManager.getRobot(robotId);
             robotsToMove.push(robot);
         } catch (error) {
-            throw new Error(`Robot ${robotId} not found in robot manager`);
+            console.log("Robot not found");
         }
     }
 
@@ -764,7 +764,7 @@ export function moveAllRobotsToDefaultPositionsHexapawn(
                 ),
             );
         } catch (error) {
-            throw new Error(`Robot ${robotId} didn't work with robot manager`);
+            // throw new Error(`Robot ${robotId} didn't work with robot manager`);
         }
     }
 
@@ -1007,7 +1007,7 @@ function generateRobotPathToDefault(
     const defaultPos = robot.config.start_pos;
 
     if (!defaultPos) {
-        throw new Error(`No default position specified for robot ${robot.id}`);
+        // throw new Error(`No default position specified for robot ${robot.id}`);
     }
 
     // Move from home to deadzone
@@ -1055,9 +1055,9 @@ function generateDeadzonePath(
     const endInArray = findGridPositionInArray(arrayOfDeadzone, endPos);
 
     if (startInArray === -1 || endInArray === -1) {
-        throw new Error(
-            `Invalid deadzone positions: start=${startPos.x}, ${startPos.y}, end=${endPos.x}, ${endPos.y}`,
-        );
+        // throw new Error(
+        //     `Invalid deadzone positions: start=${startPos.x}, ${startPos.y}, end=${endPos.x}, ${endPos.y}`,
+        // );
     }
 
     // Always go clockwise
@@ -1297,7 +1297,7 @@ export function materializePathHexapawn(move: Move): Command {
                 capturePiece,
             );
             if (captureCommand[1] === false) {
-                throw Error("THIS SHOULDN'T HAVE HAPPEEND, WHAT!!");
+                // throw Error("THIS SHOULDN'T HAVE HAPPEEND, WHAT!!");
             }
             const mainCommand = moveMainPiece(moveToGridMove(move));
             const command = new SequentialCommandGroup([

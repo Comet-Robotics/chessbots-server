@@ -14,12 +14,21 @@ import { ClientType, GameType } from "../../common/chess";
 import { SelectPuzzle } from "../game/select-puzzle";
 
 enum SetupType {
-    MAIN = "main",
     COMPUTER = "computer",
     HUMAN = "human",
     PUZZLE = "puzzle",
     HEXAPAWN = "hexapawn",
 }
+
+// function playPuzzle() {
+//     const promise = post("/start-puzzle-game", {
+//         puzzle: String(selectedPuzzle)
+//     });
+
+//     promise.then(() => {
+//         navigate("/game");
+//     });
+// }
 
 /**
  * Lets the host choose a game type and includes the debug button
@@ -27,7 +36,7 @@ enum SetupType {
  * @returns A setup base with the proper setup dialog
  */
 export function Setup(): JSX.Element {
-    const [setupType, setSetupType] = useState(SetupType.MAIN);
+    const [setupType, setSetupType] = useState<SetupType | undefined>();
     const { isPending, data } = useEffectQuery("client-information", () =>
         get("/client-information"),
     );
@@ -65,7 +74,7 @@ export function Setup(): JSX.Element {
                     />
                 :   null}
                 {setupType === SetupType.PUZZLE ?
-                    <SelectPuzzle/>
+                    <SelectPuzzle playPuzzle={() => {}}/>
                 :   null}
             </SetupBase>
         );
@@ -73,6 +82,33 @@ export function Setup(): JSX.Element {
         return <Navigate to="/lobby" />;
     }
 }
+
+            <div className="main-dialog">
+                <Outlet />
+                <ChessboardWrapper
+                    chess={new ChessEngine()}
+                    side={WHITE}
+                    onMove={() => {}}
+                    rotation={0}
+                />
+                <Dialog
+                    style={{
+                        backgroundColor: "transparent",
+                        boxShadow: "none",
+                    }}
+                    isOpen
+                    canEscapeKeyClose={false}
+                    canOutsideClickClose={false}
+                    usePortal={false}
+                    enforceFocus={false}
+                >
+                    <div className="roundedBorder">
+                        <DialogBody>{props.children}</DialogBody>
+                        <DialogFooter minimal actions={props.actions} />
+                    </div>
+                </Dialog>
+            </div>
+            <Sidebar />
 
 /**
  * Triggers a state change in setup type

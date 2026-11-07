@@ -124,7 +124,7 @@ export function Game() {
     } else if (isError) {
         console.log(isError);
         console.log("error");
-        return <Navigate to="/home" />;
+        // return <Navigate to="/home" />;
     }
 
     const side = gameState.side;
@@ -182,8 +182,6 @@ export function Game() {
                     type: MessageType.MOVE,
                     move
                 });
-                
-                window.location.reload();
             }
         :   () => {}; //send a do-nothing function if game is paused
 

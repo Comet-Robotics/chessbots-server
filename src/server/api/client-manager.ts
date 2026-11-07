@@ -19,7 +19,14 @@ export class ClientManager {
     ) {}
 
     public registerUser(uuid: string) {
-        
+        console.log(`registering user ${uuid}`)
+        if (!this.hostId) {
+            this.hostId = uuid 
+        } else if (!this.clientId) {
+            this.clientId = uuid
+        } else {
+            this.spectatorIds.add(uuid)
+        }
     }
 
     public getSocket(id: string) {
@@ -37,9 +44,8 @@ export class ClientManager {
      */
     public sendToHost(message: Message) {
         if (this.hostId) {
-            this.getSocket(this.hostId)?.send(JSON.stringify(message));
+            this.socketManager.sendToSocket(this.hostId, message);
         }
-        
     }
 
     /**
@@ -47,14 +53,10 @@ export class ClientManager {
      * @param message - the message to be sent
      * @returns if the socket was found
      */
-    public sendToClient(message: Message): boolean {
-        const socket = this.getSocket("client");
-        if (!socket) {
-            return false;
+    public sendToClient(message: Message) {
+        if (this.clientId) {
+            this.socketManager.sendToSocket(this.clientId, message);
         }
-
-        socket.send(JSON.stringify(message));
-        return true;
     }
 
     /**
@@ -62,47 +64,31 @@ export class ClientManager {
      * @param message - the message to send
      * @returns if it completed successfully
      */
-    public sendToSpectators(message: Message): boolean {
-        if (this.spectatorIds.size !== 0) {
-            for (const item of this.spectatorIds) {
-                const potentialSocket = this.socketManager.getSocket(item);
-                if (potentialSocket !== null && potentialSocket !== undefined) {
-                    for (const socket of potentialSocket) {
-                        socket.send(JSON.stringify(message));
-                    }
-                }
-            }
-            return true;
+    public sendToSpectators(message: Message) {
+        for (let spectatorId in this.spectatorIds) {
+            this.socketManager.sendToSocket(spectatorId, message);
         }
-        return false;
     }
 
+    public sendToAll(message: Message) {
+        this.socketManager.sendToAll(message)
+    }
 
     /**
      * @param id - the cookie id of the request
      * @returns the client type
      */
-    public getClientType(id: string): ClientType {
+    public getClientType(id: string): ClientType | undefined {
+        console.log(`idL ${id}, hostid: ${this.hostId}, clientid: ${this.clientId}`)
         if (id === this.hostId) {
             return ClientType.HOST;
         } else if (id === this.clientId) {
             return ClientType.CLIENT;
+        } else if (this.spectatorIds.has(id)) {
+            return ClientType.SPECTATOR;
         }
-        return ClientType.SPECTATOR;
-    }
-
-    /**
-     * assigns the passed id to either host/client
-     * @param id - the cookie id of the request
-     */
-    public assignPlayer(id: string): void {
-        if (this.hostId === undefined || id === this.hostId) {
-            this.hostId = id;
-        } else if (this.clientId === undefined || id === this.clientId) {
-            this.clientId = id;
-        } else {
-            this.spectatorIds.add(id);
-        }
+        
+        return undefined
     }
 
     public removeHost(): void {

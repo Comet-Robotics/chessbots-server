@@ -294,16 +294,20 @@ export class ChessEngine {
         return this.getPieceTypeFromSquare(square) !== undefined;
     }
 
-    /**
-     * gets ALL legal moves from the provided square
-     * @param square - from square
-     * @returns - possible to squares
-     */
-    getLegalMoves(square?: Square) {
-        return this.chess.moves({
-            square,
+    getLegalMoves(): Move[] {
+        let moves: Move[] = this.chess.moves({
             verbose: true,
+        }).map(m => {
+            return {
+                from: m.from,
+                to: m.to,
+                promotion: m.promotion
+            }
         });
+
+        console.log("All legal moves: " + moves)
+
+        return moves
     }
 
     /**
@@ -311,8 +315,8 @@ export class ChessEngine {
      * @param square - from square
      * @returns - possible to squares
      */
-    getLegalSquares(square?: Square): Square[] {
-        return this.getLegalMoves(square).map((move) => move.to);
+    getLegalSquares(square: Square): Square[] {
+        return this.getLegalMoves().filter((m) => m.from == square).map((m) => m.to);
     }
 
     /**

@@ -20,13 +20,13 @@ import { logger } from "hono/logger";
 
 export let socketManager = new SocketManager()
 export let clientManager = new ClientManager(socketManager)
-export let gameManager = new GameManager(new ChessEngine(), socketManager, WHITE, false)
+export let gameManager: GameManager | undefined = undefined;
+// new GameManager(new ChessEngine(), socketManager, WHITE, false)
 
 function setGameManager(m: GameManager) {
     gameManager = m
 }
 
-// const wss = new WebSocketServer({ noServer: true })
 const app = new Hono<{ Variables: { uuid: string } }>();
 
 app.use("*", logger());
@@ -39,6 +39,9 @@ app.use((c, next) => {
     let id = z.safeParse(z.uuidv4(), getCookie(c, "uuid"));
     if (id.success) {
         c.set('uuid', id.data)
+        if (!clientManager.getClientType(id.data)) {
+            clientManager.registerUser(id.data)
+        }
     } else {
         let uuid = randomUUID()
         clientManager.registerUser(uuid)
@@ -81,7 +84,7 @@ app.get("/api/client-information", async (c) => {
      * Note the client currently redirects to home from the game over screen
      * So removing the isGameEnded check here results in an infinite loop
      */
-    const isGameActive = gameManager !== null && !gameManager.isGameEnded();
+    const isGameActive = gameManager && !gameManager.isGameEnded();
     return c.json({
         clientType,
         isGameActive,
@@ -95,6 +98,10 @@ app.get("/api/client-information", async (c) => {
  * returns an object with the side, game pgn, and the game end reason
  */
 app.get("/api/game-state", (c) => {
+    if (!gameManager) {
+        return c.notFound()
+    }
+    
     return c.json(gameManager.getGameState());
 });
 
@@ -188,7 +195,10 @@ app.get("/api/get-puzzles", (c) => {
  * Todo: add authentication instead of an exposed pause call
  */
 app.get("/api/pause-game", (c) => {
-    gameManager.pause()
+    if (gameManager) {
+        gameManager.pause()
+    }
+
     return c.body(null, 200);
 });
 
@@ -198,7 +208,10 @@ app.get("/api/pause-game", (c) => {
  */
 
 app.get("/api/pause-game", (c) => {
-    gameManager.unpause()
+    if (gameManager) {
+        gameManager.unpause()
+    }
+    
     return c.body(null, 200);
 });
 
@@ -241,12 +254,14 @@ app.get("/api/ws",
 
         return {
             onMessage: async (event, ws) => {
-                const parsedMessage = z.safeParse(MessageSchema, event.data);
-                console.log("Received message: " + parsedMessage);
+                const parsedMessage = z.safeParse(MessageSchema, JSON.parse(event.data.toString()));
 
                 if (!parsedMessage.success) {
+                    console.log(`Failed to parse message: ${parsedMessage.error}`);
                     return;
                 }
+
+                console.log("Received websocket message ", parsedMessage.data);
 
                 const message = parsedMessage.data;
                 if (message.type === MessageType.REGISTER_WEBSOCKET) {

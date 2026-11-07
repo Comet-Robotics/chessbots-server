@@ -229,13 +229,15 @@ export function toJson(message: Message): string {
  * Parse a raw JSON string into a validated Message object.
  * @throws {z.ZodError} if the message doesn't match any known schema.
  */
-export function parseMessage(text: string): Message {
+export function parseMessage(text: string): Message | undefined {
     const obj = JSON.parse(text);
     const result = MessageSchema.safeParse(obj);
     if (result.success) {
         return result.data;
     }
-    throw new Error(`Failed to parse message: ${result.error.message}`);
+
+    return undefined
+    // throw new Error(`Failed to parse message: ${result.error.message}`);
 }
 
 // // --- Type aliases for the public API ---

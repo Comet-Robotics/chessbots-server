@@ -24,7 +24,10 @@ export function BoardContainer(props: BoardContainerProps) {
     const handleResize = (entries: ResizeEntry[]) => {
         const { height, width } = entries[0].contentRect;
         const transform = computeChessboardTransform(height, width, 0.85);
-        props.onWidthChange(transform.width);
+        
+        if (!Number.isNaN(width)) {
+            props.onWidthChange(transform.width);
+        }
         setTransform(transform);
     };
 

@@ -19,6 +19,7 @@ export function Lobby() {
     // use a socket to wait for game started
     useSocket((message) => {
         if (message.type == MessageType.GAME_STARTED ) {
+            console.log("navmav1")
             navigate("/game");
         }
     });
