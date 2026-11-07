@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, redirect } from "react-router-dom";
 import { Setup } from "./setup/setup";
 import { Debug } from "./debug/debug";
 import { Game } from "./game/game";
@@ -41,4 +41,9 @@ export default createBrowserRouter([
     //     path: "/editor",
     //     element: <Editor />,
     // },
+    {
+        path:"*",
+        loader: async () => redirect('/lobby'),
+
+    }
 ]);

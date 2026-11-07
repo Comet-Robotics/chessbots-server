@@ -72,7 +72,6 @@ export function Game() {
         useState<GameInterruptedReason>();
     const [gameEndedReason, setGameEndedReason] = useState<GameEndReason>();
     const [gameHoldReason, setGameHoldReason] = useState<GameHoldReason>();
-    const [rotation, setRotation] = useState<number>(0);
     const [paused, setPause] = useState<boolean>(false);
 
     /** send any messages using our defined message handler inside a message socket for handling */
@@ -124,7 +123,7 @@ export function Game() {
     } else if (isError) {
         console.log(isError);
         console.log("error");
-        // return <Navigate to="/home" />;
+        return <Navigate to="/home" />;
     }
 
     const side = gameState.side;
@@ -193,7 +192,6 @@ export function Game() {
                 side={side}
                 difficulty={gameState.difficulty}
                 aiDifficulty={gameState.aiDifficulty}
-                setRotation={setRotation}
             />
 
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
