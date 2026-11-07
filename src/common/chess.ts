@@ -305,7 +305,7 @@ export class ChessEngine {
             }
         });
 
-        console.log("All legal moves: " + moves)
+        console.log("All legal moves: ",moves)
 
         return moves
     }

@@ -107,7 +107,9 @@ export function ChessboardWrapper(props: ChessboardWrapperProps) {
             return piece[0] === side;
         },
 
-        squareRenderer: customSquareRenderer
+        squareRenderer: customSquareRenderer,
+
+        squareStyle:{ alignItems: "none", justifyContent: "none",}
     }
 
     /**
@@ -136,7 +138,7 @@ export function ChessboardWrapper(props: ChessboardWrapperProps) {
             onWidthChange={setWidth}
         >
             <CustomSquareContext.Provider
-                value={{ legalSquares: [], chess, lastClickedSquare, side }}
+                value={{ legalSquares: chess.getLegalSquares(lastClickedSquare), chess, lastClickedSquare, side }}
             >
                 {chessboard}
             </CustomSquareContext.Provider>
