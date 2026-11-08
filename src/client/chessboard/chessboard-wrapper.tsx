@@ -48,7 +48,7 @@ export function ChessboardWrapper(props: ChessboardWrapperProps) {
             const from = sourceSquare as Square;
             const to = targetSquare as Square;
 
-            if (chess.getLegalSquares(from).includes(to)) {
+            if (chess.getLegalSquares(from).includes(to) && chess.getPieceColor(from) == WHITE) {
                 const promoting = chess.checkPromotion(from, to);
                 
                 if (showingPromotionDialog !== undefined) {
