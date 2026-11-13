@@ -297,12 +297,12 @@ export class ComputerGameManager extends GameManager {
         // });
 
         const move = this.chess.calculateAiMove(this.difficulty);
-        
         // await this.executeRobotMovement(move); // wait for robots to finish moving
-        // this.clientManager.sendToAll({
-        //     type: MessageType.MOVE,
-        //     move: move
-        // });
+        this.clientManager.sendToAll({
+            type: MessageType.MOVE,
+            move: move
+        });
+        this.chess.makeMove(move);
     }
 
     public getGameState(): GameState {

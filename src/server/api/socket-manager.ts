@@ -13,7 +13,7 @@ export class SocketManager {
     }
 
     public registerSocket(id: string, socket: WSContext<WebSocketLike>): void {
-        this.sockets[id] = socket;
+        this.sockets.set(id,socket);
     }
 
     /**
@@ -29,7 +29,7 @@ export class SocketManager {
      * @param id - id of the desired socket
      */
     getSocket(id: string): WSContext<WebSocketLike> | undefined {
-        return this.sockets[id];
+        return this.sockets.get(id);
     }
 
     /**
