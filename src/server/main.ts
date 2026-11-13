@@ -10,7 +10,7 @@ import { robotManager } from "./robot/robot-manager";
 import { puzzles } from "./game/puzzles";
 import { RobotId } from "./api/config";
 import { executor } from "./command/executor";
-import { CenterCommand } from "./command/command";
+import { CenterCommand, RelativeMoveCommand } from "./command/command";
 import { serve, upgradeWebSocket } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { randomUUID, UUID } from "node:crypto";
@@ -214,30 +214,32 @@ app.get("/api/pause-game", (c) => {
     return c.body(null, 200);
 });
 
-// app.post("/api/force-move", async (c) => {
-//   const { robotId, dist } = c.req.query()
+app.post("/api/force-move", async (c) => {
+  const { robotId, x, y } = c.req.query()
 
-//     const command = new DriveCommand(
-//         Number(robotId) as RobotId,
-//         Number(dist as string),
-//     );
+    const command = new RelativeMoveCommand(
+        Number(robotId) as RobotId,
+        {x:Number(x as string), y:Number(y as string)},
+        0
+    );
 
-//     return executor.execute(command).then(() => {
-//         return c.json({ message: "success" });
-//     });
-// });
+    return executor.execute(command).then(() => {
+        return c.json({ message: "success" });
+    });
+});
 
-// app.post("/api/force-turn", async (c) => {
-//     const { robotId, rad } = c.req.query();
-//     const command = new RelativeRotateCommand(
-//         Number(robotId) as RobotId,
-//         Number(rad),
-//     );
+app.post("/api/force-turn", async (c) => {
+    const { robotId, rad } = c.req.query();
+    const command = new RelativeMoveCommand(
+        Number(robotId) as RobotId,
+        {x:0,y:0},
+        Number(rad),
+    );
 
-//     return executor.execute(command).then(() => {
-//         return c.json({ message: "success" });
-//     });
-// });
+    return executor.execute(command).then(() => {
+        return c.json({ message: "success" });
+    });
+});
 
 app.post("/api/force-center", async (c) => {
     const { robotId } = c.req.query();

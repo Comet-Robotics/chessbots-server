@@ -645,7 +645,7 @@ function returnToHome(from: GridPosition, id: RobotId): SequentialCommandGroup {
     );
     const endInArray = findGridPositionInArray(
         arrayOfDeadzone,
-        finalDestination,
+        finalDestination!,
     );
     let differenceOfIndex = endInArray - startInArray;
 

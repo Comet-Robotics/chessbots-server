@@ -16,6 +16,8 @@ export enum PacketType {
     
     SET_ABSOLUTE = "SET_ABSOLUTE",
     DRIVE_ABSOLUTE = "DRIVE_ABSOLUTE",
+    DRIVE_RELATIVE = "DRIVE_RELATIVE",
+
 
     // DRIVE_TICKS = "DRIVE_TICKS",
     ACTION_SUCCESS = "ACTION_SUCCESS",
@@ -68,6 +70,13 @@ export const DriveAbsoluteSchema = z.object({
     rot: z.number()
 });
 
+export const DriveRelativeSchema = z.object({
+    type: z.literal(PacketType.DRIVE_RELATIVE),
+    x: z.number(),
+    y: z.number(),
+    rot: z.number()
+});
+
 export const ClientHelloSchema = z.object({
     type: z.literal(PacketType.CLIENT_HELLO),
     macAddress: z.mac()
@@ -96,6 +105,7 @@ export const PacketSchema = z.discriminatedUnion("type", [
     TurnByAngleSchema,
     DriveTilesSchema,
     DriveAbsoluteSchema,
+    DriveRelativeSchema,
     SetAbsoluteSchema,
     ActionSuccessSchema,
     ActionFailSchema,

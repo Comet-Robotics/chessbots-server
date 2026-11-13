@@ -2,7 +2,7 @@ import { robotManager } from "../robot/robot-manager";
 import { RobotId } from "../api/config";
 import { gameManager } from "../main";
 import { gridPositionFromPosition, Position } from "../../common/units";
-import { PacketType } from "../api/tunnel/packet";
+import { DriveRelativeSchema, PacketType } from "../api/tunnel/packet";
 
 /**
  * An command which operates on one or more robots.
@@ -266,6 +266,38 @@ export class AbsoluteMoveCommand extends Command {
     }
 }
 
+export class RelativeMoveCommand extends Command {
+    position: Position
+    rotation: number
+
+    robotId: RobotId
+
+    constructor(robotId: RobotId, position: Position, rotation: number) {
+        super()
+
+        this.robotId = robotId
+        this.position = position
+        this.rotation = rotation
+    }
+
+    public async inner_execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+
+        await robot.send({
+            type: PacketType.DRIVE_RELATIVE,
+            x: this.position.x,
+            y: this.position.y,
+            rot: this.rotation
+        })
+
+        robot.position = gridPositionFromPosition(this.position)
+    }
+    
+    reverse(): Command {
+        let position = { x: -this.position.x, y: -this.position.y };
+        return new RelativeMoveCommand(this.robotId, position, -this.rotation)
+    }
+}
 // export function timeoutRetry<T>(
 //     promise: Promise<T>,
 //     maxRetries: number,
