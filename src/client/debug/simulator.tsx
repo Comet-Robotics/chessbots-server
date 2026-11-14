@@ -13,7 +13,6 @@ import { useNavigate } from "react-router-dom";
 import { get, useSocket } from "../api";
 import "./simulator.scss";
 import { clampHeading, GRID_CELL_PX } from "../../common/units";
-import { SimulatedRobotLocation, SimulatorUpdateMessage } from "../../common/message";
 
 const tileSize = GRID_CELL_PX;
 export const robotSize = tileSize / 2;

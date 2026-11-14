@@ -12,53 +12,57 @@ import Login from "./auth/login";
 import { AuthProvider } from "./auth/auth";
 import { Admin } from "./admin/admin";
 
+
 export default createBrowserRouter([
     {
-        path: "/home",
-        element: <Home />,
-    },
-    {
-        path: "/debug/simulator",
-        element: <Simulator />,
-    },
-    {
-        path: "/debug",
-        element: <Debug />,
-    },
-    {
-        path: "/debug2",
-        element: <Debug2 />,
-    },
-    {
-        path: "/setup",
-        element: <Setup />,
-    },
-    {
-        path: "/lobby",
-        element: <Lobby />,
-    },
-    {
-        path: "/game",
-        element: <Game />,
-    },
-
-    {
-        path: "/admin",
-        element: <ProtectedRoute />,
+        element: <AuthProvider />,
         children: [
             {
-                path: "",
-                element: <Admin />,
+                path: "/home",
+                element: <Home />,
+            },
+            {
+                path: "/debug/simulator",
+                element: <Simulator />,
+            },
+            {
+                path: "/debug",
+                element: <Debug />,
+            },
+            {
+                path: "/debug2",
+                element: <Debug2 />,
+            },
+            {
+                path: "/setup",
+                element: <Setup />,
+            },
+            {
+                path: "/lobby",
+                element: <Lobby />,
+            },
+            {
+                path: "/game",
+                element: <Game />,
+            },
+            {
+                path: "/login",
+                element: <Login />,
+            },
+            {
+                path: "/admin",
+                element: <ProtectedRoute />,
+                children: [
+                    {
+                        path: "",
+                        element: <Admin />,
+                    },
+                ],
+            },
+            {
+                path: "*",
+                loader: async () => redirect("/lobby"),
             },
         ],
     },
-    // {
-    //     path: "/editor",
-    //     element: <Editor />,
-    // },
-    {
-        path:"*",
-        loader: async () => redirect('/lobby'),
-
-    }
 ]);

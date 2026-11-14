@@ -14,6 +14,9 @@ export const ProtectedRoute = () => {
         SetCheckStatus(true);
         console.log("running again!");
 
+        console.log("user is:")
+        console.log(user)
+
         const serverSideCheck = async () => {
             const serverResponse = await post("/check-admin", {
                 username: user ?? "",
@@ -25,7 +28,7 @@ export const ProtectedRoute = () => {
             SetAuthenticationSuccessful(serverResponse["success"]);
         };
         serverSideCheck();
-    }, []);
+    }, [user]);
 
     if (checkStatus) {
         return <p>Checking...</p>;

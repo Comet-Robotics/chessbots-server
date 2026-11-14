@@ -7,7 +7,7 @@ type LoginType = {
 };
 interface ProviderProps {
     user: string | null;
-    login(data: LoginType): void;
+    login(data: string): void;
     logout(): void;
 }
 
@@ -22,9 +22,8 @@ export const AuthProvider = () => {
     const navigate = useNavigate();
 
     // call this function when you want to authenticate the user
-    const login = async (data) => {
-        console.log("login2");
-        setUser(data);
+    const login = (username: string) => {
+        setUser(username);
     };
 
     // call this function to sign out logged in user

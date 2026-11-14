@@ -15,6 +15,7 @@ const Login = () => {
             password: password,
         });
 
+        console.log("result:");
         console.log(result);
 
         if (result["success"]) {

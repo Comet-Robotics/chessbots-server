@@ -252,6 +252,42 @@ app.post("/api/force-center", async (c) => {
     return c.json({ message: "success" });
 });
 
+let hashedPassword = "skibidi";
+
+
+async function hashPassword(password) {
+    const data = new TextEncoder().encode(password);
+    const hash = await crypto.subtle.digest("SHA-256", data);
+
+
+    hashedPassword = Array.from(new Uint8Array(hash))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+}
+
+
+hashPassword(process.env.CHESSBOTS_PASSWORD);
+
+app.post("/api/check-admin", async (c) => {
+    const sentUser = c.req.query("username");
+    console.log("heres what we got:");
+    console.log(hashedPassword);
+    console.log(sentUser);
+    return c.json({ success: sentUser === hashedPassword });
+});
+
+app.post("/api/login-admin", async (c) => {
+    const inputPassword = c.req.query("password");
+ 
+    console.log("epstein:")
+    console.log(inputPassword)
+
+    if (inputPassword === process.env.CHESSBOTS_PASSWORD) {
+        return c.json({ success: true, username: hashedPassword });
+    }
+    return c.json({ success: false });
+});
+
 // ================== WebSocket ====================
 app.get("/api/ws",
     upgradeWebSocket((c) => {
