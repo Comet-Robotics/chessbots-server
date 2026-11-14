@@ -15,7 +15,7 @@ import {
     PING_INTERVAL,
     PING_TIMEOUT,
     USE_VIRTUAL_ROBOTS,
-    ENABLE_PINGING
+    ENABLE_PINGING,
 } from "../utils/env";
 import { BotTunnel, type RobotEventEmitter } from "./bot-tunnel";
 import { waitTime } from "../utils/time";
