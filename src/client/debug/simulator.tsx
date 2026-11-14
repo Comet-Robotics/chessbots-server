@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { get, useSocket } from "../api";
 import "./simulator.scss";
 import { clampHeading, GRID_CELL_PX } from "../../common/units";
+import { SimulatedRobotLocation, SimulatorUpdateMessage } from "../../common/message";
 
 const tileSize = GRID_CELL_PX;
 export const robotSize = tileSize / 2;
@@ -45,10 +46,10 @@ export function Simulator() {
             case "SET_ALL_ROBOTS":
                 return action.payload;
             case "UPDATE_ROBOT":
-                const returnedState = { ...state };
-                returnedState[action.payload.robotId] = action.payload.state;
-
-                return returnedState;
+                return {
+                    ...state,
+                    [action.payload.robotId]: action.payload.state,
+                };
             default:
                 return state;
         }
@@ -68,9 +69,6 @@ export function Simulator() {
                 payload: { robotId: message.robotId, state: message.location },
             });
             setMessageLog((log) => [...log, { message, ts: new Date() }]);
-        } else {
-            console.log("got unknown type! Message:");
-            console.log(message);
         }
     });
 
@@ -202,8 +200,7 @@ const openInEditor = async (frame: StackFrame) => {
 export function RobotGrid({
     robotState,
     children,
-    onClick,
-}: PropsWithChildren<{ robotState: RobotState; onClick? }>) {
+}: PropsWithChildren<{ robotState: RobotState }>) {
     return (
         <div
             style={{
@@ -242,7 +239,6 @@ export function RobotGrid({
                     robotId={bot.id}
                     key={bot.id}
                     onTopOfRobots={[]}
-                    onClick={onClick}
                 />
             ))}
             {children}
@@ -355,7 +351,6 @@ const Robot = forwardRef<
         robotId: string;
         onTopOfRobots: string[];
         style?: CSSProperties;
-        onClick?: (id: string) => null;
     }
 >(function Robot({ pos, rot, robotId, _, style }, ref) {
     return (
@@ -367,9 +362,6 @@ const Robot = forwardRef<
                 left: `${pos.x * tileSize + 0.25 * tileSize}px`,
                 bottom: `${pos.y * tileSize + 0.25 * tileSize}px`,
                 ...style,
-            }}
-            onClick={() => {
-                onClick ? onClick(robotId) : undefined;
             }}
         >
             <Tooltip content={`${robotId}: ${JSON.stringify(pos)}`}>
