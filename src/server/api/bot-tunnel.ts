@@ -10,6 +10,11 @@ export abstract class BotTunnel {
     dataBuffer: Buffer | undefined;
     emitter: RobotEventEmitter = new EventEmitter();
 
+    static messages: {
+        ts: Date;
+        message: UpdateMessage;
+    }[] = [];
+
     abstract isActive(): boolean;
     abstract getIdentifier(): string;
 

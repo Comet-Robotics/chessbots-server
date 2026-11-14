@@ -83,7 +83,10 @@ export function Admin() {
         dispatch({ type: "SET_ALL_ROBOTS", payload: robotState });
     };
 
-    const [robotPieces, setRobotPieces] = useState<[string, string]>(["", ""]);
+    type RobotSimPiece = [string, string];
+
+    const [robotPieces, setRobotPieces] = useState<RobotSimPiece>(["", ""]);
+
 
     const fetchRobotPieces = async () => {
         const { robotState } = await get("/get-robot-pieces");

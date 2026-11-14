@@ -84,6 +84,7 @@ import {
     gamePaused,
 } from "./pauseHandler";
 import { type Square } from "chess.js";
+import { BotTunnel } from "./bot-tunnel";
 
 const queue = new PriorityQueue<string>();
 //hashmap mapping cookie ids to user names
@@ -758,42 +759,9 @@ apiRouter.post("/do-big", async (req, res) => {
 });
 
 /**
- * get the current state of the virtual robots for the simulator
- */
-apiRouter.get("/get-simulator-robot-state", (_, res) => {
-    /*
-    if (!USE_VIRTUAL_ROBOTS) {
-        return res.status(400).send({ message: "Simulator is not enabled." });
-    }
-        */
-    const robotsEntries = Array.from(robotManager.idsToRobots);
-
-    // get all of the robots and their positions
-    const robotState = Object.fromEntries(
-        robotsEntries.map(([id, robot]) => {
-            const headingRadians = robot.headingRadians;
-            const position = new Position(robot.position.x, robot.position.y);
-
-            // const tunnel = robot.getTunnel();
-            // if (tunnel instanceof VirtualBotTunnel) {
-            //     position = tunnel.position;
-            //     headingRadians = tunnel.headingRadians;
-            // }
-            return [id, { position, headingRadians: headingRadians }];
-        }),
-    );
-
-    //send the robots and any tunnel messages
-    return res.send({
-        robotState,
-        messages: Array.from(VirtualBotTunnel.messages),
-    });
-});
-
-/**
  * get the current state of the real robots for the simulator
  */
-apiRouter.get("/get-real-robot-state", (_, res) => {
+apiRouter.get("/get-robot-state", (_, res) => {
     const robotsEntries = Array.from(robotManager.idsToRobots);
 
     // get all of the robots and their positions
@@ -814,6 +782,7 @@ apiRouter.get("/get-real-robot-state", (_, res) => {
     //send the robots
     return res.send({
         robotState,
+        messages: Array.from(BotTunnel.messages)
     });
 });
 
