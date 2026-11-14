@@ -77,10 +77,11 @@ export const customSquareRenderer: SquareRenderer = ({
     // return all the highlights inside a div
     return (
         <div>
+            {children}
             {clickedPieceHighlight}
             {lastMoveHighlight}
             {selectElement}
-            {children}
+            
         </div>
     );
 };

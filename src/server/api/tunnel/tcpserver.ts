@@ -1,4 +1,4 @@
-import { RobotManager } from "../../robot/robot-manager";
+import { robotManager, RobotManager } from "../../robot/robot-manager";
 import { config } from "../config";
 import { BotTunnel } from "./bot-tunnel";
 import { RealBotTunnel } from "./real-tunnel";
@@ -56,5 +56,3 @@ export class TCPServer {
         socket.on("error", tunnel.onError.bind(tunnel));
     }
 }
-
-// export const tcpServer: TCPServer | null = USE_VIRTUAL_ROBOTS ? null : new TCPServer(robotManager);

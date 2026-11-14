@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { deserializePacket, PacketType, type Packet, type PacketWithId } from "./packet";
 
 export abstract class BotTunnel {
@@ -88,7 +89,6 @@ export abstract class BotTunnel {
         }
 
         str = str.substring(0, terminator);
-
         // check if the buffer is the correct length based on where the terminator is
         if (this.dataBuffer.length > terminator) {
             this.dataBuffer = this.dataBuffer.subarray(terminator + 1);
@@ -102,12 +102,13 @@ export abstract class BotTunnel {
         }
     }
 
-    abstract processPacket(packet: PacketWithId);
+    abstract processPacket(packet: Packet);
 
     abstract send(packet: Packet): Promise<string>;
 
     public async sendTurnPacket(delta: number): Promise<void> {
         await this.send({
+            packetId:randomUUID(),
             type: PacketType.TURN_BY_ANGLE,
             deltaHeadingRadians: delta,
         });
@@ -115,6 +116,7 @@ export abstract class BotTunnel {
 
     public async sendDrivePacket(tileDistance: number): Promise<void> {
         await this.send({
+            packetId:randomUUID(),
             type: PacketType.DRIVE_TILES,
             tileDistance,
         });
@@ -122,12 +124,14 @@ export abstract class BotTunnel {
 
     public async sendCenterPacket(): Promise<void> {
         await this.send({
+            packetId:randomUUID(),
             type: PacketType.CENTER_SEND,
         });
     }
 
     public async sendStopPacket(): Promise<void> {
         await this.send({
+            packetId:randomUUID(),
             type: PacketType.ESTOP,
         });
     }

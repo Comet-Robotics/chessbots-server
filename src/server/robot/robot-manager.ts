@@ -1,8 +1,10 @@
 import { gridPositionFromPosition } from "../../common/units";
 import { Robot } from "./robot";
 import { config, RobotId } from "../api/config";
-import type { GridPosition } from "../../common/units";
+import type { GridPosition, Position } from "../../common/units";
 import { PacketType } from "../api/tunnel/packet";
+import { TCPServer } from "../api/tunnel/tcpserver";
+import { randomUUID } from "node:crypto";
 
 /**
  * Stores robots. Provides utilities for finding them by position.
@@ -16,7 +18,8 @@ export class RobotManager {
     constructor() {}
 
     createRobot(mac: string): RobotId {
-        // Way more than this
+        const robot = new Robot(mac)
+        this.addRobot(robot);
         return config.bots[mac].id
     }
     
@@ -30,6 +33,20 @@ export class RobotManager {
         ).toArray()
     }
     
+    robotPositions(): { id: RobotId, position: Position, rotation: number }[] {
+        const iter = this.connectedRobots().map((id) => {
+            const robot = this.robots.get(id)!
+            
+            return {
+                id,
+                position: robot.position,
+                rotation: robot.heading,
+            }
+        })
+
+        return Array.from(iter)
+    }
+
     isConnected(robot: RobotId): boolean {
         return this.robots.get(robot)?.connected() ?? false
     }
@@ -83,6 +100,7 @@ export class RobotManager {
     stopAllRobots() {
         this.robots.forEach((robot) => {
             robot.send({
+                packetId:randomUUID(),
                 type: PacketType.ESTOP
             });
         });
@@ -90,3 +108,4 @@ export class RobotManager {
 }
 
 export const robotManager = new RobotManager();
+export const tcpServer: TCPServer = new TCPServer(robotManager);

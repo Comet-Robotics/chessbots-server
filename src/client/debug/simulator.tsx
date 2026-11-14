@@ -18,7 +18,7 @@ const tileSize = GRID_CELL_PX;
 export const robotSize = tileSize / 2;
 const cellCount = 12;
 
-export type RobotState = { [robotId: string]: SimulatedRobotLocation };
+export type RobotState = {robotId:number,position:{x:number,y:number},rotation:number}[];
 
 /**
  * Creates a robot simulator for testing robot commands
@@ -54,7 +54,7 @@ export function Simulator() {
         }
     };
 
-    const [robotState, dispatch] = useReducer(robotStateReducer, {});
+    const [robotState, dispatch] = useReducer(robotStateReducer, []);
     const [messageLog, setMessageLog] = useState<
         { message: SimulatorUpdateMessage; ts: Date }[]
     >([]);
@@ -73,13 +73,13 @@ export function Simulator() {
 
     // fetch the current state of the robots and update all the sim robots
     const fetchRobotState = async () => {
-        const { robotState, messages } = await get(
-            "/get-simulator-robot-state",
+        const robotState = await get(
+            "/get-robot-positions",
         );
         dispatch({ type: "SET_ALL_ROBOTS", payload: robotState });
-        setMessageLog(
-            messages.map(({ message, ts }) => ({ message, ts: new Date(ts) })),
-        );
+        //setMessageLog(
+        //    messages.map(({ message, ts }) => ({ message, ts: new Date(ts) })),
+        //);
     };
 
     useEffect(() => {
@@ -230,11 +230,13 @@ export function RobotGrid({
                 );
             })}
             {/* TODO: implement onTopOfRobots */}
-            {Object.entries(robotState).map(([robotId, pos]) => (
+            
+            {robotState.map((bot) => (
                 <Robot
-                    pos={pos}
-                    robotId={robotId}
-                    key={robotId}
+                    pos={bot.position}
+                    rot={bot.rotation}
+                    robotId={bot.id}
+                    key={bot.id}
                     onTopOfRobots={[]}
                 />
             ))}
@@ -343,27 +345,28 @@ function LogEntry(props: { message: SimulatorUpdateMessage; ts: Date }) {
 const Robot = forwardRef<
     HTMLDivElement,
     {
-        pos: SimulatedRobotLocation;
+        pos: {x:number,y:number};
+        rot: number;
         robotId: string;
         onTopOfRobots: string[];
         style?: CSSProperties;
     }
->(function Robot({ pos, robotId, onTopOfRobots, style }, ref) {
+>(function Robot({ pos, rot, robotId, _, style }, ref) {
     return (
         <div
             ref={ref}
             className="robot"
             style={{
                 position: "absolute",
-                left: `${pos.position.x * tileSize - 0.25 * tileSize}px`,
-                bottom: `${pos.position.y * tileSize - 0.25 * tileSize}px`,
+                left: `${pos.x * tileSize + 0.25 * tileSize}px`,
+                bottom: `${pos.y * tileSize + 0.25 * tileSize}px`,
                 ...style,
             }}
         >
             <Tooltip content={`${robotId}: ${JSON.stringify(pos)}`}>
                 <div
                     style={{
-                        transform: `rotate(-${clampHeading(pos.headingRadians)}rad)`,
+                        transform: `rotate(-${clampHeading(rot)}rad)`,
                         borderRadius: "50%",
                         display: "flex",
                         justifyContent: "flex-end",
@@ -379,6 +382,7 @@ const Robot = forwardRef<
                             width: robotSize / 4,
                             height: robotSize / 4,
                             borderRadius: "50%",
+                            boxShadow: "0 0 3px black",
                         }}
                     />
                 </div>

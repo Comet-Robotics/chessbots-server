@@ -39,6 +39,7 @@ export const PingSendSchema = z.object({
 });
 
 export const CenterSendSchema = z.object({
+    packetId: z.string(),
     type: z.literal(PacketType.CENTER_SEND),
 });
 
@@ -47,23 +48,19 @@ export const PingResponseSchema = z.object({
 });
 
 export const TurnByAngleSchema = z.object({
+    packetId: z.string(),
     type: z.literal(PacketType.TURN_BY_ANGLE),
     deltaHeadingRadians: z.number(),
 });
 
 export const DriveTilesSchema = z.object({
+    packetId: z.string(),
     type: z.literal(PacketType.DRIVE_TILES),
     tileDistance: z.number(),
 });
 
-export const SetAbsoluteSchema = z.object({
-    type: z.literal(PacketType.DRIVE_ABSOLUTE),
-    x: z.number(),
-    y: z.number(),
-    rot: z.number()
-});
-
 export const DriveAbsoluteSchema = z.object({
+    packetId: z.string(),
     type: z.literal(PacketType.DRIVE_ABSOLUTE),
     x: z.number(),
     y: z.number(),
@@ -71,6 +68,7 @@ export const DriveAbsoluteSchema = z.object({
 });
 
 export const DriveRelativeSchema = z.object({
+    packetId: z.string(),
     type: z.literal(PacketType.DRIVE_RELATIVE),
     x: z.number(),
     y: z.number(),
@@ -83,16 +81,19 @@ export const ClientHelloSchema = z.object({
 });
 
 export const ActionSuccessSchema = z.object({
+    packetId: z.string(),
     type: z.literal(PacketType.ACTION_SUCCESS),
     tileDistance: z.number(),
 });
 
 export const ActionFailSchema = z.object({
+    packetId: z.string(),
     type: z.literal(PacketType.ACTION_FAIL),
     reason: z.string()
 });
 
 export const EstopSchema = z.object({
+    packetId: z.string(),
     type: z.literal(PacketType.ESTOP),
 });
 
@@ -106,7 +107,6 @@ export const PacketSchema = z.discriminatedUnion("type", [
     DriveTilesSchema,
     DriveAbsoluteSchema,
     DriveRelativeSchema,
-    SetAbsoluteSchema,
     ActionSuccessSchema,
     ActionFailSchema,
     EstopSchema,
@@ -127,10 +127,11 @@ export type Estop = z.infer<typeof EstopSchema>;
 export type Packet = z.infer<typeof PacketSchema>;
 export type PacketWithId = Packet & { packetId: string };
 
-export function deserializePacket(json: string): PacketWithId | undefined {
+export function deserializePacket(json: string): Packet | undefined {
     const obj = JSON.parse(json);
-    const result = PacketSchema.and(z.object({ packetId: z.string() })).safeParse(obj);
+    const result = PacketSchema.safeParse(obj);
     if (!result.success) {
+        console.log(result.error);
         return undefined;
     }
 

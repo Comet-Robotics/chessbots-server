@@ -3,6 +3,7 @@ import { RobotId } from "../api/config";
 import { gameManager } from "../main";
 import { gridPositionFromPosition, Position } from "../../common/units";
 import { DriveRelativeSchema, PacketType } from "../api/tunnel/packet";
+import { randomUUID } from "node:crypto";
 
 /**
  * An command which operates on one or more robots.
@@ -116,6 +117,7 @@ export class CenterCommand extends Command {
         const robot = robotManager.getRobot(this.robotId);
         
         robot.send({
+            packetId:randomUUID(),
             type: PacketType.CENTER_SEND
         })
     }
@@ -248,6 +250,7 @@ export class AbsoluteMoveCommand extends Command {
         this.saved_rotation = robot.heading
 
         await robot.send({
+            packetId:randomUUID(),
             type: PacketType.DRIVE_ABSOLUTE,
             x: this.position.x,
             y: this.position.y,
@@ -284,6 +287,7 @@ export class RelativeMoveCommand extends Command {
         const robot = robotManager.getRobot(this.robotId);
 
         await robot.send({
+            packetId:randomUUID(),
             type: PacketType.DRIVE_RELATIVE,
             x: this.position.x,
             y: this.position.y,

@@ -12,7 +12,6 @@ import {
     MAX_PING_FAIL,
     PING_INTERVAL,
     PING_TIMEOUT,
-    USE_VIRTUAL_ROBOTS,
 } from "../../env";
 import { BotTunnel } from "./bot-tunnel";
 import { config, RobotId } from "../config";
@@ -195,6 +194,6 @@ export class RealBotTunnel extends BotTunnel {
     }
 
     sendCenter() {
-        this.send({ type: PacketType.CENTER_SEND });
+        this.send({packetId:randomUUID(), type: PacketType.CENTER_SEND });
     }
 }

@@ -182,6 +182,10 @@ app.get("/api/get-ids", (c) => {
     return c.json(robotManager.connectedRobots())
 });
 
+app.get("/api/get-robot-positions", (c) => {
+    return c.json(robotManager.robotPositions())
+})
+
 /**
  * Returns a list of available puzzles.
  */
