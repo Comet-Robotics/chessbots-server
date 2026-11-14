@@ -5,13 +5,13 @@ import { post } from "../api";
 import { useState } from "react";
 import { puzzles } from "../../server/game/puzzles";
 import { Puzzle } from "../../common/chess";
+import { useNavigate } from "react-router-dom";
 
 const renderPuzzleOptions: ItemRenderer<number> = (
     puzzleId,
     { modifiers, handleFocus, handleClick },
 ) => {
     const puzzle = puzzles[puzzleId];
-
     return (
         <MenuItem
             key={puzzle.name}
@@ -30,6 +30,7 @@ type SelectPuzzleProps = {
 
 export function SelectPuzzle(props: SelectPuzzleProps) {
     let [selectedPuzzle, setSelectedPuzzle] = useState(0);
+    const navigate = useNavigate();
     return (
         <>
             <Select<number>
@@ -49,7 +50,10 @@ export function SelectPuzzle(props: SelectPuzzleProps) {
                 text="Play"
                 icon="arrow-right"
                 intent="primary"
-                onClick={props.playPuzzle(selectedPuzzle)}
+                onClick={()=>{
+                    props.playPuzzle(selectedPuzzle);
+                    navigate("/game");
+                }}
             />
         </>
     );

@@ -9,7 +9,7 @@ import type { Dispatch, JSX } from "react";
 import { useState } from "react";
 import { SetupGame } from "./setup-game";
 import { Navigate, useNavigate } from "react-router-dom";
-import { get, useEffectQuery } from "../api";
+import { get, post, useEffectQuery } from "../api";
 import { ClientType, GameType } from "../../common/chess";
 import { SelectPuzzle } from "../game/select-puzzle";
 
@@ -36,6 +36,7 @@ enum SetupType {
  * @returns A setup base with the proper setup dialog
  */
 export function Setup(): JSX.Element {
+    const navigate = useNavigate();
     const [setupType, setSetupType] = useState<SetupType | undefined>();
     const { isPending, data } = useEffectQuery("client-information", () =>
         get("/client-information"),
@@ -74,7 +75,9 @@ export function Setup(): JSX.Element {
                     />
                 :   null}
                 {setupType === SetupType.PUZZLE ?
-                    <SelectPuzzle playPuzzle={() => {}}/>
+                    <SelectPuzzle playPuzzle={(puzzle) => {
+                        post("/start-puzzle-game", {puzzle:puzzle.toString()});
+                    }}/>
                 :   null}
             </SetupBase>
         );
