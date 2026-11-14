@@ -15,6 +15,7 @@ import {
     PING_INTERVAL,
     PING_TIMEOUT,
     USE_VIRTUAL_ROBOTS,
+    ENABLE_PINGING
 } from "../utils/env";
 import { BotTunnel, type RobotEventEmitter } from "./bot-tunnel";
 import { waitTime } from "../utils/time";
@@ -122,7 +123,7 @@ export class RealBotTunnel extends BotTunnel {
                 await this.send(this.makeHello(packet.macAddress));
                 this.connected = true;
                 //get to start running pings.
-                //this.runPings();
+                if (ENABLE_PINGING) this.runPings();
                 break;
             }
             // respond to pings
