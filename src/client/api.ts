@@ -1,13 +1,13 @@
 import useWebSocket from "react-use-websocket";
 import type {
     Message,
-    SendMessage,
     MessageHandler,
-} from "../common/message/message";
-import { RegisterWebsocketMessage } from "../common/message/message";
+    MessageSender
+} from "../common/message";
 import { useId, useMemo } from "react";
-import { parseMessage } from "../common/message/parse-message";
+import { MessageType, parseMessage } from "../common/message";
 import { useQuery } from "@tanstack/react-query";
+import { json } from "zod";
 
 /**
  * A wrapper around `useQuery` which causes the wrapped query to be trigged once each time the page renders.
@@ -33,9 +33,7 @@ export function useEffectQuery<T>(
  */
 const USE_SSL = window.location.protocol === "https:";
 const WS_PROTOCOL = USE_SSL ? "wss" : "ws";
-// added info about this, important in specifying socket connections
-const PAGE_LOCATION = window.location.pathname;
-const WEBSOCKET_URL = `${WS_PROTOCOL}://${new URL(window.location.href).host}/ws?page=${encodeURIComponent(PAGE_LOCATION)}`;
+const WEBSOCKET_URL = `${WS_PROTOCOL}://${new URL(window.location.href).host}/api/ws`;
 
 /**
  * A custom hook which allows using a websocket to connect to the server.
@@ -47,12 +45,17 @@ const WEBSOCKET_URL = `${WS_PROTOCOL}://${new URL(window.location.href).host}/ws
 export function useSocket(
     onMessage?: MessageHandler,
     onOpen?: () => void,
-): SendMessage {
+): MessageSender {
     // handle sending a message and opening it
     const { sendMessage } = useWebSocket(WEBSOCKET_URL, {
         onOpen: () => {
             console.log("Connection established");
-            sendMessage(new RegisterWebsocketMessage().toJson());
+            sendMessage(
+                JSON.stringify({
+                    type: MessageType.REGISTER_WEBSOCKET
+                })
+            );
+            
             if (onOpen !== undefined) {
                 onOpen();
             }
@@ -60,9 +63,9 @@ export function useSocket(
         // handle what to do with the message
         onMessage: (msg: MessageEvent) => {
             const message = parseMessage(msg.data.toString());
-            console.log("Handle message: " + message.toJson());
+            console.log("Handle message: " + JSON.stringify(message));
 
-            if (onMessage !== undefined) {
+            if (onMessage !== undefined && message !== undefined) {
                 onMessage(message);
             }
         },
@@ -72,8 +75,8 @@ export function useSocket(
     // handle how a message is sent
     const sendMessageHandler = useMemo(() => {
         return (message: Message) => {
-            console.log("Sending message: " + message.toJson());
-            sendMessage(message.toJson());
+            console.log("Sending message: " + JSON.stringify(message));
+            sendMessage(JSON.stringify(message));
         };
     }, [sendMessage]);
     return sendMessageHandler;

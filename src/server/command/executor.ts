@@ -1,4 +1,4 @@
-import { gamePaused } from "../api/pauseHandler";
+import { gameManager } from "../main";
 import type { Command } from "./command";
 
 /**
@@ -21,19 +21,19 @@ export class CommandExecutor {
     private runningCommands: Command[] = [];
     private oldCommands: Command[] = [];
 
-    private checkRequirements(command: Command) {
+    private checkRequirements(command: Command): boolean {
         for (const req of command.requirements) {
             for (const runningCmd of this.runningCommands) {
                 console.log(
                     `Checking requirement ${req} against running command ${runningCmd}`,
                 );
                 if (runningCmd.requirements.has(req)) {
-                    throw new RequirementError(
-                        `Command already requires ${req}!`,
-                    );
+                    return false
                 }
             }
         }
+
+        return true
     }
 
     /**
@@ -43,7 +43,7 @@ export class CommandExecutor {
     public async execute(command: Command): Promise<void> {
         this.checkRequirements(command);
         this.runningCommands.push(command);
-        if (!gamePaused) {
+        if (!gameManager || gameManager.paused) {
             return command.execute().finally(() => {
                 this.oldCommands.unshift(command);
                 const index = this.runningCommands.indexOf(command);

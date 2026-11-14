@@ -1,19 +1,14 @@
 import { Button, useHotkeys } from "@blueprintjs/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { DriveRobotMessage } from "../../common/message/robot-message";
-import type { SendMessage } from "../../common/message/message";
+import { Message, MessageSender, MessageType } from "../../common/message";
 import { Joystick } from "react-joystick-component";
 import type { IJoystickUpdateEvent } from "react-joystick-component/build/lib/Joystick";
 import { DriveSlider } from "./drive-slider";
-import {
-    joystickInColor,
-    joystickOutColor,
-    textColor,
-} from "../check-dark-mode";
+import { RobotId } from "../../server/api/config";
 
 interface DriveRobotProps {
-    robotId: string;
-    sendMessage: SendMessage;
+    robotId: RobotId;
+    sendMessage: MessageSender;
 }
 
 const ROBOT_MSG_THROTTLE_MS = 50;
@@ -29,7 +24,7 @@ function almostEqual(v1: number, v2: number, epsilon: number = 0.01): boolean {
 export function DriveRobot(props: DriveRobotProps) {
     // state variable for handling the power levels of the robot
     const [power, setPower] = useState({ left: 0, right: 0 });
-    const [prevPad, setPrevPad] = useState({ left: 0, right: 0 });
+    const [prevPad  , setPrevPad] = useState({ left: 0, right: 0 });
     const [prev, setPrev] = useState({ left: 0, right: 0 });
 
     // useEffect hook to send the power levels to the robot if there is a change in the power levels
@@ -40,9 +35,13 @@ export function DriveRobot(props: DriveRobotProps) {
         ) {
             return;
         }
-        props.sendMessage(
-            new DriveRobotMessage(props.robotId, power.left, power.right),
-        );
+        props.sendMessage({
+            type: MessageType.DRIVE_ROBOT,
+            id: "custom-drive-command",
+            leftPower: power.left,
+            rightPower: power.right
+        });
+        
         setPrev({ left: power.left, right: power.right });
     }, [props, power.left, power.right, prev]);
 
@@ -246,7 +245,7 @@ export function DriveRobot(props: DriveRobotProps) {
     return (
         <div tabIndex={0} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
             <br />
-            <p className={textColor()}>
+            <p>
                 Control this robot using the buttons below, arrow keys, WASD, or
                 a connected gamepad. If arrow keys are not working, make sure
                 controls are in focus.
@@ -273,8 +272,6 @@ export function DriveRobot(props: DriveRobotProps) {
                         }}
                     >
                         <Joystick
-                            baseColor={joystickOutColor()}
-                            stickColor={joystickInColor()}
                             throttle={ROBOT_MSG_THROTTLE_MS}
                             size={150}
                             pos={convertMotorPowersToJoystickXY(

@@ -8,18 +8,14 @@ import {
     NonIdealStateIconSize,
 } from "@blueprintjs/core";
 import { useNavigate } from "react-router-dom";
-import type { GameEndReason } from "../../common/game-end-reasons";
-import {
-    GameFinishedReason,
-    GameInterruptedReason,
-} from "../../common/game-end-reasons";
-import { useState } from "react";
-import { Side } from "../../common/game-types";
-import { bgColor, buttonColor, textColor } from "../check-dark-mode";
-import "../colors.css";
-import { post } from "../api";
 
-interface GameEndDialogProps {
+import { useState } from "react";
+import { Side, WHITE } from "../../common/chess";
+import { post } from "../api";
+import { type } from "node:os";
+import { GameEndReason, GameCompletedReason, GameInterruptedReason } from "../../common/message";
+
+type GameEndDialogProps = {
     reason: GameEndReason;
     side: Side;
 }
@@ -39,7 +35,6 @@ export function GameEndDialog(props: GameEndDialogProps) {
         <Button
             text="Continue"
             rightIcon="arrow-right"
-            className={buttonColor()}
             intent="primary"
             disabled={isProcessing}
             onClick={() => {
@@ -57,7 +52,6 @@ export function GameEndDialog(props: GameEndDialogProps) {
     // return the dialog with the button and game over reason
     return (
         <Dialog
-            className={bgColor()}
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
             canOutsideClickClose={false}
@@ -67,7 +61,7 @@ export function GameEndDialog(props: GameEndDialogProps) {
                 <NonIdealState
                     icon={gameOverIcon(props.reason, props.side)}
                     title={
-                        <h4 className={textColor()}>
+                        <h4>
                             {gameOverMessage(props.reason)}
                         </h4>
                     }
@@ -89,17 +83,17 @@ export function GameEndDialog(props: GameEndDialogProps) {
 function gameOverIcon(reason: GameEndReason, side: Side) {
     // check which side won
     const whiteWon =
-        reason === GameFinishedReason.BLACK_CHECKMATED ||
+        reason === GameCompletedReason.BLACK_CHECKMATED ||
         reason === GameInterruptedReason.BLACK_RESIGNED ||
-        reason === GameFinishedReason.PUZZLE_SOLVED;
+        reason === GameCompletedReason.PUZZLE_SOLVED;
     const blackWon =
-        reason === GameFinishedReason.WHITE_CHECKMATED ||
+        reason === GameCompletedReason.WHITE_CHECKMATED ||
         reason === GameInterruptedReason.WHITE_RESIGNED ||
-        reason === GameFinishedReason.PUZZLE_SOLVED;
+        reason === GameCompletedReason.PUZZLE_SOLVED;
 
     // checks which side is asking and assigns win/lost accordingly
-    const won = side === Side.WHITE ? whiteWon : blackWon;
-    const lost = side === Side.WHITE ? blackWon : whiteWon;
+    const won = side === WHITE ? whiteWon : blackWon;
+    const lost = side === WHITE ? blackWon : whiteWon;
     // const draw = !blackWon && !whiteWon;
 
     // return the correct icon and intent
@@ -138,17 +132,17 @@ function gameOverIcon(reason: GameEndReason, side: Side) {
  */
 function gameOverMessage(reason: GameEndReason) {
     switch (reason) {
-        case GameFinishedReason.WHITE_CHECKMATED:
+        case GameCompletedReason.WHITE_CHECKMATED:
             return "Checkmate - Black Wins";
-        case GameFinishedReason.BLACK_CHECKMATED:
+        case GameCompletedReason.BLACK_CHECKMATED:
             return "Checkmate - White Wins";
-        case GameFinishedReason.STALEMATE:
+        case GameCompletedReason.STALEMATE:
             return "Draw - Stalemate";
-        case GameFinishedReason.PUZZLE_SOLVED:
+        case GameCompletedReason.PUZZLE_SOLVED:
             return "Puzzle Solved";
-        case GameFinishedReason.THREEFOLD_REPETITION:
+        case GameCompletedReason.THREEFOLD_REPETITION:
             return "Draw - Threefold Repetition";
-        case GameFinishedReason.INSUFFICIENT_MATERIAL:
+        case GameCompletedReason.INSUFFICIENT_MATERIAL:
             return "Draw By Insufficient Material";
         case GameInterruptedReason.DRAW_ACCEPTED:
             return "Draw by Mutual Agreement";

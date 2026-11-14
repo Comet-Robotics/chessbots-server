@@ -1,11 +1,7 @@
 import { type Robot } from "../robot/robot";
-import type { Command, RobotCommand, Reversible } from "./command";
+import type { Command } from "./command";
 import { ParallelCommandGroup, SequentialCommandGroup } from "./command";
-import { CenterCommand } from "./move-command";
-
-export type ReversibleRobotCommand = RobotCommand &
-    Reversible<ReversibleRobotCommand>;
-
+import { CenterCommand } from "./command";
 /**
  * Executes a set of setupMoves in parallel, followed by a mainMove.
  * The setupMoves are automatically undone afterwards.
@@ -32,7 +28,7 @@ export class MovePiece extends SequentialCommandGroup {
                 setupMoves.map(
                     (command) =>
                         new CenterCommand(
-                            ([...command.requirements][0] as Robot).id,
+                            ([...command.requirements][0] as unknown as Robot).id,
                         ),
                 ),
             ),

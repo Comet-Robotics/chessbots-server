@@ -1,7 +1,5 @@
 import { createContext } from "react";
-import { ChessEngine } from "../../common/chess-engine";
-import type { Square } from "chess.js";
-import { Side } from "../../common/game-types";
+import { ChessEngine, Side, WHITE, type Square } from "../../common/chess";
 
 /**
  * A context used to pass arguments to custom square renderer.
@@ -11,5 +9,5 @@ export const CustomSquareContext = createContext({
     legalSquares: [] as string[],
     chess: new ChessEngine(),
     lastClickedSquare: undefined as Square | undefined,
-    side: Side.WHITE as Side,
+    side: WHITE,
 });

@@ -1,7 +1,9 @@
 import type { WebSocket } from "ws";
 import type { SocketManager } from "./socket-manager";
-import { ClientType } from "../../common/client-types";
-import type { Message } from "../../common/message/message";
+import { ClientType } from "../../common/chess";
+import type { Message } from "../../common/message";
+import { WebSocketLike } from "@hono/node-server";
+import { WSContext } from "hono/ws";
 
 /**
  * A class which maps player client ids to their corresponding websocket (if any).
@@ -16,28 +18,34 @@ export class ClientManager {
         private spectatorIds: Set<string> = new Set([]),
     ) {}
 
+    public registerUser(uuid: string) {
+        console.log(`registering user ${uuid}`)
+        if (!this.hostId) {
+            this.hostId = uuid 
+        } else if (!this.clientId) {
+            this.clientId = uuid
+        } else {
+            this.spectatorIds.add(uuid)
+        }
+    }
+
+    public getSocket(id: string) {
+        return this.socketManager.getSocket(id)
+    }
+    
     /**
      * get the host's socket
      * @returns the host socket
      */
-    public getHostSocket(): Set<WebSocket> | undefined {
-        if (this.hostId !== undefined) {
-            return this.socketManager.getSockets(this.hostId);
-        }
-        return undefined;
-    }
-
     /**
      * finds the host and sends a message
      * @param message - the message to be sent
      * @returns if the socket was found
      */
-    public sendToHost(message: Message): boolean {
-        const sockets = this.getHostSocket();
-        if (sockets !== undefined) {
-            for (const socket of sockets) socket.send(message.toJson());
+    public sendToHost(message: Message) {
+        if (this.hostId) {
+            this.socketManager.sendToSocket(this.hostId, message);
         }
-        return sockets !== undefined;
     }
 
     /**
@@ -45,12 +53,10 @@ export class ClientManager {
      * @param message - the message to be sent
      * @returns if the socket was found
      */
-    public sendToClient(message: Message): boolean {
-        const sockets = this.getClientSocket();
-        if (sockets !== undefined) {
-            for (const socket of sockets) socket.send(message.toJson());
+    public sendToClient(message: Message) {
+        if (this.clientId) {
+            this.socketManager.sendToSocket(this.clientId, message);
         }
-        return sockets !== undefined;
     }
 
     /**
@@ -58,57 +64,31 @@ export class ClientManager {
      * @param message - the message to send
      * @returns if it completed successfully
      */
-    public sendToSpectators(message: Message): boolean {
-        if (this.spectatorIds.size !== 0) {
-            for (const item of this.spectatorIds) {
-                const potentialSocket = this.socketManager.getSockets(item);
-                if (potentialSocket !== null && potentialSocket !== undefined) {
-                    for (const socket of potentialSocket) {
-                        socket.send(message.toJson());
-                    }
-                }
-            }
-            return true;
+    public sendToSpectators(message: Message) {
+        for (let spectatorId in this.spectatorIds) {
+            this.socketManager.sendToSocket(spectatorId, message);
         }
-        return false;
     }
 
-    /**
-     * get the client socket
-     * @returns the socket of the client
-     */
-    public getClientSocket(): Set<WebSocket> | undefined {
-        if (this.clientId !== undefined) {
-            return this.socketManager.getSockets(this.clientId);
-        }
-        return undefined;
+    public sendToAll(message: Message) {
+        this.socketManager.sendToAll(message)
     }
 
     /**
      * @param id - the cookie id of the request
      * @returns the client type
      */
-    public getClientType(id: string): ClientType {
+    public getClientType(id: string): ClientType | undefined {
+        console.log(`idL ${id}, hostid: ${this.hostId}, clientid: ${this.clientId}`)
         if (id === this.hostId) {
             return ClientType.HOST;
         } else if (id === this.clientId) {
             return ClientType.CLIENT;
+        } else if (this.spectatorIds.has(id)) {
+            return ClientType.SPECTATOR;
         }
-        return ClientType.SPECTATOR;
-    }
-
-    /**
-     * assigns the passed id to either host/client
-     * @param id - the cookie id of the request
-     */
-    public assignPlayer(id: string): void {
-        if (this.hostId === undefined || id === this.hostId) {
-            this.hostId = id;
-        } else if (this.clientId === undefined || id === this.clientId) {
-            this.clientId = id;
-        } else {
-            this.spectatorIds.add(id);
-        }
+        
+        return undefined
     }
 
     public removeHost(): void {
@@ -141,13 +121,4 @@ export class ClientManager {
             return;
         }
     }
-}
-
-/**
- * a function to create a client manager from a socket manager, not currently used in code
- * @param socketManager - manages the client sockets
- * @returns a new client manager
- */
-export function makeClientManager(socketManager: SocketManager): ClientManager {
-    return new ClientManager(socketManager);
 }

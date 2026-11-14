@@ -1,13 +1,10 @@
-import { DEGREE } from "../../common/units";
-import { GridIndices } from "./grid-indices";
+import { gridPositionFromPosition } from "../../common/units";
 import { Robot } from "./robot";
-import config from "../api/bot-server-config.json";
-import { virtualRobots } from "../simulator";
-import {
-    USE_BANQUET_INDICES,
-    USE_HEXAPAWN_INDICES,
-    USE_VIRTUAL_ROBOTS,
-} from "../utils/env";
+import { config, RobotId } from "../api/config";
+import type { GridPosition, Position } from "../../common/units";
+import { PacketType } from "../api/tunnel/packet";
+import { TCPServer } from "../api/tunnel/tcpserver";
+import { randomUUID } from "node:crypto";
 
 /**
  * Stores robots. Provides utilities for finding them by position.
@@ -16,150 +13,99 @@ export class RobotManager {
     /**
      * Maps robot ids to robots.
      */
-    idsToRobots: Map<string, Robot> = new Map();
+    robots: Map<RobotId, Robot> = new Map();
+
+    constructor() {}
+
+    createRobot(mac: string): RobotId {
+        const robot = new Robot(mac)
+        this.addRobot(robot);
+        return config.bots[mac].id
+    }
+    
+    addRobot(robot: Robot) {
+        this.robots.set(robot.id, robot);
+    }
+
+    connectedRobots(): RobotId[] {
+        return this.robots.keys().filter(
+            (robotId) => this.isConnected(robotId)
+        ).toArray()
+    }
+    
+    robotPositions(): { id: RobotId, position: Position, rotation: number }[] {
+        const iter = this.connectedRobots().map((id) => {
+            const robot = this.robots.get(id)!
+            
+            return {
+                id,
+                position: robot.position,
+                rotation: robot.heading,
+            }
+        })
+
+        return Array.from(iter)
+    }
+
+    isConnected(robot: RobotId): boolean {
+        return this.robots.get(robot)?.connected() ?? false
+    }
 
     /**
-     * Maps robot locations to their ids.
+     * Updates a robot's stored position to a new grid position.
      */
-    getIndicesToIds(): Map<string, string> {
-        return Array.from(this.idsToRobots.values()).reduce((acc, robot) => {
-            const positionAsGridIndices = GridIndices.fromPosition(
-                robot.position,
-            );
-            acc.set(positionAsGridIndices.toString(), robot.id);
-            return acc;
-        }, new Map<string, string>());
-    }
-
-    constructor(robots: Robot[]) {
-        robots.forEach((robot) => this.addRobot(robot));
-    }
-
-    addRobot(robot: Robot) {
-        this.idsToRobots.set(robot.id, robot);
+    updateRobot(robotId: RobotId, newPos: GridPosition) {
+        const robot = this.robots.get(robotId);
+        if (robot) {
+            robot.position = { x: newPos.x, y: newPos.y };
+        }
     }
 
     //use this so on disconnect and reconnect we don't just have a bunch of bots in here that shouldn't exist cause they're disconnected
-    removeRobot(robotId: string) {
-        this.idsToRobots.delete(robotId);
+    removeRobot(robotId: RobotId) {
+        this.robots.delete(robotId);
     }
 
     /**
      * Retrieves a robot by id.
      * Throws if no robot is found.
      */
-    getRobot(robotId: string): Robot {
-        const robot = this.idsToRobots.get(robotId);
-        if (robot === undefined) {
-            throw new Error("Failed to find robot with id " + robotId);
+    getRobot(robotId: RobotId): Robot {
+        let robot = this.robots.get(robotId);
+        if (!robot) {
+            console.error(`Failed to find robot ${robotId}`)
         }
-        return robot;
+
+        return robot!;
     }
 
-    createRobotFromId(robotId: string) {
-        const robotConfig = config[robotId];
-        if (!robotConfig) {
-            throw new Error("Failed to find robot config for id " + robotId);
-        }
-
-        const iIndex =
-            USE_BANQUET_INDICES && robotConfig.banquetIndices !== undefined ?
-                robotConfig?.banquetIndices.x
-            : (
-                USE_HEXAPAWN_INDICES &&
-                robotConfig.hexapawnIndices !== undefined
-            ) ?
-                robotConfig?.hexapawnIndices.x
-            :   robotConfig?.homeIndices.x;
-        const jIndex =
-            USE_BANQUET_INDICES && robotConfig.banquetIndices !== undefined ?
-                robotConfig?.banquetIndices.y
-            : (
-                USE_HEXAPAWN_INDICES &&
-                robotConfig.hexapawnIndices !== undefined
-            ) ?
-                robotConfig?.hexapawnIndices.y
-            :   robotConfig?.homeIndices.y;
-
-        console.log("Hexapawn status " + USE_HEXAPAWN_INDICES);
-        if (robotConfig.banquetIndices !== undefined) {
-            console.log("Ok so we should be using them, specifically ti is:");
-            console.log(
-                robotConfig?.hexapawnIndices.x +
-                    " " +
-                    robotConfig?.hexapawnIndices.y,
-            );
-        }
-
-        const robot = new Robot(
-            robotId,
-            new GridIndices(iIndex, jIndex),
-            new GridIndices(
-                robotConfig?.defaultIndices.x,
-                robotConfig?.defaultIndices.y,
-            ),
-            robotConfig?.startHeadingRadians * DEGREE,
-            robotConfig?.attributes.piece_type,
-        );
-        this.addRobot(robot);
-        console.log("We have the following:" + robotConfig?.defaultIndices);
-        return robot;
-    }
-
-    /**
-     * Returns `true` if a Robot is at the specified position, and `false` otherwise.
-     */
-    isRobotAtIndices(indices: GridIndices): boolean {
-        const indicesToIds = this.getIndicesToIds();
-        return indicesToIds.has(indices.toString());
+    isRobotAtGridPos(pos: GridPosition): boolean {
+        return this.getRobotAtGridPos(pos) != undefined
     }
 
     /**
      * Retrieves a robot at `indices`.
      * Throws if no robot is found.
      */
-    getRobotAtIndices(indices: GridIndices): Robot {
-        const indicesToIds = this.getIndicesToIds();
-        const robotId = indicesToIds.get(indices.toString());
-        const theKeys = indicesToIds.keys();
-        const keyArr = [...theKeys];
-        console.log(
-            `Indices is ${indices.toString()}, current id's are,`,
-            keyArr,
-        );
+    getRobotAtGridPos(pos: GridPosition): Robot | undefined {
+        this.robots.forEach((robot, _id) => {
+            if (gridPositionFromPosition(robot.position) == pos) {
+                return robot
+            }
+        })
 
-        if (robotId === undefined) {
-            throw new Error("Failed to find robot at indices " + indices);
-        }
-        return this.getRobot(robotId);
-    }
-
-    updateRobot(robotId: string, indices: GridIndices) {
-        const indicesToIds = this.getIndicesToIds();
-        // if (indicesToIds.has(indices.toString())) {
-        //     indicesToIds.delete(indices.toString());
-        // }
-        for (const [i, r] of indicesToIds.entries()) {
-            if (robotId === r) indicesToIds.delete(i);
-        }
-        indicesToIds.set(indices.toString(), robotId);
-
-        if (robotId === "robot-2") {
-            console.log("Ok we are updating it...");
-            console.log("We shoudl be updating it to:");
-            console.log(indices);
-            console.log("If this gets robot-2, it should be set:");
-            console.log(indicesToIds.get(indices.toString()));
-        }
+        return undefined
     }
 
     stopAllRobots() {
-        Array.from(this.idsToRobots.values()).forEach((robot) => {
-            robot.sendStopPacket();
+        this.robots.forEach((robot) => {
+            robot.send({
+                packetId:randomUUID(),
+                type: PacketType.ESTOP
+            });
         });
     }
 }
 
-export const robotManager = new RobotManager(
-    USE_VIRTUAL_ROBOTS ? Array.from(virtualRobots.values()) : [],
-);
+export const robotManager = new RobotManager();
+export const tcpServer: TCPServer = new TCPServer(robotManager);

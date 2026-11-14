@@ -2,22 +2,12 @@ import { Button, H3, H6, Slider } from "@blueprintjs/core";
 import type { Dispatch } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Difficulty, GameType } from "../../common/client-types";
-import { Side } from "../../common/game-types";
+import { Difficulty, GameType, BLACK, Side, WHITE } from "../../common/chess";
 import { post } from "../api";
-import {
-    buttonColor,
-    textColor,
-    sliderColor,
-    textBoxColor,
-} from "../check-dark-mode";
-import "../colors.css";
+import { DifficultySlider } from "./difficulty-slider";
+import { SelectSide, DesiredSide } from "./select-side";
 /** User's desired side, b/w/random */
-enum DesiredSide {
-    WHITE = "white",
-    BLACK = "black",
-    RANDOM = "random",
-}
+
 
 interface SetupGameProps {
     gameType: GameType;
@@ -71,7 +61,6 @@ export function SetupGame(props: SetupGameProps) {
     // handles passing user choices to the api
     const submit = (
         <Button
-            className={buttonColor()}
             text="Play"
             icon="arrow-right"
             intent="primary"
@@ -80,12 +69,12 @@ export function SetupGame(props: SetupGameProps) {
                 let selectedSide: Side;
                 if (desiredSide === DesiredSide.RANDOM) {
                     selectedSide =
-                        Math.random() < 0.5 ? Side.WHITE : Side.BLACK;
+                        Math.random() < 0.5 ? WHITE : BLACK;
                 } else {
                     selectedSide =
                         desiredSide === DesiredSide.WHITE ?
-                            Side.WHITE
-                        :   Side.BLACK;
+                            WHITE
+                        :   BLACK;
                 }
 
                 // pass the user choice to api
@@ -105,6 +94,8 @@ export function SetupGame(props: SetupGameProps) {
                     });
                 }
                 promise.then(() => {
+                                console.log("navmav2")
+
                     navigate("/game");
                 });
             }}
@@ -121,79 +112,14 @@ export function SetupGame(props: SetupGameProps) {
                 justifyContent: "space-around",
             }}
         >
-            <H3 className={textColor()}>{title}</H3>
+            <H3>{title}</H3>
             {options}
             {submit}
         </div>
     );
 }
 
-interface DifficultySliderProps {
-    difficulty: Difficulty;
-    onDifficultyChange: Dispatch<Difficulty>;
-}
 
-/**
- * Creates a difficulty slider from 0 to 3
- *
- * @param props - difficulty change handler
- * @returns 4 part difficulty slider
- */
-function DifficultySlider(props: DifficultySliderProps) {
-    return (
-        <>
-            <H6 className={textColor()}>Difficulty</H6>
-            <div style={{ width: "75%" }}>
-                <Slider
-                    className={textColor() + " " + sliderColor()}
-                    intent="primary"
-                    value={props.difficulty}
-                    onChange={props.onDifficultyChange}
-                    // return string based on user chosen value
-                    labelRenderer={(value) => {
-                        if (value === Difficulty.BABY) {
-                            return "Baby";
-                        } else if (value === Difficulty.BEGINNER) {
-                            return "Beginner";
-                        } else if (value === Difficulty.INTERMEDIATE) {
-                            return "Intermediate";
-                        } else {
-                            return "Advanced";
-                        }
-                    }}
-                    min={0}
-                    max={3}
-                />
-            </div>
-        </>
-    );
-}
 
-interface SelectSideProps {
-    desiredSide: DesiredSide;
-    onDesiredSideChange: Dispatch<DesiredSide>;
-}
 
-/**
- * Creates a dialog for the user to choose their side
- * @param props - function for handling user side choice
- * @returns user side dialog
- */
-function SelectSide(props: SelectSideProps) {
-    return (
-        <>
-            <H6 className={textColor()}>Desired Side</H6>
-            <select
-                className={textBoxColor() + " " + textColor()}
-                value={props.desiredSide}
-                onChange={(e) =>
-                    props.onDesiredSideChange(e.target.value as DesiredSide)
-                }
-            >
-                <option value={DesiredSide.WHITE}>White</option>
-                <option value={DesiredSide.BLACK}>Black</option>
-                <option value={DesiredSide.RANDOM}>Random</option>
-            </select>
-        </>
-    );
-}
+

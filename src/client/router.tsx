@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, redirect } from "react-router-dom";
 import { Setup } from "./setup/setup";
 import { Debug } from "./debug/debug";
 import { Game } from "./game/game";
@@ -12,62 +12,53 @@ import Login from "./auth/login";
 import { AuthProvider } from "./auth/auth";
 import { Admin } from "./admin/admin";
 
-export const router = createBrowserRouter([
+export default createBrowserRouter([
     {
-        element: <AuthProvider />,
+        path: "/home",
+        element: <Home />,
+    },
+    {
+        path: "/debug/simulator",
+        element: <Simulator />,
+    },
+    {
+        path: "/debug",
+        element: <Debug />,
+    },
+    {
+        path: "/debug2",
+        element: <Debug2 />,
+    },
+    {
+        path: "/setup",
+        element: <Setup />,
+    },
+    {
+        path: "/lobby",
+        element: <Lobby />,
+    },
+    {
+        path: "/game",
+        element: <Game />,
+    },
+
+    {
+        path: "/admin",
+        element: <ProtectedRoute />,
         children: [
             {
-                path: "/home",
-                element: <Home />,
-            },
-            {
-                path: "/setup",
-                element: <Setup />,
-            },
-            {
-                path: "/lobby",
-                element: <Lobby />,
-            },
-            {
-                path: "/game",
-                element: <Game />,
-            },
-            {
-                path: "/editor",
-                element: <Editor />,
-            },
-            {
-                path: "/login",
-                element: <Login />,
-            },
-            {
-                path: "/debug",
-                element: <ProtectedRoute />,
-                children: [
-                    {
-                        path: "",
-                        element: <Debug />,
-                    },
-                    {
-                        path: "2",
-                        element: <Debug2 />,
-                    },
-                    {
-                        path: "simulator",
-                        element: <Simulator />,
-                    },
-                ],
-            },
-            {
-                path: "/admin",
-                element: <ProtectedRoute />,
-                children: [
-                    {
-                        path: "",
-                        element: <Admin />,
-                    },
-                ],
+                path: "",
+                element: <Admin />,
             },
         ],
     },
+    // {
+    //     path: "/editor",
+    //     element: <Editor />,
+    // },
+    {
+        path:"*",
+        loader: async () => redirect('/lobby'),
+
+    }
 ]);

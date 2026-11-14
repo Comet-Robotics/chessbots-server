@@ -1,3 +1,5 @@
+import type { Square } from "./chess";
+
 /**
  * The value of a degree in radians.
  * Usage:
@@ -25,3 +27,55 @@ export function clampHeading(radians: number): number {
  * Used to convert between board grid coordinates and pixel coordinates.
  */
 export const GRID_CELL_PX = 60;
+
+export type Position = {
+    x: number;
+    y: number;
+}
+
+export type GridPosition = {
+    x: number;
+    y: number;
+}
+
+export function positionFromSquare(square: Square): Position {
+    let lettermap = new Map([['a', 0], ['b', 1], ['c', 2], ['d', 3], ['e', 4], ['f', 5], ['g', 6], ['h', 7], ['i', 8]])
+    
+    return { x: lettermap.get(square.charAt(0))!, y: Number(square.charAt(1)) }
+}
+
+/**
+ * Converts a GridPosition to a pixel Position by adding 0.5 center offset.
+ */
+export function positionFromGridPosition(gp: GridPosition): Position {
+    return { x: gp.x + 0.5, y: gp.y + 0.5 };
+}
+
+/**
+ * Converts a pixel Position to a GridPosition by rounding.
+ */
+export function gridPositionFromPosition(pos: Position): GridPosition {
+    return { x: Math.round(pos.x), y: Math.round(pos.y) };
+}
+
+export function gridPositionFromSquare(square: Square): GridPosition {
+    let position = positionFromSquare(square);
+    return gridPositionFromPosition(position)
+}
+
+
+
+/**
+ * Converts a GridPosition to a string representation "i, j".
+ */
+export function gridPositionToString(pos: GridPosition): string {
+    return `${pos.x}, ${pos.y}`;
+}
+
+/**
+ * Parses a string "i, j" back into a GridPosition.
+ */
+export function gridPositionFromString(str: string): GridPosition {
+    const parts = str.split(", ");
+    return { x: parseInt(parts[0], 10), y: parseInt(parts[1], 10) };
+}

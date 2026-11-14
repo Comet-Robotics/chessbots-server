@@ -1,0 +1,143 @@
+import { z } from "zod";
+
+export const SERVER_PROTOCOL_VERSION = 1;
+
+export enum PacketType {
+    CLIENT_HELLO = "CLIENT_HELLO",
+    SERVER_HELLO = "SERVER_HELLO",
+    CENTER_SEND = "CENTER_SEND",
+    PING_SEND = "PING_SEND",
+    PING_RESPONSE = "PING_RESPONSE",
+    QUERY_VAR = "QUERY_VAR",
+    QUERY_RESPONSE = "QUERY_RESPONSE",
+    SET_VAR = "SET_VAR",
+    TURN_BY_ANGLE = "TURN_BY_ANGLE",
+    DRIVE_TILES = "DRIVE_TILES",
+    
+    SET_ABSOLUTE = "SET_ABSOLUTE",
+    DRIVE_ABSOLUTE = "DRIVE_ABSOLUTE",
+    DRIVE_RELATIVE = "DRIVE_RELATIVE",
+
+
+    // DRIVE_TICKS = "DRIVE_TICKS",
+    ACTION_SUCCESS = "ACTION_SUCCESS",
+    ACTION_FAIL = "ACTION_FAIL",
+    // DRIVE_TANK = "DRIVE_TANK",
+    // DRIVE_CUBIC_SPLINE = "DRIVE_CUBIC_SPLINE",
+    // DRIVE_QUADRATIC_SPLINE = "DRIVE_QUADRATIC_SPLINE",
+    ESTOP = "ESTOP",
+    // SPIN_RADIANS = "SPIN_RADIANS",
+}
+
+export const ServerHelloSchema = z.object({
+    type: z.literal(PacketType.SERVER_HELLO),
+    protocol: z.int(),
+});
+
+export const PingSendSchema = z.object({
+    type: z.literal(PacketType.PING_SEND),
+});
+
+export const CenterSendSchema = z.object({
+    packetId: z.string(),
+    type: z.literal(PacketType.CENTER_SEND),
+});
+
+export const PingResponseSchema = z.object({
+    type: z.literal(PacketType.PING_RESPONSE),
+});
+
+export const TurnByAngleSchema = z.object({
+    packetId: z.string(),
+    type: z.literal(PacketType.TURN_BY_ANGLE),
+    deltaHeadingRadians: z.number(),
+});
+
+export const DriveTilesSchema = z.object({
+    packetId: z.string(),
+    type: z.literal(PacketType.DRIVE_TILES),
+    tileDistance: z.number(),
+});
+
+export const DriveAbsoluteSchema = z.object({
+    packetId: z.string(),
+    type: z.literal(PacketType.DRIVE_ABSOLUTE),
+    x: z.number(),
+    y: z.number(),
+    rot: z.number()
+});
+
+export const DriveRelativeSchema = z.object({
+    packetId: z.string(),
+    type: z.literal(PacketType.DRIVE_RELATIVE),
+    x: z.number(),
+    y: z.number(),
+    rot: z.number()
+});
+
+export const ClientHelloSchema = z.object({
+    type: z.literal(PacketType.CLIENT_HELLO),
+    macAddress: z.mac()
+});
+
+export const ActionSuccessSchema = z.object({
+    packetId: z.string(),
+    type: z.literal(PacketType.ACTION_SUCCESS),
+    tileDistance: z.number(),
+});
+
+export const ActionFailSchema = z.object({
+    packetId: z.string(),
+    type: z.literal(PacketType.ACTION_FAIL),
+    reason: z.string()
+});
+
+export const EstopSchema = z.object({
+    packetId: z.string(),
+    type: z.literal(PacketType.ESTOP),
+});
+
+export const PacketSchema = z.discriminatedUnion("type", [
+    ClientHelloSchema,
+    ServerHelloSchema,
+    CenterSendSchema,
+    PingSendSchema,
+    PingResponseSchema,
+    TurnByAngleSchema,
+    DriveTilesSchema,
+    DriveAbsoluteSchema,
+    DriveRelativeSchema,
+    ActionSuccessSchema,
+    ActionFailSchema,
+    EstopSchema,
+])
+
+// --- TypeScript types ---
+export type ClientHello = z.infer<typeof ClientHelloSchema>;
+export type ServerHello = z.infer<typeof ServerHelloSchema>;
+export type PingSend = z.infer<typeof PingSendSchema>;
+export type CenterSend = z.infer<typeof CenterSendSchema>;
+export type PingResponse = z.infer<typeof PingResponseSchema>;
+export type TurnByAngle = z.infer<typeof TurnByAngleSchema>;
+export type DriveTiles = z.infer<typeof DriveTilesSchema>;
+export type ActionSuccess = z.infer<typeof ActionSuccessSchema>;
+export type ActionFail = z.infer<typeof ActionFailSchema>;
+export type Estop = z.infer<typeof EstopSchema>;
+
+export type Packet = z.infer<typeof PacketSchema>;
+export type PacketWithId = Packet & { packetId: string };
+
+export function deserializePacket(json: string): Packet | undefined {
+    const obj = JSON.parse(json);
+    const result = PacketSchema.safeParse(obj);
+    if (!result.success) {
+        console.log(result.error);
+        return undefined;
+    }
+
+    return result.data;
+}
+
+export function serializePacket(packet: Packet, packetId: string): string {
+    return JSON.stringify({ ...packet, packetId });
+}

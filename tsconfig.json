@@ -3,10 +3,10 @@
         "target": "ESNext",
         "useDefineForClassFields": true,
         "lib": ["DOM", "DOM.Iterable", "ESNext"],
-        "module": "Node16",
+        "module": "commonjs",
         "skipLibCheck": true,
 
-        "moduleResolution": "Node16",
+        "moduleResolution": "bundler",
         "resolveJsonModule": true,
         "isolatedModules": true,
         "noEmit": true,
@@ -14,8 +14,8 @@
 
         /* Linting */
         "strict": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
+        // "noUnusedLocals": true,
+        // "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true,
         "noImplicitAny": false,
 
@@ -25,9 +25,7 @@
         "allowSyntheticDefaultImports": true,
         "forceConsistentCasingInFileNames": true
     },
-    "include": ["src"],
-    "files": ["src/server/js-chess-engine.d.ts"],
-    "references": [{ "path": "./tsconfig.node.json" }],
+    "include": ["src", "src/**/*.scss"],
     "typedocOptions": {
         "entryPoints": ["src/"],
         "entryPointStrategy": "expand",

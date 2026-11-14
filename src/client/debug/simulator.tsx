@@ -11,29 +11,14 @@ import type { CSSProperties, PropsWithChildren } from "react";
 import { forwardRef, useEffect, useReducer, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { get, useSocket } from "../api";
-import type {
-    SimulatedRobotLocation,
-    StackFrame,
-} from "../../common/message/simulator-message";
-import { SimulatorUpdateMessage } from "../../common/message/simulator-message";
 import "./simulator.scss";
 import { clampHeading, GRID_CELL_PX } from "../../common/units";
-import {
-    bgColor,
-    darkModeIcon,
-    innerRobotColor,
-    robotColor,
-    simBorderColor,
-    simRingCellColor,
-    textColor,
-    toggleUserSetting,
-} from "../check-dark-mode";
 
 const tileSize = GRID_CELL_PX;
 export const robotSize = tileSize / 2;
 const cellCount = 12;
 
-export type RobotState = { [robotId: string]: SimulatedRobotLocation };
+export type RobotState = {robotId:number,position:{x:number,y:number},rotation:number}[];
 
 /**
  * Creates a robot simulator for testing robot commands
@@ -69,10 +54,10 @@ export function Simulator() {
         }
     };
 
-    type MessageLog = { message: SimulatorUpdateMessage; ts: Date };
-
-    const [robotState, dispatch] = useReducer(robotStateReducer, {});
-    const [messageLog, setMessageLog] = useState<MessageLog[]>([]);
+    const [robotState, dispatch] = useReducer(robotStateReducer, []);
+    const [messageLog, setMessageLog] = useState<
+        { message: SimulatorUpdateMessage; ts: Date }[]
+    >([]);
 
     // update the simulator when a message comes in
     useSocket((message) => {
@@ -91,13 +76,13 @@ export function Simulator() {
 
     // fetch the current state of the robots and update all the sim robots
     const fetchRobotState = async () => {
-        const { robotState, messages } = await get(
-            "/get-simulator-robot-state",
+        const robotState = await get(
+            "/get-robot-positions",
         );
         dispatch({ type: "SET_ALL_ROBOTS", payload: robotState });
-        setMessageLog(
-            messages.map(({ message, ts }) => ({ message, ts: new Date(ts) })),
-        );
+        //setMessageLog(
+        //    messages.map(({ message, ts }) => ({ message, ts: new Date(ts) })),
+        //);
     };
 
     useEffect(() => {
@@ -128,7 +113,7 @@ export function Simulator() {
      * add all the robots on top of the board
      */
     return (
-        <Card className={bgColor()}>
+        <Card>
             <Button
                 variant="minimal"
                 style={{ float: "right" }}
@@ -141,12 +126,6 @@ export function Simulator() {
                 icon="cog"
                 onClick={() => navigate("/debug")}
             />
-            <Button
-                variant="minimal"
-                style={{ float: "right" }}
-                icon={darkModeIcon()}
-                onClick={toggleUserSetting}
-            />
             <div
                 style={{
                     display: "flex",
@@ -155,7 +134,7 @@ export function Simulator() {
                     alignItems: "center",
                 }}
             >
-                <H1 className={textColor()}>Robot Simulator</H1>
+                <H1>Robot Simulator</H1>
                 <Button icon="refresh" onClick={fetchRobotState}>
                     Refresh
                 </Button>
@@ -245,9 +224,9 @@ export function RobotGrid({
                         style={{
                             borderWidth: "1px",
                             borderStyle: "solid",
-                            borderColor: simBorderColor(),
+                            borderColor: "#ccc",
                             backgroundColor:
-                                !isCenterCell ? simRingCellColor() : (
+                                !isCenterCell ? "#f0f0f0" : (
                                     "transparent"
                                 ),
                         }}
@@ -255,11 +234,13 @@ export function RobotGrid({
                 );
             })}
             {/* TODO: implement onTopOfRobots */}
-            {Object.entries(robotState).map(([robotId, pos]) => (
+            
+            {robotState.map((bot) => (
                 <Robot
-                    pos={pos}
-                    robotId={robotId}
-                    key={robotId}
+                    pos={bot.position}
+                    rot={bot.rotation}
+                    robotId={bot.id}
+                    key={bot.id}
                     onTopOfRobots={[]}
                     onClick={onClick}
                 />
@@ -366,24 +347,25 @@ function LogEntry(props: { message: SimulatorUpdateMessage; ts: Date }) {
  * @param props - the robot position and id
  * @returns the robot icon scaled to the board
  */
-export const Robot = forwardRef<
+const Robot = forwardRef<
     HTMLDivElement,
     {
-        pos: SimulatedRobotLocation;
+        pos: {x:number,y:number};
+        rot: number;
         robotId: string;
         onTopOfRobots: string[];
         style?: CSSProperties;
         onClick?: (id: string) => null;
     }
->(function Robot({ pos, robotId, onTopOfRobots, style, onClick }, ref) {
+>(function Robot({ pos, rot, robotId, _, style }, ref) {
     return (
         <div
             ref={ref}
             className="robot"
             style={{
                 position: "absolute",
-                left: `${pos.position.x * tileSize - 0.25 * tileSize}px`,
-                bottom: `${pos.position.y * tileSize - 0.25 * tileSize}px`,
+                left: `${pos.x * tileSize + 0.25 * tileSize}px`,
+                bottom: `${pos.y * tileSize + 0.25 * tileSize}px`,
                 ...style,
             }}
             onClick={() => {
@@ -392,9 +374,8 @@ export const Robot = forwardRef<
         >
             <Tooltip content={`${robotId}: ${JSON.stringify(pos)}`}>
                 <div
-                    className={robotColor(onTopOfRobots.length)}
                     style={{
-                        transform: `rotate(-${clampHeading(pos.headingRadians)}rad)`,
+                        transform: `rotate(-${clampHeading(rot)}rad)`,
                         borderRadius: "50%",
                         display: "flex",
                         justifyContent: "flex-end",
@@ -406,11 +387,11 @@ export const Robot = forwardRef<
                     }}
                 >
                     <div
-                        className={innerRobotColor()}
                         style={{
                             width: robotSize / 4,
                             height: robotSize / 4,
                             borderRadius: "50%",
+                            boxShadow: "0 0 3px black",
                         }}
                     />
                 </div>

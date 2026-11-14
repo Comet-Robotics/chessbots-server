@@ -1,0 +1,148 @@
+{
+    "tcpPort": 3001,
+    "bots": {
+        "80:65:99:4d:f3:e8": {
+            "id": 15,
+            "color": "w",
+            "piece": "p",
+            "start_pos": {
+                "x": 8,
+                "y": 3
+            },
+            "start_rot": 1.5707963268,
+            "vanilla_home_pos": "a2",
+            "hexapawn_home_pos": "a3",
+            "puzzle_home_pos": "a2"
+        },
+        "c0:4e:30:4b:68:76": {
+            "id": 19,
+            "color": "b",
+            "piece": "p",
+            "start_pos": {
+                "x": 4,
+                "y": 8
+            },
+            "start_rot": 4.7123889804,
+            "vanilla_home_pos": "a7",
+            "hexapawn_home_pos": "a6",
+            "puzzle_home_pos": "a7"
+        },
+        "80:65:99:4d:f3:9a": {
+            "id": 3,
+            "color": "w",
+            "piece": "b",
+            "start_pos": {
+                "x": 4,
+                "y": 2
+            },
+            "start_rot": 1.5707963268,
+            "vanilla_home_pos": "e3",
+            "hexapawn_home_pos": "e3",
+            "puzzle_home_pos": "e3"
+        },
+        "80:65:99:4e:07:b0": {
+            "id": 4,
+            "color": "w",
+            "piece": "q",
+            "start_pos": {
+                "x": 5,
+                "y": 2
+            },
+            "start_rot": 1.5707963268,
+            "vanilla_home_pos": "f3",
+            "hexapawn_home_pos": "c7",
+            "puzzle_home_pos": "f3"
+        },
+        "80:65:99:4e:07:9c": {
+            "id": 11,
+            "color": "b",
+            "piece": "k",
+            "start_pos": {
+                "x": 5,
+                "y": 3
+            },
+            "start_rot": 1.5707963268,
+            "vanilla_home_pos": "f4",
+            "hexapawn_home_pos": "f4",
+            "puzzle_home_pos": "f4"
+        },
+        "80:65:99:4e:07:ae": {
+            "id": 12,
+            "color": "b",
+            "piece": "k",
+            "start_pos": {
+                "x": 5,
+                "y": 3
+            },
+            "start_rot": 1.5707963268,
+            "vanilla_home_pos": "f4",
+            "hexapawn_home_pos": "f4",
+            "puzzle_home_pos": "f4"
+        },
+        "80:65:99:4e:70:48": {
+            "id": 2,
+            "color": "w",
+            "piece": "n",
+            "start_pos": {
+                "x": 0,
+                "y": 9
+            },
+            "start_rot": 1.5707963268,
+            "vanilla_home_pos": "b1",
+            "hexapawn_home_pos": "b3",
+            "puzzle_home_pos": "b1"
+        },
+        "80:65:99:4e:70:46": {
+            "id": 7,
+            "color": "w",
+            "piece": "n",
+            "start_pos": {
+                "x": 8,
+                "y": 2
+            },
+            "start_rot": 1.5707963268,
+            "vanilla_home_pos": "g1",
+            "hexapawn_home_pos": "c3",
+            "puzzle_home_pos": "g1"
+        },
+        "80:65:99:4e:70:4c": {
+            "id": 6,
+            "color": "w",
+            "piece": "b",
+            "start_pos": {
+                "x": 7,
+                "y": 2
+            },
+            "start_rot": 1.5707963268,
+            "vanilla_home_pos": "h3",
+            "hexapawn_home_pos": "h3",
+            "puzzle_home_pos": "h3"
+        },
+        "c0:4e:30:4b:66:98": {
+            "id": 1,
+            "color": "w",
+            "piece": "n",
+            "start_pos": {
+                "x": 3,
+                "y": 2
+            },
+            "start_rot": 1.5707963268,
+            "vanilla_home_pos": "d3",
+            "hexapawn_home_pos": "d3",
+            "puzzle_home_pos": "d3"
+        },
+        "80:65:99:4e:70:6a": {
+            "id": 5,
+            "color": "w",
+            "piece": "k",
+            "start_pos": {
+                "x": 9,
+                "y": 2
+            },
+            "start_rot": 1.5707963268,
+            "vanilla_home_pos": "e1",
+            "hexapawn_home_pos": "e7",
+            "puzzle_home_pos": "e1"
+        }
+    }
+}

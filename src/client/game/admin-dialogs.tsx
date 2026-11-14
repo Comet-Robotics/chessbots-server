@@ -6,7 +6,6 @@ import {
     NonIdealState,
 } from "@blueprintjs/core";
 import { useState } from "react";
-import { bgColor, buttonColor, textColor } from "../check-dark-mode";
 
 interface DrawDialogProps {
     dialogText?: string;
@@ -21,7 +20,6 @@ export function PauseDialog(props: DrawDialogProps) {
     const [isOpen, setIsOpen] = useState(true);
     return (
         <Dialog
-            className={bgColor()}
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
             canOutsideClickClose={false}
@@ -29,7 +27,7 @@ export function PauseDialog(props: DrawDialogProps) {
         >
             <DialogBody>
                 <NonIdealState>
-                    <h4 className={textColor()}>
+                    <h4>
                         {props.dialogText || "Game Paused"}
                     </h4>
                 </NonIdealState>
@@ -55,7 +53,6 @@ export function NotificationDialog(props: NotificationDialogProps) {
         <Button
             text="Continue"
             rightIcon="arrow-right"
-            className={buttonColor()}
             intent="primary"
             onClick={() => {
                 setIsOpen(false);
@@ -65,7 +62,6 @@ export function NotificationDialog(props: NotificationDialogProps) {
 
     return (
         <Dialog
-            className={bgColor()}
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
             canOutsideClickClose={true}
@@ -73,7 +69,7 @@ export function NotificationDialog(props: NotificationDialogProps) {
         >
             <DialogBody>
                 <NonIdealState>
-                    <h4 className={textColor()}>{props.dialogText}</h4>
+                    <h4>{props.dialogText}</h4>
                 </NonIdealState>
             </DialogBody>
             <DialogFooter minimal actions={actions} />

@@ -1,34 +1,34 @@
 import {
     Button,
-    ButtonGroup,
     H3,
     NonIdealState,
     Spinner,
 } from "@blueprintjs/core";
 import { SetupBase } from "./setup-base";
-import type { Dispatch } from "react";
+import type { Dispatch, JSX } from "react";
 import { useState } from "react";
 import { SetupGame } from "./setup-game";
 import { Navigate, useNavigate } from "react-router-dom";
-import { ClientType, GameType } from "../../common/client-types";
-import { SetupPuzzle } from "../puzzle/setup-puzzle";
 import { get, useEffectQuery } from "../api";
-import {
-    allSettings,
-    buttonColor,
-    setUserSetting,
-    getUserSetting,
-    textColor,
-} from "../check-dark-mode";
-import "../colors.css";
+import { ClientType, GameType } from "../../common/chess";
+import { SelectPuzzle } from "../game/select-puzzle";
 
 enum SetupType {
-    MAIN = "main",
     COMPUTER = "computer",
     HUMAN = "human",
     PUZZLE = "puzzle",
     HEXAPAWN = "hexapawn",
 }
+
+// function playPuzzle() {
+//     const promise = post("/start-puzzle-game", {
+//         puzzle: String(selectedPuzzle)
+//     });
+
+//     promise.then(() => {
+//         navigate("/game");
+//     });
+// }
 
 /**
  * Lets the host choose a game type and includes the debug button
@@ -36,7 +36,7 @@ enum SetupType {
  * @returns A setup base with the proper setup dialog
  */
 export function Setup(): JSX.Element {
-    const [setupType, setSetupType] = useState(SetupType.MAIN);
+    const [setupType, setSetupType] = useState<SetupType | undefined>();
     const { isPending, data } = useEffectQuery("client-information", () =>
         get("/client-information"),
     );
@@ -56,7 +56,7 @@ export function Setup(): JSX.Element {
     if (data.clientType === ClientType.HOST) {
         return (
             <SetupBase>
-                {setupType === SetupType.MAIN ?
+                {!setupType?
                     <SetupMain onPageChange={setSetupType} />
                 :   null}
                 {(
@@ -74,7 +74,7 @@ export function Setup(): JSX.Element {
                     />
                 :   null}
                 {setupType === SetupType.PUZZLE ?
-                    <SetupPuzzle />
+                    <SelectPuzzle playPuzzle={() => {}}/>
                 :   null}
             </SetupBase>
         );
@@ -82,6 +82,7 @@ export function Setup(): JSX.Element {
         return <Navigate to="/lobby" />;
     }
 }
+
 
 /**
  * Triggers a state change in setup type
@@ -117,7 +118,6 @@ function SetupMain(props: SetupMainProps) {
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.COMPUTER)}
-                className={buttonColor()}
             />
             <Button
                 large
@@ -125,7 +125,6 @@ function SetupMain(props: SetupMainProps) {
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.HUMAN)}
-                className={buttonColor()}
             />
             <Button
                 large
@@ -133,7 +132,6 @@ function SetupMain(props: SetupMainProps) {
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.PUZZLE)}
-                className={buttonColor()}
             />
             <Button
                 large
@@ -141,9 +139,8 @@ function SetupMain(props: SetupMainProps) {
                 rightIcon="arrow-right"
                 intent="primary"
                 onClick={() => props.onPageChange(SetupType.HEXAPAWN)}
-                className={buttonColor()}
             />
-            <ThemeButtons />
+
         </>
     );
 
@@ -160,7 +157,7 @@ function SetupMain(props: SetupMainProps) {
                     justifyContent: "space-around",
                 }}
             >
-                <H3 className={textColor()}>Welcome to Chess Bot!</H3>
+                <H3>Welcome to Chess Bot!</H3>
 
                 {actions}
             </div>
@@ -168,23 +165,4 @@ function SetupMain(props: SetupMainProps) {
     );
 }
 
-export function ThemeButtons(): JSX.Element {
-    return (
-        <>
-            <h3 className={textColor()}>Display Settings:</h3>
-            <ButtonGroup variant="outlined">
-                {allSettings.map((item, idx) => (
-                    <Button
-                        key={item[0]}
-                        textClassName={textColor()}
-                        //changed for better visibility
-                        icon={item[1]}
-                        text={item[0]}
-                        active={getUserSetting() === idx}
-                        onClick={() => setUserSetting(idx)}
-                    />
-                ))}
-            </ButtonGroup>
-        </>
-    );
-}
+

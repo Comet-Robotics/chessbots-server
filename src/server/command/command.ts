@@ -1,251 +1,337 @@
-import { gamePaused } from "../api/pauseHandler";
 import { robotManager } from "../robot/robot-manager";
-import { MAX_RETRIES, MOVE_TIMEOUT } from "../utils/env";
+import { RobotId } from "../api/config";
+import { gameManager } from "../main";
+import { gridPositionFromPosition, Position } from "../../common/units";
+import { DriveRelativeSchema, PacketType } from "../api/tunnel/packet";
+import { randomUUID } from "node:crypto";
 
 /**
  * An command which operates on one or more robots.
  */
-export interface Command {
+export abstract class Command {
+    completed: boolean = false;
+
     /**
      * The set of objects that this command requires to execute. Used to place mutexes on
      * common resources to ensure they don't receive multiple inputs at once.
      */
-    requirements: Set<object>;
+    requirements: Set<RobotId> = new Set();
 
     /**
-     * used for time calculations
+     * The depth of the Command in Comand execution tree.
+     * One command may call another, or call mutiple commands
      */
-    height: number;
+    depth: number = 1;
 
-    /**
-     * Executes the command.
-     */
-    execute(): Promise<void>;
+    execute(): Promise<void> {
+        if (!this.completed && !gameManager?.paused) {
+            return this.inner_execute()
+        } else {
+            return Promise.resolve()
+        }
+    }
+
+    abstract inner_execute(): Promise<void>;
+    abstract reverse(): Command
 
     /**
      * Implicitly wraps a Command into a Sequential Command.
      * @param next - The command which is run next.
      */
-    then(next: Command): SequentialCommandGroup;
-
-    /**
-     * Decorates the command with a "time point" - if the command finishes in less than the
-     * given duration, it will wait until this number of seconds has elapsed before continuing.
-     * @param seconds - The number of seconds that the command will execute for, at minimum.
-     */
-    withTimePoint(seconds: number): Command;
-}
-
-/**
- * An interface for a command which can be reversed (undone).
- */
-export interface Reversible<T extends Reversible<T>> {
-    reverse(): T;
-}
-
-/**
- * A command base class.
- * Used to circumvent TypeScript abstract/interface weirdness by providing a version of Command
- * which can be extended with attributes and constructors.
- */
-export abstract class CommandBase implements Command {
-    protected _requirements: Set<object> = new Set();
-
-    protected _height: number = 1;
-
-    public abstract execute(): Promise<void>;
-
-    public then(next: Command): SequentialCommandGroup {
-        return new SequentialCommandGroup([this, next]);
+    then(next: Command): SequentialCommandGroup {
+        return new SequentialCommandGroup([this, next])
     }
 
-    public withTimePoint(seconds: number): Command {
-        return new ParallelCommandGroup([this, new WaitCommand(seconds)]);
-    }
-
-    public get height(): number {
-        return this._height;
-    }
-
-    public set height(height: number) {
-        this._height = height;
-    }
-
-    public get requirements(): Set<object> {
-        return this._requirements;
-    }
-
-    /**
-     * A utility method for adding multiple requirements at once.
-     */
-    protected addRequirements(reqs: object[]) {
-        reqs.forEach((req) => this._requirements.add(req));
+    alongside(next: Command): ParallelCommandGroup {
+        return new ParallelCommandGroup([this, next])
     }
 }
 
-/**
- * A command which operates on an individual Robot.
- * Note this class redirects the execute implementation to executeRobot.
- */
-export abstract class RobotCommand extends CommandBase {
-    commandIsCompleted = false;
-    constructor(public readonly robotId: string) {
-        super();
-        // TO DISCUSS: idk if its possible for a robot object to change between adding it as a requrement and executing the command but if it is, adding the robot object as a requirement semi defeats the purpose of using robot ids everywhere
-        const robot = robotManager.getRobot(robotId);
-        this.addRequirements([robot]);
-    }
-}
-
-/**
- * A command that waits for a given number of seconds.
- */
-export class WaitCommand extends CommandBase {
-    constructor(public readonly durationSec: number) {
-        super();
-        //in case there is a long wait that isn't accounted for in the regular timeout
-        this.height = durationSec / MOVE_TIMEOUT;
-    }
-    public async execute(): Promise<void> {
-        return new Promise((resolve) =>
-            setTimeout(resolve, this.durationSec * 1000),
-        );
-    }
-}
-
-/**
- * A type of command which groups other commands and runs them together.
- */
-export abstract class CommandGroup extends CommandBase {
-    constructor(public readonly commands: Command[]) {
-        super();
-        this.addRequirements(commands.map((c) => [...c.requirements]).flat());
-    }
-    public abstract reverse();
-}
-function isReversable(obj): obj is Reversible<typeof obj> {
-    return obj.reverse() !== undefined;
+// Useful for reversing command that don't have a reasonable reversal (like centering)
+export class NoopCommand extends Command {
+    public inner_execute(): Promise<void> { return Promise.resolve() }
+    public reverse(): Command { return this }
 }
 
 /**
  * Executes one or more commands in parallel.
  */
-export class ParallelCommandGroup extends CommandGroup {
+export class ParallelCommandGroup extends Command {
     constructor(public readonly commands: Command[]) {
-        super(commands);
-        let max = 1;
-        for (let x = 0; x < commands.length; x++) {
-            if (commands[x].height > max) {
-                max = commands[x].height;
-            }
-        }
-        this.height = max;
+        super();
+
+        this.depth = commands.map((c => c.depth)).reduce((a, b) => (a > b ? a : b));
     }
 
-    public async execute(): Promise<void> {
-        const promises = this.commands
-            .map((move) => {
-                if (!gamePaused) return move.execute().catch();
-                else return new Promise<void>(() => {}).catch();
-            })
-            .filter(Boolean);
-        if (promises) {
-            return timeoutRetry(
-                Promise.all(promises),
-                MAX_RETRIES,
-                this.height,
-                0,
-                "Parallel Group Error",
-            ) as Promise<void>;
-        }
+    public async inner_execute(): Promise<void> {
+        const promises = this.commands.map(async (move) => {
+            return move.execute()
+        })
+
+        await Promise.all(promises)
+            
+        return
     }
-    public reverse(): ParallelCommandGroup {
-        const commands: Command[] = [];
-        for (const command of this.commands) {
-            if (isReversable(command)) {
-                commands.push(command.reverse());
-            }
-        }
-        return new ParallelCommandGroup(commands);
+
+    public reverse(): Command {
+        return new ParallelCommandGroup(this.commands.map((c) => c.reverse()));
     }
 }
 
 /**
  * Executes one or more commands in sequence, one after another.
  */
-export class SequentialCommandGroup
-    extends CommandGroup
-    implements Reversible<SequentialCommandGroup>
-{
+export class SequentialCommandGroup extends Command {
     constructor(public readonly commands: Command[]) {
-        super(commands);
-        let sum = 0;
-        for (let x = 0; x < commands.length; x++) {
-            sum += commands[x].height;
-        }
-        this.height = sum;
+        super()
+
+        this.depth = commands.reduce((acc, command) => { return acc + command.depth }, 0)
     }
 
-    public async execute(): Promise<void> {
+    public async inner_execute(): Promise<void> {
         let promise = Promise.resolve();
 
         for (const command of this.commands) {
-            promise = promise
-                .then(() => {
-                    if (!gamePaused) return command.execute().catch();
-                })
-                .catch();
+            await command.execute()
         }
-
-        return timeoutRetry(
-            promise,
-            MAX_RETRIES,
-            this.height,
-            0,
-            "Sequential Group Error",
-        ) as Promise<void>;
     }
 
-    public reverse(): SequentialCommandGroup {
-        const commands: Command[] = [];
-        for (const command of this.commands) {
-            if (isReversable(command)) {
-                commands.push(command.reverse());
-            }
-        }
-        return new SequentialCommandGroup(commands.reverse());
+    public reverse(): Command {
+        return new SequentialCommandGroup(this.commands.map((c) => c.reverse()).reverse());
     }
 }
 
-export function timeoutRetry(
-    promise: Promise<unknown>,
-    maxRetries: number,
-    height: number,
-    count: number,
-    debugInfo?: string,
-): typeof promise {
-    const timeout = new Promise<void>((_, rej) => {
-        //time for each move to execute plus time to handle errors
-        setTimeout(
-            () => {
-                rej("Move Timeout");
-            },
-            height * MOVE_TIMEOUT * maxRetries * 1.1,
-        );
-    }).catch();
-    return Promise.race([promise, timeout]).catch((reason) => {
-        if (reason.indexOf("Move Timeout") >= 0) {
-            if (count < MAX_RETRIES) {
-                return timeoutRetry(
-                    promise,
-                    maxRetries,
-                    height,
-                    count + 1,
-                    debugInfo,
-                ).catch();
-            } else {
-                throw `${reason} failed at height: ${height.toString()} with error: ${debugInfo} \\`;
-            }
-        }
-    });
+/**
+ * Tell the robot to center
+ */
+export class CenterCommand extends Command {
+    robotId: RobotId
+
+    constructor(robotId: RobotId){
+        super()
+
+        this.robotId = robotId
+    }
+
+    public async inner_execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+        
+        robot.send({
+            packetId:randomUUID(),
+            type: PacketType.CENTER_SEND
+        })
+    }
+
+    reverse(): Command {
+        return new NoopCommand()
+    }
 }
+
+// export class AbsoluteRotateCommand extends Command {
+//     public async execute(): Promise<void> {
+//         const robot = robotManager.getRobot(this.robotId);
+//         return this.completed ?
+//                 Promise.resolve()
+//             :   (timeoutRetry(
+//                     robot.absoluteRotate(this.headingRadians).then(() => {
+//                         this.completed = true;
+//                     }),
+//                     MAX_RETRIES,
+//                     this.depth,
+//                     0,
+//                     `Absolute Rotate Command Error at Robot:${this.robotId}`,
+//                 ) as Promise<void>);
+//     }
+// }
+
+// /**
+//  * Resets a robot to its starting heading.
+//  */
+// export class RotateToStartCommand extends Command {
+//     public async execute(): Promise<void> {
+//         const robot = robotManager.getRobot(this.robotId);
+//         if (!robot) {
+//             return;
+//         }
+
+//         return this.completed ?
+//             Promise.resolve()
+//             : (timeoutRetry(
+//                 robot.absoluteRotate(robot?.config.start_rot).then(() => {
+//                     this.completed = true;
+//                 }),
+//                 MAX_RETRIES,
+//                 this.depth,
+//                 0,
+//                 `Rotate to Start Command Error at Robot:${this.robotId}`,
+//             ) as Promise<void>);
+//     }
+
+//     reverse(): Command {
+//         return new WaitCommand(this.robotId, 0)
+//     }
+// }
+
+/**
+ * Drives a robot for a distance equal to a number of tiles. Distance
+ * may be negative, indicating the robot drives backwards.
+ *
+ * Does not modify robot's stored position, must be done on the
+ * caller's side.
+ */
+// export class DriveCommand
+//     extends Command {
+//     constructor(
+//         robotId: RobotId,
+//         public tileDistance: number,
+//     ) {
+//         super(robotId);
+//     }
+
+//     public async execute(): Promise<void> {
+//         const robot = robotManager.getRobot(this.robotId);
+//         const currentPosition = robot.position;
+//         const newPositionX = this.tileDistance * Math.cos(robot.headingRadians);
+//         const newPositionY = this.tileDistance * Math.sin(robot.headingRadians);
+//         robot.position = {
+//             x: newPositionX + currentPosition.x,
+//             y: newPositionY + currentPosition.y,
+//         };
+
+//         robotManager.updateRobot(
+//             this.robotId,
+//             gridPositionFromPosition(robot.position),
+//         );
+//         return this.completed ?
+//             Promise.resolve()
+//             : (timeoutRetry(
+//                 robot.sendDrivePacket(this.tileDistance).then(() => {
+//                     this.completed = true;
+//                 }),
+//                 MAX_RETRIES,
+//                 this.depth,
+//                 0,
+//                 `Drive Command Error at Robot:${this.robotId}`,
+//             ) as Promise<void>);
+//     }
+
+//     public reverse(): DriveCommand {
+//         return new DriveCommand(this.robotId, -this.tileDistance);
+//     }
+// }
+
+/**
+ * Moves a robot to a global location. WARNING: Only moves in a straight line
+ */
+
+// Be careful when integrating with pathmat, it might assume
+// absolute moves are relative to (0, 0), the starting position of the robot
+export class AbsoluteMoveCommand extends Command {
+    saved_position: Position | undefined
+    saved_rotation: number | undefined
+
+    position: Position
+    rotation: number
+
+    robotId: RobotId
+
+    constructor(robotId: RobotId, position: Position, rotation: number) {
+        super()
+
+        this.robotId = robotId
+        this.position = position
+        this.rotation = rotation
+    }
+
+    public async inner_execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+
+        this.saved_position = robot.position;
+        this.saved_rotation = robot.heading
+
+        await robot.send({
+            packetId:randomUUID(),
+            type: PacketType.DRIVE_ABSOLUTE,
+            x: this.position.x,
+            y: this.position.y,
+            rot: this.rotation
+        })
+
+        robot.position = gridPositionFromPosition(this.position)
+    }
+    
+    reverse(): Command {
+        if (!this.saved_position || !this.saved_rotation) {
+            return new NoopCommand()
+        }
+
+        return new AbsoluteMoveCommand(this.robotId, this.saved_position, this.saved_rotation)
+    }
+}
+
+export class RelativeMoveCommand extends Command {
+    position: Position
+    rotation: number
+
+    robotId: RobotId
+
+    constructor(robotId: RobotId, position: Position, rotation: number) {
+        super()
+
+        this.robotId = robotId
+        this.position = position
+        this.rotation = rotation
+    }
+
+    public async inner_execute(): Promise<void> {
+        const robot = robotManager.getRobot(this.robotId);
+
+        await robot.send({
+            packetId:randomUUID(),
+            type: PacketType.DRIVE_RELATIVE,
+            x: this.position.x,
+            y: this.position.y,
+            rot: this.rotation
+        })
+
+        robot.position = gridPositionFromPosition(this.position)
+    }
+    
+    reverse(): Command {
+        let position = { x: -this.position.x, y: -this.position.y };
+        return new RelativeMoveCommand(this.robotId, position, -this.rotation)
+    }
+}
+// export function timeoutRetry<T>(
+//     promise: Promise<T>,
+//     maxRetries: number,
+//     height: number,
+//     count: number,
+//     debugInfo?: string,
+// ): Promise<T> {
+//     const timeout = new Promise<void>((_, rej) => {
+//         //time for each move to execute plus time to handle errors
+//         setTimeout(
+//             () => {
+//                 rej("Move Timeout");
+//             },
+//             height * MOVE_TIMEOUT * maxRetries * 1.1,
+//         );
+//     }).catch();
+
+//     return Promise.race([promise, timeout]).catch((reason) => {
+//         if (reason.indexOf("Move Timeout") >= 0) {
+//             if (count < MAX_RETRIES) {
+//                 return timeoutRetry(
+//                     promise,
+//                     maxRetries,
+//                     height,
+//                     count + 1,
+//                     debugInfo,
+//                 ).catch();
+//             } else {
+//                 throw `${reason} failed at height: ${height.toString()} with error: ${debugInfo} \\`;
+//             }
+//         }
+//     });
+// }

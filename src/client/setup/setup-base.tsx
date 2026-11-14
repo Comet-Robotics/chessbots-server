@@ -2,13 +2,10 @@ import { Dialog, DialogBody, DialogFooter } from "@blueprintjs/core";
 import { Outlet } from "react-router-dom";
 import { ChessboardWrapper } from "../chessboard/chessboard-wrapper";
 import type { PropsWithChildren, ReactNode } from "react";
-import { ChessEngine } from "../../common/chess-engine";
-import { Side } from "../../common/game-types";
+import { ChessEngine, WHITE } from "../../common/chess";
 import { Sidebar } from "./sidebar";
-import { bgColor } from "../check-dark-mode";
-import "../colors.css";
 
-interface SetupBaseProps extends PropsWithChildren {
+interface SetupBaseProps {
     actions?: ReactNode;
 }
 
@@ -16,18 +13,16 @@ interface SetupBaseProps extends PropsWithChildren {
  * Create the background chessboard and applies a dialog on top
  *
  * @param props - any dialogs that need to be shown on screen
- * @returns the background element with a dialog
  */
-export function SetupBase(props: SetupBaseProps): JSX.Element {
+export function SetupBase(props: PropsWithChildren<SetupBaseProps>) {
     return (
         <>
             <div className="main-dialog">
                 <Outlet />
                 <ChessboardWrapper
                     chess={new ChessEngine()}
-                    side={Side.WHITE}
+                    side={WHITE}
                     onMove={() => {}}
-                    rotation={0}
                 />
                 <Dialog
                     style={{
@@ -40,7 +35,7 @@ export function SetupBase(props: SetupBaseProps): JSX.Element {
                     usePortal={false}
                     enforceFocus={false}
                 >
-                    <div className={bgColor() + " " + "roundedBorder"}>
+                    <div className="roundedBorder">
                         <DialogBody>{props.children}</DialogBody>
                         <DialogFooter minimal actions={props.actions} />
                     </div>

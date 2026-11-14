@@ -49,7 +49,7 @@ export function OutsideCorners(props: PieceSquareProps) {
  * */
 export function CenterDot() {
     return (
-        <svg display="block">
+        <svg width="100%" height="100%">
             <circle cx="50%" cy="50%" r="15%" fill="#275133" />
         </svg>
     );
@@ -70,8 +70,8 @@ export function SquareHighlight(props: PieceSquareProps) {
                 <rect
                     x="0"
                     y="0"
-                    width={Math.ceil(props.width as number)}
-                    height={Math.ceil(props.height as number)}
+                    width="100%"
+                    height="100%"
                     fill="#f5f682"
                     opacity="60%"
                 />
@@ -95,8 +95,8 @@ export function ClickedPiece(props: PieceSquareProps) {
                 <rect
                     x="0"
                     y="0"
-                    width={Math.ceil(props.width as number)}
-                    height={Math.ceil(props.height as number)}
+                    width="100%"
+                    height="100%"
                     fill="#499c61"
                     opacity="60%"
                 />

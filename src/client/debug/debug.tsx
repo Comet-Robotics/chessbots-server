@@ -7,21 +7,15 @@ import { SelectRobot } from "./select-robot";
 import { DriveRobot } from "./drive-robot";
 import { SetRobotVariable } from "./set-robot-variable";
 import "./debug.scss";
-import {
-    bgColor,
-    darkModeIcon,
-    textColor,
-    toggleUserSetting,
-} from "../check-dark-mode";
-import "../colors.css";
+import { RobotId } from "../../server/api/config";
 
 /**
  * A debug menu which can be used to manually control individual robots.
  */
 export function Debug() {
-    const [robotIds, setRobotIds] = useState<string[] | undefined>();
+    const [robotIds, setRobotIds] = useState<RobotId[] | undefined>();
     const [selectedRobotId, setSelectedRobotId] = useState<
-        string | undefined
+        RobotId | undefined
     >();
 
     // helper functions
@@ -50,7 +44,7 @@ export function Debug() {
     } else {
         body = (
             <div className="debug-section ">
-                <H2 className={textColor()}>Select Robot</H2>
+                <H2>Select Robot</H2>
                 <SelectRobot
                     robotIds={robotIds}
                     selectedRobotId={selectedRobotId}
@@ -62,7 +56,7 @@ export function Debug() {
                 {selectedRobotId === undefined ? null : (
                     <>
                         <div className="debug-section">
-                            <H2 className={textColor()}>
+                            <H2>
                                 Motor Control for <Code>{selectedRobotId}</Code>
                             </H2>
                             <DriveRobot
@@ -71,7 +65,7 @@ export function Debug() {
                             />
                         </div>
                         <div className="debug-section">
-                            <H2 className={textColor()}>
+                            <H2>
                                 Configuration for <Code>{selectedRobotId}</Code>
                             </H2>
                             <SetRobotVariable
@@ -87,7 +81,7 @@ export function Debug() {
 
     // return the dialog with buttons for home and simulator
     return (
-        <Card className={bgColor()}>
+        <Card>
             <Button
                 variant="minimal"
                 style={{ float: "right" }}
@@ -100,13 +94,7 @@ export function Debug() {
                 icon="airplane"
                 onClick={() => navigate("/debug/simulator")}
             />
-            <Button
-                variant="minimal"
-                style={{ float: "right" }}
-                icon={darkModeIcon()}
-                onClick={toggleUserSetting}
-            />
-            <H1 className={textColor()}>Debug</H1>
+            <H1>Debug</H1>
             {body}
         </Card>
     );

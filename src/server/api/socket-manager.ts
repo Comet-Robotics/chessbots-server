@@ -1,40 +1,35 @@
-import type WebSocket from "ws";
-import type { Message } from "../../common/message/message";
+import { WebSocket } from "ws";
+import type { Message } from "../../common/message";
+import { WSContext } from "hono/ws";
+import { WebSocketLike } from "@hono/node-server";
 
 /**
  * A class which maps player client ids to their corresponding websocket (if any).
  */
 export class SocketManager {
-    constructor(private sockets: Record<string, Set<WebSocket>>) {}
+    private sockets: Map<string, WSContext<WebSocketLike>>
+    constructor() {
+        this.sockets = new Map()
+    }
 
-    public registerSocket(id: string, socket: WebSocket): void {
-        if (this.sockets[id] === null || this.sockets[id] === undefined) {
-            this.sockets[id] = new Set<WebSocket>();
-        }
-        console.log(`Id is: ${id}`);
-        this.sockets[id].add(socket);
+    public registerSocket(id: string, socket: WSContext<WebSocketLike>): void {
+        this.sockets.set(id,socket);
     }
 
     /**
      * deletes the socket at the provided id
      * @param id - id to be deleted
      */
-    public handleSocketClosed(id: string, socket: WebSocket): void {
-        // find if the socket exists and is in the set for that user
-        if (this.sockets[id] && this.sockets[id].has(socket)) {
-            // if so, KILL IT!
-            this.sockets[id].delete(socket);
-            return;
-        }
+    handleSocketClosed(id: string): void {
+       this.sockets.delete(id)
     }
 
     /**
      * gets the socket at the provided id, which may be multiple if they have multiple tabs open
      * @param id - id of the desired socket
      */
-    public getSockets(id: string): Set<WebSocket> | undefined {
-        if (this.sockets[id]) return this.sockets[id];
-        return undefined;
+    getSocket(id: string): WSContext<WebSocketLike> | undefined {
+        return this.sockets.get(id);
     }
 
     /**
@@ -50,12 +45,15 @@ export class SocketManager {
      * Returns true if the message was sent successfully, and false otherwise.
      */
     public sendToSocket(id: string, message: Message): boolean {
-        const sockets = this.getSockets(id);
-        if (sockets !== undefined) {
-            for (const socket of sockets) socket.send(message.toJson());
-            return true;
+        const socket = this.getSocket(id);
+        if (!socket) {
+            return false
         }
-        return false;
+
+        console.log("Sending to connection id ", id, " message: ", message)
+        socket.send(JSON.stringify(message));
+
+        return true;
     }
 
     /**
@@ -63,14 +61,9 @@ export class SocketManager {
      * @param message - message to be sent
      * @returns isSuccessful
      */
-    public sendToAll(message: Message): boolean {
-        const sockets = Object.values(this.sockets);
-        console.log(`Current list of connections are: ${sockets.length}`);
-        for (const socketSet of sockets) {
-            for (const socket of socketSet) {
-                socket.send(message.toJson());
-            }
+    public sendToAll(message: Message) {
+        for (const id of this.sockets.keys()) {
+            this.sendToSocket(id, message);
         }
-        return true;
     }
 }

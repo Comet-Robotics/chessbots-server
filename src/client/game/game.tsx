@@ -1,35 +1,21 @@
 import type { Dispatch } from "react";
 import { useState } from "react";
 
-import {
-    GameEndMessage,
-    GameFinishedMessage,
-    GameHoldMessage,
-    GameInterruptedMessage,
-    SetChessMessage,
-    MoveMessage,
-} from "../../common/message/game-message";
-import type {
-    GameEndReason,
-    GameInterruptedReason,
-} from "../../common/game-end-reasons";
-import { GameHoldReason } from "../../common/game-end-reasons";
+import { GameHoldReason, Message, MessageType } from "../../common/message";
 
 import { ChessboardWrapper } from "../chessboard/chessboard-wrapper";
 import { NavbarMenu } from "./navbar-menu";
 import { get, useEffectQuery, useSocket } from "../api";
-import type { MessageHandler } from "../../common/message/message";
+import type { GameEndReason, GameInterruptedReason, MessageHandler } from "../../common/message";
 import { GameEndDialog } from "./game-end-dialog";
 import { Navigate, Outlet } from "react-router-dom";
-import { ChessEngine } from "../../common/chess-engine";
-import type { Move } from "../../common/game-types";
+import { ChessEngine } from "../../common/chess";
+import type { Move } from "../../common/chess";
 import { NonIdealState, Spinner } from "@blueprintjs/core";
 import { AcceptDrawDialog, OfferDrawDialog } from "./draw-dialog";
 import { Sidebar } from "../setup/sidebar";
-import { bgColor } from "../check-dark-mode";
-import "../colors.css";
 import { NotificationDialog, PauseDialog } from "./admin-dialogs";
-import { PuzzleTipBox } from "../PuzzleTipBox";
+import { PuzzleTipBox } from "./PuzzleTipBox";
 
 /**
  * Creates a MessageHandler function to handle move messages and game interruptions.
@@ -46,13 +32,13 @@ function getMessageHandler(
     setPaused: Dispatch<boolean>,
 ): MessageHandler {
     return (message) => {
-        if (message instanceof MoveMessage) {
+        if (message.type == MessageType.MOVE) {
             // Must be a new instance of ChessEngine to trigger UI redraw
             // short wait so the pieces don't teleport into place
             setTimeout(() => {
                 setChess(chess.copy(message.move));
             }, 500);
-        } else if (message instanceof SetChessMessage) {
+        } else if (message.type == MessageType.SET_CHESS) {
             const fen = message.chess;
             if (fen) {
                 setTimeout(() => {
@@ -60,15 +46,16 @@ function getMessageHandler(
                     setChess(chess.copy());
                 }, 500);
             }
-        } else if (message instanceof GameInterruptedMessage) {
+        } else if (message.type == MessageType.GAME_INTERRUPTED) {
             setGameInterruptedReason(message.reason);
-        } else if (message instanceof GameEndMessage) {
+        } else if (message.type == MessageType.GAME_ENDED) {
             setGameEndedReason(message.reason);
-        } else if (message instanceof GameHoldMessage) {
+        } else if (message.type == MessageType.GAME_HELD) {
             setGameHoldReason(message.reason);
-            if (message.reason === GameHoldReason.GAME_PAUSED) {
+
+            if (message.reason == GameHoldReason.GAME_PAUSED) {
                 setPaused(true);
-            } else if (message.reason === GameHoldReason.GAME_UNPAUSED) {
+            } else if (message.reason == GameHoldReason.GAME_UNPAUSED) {
                 setPaused(false);
             }
         }
@@ -79,13 +66,12 @@ function getMessageHandler(
  *
  * @returns chessboard wrapper with current side and message handler
  */
-export function Game(): JSX.Element {
+export function Game() {
     const [chess, setChess] = useState(new ChessEngine());
     const [gameInterruptedReason, setGameInterruptedReason] =
         useState<GameInterruptedReason>();
     const [gameEndedReason, setGameEndedReason] = useState<GameEndReason>();
     const [gameHoldReason, setGameHoldReason] = useState<GameHoldReason>();
-    const [rotation, setRotation] = useState<number>(0);
     const [paused, setPause] = useState<boolean>(false);
 
     /** send any messages using our defined message handler inside a message socket for handling */
@@ -109,8 +95,6 @@ export function Game(): JSX.Element {
         "game-state",
         async () => {
             return get("/game-state").then((gameState) => {
-                // console.log("GAMESTATE ACQUIRED!");
-                // console.log(gameState);
                 setChess(
                     new ChessEngine(
                         gameState.type === "puzzle",
@@ -150,7 +134,10 @@ export function Game(): JSX.Element {
     if (gameEndedReason !== undefined) {
         gameEndReason = gameEndedReason;
     } else if (gameFinishedReason !== undefined) {
-        sendMessage(new GameFinishedMessage(gameFinishedReason));
+        sendMessage({
+            type: MessageType.GAME_FINISHED,
+            reason: gameFinishedReason
+        });
         gameEndReason = gameFinishedReason;
     } else if (gameInterruptedReason !== undefined) {
         gameEndReason = gameInterruptedReason;
@@ -190,8 +177,10 @@ export function Game(): JSX.Element {
         !paused ?
             (move: Move): void => {
                 setChess(chess.copy(move));
-                sendMessage(new MoveMessage(move));
-                window.location.reload();
+                sendMessage({
+                    type: MessageType.MOVE,
+                    move
+                });
             }
         :   () => {}; //send a do-nothing function if game is paused
 
@@ -203,7 +192,6 @@ export function Game(): JSX.Element {
                 side={side}
                 difficulty={gameState.difficulty}
                 aiDifficulty={gameState.aiDifficulty}
-                setRotation={setRotation}
             />
 
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
@@ -212,12 +200,11 @@ export function Game(): JSX.Element {
 
             <Sidebar top={50} />
             <div className="main-dialog">
-                <div id="body-container" className={bgColor()}>
+                <div id="body-container">
                     <ChessboardWrapper
                         side={side}
                         chess={chess}
                         onMove={handleMove}
-                        rotation={rotation ? rotation : 0}
                     />
                     {gameEndDialog}
                     {gameOfferDialog}
