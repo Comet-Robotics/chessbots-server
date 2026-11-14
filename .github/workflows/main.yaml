@@ -8,12 +8,15 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
+            - name: Enable Corepack
+              run: corepack enable
+
             - uses: actions/setup-node@v4
               with:
                   cache: yarn
 
             - name: Install modules
-              run: yarn install --frozen-lockfile
+              run: yarn install --immutable
 
             - name: Check formatting
               run: yarn format-check
@@ -23,12 +26,15 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
+            - name: Enable Corepack
+              run: corepack enable
+
             - uses: actions/setup-node@v4
               with:
                   cache: yarn
 
             - name: Install modules
-              run: yarn install --frozen-lockfile
+              run: yarn install --immutable
 
             - name: Lint
               run: yarn lint-check
@@ -38,12 +44,15 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
+            - name: Enable Corepack
+              run: corepack enable
+
             - uses: actions/setup-node@v4
               with:
                   cache: yarn
 
             - name: Install modules
-              run: yarn install --frozen-lockfile
+              run: yarn install --immutable
 
             - name: Run TypeScript compiler
               run: yarn run tsc
@@ -53,12 +62,15 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
+            - name: Enable Corepack
+              run: corepack enable
+
             - uses: actions/setup-node@v4
               with:
                   cache: yarn
 
             - name: Install modules
-              run: yarn install --frozen-lockfile
+              run: yarn install --immutable
 
             - name: Run tests
               run: yarn test
@@ -68,12 +80,15 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
+            - name: Enable Corepack
+              run: corepack enable
+
             - uses: actions/setup-node@v4
               with:
                   cache: yarn
 
             - name: Install modules
-              run: yarn install --frozen-lockfile
+              run: yarn install --immutable
 
             - name: Build
               run: yarn build

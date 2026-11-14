@@ -95,8 +95,12 @@ export function SetupGame(props: SetupGameProps) {
                         side: selectedSide,
                         difficulty: difficulty.toString(),
                     });
-                } else {
+                } else if (props.gameType === GameType.HUMAN) {
                     promise = post("/start-human-game", {
+                        side: selectedSide,
+                    });
+                } else {
+                    promise = post("/start-hexapawn-game", {
                         side: selectedSide,
                     });
                 }

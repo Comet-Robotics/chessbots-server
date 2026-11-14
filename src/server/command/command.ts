@@ -124,7 +124,7 @@ export abstract class CommandGroup extends CommandBase {
     public abstract reverse();
 }
 function isReversable(obj): obj is Reversible<typeof obj> {
-    return typeof obj.reverse() === "function";
+    return obj.reverse() !== undefined;
 }
 
 /**
@@ -159,20 +159,24 @@ export class ParallelCommandGroup extends CommandGroup {
             ) as Promise<void>;
         }
     }
-    public async reverse(): Promise<void> {
-        const promises = this.commands.map((move) => {
-            if (isReversable(move)) {
-                move.reverse().catch();
+    public reverse(): ParallelCommandGroup {
+        const commands: Command[] = [];
+        for (const command of this.commands) {
+            if (isReversable(command)) {
+                commands.push(command.reverse());
             }
-        });
-        return Promise.all(promises).catch().then(null);
+        }
+        return new ParallelCommandGroup(commands);
     }
 }
 
 /**
  * Executes one or more commands in sequence, one after another.
  */
-export class SequentialCommandGroup extends CommandGroup {
+export class SequentialCommandGroup
+    extends CommandGroup
+    implements Reversible<SequentialCommandGroup>
+{
     constructor(public readonly commands: Command[]) {
         super(commands);
         let sum = 0;
@@ -202,14 +206,14 @@ export class SequentialCommandGroup extends CommandGroup {
         ) as Promise<void>;
     }
 
-    public async reverse(): Promise<void> {
-        let promise = Promise.resolve();
+    public reverse(): SequentialCommandGroup {
+        const commands: Command[] = [];
         for (const command of this.commands) {
             if (isReversable(command)) {
-                promise = promise.then(() => command.reverse().catch());
+                commands.push(command.reverse());
             }
         }
-        return promise.catch();
+        return new SequentialCommandGroup(commands.reverse());
     }
 }
 

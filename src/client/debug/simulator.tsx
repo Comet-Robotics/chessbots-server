@@ -98,7 +98,9 @@ export function Simulator() {
     };
 
     useEffect(() => {
-        fetchRobotState();
+        setInterval(() => {
+            fetchRobotState();
+        }, 500);
     }, []);
 
     // get /do-smth to move the robot randomly

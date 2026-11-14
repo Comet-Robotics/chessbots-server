@@ -12,5 +12,9 @@ export let gameManager: GameManager | null = null;
 export const disconnectedBots: Set<string> = new Set();
 
 export function setGameManager(manager: GameManager | null) {
+    console.log(`Right now manager is getting replaced from:`);
+    console.log(gameManager);
+    console.log("to:");
+    console.log(manager);
     gameManager = manager;
 }
