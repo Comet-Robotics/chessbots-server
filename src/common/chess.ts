@@ -1,9 +1,9 @@
 import type { Color, Move as ChessJsMove, PieceSymbol, Square } from "chess.js";
 import { Chess, KING, PAWN, QUEEN, WHITE, BLACK, validateFen } from "chess.js";
 import { z } from "zod/v4";
-import { gridPositionFromSquare } from "./units";
+import { GridPosition, gridPositionFromSquare } from "./units";
 import { RobotManager } from "../server/robot/robot-manager";
-import { RobotId } from "../server/api/config";
+import { robot_id_schema, RobotId } from "../server/api/config";
 import { aiMove } from "js-chess-engine";
 
 export type GameEndReason = GameCompletedReason | GameInterruptedReason;
@@ -82,6 +82,7 @@ export const puzzle_schema = z.object({
     moves: z.array(move_schema),
     rating: z.number(),
     tooltip: z.string().optional(),
+    robotPositions: z.record(z.number(),z.object({x:z.number(),y:z.number()})).optional(),
 })
 
 export type Move = z.infer<typeof move_schema>

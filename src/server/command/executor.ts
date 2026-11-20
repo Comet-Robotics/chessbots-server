@@ -54,6 +54,10 @@ export class CommandExecutor {
         }
     }
 
+    public commandComplete(id: string) {
+        // TODO
+    }
+
     /**
      * run through the running command list
      * mainly used to finish the backlog from a paused game

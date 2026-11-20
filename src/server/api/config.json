@@ -71,10 +71,10 @@
             "color": "b",
             "piece": "k",
             "start_pos": {
-                "x": 5,
-                "y": 3
+                "x": 2,
+                "y": 11
             },
-            "start_rot": 1.5707963268,
+            "start_rot": 0,
             "vanilla_home_pos": "f4",
             "hexapawn_home_pos": "f4",
             "puzzle_home_pos": "f4"
@@ -87,7 +87,7 @@
                 "x": 0,
                 "y": 9
             },
-            "start_rot": 1.5707963268,
+            "start_rot": 0,
             "vanilla_home_pos": "b1",
             "hexapawn_home_pos": "b3",
             "puzzle_home_pos": "b1"
@@ -97,10 +97,10 @@
             "color": "w",
             "piece": "n",
             "start_pos": {
-                "x": 8,
-                "y": 2
+                "x": 3,
+                "y": 11
             },
-            "start_rot": 1.5707963268,
+            "start_rot": 0,
             "vanilla_home_pos": "g1",
             "hexapawn_home_pos": "c3",
             "puzzle_home_pos": "g1"
@@ -110,10 +110,10 @@
             "color": "w",
             "piece": "b",
             "start_pos": {
-                "x": 7,
-                "y": 2
+                "x": 0,
+                "y": 10
             },
-            "start_rot": 1.5707963268,
+            "start_rot": 0,
             "vanilla_home_pos": "h3",
             "hexapawn_home_pos": "h3",
             "puzzle_home_pos": "h3"

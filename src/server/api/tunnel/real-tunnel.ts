@@ -16,6 +16,7 @@ import {
 import { BotTunnel } from "./bot-tunnel";
 import { config, RobotId } from "../config";
 import { sleep } from "../../../common/misc";
+import { CommandExecutor, executor } from "../../command/executor";
 
 /**
  * The tunnel for handling communications to the robots
@@ -109,6 +110,7 @@ export class RealBotTunnel extends BotTunnel {
             }
             // emit a action complete for further processing
             case PacketType.ACTION_SUCCESS: {
+                executor.commandComplete(packet.packetId);
                 // this.emitter.emit("actionComplete", {
                 //     success: true,
                 //     packetId,
@@ -182,6 +184,7 @@ export class RealBotTunnel extends BotTunnel {
                 // );
 
                 this.socket!.write(msg);
+                res(packetId);
             }
         });
     }

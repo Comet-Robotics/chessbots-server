@@ -1,6 +1,7 @@
 import { robotManager, RobotManager } from "../../robot/robot-manager";
 import { config } from "../config";
 import { BotTunnel } from "./bot-tunnel";
+import { PacketType } from "./packet";
 import { RealBotTunnel } from "./real-tunnel";
 import net from "node:net" 
 /**
@@ -46,7 +47,10 @@ export class TCPServer {
                 let robotId = this.robotManager.createRobot(mac);                
                 tunnel.id = robotId;
                 tunnel.address = mac;
-                this.robotManager.getRobot(robotId).setTunnel(tunnel);
+                let robot = this.robotManager.getRobot(robotId)
+                robot.setTunnel(tunnel);
+                robot.send({type:PacketType.SET_ABSOLUTE,x:robot.position.x,y:robot.position.y,rot:robot.heading});
+
             }).bind(this),
         );
 

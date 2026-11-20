@@ -17,6 +17,8 @@ import { randomUUID, UUID } from "node:crypto";
 import z from "zod";
 import { MessageSchema, MessageType } from "../common/message";
 import { logger } from "hono/logger";
+import { moveAllRobotsToDefaultPositions } from "./robot/path-materializer";
+import { GridPosition } from "../common/units";
 
 export let socketManager = new SocketManager()
 export let clientManager = new ClientManager(socketManager)
@@ -160,6 +162,31 @@ app.post("/api/start-puzzle-game", async (c) => {
     );
 
     // TODO default positions
+    const defaultPositionsMap = new Map<RobotId, GridPosition>();
+    if(puzzle.robotPositions){
+        for(const [robotId, startSquare] of Object.entries(
+            puzzle.robotPositions,
+        )) {
+            const robot = robotManager.getRobot(+robotId as RobotId);
+            if (robot) {
+
+                defaultPositionsMap.set(+robotId as RobotId, startSquare);
+                console.log(
+                    `Robot ${robotId} will move to square ${startSquare.x} (${startSquare.y})`,
+                );
+            } else {
+                return c.json({
+                    message:
+                        "Missing robot " +
+                        robotId +
+                        " which is required to start the puzzle, because it is included in the puzzle's robotDefaultPositions map.",
+                });
+            }
+        }
+    }
+    console.log(`current map: (${defaultPositionsMap})`);
+    moveAllRobotsToDefaultPositions(defaultPositionsMap).execute();
+
 
     setGameManager(
         new PuzzleGameManager(

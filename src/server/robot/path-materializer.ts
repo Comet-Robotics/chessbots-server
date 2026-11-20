@@ -741,7 +741,7 @@ export function moveAllRobotsToDefaultPositions(
     const allCommands: Command[] = [];
 
     for (const robot of sortedRobots) {
-        const robotCommands = generateRobotPathToDefault(robot);
+        const robotCommands = generateRobotPathToDefault(robot,defaultPositions.get(robot.id));
         allCommands.push(...robotCommands);
     }
 
@@ -1001,10 +1001,11 @@ export function moveAllRobotsFromBoardToHome(
  */
 function generateRobotPathToDefault(
     robot: Robot,
+    pos?:GridPosition
 ): Command[] {
     const commands: Command[] = [];
     const currentPos = gridPositionFromPosition(robot.position);
-    const defaultPos = robot.config.start_pos;
+    const defaultPos = pos?pos:robot.config.start_pos;
 
     if (!defaultPos) {
         // throw new Error(`No default position specified for robot ${robot.id}`);
@@ -1030,7 +1031,6 @@ function generateRobotPathToDefault(
         );
         commands.push(...deadzoneCommands);
     }
-
     // Drop down to the correct position on the board
     commands.push(
         new AbsoluteMoveCommand(robot.id, positionFromGridPosition(defaultPos), 0),

@@ -59,6 +59,13 @@ export const DriveTilesSchema = z.object({
     tileDistance: z.number(),
 });
 
+export const SetAbsoluteSchema = z.object({
+    type: z.literal(PacketType.SET_ABSOLUTE),
+    x: z.number(),
+    y: z.number(),
+    rot: z.number()
+});
+
 export const DriveAbsoluteSchema = z.object({
     packetId: z.string(),
     type: z.literal(PacketType.DRIVE_ABSOLUTE),
@@ -83,7 +90,6 @@ export const ClientHelloSchema = z.object({
 export const ActionSuccessSchema = z.object({
     packetId: z.string(),
     type: z.literal(PacketType.ACTION_SUCCESS),
-    tileDistance: z.number(),
 });
 
 export const ActionFailSchema = z.object({
@@ -105,6 +111,7 @@ export const PacketSchema = z.discriminatedUnion("type", [
     PingResponseSchema,
     TurnByAngleSchema,
     DriveTilesSchema,
+    SetAbsoluteSchema,
     DriveAbsoluteSchema,
     DriveRelativeSchema,
     ActionSuccessSchema,
