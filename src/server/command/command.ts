@@ -285,7 +285,6 @@ export class RelativeMoveCommand extends Command {
 
     public async inner_execute(): Promise<void> {
         const robot = robotManager.getRobot(this.robotId);
-        console.log("begin send");
         await robot.send({
             packetId:randomUUID(),
             type: PacketType.DRIVE_RELATIVE,
@@ -293,7 +292,6 @@ export class RelativeMoveCommand extends Command {
             y: this.position.y,
             rot: this.rotation
         })
-        console.log("finished send");
         robot.position = gridPositionFromPosition(this.position)
     }
     

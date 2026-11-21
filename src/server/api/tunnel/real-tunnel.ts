@@ -17,6 +17,7 @@ import { BotTunnel } from "./bot-tunnel";
 import { config, RobotId } from "../config";
 import { sleep } from "../../../common/misc";
 import { CommandExecutor, executor } from "../../command/executor";
+import { EventEmitter } from "ws";
 
 /**
  * The tunnel for handling communications to the robots
@@ -25,6 +26,7 @@ export class RealBotTunnel extends BotTunnel {
     address: string | undefined;
     id: RobotId | undefined;
     pingReceived: boolean;
+    emitter: EventEmitter;
 
     /**
      * take the robot socket and creates an emitter to notify dependencies
@@ -38,6 +40,7 @@ export class RealBotTunnel extends BotTunnel {
     ) {
         super();
         this.pingReceived = false;
+        this.emitter = new EventEmitter();
     }
 
     isActive() {
@@ -111,19 +114,12 @@ export class RealBotTunnel extends BotTunnel {
             // emit a action complete for further processing
             case PacketType.ACTION_SUCCESS: {
                 executor.commandComplete(packet.packetId);
-                // this.emitter.emit("actionComplete", {
-                //     success: true,
-                //     packetId,
-                // });
+                this.emitter.emit(packet.packetId,{success:true});
                 break;
             }
             // emit a action fail for further processing
             case PacketType.ACTION_FAIL: {
-                // this.emitter.emit("actionComplete", {
-                //     success: false,
-                //     reason: packet.reason,
-                //     packetId,
-                // });
+                this.emitter.emit(packet.packetId,{success:false,reason:packet.reason});
                 break;
             }
 
@@ -172,19 +168,19 @@ export class RealBotTunnel extends BotTunnel {
                 this.socket!.write(msg);
                 res(packetId);
             } else {
-                // const removeListener = this.emitter.on(
-                //     "actionComplete",
-                //     (args) => {
-                //         if (args.packetId !== packetId) return;
-                //         removeListener();
-                //         console.log("action complete", args);
-                //         if (args.success) res(args.packetId);
-                //         else rej(args.reason);
-                //     },
-                // );
+                const callback = (args) => {
+                    this.emitter.removeListener(packetId,callback);
+                    console.log("action complete");
+                    if (args.success) res(packetId);
+                    else rej(args.reason);
+                };
+
+                this.emitter.on(
+                    packetId,
+                    callback,
+                );
 
                 this.socket!.write(msg);
-                res(packetId);
             }
         });
     }
